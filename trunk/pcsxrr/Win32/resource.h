@@ -310,6 +310,7 @@
 #define ID_END_CAPTURE                  40048
 #define IDC_MHKEYS_LIST                 40049
 #define ID_CONFIGURATION_MAPHOTKEYS     40050
+#define IDD_MHKEYS                      40051
 #define ID_LANGS                        50000
 
 // Next default values for new objects
