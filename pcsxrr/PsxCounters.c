@@ -119,7 +119,6 @@ void psxUpdateVSyncRateEnd() {
 void psxRcntUpdate() {
 	if ((psxRegs.cycle - psxCounters[3].sCycle) >= psxCounters[3].Cycle) {
 		if (psxCounters[3].mode & 0x10000) { // VSync End (22 hsyncs)
-//			if (flagDontPause) { // emulate
 				psxCounters[3].mode&=~0x10000;
 				psxUpdateVSyncRate();
 				psxRcntUpd(3);
@@ -193,19 +192,6 @@ if (currentMovie.mode == 2)
 GPU_setcurrentmode(modeFlags);
 
 					/* movie stuff end */
-//			}
-//			else { // pause
-//				char modeFlags = 0;
-//				modeFlags |= MODE_FLAG_PAUSED;
-//				if (currentMovie.mode == 1)
-//					modeFlags |= MODE_FLAG_RECORD;
-//				if (currentMovie.mode == 2)
-//					modeFlags |= MODE_FLAG_REPLAY;
-//				GPU_setcurrentmode(modeFlags);
-//		
-//				GPU_updateframe();
-//				SysUpdate();
-//			}
 		} else { // VSync Start (240 hsyncs) 
 			psxCounters[3].mode|= 0x10000;
 			psxUpdateVSyncRateEnd();

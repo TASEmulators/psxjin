@@ -74,12 +74,12 @@ typedef long (CALLBACK* GPUfreeze)(unsigned long, GPUFreeze_t *);
 typedef long (CALLBACK* GPUgetScreenPic)(unsigned char *);
 typedef long (CALLBACK* GPUshowScreenPic)(unsigned char *);
 typedef void (CALLBACK* GPUclearDynarec)(void (CALLBACK *callback)(void));
-typedef long (CALLBACK* GPUsetframelimit)(unsigned long *);
-typedef long (CALLBACK* GPUsetframecounter)(unsigned long *,unsigned long *);
-typedef long (CALLBACK* GPUsetlagcounter)(unsigned long *);
-typedef long (CALLBACK* GPUinputdisplay)(unsigned long *);
-typedef long (CALLBACK* GPUupdateframe)(void);
-typedef long (CALLBACK* GPUsetcurrentmode)(char *);
+typedef void (CALLBACK* GPUsetframelimit)(unsigned long);
+typedef void (CALLBACK* GPUsetframecounter)(unsigned long, unsigned long);
+typedef void (CALLBACK* GPUsetlagcounter)(unsigned long);
+typedef void (CALLBACK* GPUinputdisplay)(unsigned long);
+typedef void (CALLBACK* GPUupdateframe)(void);
+typedef void (CALLBACK* GPUsetcurrentmode)(char);
 
 //plugin stuff From Shadow
 // *** walking in the valley of your darking soul i realize that i was alone

@@ -144,12 +144,12 @@ void CALLBACK GPU__keypressed(int key) {}
 long CALLBACK GPU__getScreenPic(unsigned char *pMem) { return -1; }
 long CALLBACK GPU__showScreenPic(unsigned char *pMem) { return -1; }
 void CALLBACK GPU__clearDynarec(void (CALLBACK *callback)(void)) { }
-void CALLBACK GPU__setframelimit(void (CALLBACK *callback)(void)) {}
-void CALLBACK GPU__setframecounter(void (CALLBACK *callback)(void),void (CALLBACK *callback2)(void)) {}
-void CALLBACK GPU__setlagcounter(void (CALLBACK *callback)(void)) {}
-void CALLBACK GPU__inputdisplay(void (CALLBACK *callback)(void)) {}
-void CALLBACK GPU__updateframe(void (CALLBACK *callback)(void)) {}
-void CALLBACK GPU__setcurrentmode(void (CALLBACK *callback)(void)) {}
+void CALLBACK GPU__setframelimit(unsigned long option) {}
+void CALLBACK GPU__setframecounter(unsigned long newCurrentFrame,unsigned long newTotalFrames) {}
+void CALLBACK GPU__setlagcounter(unsigned long newCurrentLag) {}
+void CALLBACK GPU__inputdisplay(unsigned long newCurrentInput) {}
+void CALLBACK GPU__updateframe(void) {}
+void CALLBACK GPU__setcurrentmode(char newModeFlags) {}
 
 #define LoadGpuSym1(dest, name) \
 	LoadSym(GPU_##dest, GPU##dest, name, 1);
