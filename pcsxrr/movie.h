@@ -1,0 +1,13 @@
+extern void PCSX_MOV_WriteJoy(PadDataS pad,int port);
+extern void PCSX_MOV_StopMovie();
+extern void PCSX_MOV_StartMovie(int mode);
+extern PadDataS PCSX_MOV_ReadJoy(int port);
+extern void PCSX_MOV_CopyMovie(int mode, char *file);
+extern void PCSX_MOV_FlushMovieFile();
+extern int flagDontPause;
+extern int flagFakePause;
+extern int flagGPUchain;
+extern int flagVSync;
+extern int HasEmulatedFrame;
+int movieFreeze(gzFile f, int Mode);
+void PCSX_MOV_WriteHeader();
