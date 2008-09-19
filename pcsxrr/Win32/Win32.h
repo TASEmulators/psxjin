@@ -19,6 +19,21 @@
 #ifndef __WIN32_H__
 #define __WIN32_H__
 
+#define _WIN32_WINDOWS 0x410
+#define _WIN32_IE 0x0500
+
+#define VK_OEM_PLUS 0xBB
+#define VK_OEM_COMMA 0xBC
+#define VK_OEM_MINUS 0xBD
+#define VK_OEM_PERIOD 0xBE
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <windows.h>
+#include <commctrl.h>
+
 AppData gApp;
 HANDLE hConsole;
 
@@ -56,12 +71,18 @@ char *GetLanguageNext();
 void CloseLanguages();
 void ChangeLanguage(char *lang);
 
-// maphkeys.cpp
+// maphkeys.c
 extern HWND hMHkeysDlg;							// Handle to the MapHotkeys Dialog
 
 int MHkeysUpdate();
 int MHkeysCreate();
 int MHkeysListMake(int bBuild);
+
+// memwatch.c
+void UpdateMemWatch();
+void CreateMemWatch();
+void AddMemWatch();
+extern char * MemWatchDir;
 
 void PCSX_LoadState(int newState);
 void PCSX_SaveState(int newState);
