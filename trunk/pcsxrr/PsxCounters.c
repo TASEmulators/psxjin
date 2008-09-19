@@ -191,12 +191,17 @@ if (currentMovie.mode == 2)
 	modeFlags |= MODE_FLAG_REPLAY;
 GPU_setcurrentmode(modeFlags);
 
+#ifdef WIN32
+	UpdateMemWatch();
+#endif
+
 					/* movie stuff end */
 		} else { // VSync Start (240 hsyncs) 
 			psxCounters[3].mode|= 0x10000;
 			psxUpdateVSyncRateEnd();
 			psxRcntUpd(3);
 			psxHu32ref(0x1070)|= SWAPu32(1);
+SPU_tellFrame(currentMovie.frameCounter);
 		}
 	}
 

@@ -587,6 +587,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						MHkeysCreate();
 					return TRUE;
 
+				case ID_CONFIGURATION_MEMWATCH:
+						CreateMemWatch();
+					return TRUE;
+
 				case ID_CONFIGURATION_NETPLAY:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_NETPLAY), hWnd, (DLGPROC)ConfigureNetPlayDlgProc);
 					return TRUE;
@@ -1454,8 +1458,9 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
 
 	ADDSUBMENU(0, _("&Configuration"));
-	ADDMENUITEM(0, _("&Memory cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
+	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 	ADDMENUITEM(0, _("&Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
+	ADDMENUITEM(0, _("Memory &Watch"), ID_CONFIGURATION_MEMWATCH);
 	ADDMENUITEM(0, _("C&PU"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
@@ -1469,7 +1474,7 @@ void CreateMainMenu() {
 
 	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_MAPHOTKEYS,MF_GRAYED);
+//	EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_MAPHOTKEYS,MF_GRAYED);
 	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 
 //	ADDSUBMENU(0, _("&Language"));

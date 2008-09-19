@@ -311,6 +311,34 @@
 #define IDC_MHKEYS_LIST                 40049
 #define ID_CONFIGURATION_MAPHOTKEYS     40050
 #define IDD_MHKEYS                      40051
+#define ID_CONFIGURATION_MEMWATCH       40052
+#define MEMWATCH                        40053
+#define MW_ValueLabel1                  40054
+#define MW_ValueLabel2                  40055
+#define MW_ADDR00                       1001
+#define MW_ADDR01                       1004
+#define MW_ADDR02                       1007
+#define MW_ADDR03                       1010
+#define MW_ADDR04                       1013
+#define MW_ADDR05                       1016
+#define MW_ADDR06                       1019
+#define MW_ADDR07                       1022
+#define MW_ADDR08                       1025
+#define MW_ADDR09                       1028
+#define MW_ADDR10                       1031
+#define MW_ADDR11                       1034
+#define MW_ADDR12                       1037
+#define MW_ADDR13                       1040
+#define MW_ADDR14                       1043
+#define MW_ADDR15                       1046
+#define MW_ADDR16                       1049
+#define MW_ADDR17                       1052
+#define MW_ADDR18                       1055
+#define MW_ADDR19                       1058
+#define MW_ADDR20                       1061
+#define MW_ADDR21                       1064
+#define MW_ADDR22                       1067
+#define MW_ADDR23                       1070
 #define ID_LANGS                        50000
 
 // Next default values for new objects
