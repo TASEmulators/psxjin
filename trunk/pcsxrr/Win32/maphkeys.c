@@ -44,28 +44,96 @@ static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;			// Last input values/defined
 static int bLastValDefined = 0;					//
 
+static HHOOK hook;
+static int receivingKmap;
+
 static char* RealKeyName(int c)
 {
-	static char szString[64];
-	char* szName = "";
-	int i;
+	static char out[255];
 
-	for (i = 0; RealKeyNames[i].nCode; i++) {
-		if (c == RealKeyNames[i].nCode) {
-			if (RealKeyNames[i].szName) {
-				szName = RealKeyNames[i].szName;
-			}
-			break;
-		}
+	sprintf(out,GAMEDEVICE_KEY,c);
+	if((c>='0' && c<='9')||(c>='A' &&c<='Z'))
+	{
+		sprintf(out,"%c",c);
+		return out;
+	}
+	if( c >= VK_NUMPAD0 && c <= VK_NUMPAD9)
+	{
+		sprintf(out,GAMEDEVICE_NUMPADPREFIX,'0'+(c-VK_NUMPAD0));
+		return out;
+	}
+	switch(c)
+	{
+		case VK_TAB:        sprintf(out,GAMEDEVICE_VK_TAB); break;
+		case VK_BACK:       sprintf(out,GAMEDEVICE_VK_BACK); break;
+		case VK_CLEAR:      sprintf(out,GAMEDEVICE_VK_CLEAR); break;
+		case VK_RETURN:     sprintf(out,GAMEDEVICE_VK_RETURN); break;
+		case VK_LSHIFT:     sprintf(out,GAMEDEVICE_VK_LSHIFT); break;
+		case VK_RSHIFT:     sprintf(out,GAMEDEVICE_VK_RSHIFT); break;
+		case VK_LCONTROL:   sprintf(out,GAMEDEVICE_VK_LCONTROL); break;
+		case VK_RCONTROL:   sprintf(out,GAMEDEVICE_VK_RCONTROL); break;
+		case VK_LMENU:      sprintf(out,GAMEDEVICE_VK_LMENU); break;
+		case VK_RMENU:      sprintf(out,GAMEDEVICE_VK_RMENU); break;
+		case 3:             sprintf(out,GAMEDEVICE_VK_PAUSE); break;
+		case VK_PAUSE:      sprintf(out,GAMEDEVICE_VK_PAUSE); break;
+		case VK_CAPITAL:    sprintf(out,GAMEDEVICE_VK_CAPITAL); break;
+		case VK_ESCAPE:     sprintf(out,GAMEDEVICE_VK_ESCAPE); break;
+		case VK_SPACE:      sprintf(out,GAMEDEVICE_VK_SPACE); break;
+		case VK_PRIOR:      sprintf(out,GAMEDEVICE_VK_PRIOR); break;
+		case VK_NEXT:       sprintf(out,GAMEDEVICE_VK_NEXT); break;
+		case VK_HOME:       sprintf(out,GAMEDEVICE_VK_HOME); break;
+		case VK_END:        sprintf(out,GAMEDEVICE_VK_END); break;
+		case VK_LEFT:       sprintf(out,GAMEDEVICE_VK_LEFT ); break;
+		case VK_RIGHT:      sprintf(out,GAMEDEVICE_VK_RIGHT); break;
+		case VK_UP:         sprintf(out,GAMEDEVICE_VK_UP); break;
+		case VK_DOWN:       sprintf(out,GAMEDEVICE_VK_DOWN); break;
+		case VK_SELECT:     sprintf(out,GAMEDEVICE_VK_SELECT); break;
+		case VK_PRINT:      sprintf(out,GAMEDEVICE_VK_PRINT); break;
+		case VK_EXECUTE:    sprintf(out,GAMEDEVICE_VK_EXECUTE); break;
+		case VK_SNAPSHOT:   sprintf(out,GAMEDEVICE_VK_SNAPSHOT); break;
+		case VK_INSERT:     sprintf(out,GAMEDEVICE_VK_INSERT); break;
+		case VK_DELETE:     sprintf(out,GAMEDEVICE_VK_DELETE); break;
+		case VK_HELP:       sprintf(out,GAMEDEVICE_VK_HELP); break;
+		case VK_LWIN:       sprintf(out,GAMEDEVICE_VK_LWIN); break;
+		case VK_RWIN:       sprintf(out,GAMEDEVICE_VK_RWIN); break;
+		case VK_APPS:       sprintf(out,GAMEDEVICE_VK_APPS); break;
+		case VK_MULTIPLY:   sprintf(out,GAMEDEVICE_VK_MULTIPLY); break;
+		case VK_ADD:        sprintf(out,GAMEDEVICE_VK_ADD); break;
+		case VK_SEPARATOR:  sprintf(out,GAMEDEVICE_VK_SEPARATOR); break;
+		case VK_OEM_1:      sprintf(out,GAMEDEVICE_VK_OEM_1); break;
+		case VK_OEM_7:      sprintf(out,GAMEDEVICE_VK_OEM_7); break;
+		case VK_OEM_COMMA:  sprintf(out,GAMEDEVICE_VK_OEM_COMMA );break;
+		case VK_OEM_PERIOD: sprintf(out,GAMEDEVICE_VK_OEM_PERIOD);break;
+		case VK_SUBTRACT:   sprintf(out,GAMEDEVICE_VK_SUBTRACT); break;
+		case VK_DECIMAL:    sprintf(out,GAMEDEVICE_VK_DECIMAL); break;
+		case VK_DIVIDE:     sprintf(out,GAMEDEVICE_VK_DIVIDE); break;
+		case VK_NUMLOCK:    sprintf(out,GAMEDEVICE_VK_NUMLOCK); break;
+		case VK_SCROLL:     sprintf(out,GAMEDEVICE_VK_SCROLL); break;
+		case 189:           sprintf(out,"-"); break;
+		case 187:           sprintf(out,"="); break;
+		case 16:            sprintf(out,"Shift"); break;
+		case 17:            sprintf(out,"Control"); break;
+		case 18:            sprintf(out,"Alt"); break;
+		case 219:           sprintf(out,"["); break;
+		case 221:           sprintf(out,"]"); break;
+		case 220:           sprintf(out,"\\"); break;
+		case 191:           sprintf(out,"/"); break;
+		case 192:           sprintf(out,"`"); break;
+		case 112:           sprintf(out,"F1"); break;
+		case 113:           sprintf(out,"F2"); break;
+		case 114:           sprintf(out,"F3"); break;
+		case 115:           sprintf(out,"F4"); break;
+		case 116:           sprintf(out,"F5"); break;
+		case 117:           sprintf(out,"F6"); break;
+		case 118:           sprintf(out,"F7"); break;
+		case 119:           sprintf(out,"F8"); break;
+		case 120:           sprintf(out,"F9"); break;
+		case 121:           sprintf(out,"F10"); break;
+		case 122:           sprintf(out,"F11"); break;
+		case 123:           sprintf(out,"F12"); break;
 	}
 
-	if (szName[0]) {
-		sprintf(szString, "%s", szName);
-	} else {
-		sprintf(szString, "code 0x%.2X", c);
-	}
-
-	return szString;
+	return out;
 }
 
 // Update which command is using which key
@@ -74,6 +142,7 @@ static int MHkeysUseUpdate()
 	if (hMHkeysList == NULL) {
 		return 1;
 	}
+	char tempTxt[255];
 	unsigned int i;
 
 	// Update the values of all the inputs
@@ -84,11 +153,21 @@ static int MHkeysUseUpdate()
 			continue;
 		}
 
+		sprintf(tempTxt, "");
+		if(EmuCommandTable[i].keymod == VK_CONTROL)
+			sprintf(tempTxt,"Ctrl + ");
+		else if(EmuCommandTable[i].keymod == VK_MENU)
+			sprintf(tempTxt,"Alt + ");
+		else if(EmuCommandTable[i].keymod == VK_SHIFT)
+			sprintf(tempTxt,"Shift + ");
+	
+		sprintf(tempTxt,"%s%s",tempTxt,RealKeyName(EmuCommandTable[i].key));
+
 		memset(&LvItem, 0, sizeof(LvItem));
 		LvItem.mask = LVIF_TEXT;
 		LvItem.iItem = i;
 		LvItem.iSubItem = 1;
-		LvItem.pszText = RealKeyName(EmuCommandTable[i].key);
+		LvItem.pszText = tempTxt;
 
 		SendMessage(hMHkeysList, LVM_SETITEM, 0, (LPARAM)&LvItem);
 	}
@@ -184,30 +263,64 @@ static int MHkeysExit()
 	return 0;
 }
 
+static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
+	if (code < 0) {
+		return CallNextHookEx(hook, code, wParam, lParam);
+	}
+	if(wParam == VK_SHIFT || wParam == VK_MENU || wParam == VK_CONTROL) {
+		return CallNextHookEx(hook, code, wParam, lParam);
+	}
+
+//	if(wParam == VK_ESCAPE)
+//	{
+//		TranslateKey(wParam,temp);
+//	}
+//	else
+//	{
+	if(GetAsyncKeyState(VK_CONTROL))
+		EmuCommandTable[receivingKmap].keymod = VK_CONTROL;
+	else if(GetAsyncKeyState(VK_MENU))
+		EmuCommandTable[receivingKmap].keymod = VK_MENU;
+	else if(GetAsyncKeyState(VK_SHIFT))
+		EmuCommandTable[receivingKmap].keymod = VK_SHIFT;
+	else
+		EmuCommandTable[receivingKmap].keymod = 0;
+//	}
+
+	char keyNameBuf[16];
+	unsigned short key = wParam;
+
+////	NewKeyMappings[receivingKmap] = key;
+
+	snprintf(keyNameBuf, 16, "0x%02x", key);
+//	SetDlgItemText(hwndKeyDlg, ID_LAB_KMAP(receivingKmap), keyNameBuf);
+//
+//	EnableAll(TRUE);
+
+	static HWND statusText;
+	statusText = GetDlgItem(hMHkeysDlg, IDC_HKEYSS_STATIC);
+	SetWindowText(statusText, keyNameBuf);
+	EmuCommandTable[receivingKmap].key = key;
+	MHkeysUseUpdate();
+
+	UnhookWindowsHookEx(hook);
+	hook = 0;
+
+	return 1;
+}
+
 // List item activated; find out which one
 static int ListItemActivate()
 {
-	LVITEM LvItem;
-
+	char str [256];
 	int nSel = SendMessage(hMHkeysList, LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
-	if (nSel < 0) {
-		return 1;
-	}
+	static HWND statusText;
+	statusText = GetDlgItem(hMHkeysDlg, IDC_HKEYSS_STATIC);
 
-	// Get the corresponding input
-	LvItem.mask = LVIF_PARAM;
-	LvItem.iItem = nSel;
-	LvItem.iSubItem = 0;
-	SendMessage(hMHkeysList, LVM_GETITEM, 0, (LPARAM)&LvItem);
-	nSel = LvItem.lParam;
-
-	if (nSel >= (int)(NUM_EMU_CMDS)) {	// out of range
-		return 1;
-	}
-
-	if (!EmuCommandTable[nSel].key) {
-		return 1;
-	}
+	sprintf(str, "SETTING KEY: %d", nSel);
+	SetWindowText(statusText, str);
+	receivingKmap = nSel;
+	hook = SetWindowsHookEx(WH_KEYBOARD, KeyMappingHook, 0, GetCurrentThreadId());
 
 	return 0;
 }
