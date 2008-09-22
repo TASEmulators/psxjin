@@ -286,6 +286,8 @@ int movieFreeze(gzFile f, int Mode) {
 		else if (currentMovie.mode == 2) { // if replaying movie
 			gzfreezel(&currentMovie.frameCounter);
 			gzfreezel(&bufSize);
+			fclose(fpRecordingMovie);
+			fpRecordingMovie = fopen(currentMovie.movieFilename,"r+b");
 			fseek(fpRecordingMovie, currentMovie.inputOffset+bufSize, SEEK_SET);
 		}
 		GPU_setframecounter(currentMovie.frameCounter,currentMovie.totalFrames);
