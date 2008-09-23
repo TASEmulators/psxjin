@@ -144,12 +144,15 @@ void CALLBACK GPU__keypressed(int key) {}
 long CALLBACK GPU__getScreenPic(unsigned char *pMem) { return -1; }
 long CALLBACK GPU__showScreenPic(unsigned char *pMem) { return -1; }
 void CALLBACK GPU__clearDynarec(void (CALLBACK *callback)(void)) { }
+
 void CALLBACK GPU__setframelimit(unsigned long option) {}
 void CALLBACK GPU__setframecounter(unsigned long newCurrentFrame,unsigned long newTotalFrames) {}
 void CALLBACK GPU__setlagcounter(unsigned long newCurrentLag) {}
 void CALLBACK GPU__inputdisplay(unsigned long newCurrentInput) {}
 void CALLBACK GPU__updateframe(void) {}
 void CALLBACK GPU__setcurrentmode(char newModeFlags) {}
+void CALLBACK GPU__setspeedmode(unsigned long newSpeedMode) {}
+void CALLBACK GPU__showframecounter(void) {}
 
 #define LoadGpuSym1(dest, name) \
 	LoadSym(GPU_##dest, GPU##dest, name, 1);
@@ -198,6 +201,8 @@ int LoadGPUplugin(char *GPUdll) {
 	LoadGpuSym0(inputdisplay, "GPUinputdisplay");
 	LoadGpuSym0(updateframe, "GPUupdateframe");
 	LoadGpuSym0(setcurrentmode, "GPUsetcurrentmode");
+	LoadGpuSym0(setspeedmode, "GPUsetspeedmode");
+	LoadGpuSym0(showframecounter, "GPUshowframecounter");
 
 	return 0;
 }
@@ -449,6 +454,7 @@ long CALLBACK SPU__freeze(unsigned long ulFreezeMode, SPUFreeze_t *pF) {
 }
 
 void CALLBACK SPU__registerCallback(void (CALLBACK *callback)(void)) {}
+void CALLBACK SPU__tellFrame(unsigned long newCurrentFrame) {}
 
 #define LoadSpuSym1(dest, name) \
 	LoadSym(SPU_##dest, SPU##dest, name, 1);
@@ -504,6 +510,7 @@ int LoadSPUplugin(char *SPUdll) {
 	LoadSpuSym0(freeze, "SPUfreeze");
 	LoadSpuSym0(registerCallback, "SPUregisterCallback");
 	LoadSpuSymN(async, "SPUasync");
+	LoadSpuSym0(tellFrame,"SPUtellFrame");
 
 	return 0;
 }

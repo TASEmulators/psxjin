@@ -50,6 +50,9 @@ int flagEscPressed;
 
 int recording;
 
+#include "maphkeys.h"
+int speedModifierFlag;
+
 int AccBreak=0;
 int ConfPlug=0;
 int StatesC=0;
@@ -629,9 +632,28 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_SYSKEYDOWN:
 			if (wParam != VK_F10)
 				return DefWindowProc(hWnd, msg, wParam, lParam);
+
 		case WM_KEYDOWN:
 			PADhandleKey(wParam);
 			return TRUE;
+
+		case WM_KEYUP: {
+			int modifier = 0;int key;
+			key = wParam;
+			if(GetAsyncKeyState(VK_MENU))
+				modifier = VK_MENU;
+			else if(GetAsyncKeyState(VK_CONTROL))
+				modifier = VK_CONTROL;
+			else if(GetAsyncKeyState(VK_SHIFT))
+				modifier = VK_SHIFT;
+			if(key == EmuCommandTable[EMUCMD_TURBOMODE].key
+			&& modifier == EmuCommandTable[EMUCMD_TURBOMODE].keymod)
+			{
+				GPU_setspeedmode(7);
+				speedModifierFlag = 0;
+			}
+			return TRUE;
+		}
 	
 		case WM_DESTROY:
 			if (!AccBreak) {
@@ -1458,9 +1480,6 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
 
 	ADDSUBMENU(0, _("&Configuration"));
-	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
-	ADDMENUITEM(0, _("&Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
-	ADDMENUITEM(0, _("Memory &Watch"), ID_CONFIGURATION_MEMWATCH);
 	ADDMENUITEM(0, _("C&PU"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
@@ -1472,39 +1491,19 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Plugins && Bios"), ID_CONFIGURATION);
 
-	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
-//	EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_MAPHOTKEYS,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
-
-//	ADDSUBMENU(0, _("&Language"));
-//
-//	if (langs != langs) free(langs);
-//	langs = (_langs*)malloc(sizeof(_langs));
-//	strcpy(langs[0].lang, "English");
-//	InitLanguages(); i=1;
-//	while ((lang = GetLanguageNext()) != NULL) {
-//		langs = (_langs*)realloc(langs, sizeof(_langs)*(i+1));
-//		strcpy(langs[i].lang, lang);
-//		if (!strcmp(Config.Lang, lang)) {
-//			ADDMENUITEMC(0, ParseLang(langs[i].lang), ID_LANGS + i);
-//		} else {
-//			ADDMENUITEM(0, ParseLang(langs[i].lang), ID_LANGS + i);
-//		}
-//		i++;
-//	}
-//	CloseLanguages();
-//	langsMax = i;
-//	if (!strcmp(Config.Lang, "English")) {
-//		ADDMENUITEMC(0, _("English"), ID_LANGS);
-//	} else {
-//		ADDMENUITEM(0, _("English"), ID_LANGS);
-//	}
+	ADDSUBMENU(0, _("&Tools"));
+	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
+	ADDMENUITEM(0, _("RAM &Watch"), ID_CONFIGURATION_MEMWATCH);
+	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 
 	ADDSUBMENU(0, _("&Help"));
 	ADDMENUITEM(0, _("&About..."), ID_HELP_ABOUT);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Help"), ID_HELP_HELP);
+
+	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
+	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
+	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 }
 
 void CreateMainWindow(int nCmdShow) {

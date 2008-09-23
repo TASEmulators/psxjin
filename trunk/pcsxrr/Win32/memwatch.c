@@ -177,7 +177,7 @@ void UpdateMemWatch()
 			}
 			else
 			{
-				text = "-";
+				text = "-    ";
 			}
 
 			MoveToEx(hdc,xPositions[i],yPositions[i],NULL);
@@ -413,14 +413,15 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		{
 		
 		case EN_CHANGE:
-		  {
+			{
 				//the contents of an address box changed. re-parse it.
 				//first, find which address changed
 				int changed = MWRec_findIndex(LOWORD(wParam));
 				if(changed==-1) break;
 				MWRec_parse(LOWORD(wParam),changed);
+				UpdateMemWatch();
 				break;
- 			}
+			}
 			
 		case BN_CLICKED:
 			switch(LOWORD(wParam))
