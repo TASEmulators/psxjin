@@ -315,6 +315,9 @@
 #define MEMWATCH                        40053
 #define MW_ValueLabel1                  40054
 #define MW_ValueLabel2                  40055
+#define IDC_HKEYSS_STATIC               40056
+#define ID_LANGS                        50000
+
 #define MW_ADDR00                       1001
 #define MW_ADDR01                       1004
 #define MW_ADDR02                       1007
@@ -339,7 +342,6 @@
 #define MW_ADDR21                       1064
 #define MW_ADDR22                       1067
 #define MW_ADDR23                       1070
-#define ID_LANGS                        50000
 
 // Next default values for new objects
 // 

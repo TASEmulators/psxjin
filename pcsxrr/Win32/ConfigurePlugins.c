@@ -23,6 +23,7 @@
 #include "plugin.h"
 #include "resource.h"
 #include "Win32.h"
+#include "maphkeys.h"
 
 #define QueryKeyV(s, name, var) \
 	size = s; \
@@ -67,6 +68,22 @@ int LoadConfig() {
 	QueryKeyV(sizeof(Conf->RCntFix), "RCntFix", &Conf->RCntFix);
 	QueryKeyV(sizeof(Conf->VSyncWA), "VSyncWA", &Conf->VSyncWA);
 
+	int i;
+	char HotkeysKeys[EMUCMDMAX];
+	QueryKeyV(sizeof(HotkeysKeys), "HotkeysKeys", &HotkeysKeys);
+	for (i = 0; i <= EMUCMDMAX; i++) {
+		if (HotkeysKeys[i] < 0)
+			EmuCommandTable[i].key = HotkeysKeys[i]+0x100; // ugly hack...
+		else
+			EmuCommandTable[i].key = HotkeysKeys[i];
+	}
+
+	char HotkeysKeymods[EMUCMDMAX];
+	QueryKeyV(sizeof(HotkeysKeymods), "HotkeysKeymods", &HotkeysKeymods);
+	for (i = 0; i <= EMUCMDMAX; i++) {
+		EmuCommandTable[i].keymod = HotkeysKeymods[i];
+	}
+
 	RegCloseKey(myKey);
 
 #ifdef ENABLE_NLS
@@ -110,6 +127,19 @@ void SaveConfig() {
 	SetKeyV("SpuIrq",  &Conf->SpuIrq,  sizeof(Conf->SpuIrq),  REG_DWORD);
 	SetKeyV("RCntFix", &Conf->RCntFix, sizeof(Conf->RCntFix), REG_DWORD);
 	SetKeyV("VSyncWA", &Conf->VSyncWA, sizeof(Conf->VSyncWA), REG_DWORD);
+
+	int i;
+	char HotkeysKeys[EMUCMDMAX];
+	for (i = 0; i <= EMUCMDMAX; i++) {
+		HotkeysKeys[i] = EmuCommandTable[i].key;
+	}
+	SetKeyV("HotkeysKeys", &HotkeysKeys,sizeof(HotkeysKeys), REG_BINARY);
+
+	char HotkeysKeymods[EMUCMDMAX];
+	for (i = 0; i <= EMUCMDMAX; i++) {
+		HotkeysKeymods[i] = EmuCommandTable[i].keymod;
+	}
+	SetKeyV("HotkeysKeymods", &HotkeysKeymods,sizeof(HotkeysKeymods), REG_BINARY);
 
 	RegCloseKey(myKey);
 }

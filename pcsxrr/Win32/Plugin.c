@@ -30,13 +30,15 @@
 #include "PsxCommon.h"
 #include "../movie.h"
 extern struct Movie_Type currentMovie;
+#include "maphkeys.h"
+extern int speedModifierFlag;
+int speedModeTemp = 7;
 
 int ShowPic=0;
 char Text[255];
 int ret;
 
 void gpuShowPic() {
-	char Text[255];
 	gzFile f;
 
 	if (!ShowPic) {
@@ -66,8 +68,6 @@ void gpuShowPic() {
 
 void PCSX_SaveState(int newState) {
 	StatesC=newState;
-//	sprintf(Text, "sstates\\%10.10s.%dsm", CdromLabel, StatesC);
-//	PCSX_MOV_CopyMovie(0,Text);
 	if (currentMovie.mode)
 		sprintf(Text, "sstates\\%s.pxm.%3.3d", currentMovie.movieFilenameMini, StatesC);
 	else
@@ -108,103 +108,151 @@ void PCSX_LoadState(int newState) {
 }
 
 void PADhandleKey(int key) {
+	int i;
+	int modifiers = 0;
+	if(GetAsyncKeyState(VK_CONTROL))
+		modifiers = VK_CONTROL;
+	else if(GetAsyncKeyState(VK_MENU))
+		modifiers = VK_MENU;
+	else if(GetAsyncKeyState(VK_SHIFT))
+		modifiers = VK_SHIFT;
 
 	if (Running == 0) return;
-	switch (key) {
-		case 0: break;
 
-//		case VK_NUMPAD0:
-//			GPU_setframelimit(7);
-//			break;
-//		case VK_DECIMAL:
-//			GPU_setframelimit(0);
-//			break;
+	for (i = EMUCMD_LOADSTATE1; i <= EMUCMD_LOADSTATE1+8; i++) {
+		if(key == EmuCommandTable[i].key
+		&& modifiers == EmuCommandTable[i].keymod)
+		{
+			flagLoadState=i-EMUCMD_LOADSTATE1+1;
+		}
+	}
 
-		case VK_PAUSE:
-		case 'P': // pause - unpause
-			if (flagDontPause)
-				flagFakePause = 1;
-			else
-				flagDontPause = 1;
-			break;
+	for (i = EMUCMD_SAVESTATE1; i <= EMUCMD_SAVESTATE1+8; i++) {
+		if(key == EmuCommandTable[i].key
+		&& modifiers == EmuCommandTable[i].keymod)
+		{
+			flagSaveState=i-EMUCMD_SAVESTATE1+1;
+		}
+	}
 
-		case VK_OEM_5:
-		case VK_SPACE: // frame advance
-			flagDontPause=2;
-			break;
+	for (i = EMUCMD_SELECTSTATE1; i <= EMUCMD_SELECTSTATE1+8; i++) {
+		if(key == EmuCommandTable[i].key
+		&& modifiers == EmuCommandTable[i].keymod)
+		{
+			StatesC=i-EMUCMD_SELECTSTATE1;
+			GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+			if (ShowPic) { ShowPic = 0; gpuShowPic(); }
+			sprintf(Text, "*PCSX*: State %d Selected", StatesC+1);
+			GPU_displayText(Text);
+		}
+	}
 
-		case '8': // read-only toggle
-			if (GetKeyState(VK_SHIFT) & 0x8000) {
-				currentMovie.readOnly^=1;
-				if (currentMovie.readOnly)
-					GPU_displayText("*PCSX*: Read-Only mode");
-				else
-					GPU_displayText("*PCSX*: Read+Write mode");
-			}
-			break;
+//	if(key == 'Z')
+//		gpuShowPic(); //only shows a black screen :/
 
-		case '0': // lag counter reset
-			currentMovie.lagCounter=0;
-			GPU_setlagcounter(currentMovie.lagCounter);
-			break;
+	if(key == EmuCommandTable[EMUCMD_MENU].key
+	&& modifiers == EmuCommandTable[EMUCMD_MENU].keymod)
+	{
+		flagEscPressed=1;
+	}
 
-		case VK_F1:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=1;
-			else flagLoadState=1;
-		break;
-		case VK_F2:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=2;
-			else flagLoadState=2;
-		break;
-		case VK_F3:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=3;
-			else flagLoadState=3;
-		break;
-		case VK_F4:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=4;
-			else flagLoadState=4;
-		break;
-		case VK_F5:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=5;
-			else flagLoadState=5;
-		break;
-		case VK_F6:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=6;
-			else flagLoadState=6;
-		break;
-		case VK_F7:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=7;
-			else flagLoadState=7;
-		break;
-		case VK_F8:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=8;
-			else flagLoadState=8;
-		break;
-		case VK_F9:
-			if (GetKeyState(VK_SHIFT) & 0x8000) flagSaveState=9;
-			else flagLoadState=9;
-		break;
+	if(key == EmuCommandTable[EMUCMD_PAUSE].key
+	&& modifiers == EmuCommandTable[EMUCMD_PAUSE].keymod)
+	{
+		if (flagDontPause)
+			flagFakePause = 1;
+		else
+			flagDontPause = 1;
+	}
 
-//		case VK_F2:
-//			if (StatesC < 4) StatesC++;
-//			else StatesC = 0;
-//			GPU_freeze(2, (GPUFreeze_t *)&StatesC);
-//			if (ShowPic) { ShowPic = 0; gpuShowPic(); }
-//			break;
-//
-//		case VK_F4:
-//			gpuShowPic();
-//			break;
-//
-//		case VK_F5:
-//			if (Config.QKeys) break;
-//			Config.Sio ^= 0x1;
-//			if (Config.Sio)
-//				 sprintf(Text, _("*PCSX*: Sio Irq Always Enabled"));
-//			else sprintf(Text, _("*PCSX*: Sio Irq Not Always Enabled"));
-//			GPU_displayText(Text);
-//			break;
-//
+	if(key == EmuCommandTable[EMUCMD_FRAMEADVANCE].key
+	&& modifiers == EmuCommandTable[EMUCMD_FRAMEADVANCE].keymod)
+	{
+		flagDontPause=2;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RWTOGGLE].key
+	&& modifiers == EmuCommandTable[EMUCMD_RWTOGGLE].keymod)
+	{
+		currentMovie.readOnly^=1;
+		if (currentMovie.readOnly)
+			GPU_displayText("*PCSX*: Read-Only mode");
+		else
+			GPU_displayText("*PCSX*: Read+Write mode");
+	}
+
+	if(key == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].key
+	&& modifiers == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].keymod)
+	{
+		currentMovie.lagCounter=0;
+		GPU_setlagcounter(currentMovie.lagCounter);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
+	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
+	{
+		Config.Sio ^= 0x1;
+		if (Config.Sio)
+			 sprintf(Text, _("*PCSX*: Sio Irq Always Enabled"));
+		else sprintf(Text, _("*PCSX*: Sio Irq Not Always Enabled"));
+		GPU_displayText(Text);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
+	{
+		Config.SpuIrq ^= 0x1;
+		if (Config.SpuIrq)
+			 sprintf(Text, _("*PCSX*: Spu Irq Always Enabled"));
+		else sprintf(Text, _("*PCSX*: Spu Irq Not Always Enabled"));
+		GPU_displayText(Text);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SCREENSHOT].key
+	&& modifiers == EmuCommandTable[EMUCMD_SCREENSHOT].keymod)
+	{
+		GPU_makeSnapshot();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPEEDNORMAL].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPEEDNORMAL].keymod)
+	{
+		GPU_setspeedmode(7);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPEEDTURBO].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPEEDTURBO].keymod)
+	{
+		GPU_setspeedmode(0);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_TURBOMODE].key
+	&& modifiers == EmuCommandTable[EMUCMD_TURBOMODE].keymod)
+	{
+		if (!speedModifierFlag) GPU_setspeedmode(0);
+		speedModifierFlag = 1;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPEEDDEC].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPEEDDEC].keymod)
+	{
+		if (speedModeTemp>1) speedModeTemp--;
+		GPU_setspeedmode(speedModeTemp);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPEEDINC].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPEEDINC].keymod)
+	{
+		if (speedModeTemp<12) speedModeTemp++;
+		GPU_setspeedmode(speedModeTemp);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_FRAMECOUNTER].key
+	&& modifiers == EmuCommandTable[EMUCMD_FRAMECOUNTER].keymod)
+	{
+		GPU_showframecounter();
+	}
+
 //		case VK_F6:
 //			if (Config.QKeys) break;
 //			Config.Mdec ^= 0x1;
@@ -223,11 +271,6 @@ void PADhandleKey(int key) {
 //			GPU_displayText(Text);
 //			break;
 //
-		case VK_F12:
-			if (Config.QKeys) break;
-			GPU_makeSnapshot();
-			return;
-
 //		case VK_F9:
 //			GPU_displayText(_("*PCSX*: CdRom Case Opened"));
 //			cdOpenCase = 1;
@@ -242,11 +285,6 @@ void PADhandleKey(int key) {
 //			SysPrintf("*PCSX*: CpuReset\n");
 //			psxCpu->Reset();
 //			break;
-
-		case VK_ESCAPE:
-			flagEscPressed=1;
-			break;
-	}
 }
 
 void CALLBACK SPUirq(void);

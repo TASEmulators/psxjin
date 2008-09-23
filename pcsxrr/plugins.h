@@ -74,12 +74,15 @@ typedef long (CALLBACK* GPUfreeze)(unsigned long, GPUFreeze_t *);
 typedef long (CALLBACK* GPUgetScreenPic)(unsigned char *);
 typedef long (CALLBACK* GPUshowScreenPic)(unsigned char *);
 typedef void (CALLBACK* GPUclearDynarec)(void (CALLBACK *callback)(void));
+
 typedef void (CALLBACK* GPUsetframelimit)(unsigned long);
 typedef void (CALLBACK* GPUsetframecounter)(unsigned long, unsigned long);
 typedef void (CALLBACK* GPUsetlagcounter)(unsigned long);
 typedef void (CALLBACK* GPUinputdisplay)(unsigned long);
 typedef void (CALLBACK* GPUupdateframe)(void);
 typedef void (CALLBACK* GPUsetcurrentmode)(char);
+typedef void (CALLBACK* GPUsetspeedmode)(unsigned long);
+typedef void (CALLBACK* GPUshowframecounter)(void);
 
 //plugin stuff From Shadow
 // *** walking in the valley of your darking soul i realize that i was alone
@@ -112,6 +115,8 @@ GPUsetlagcounter    GPU_setlagcounter;
 GPUinputdisplay     GPU_inputdisplay;
 GPUupdateframe      GPU_updateframe;
 GPUsetcurrentmode   GPU_setcurrentmode;
+GPUsetspeedmode     GPU_setspeedmode;
+GPUshowframecounter GPU_showframecounter;
 
 //cd rom plugin ;)
 typedef long (CALLBACK* CDRinit)(void);
@@ -191,6 +196,7 @@ typedef void (CALLBACK* SPUregisterCallback)(void (CALLBACK *callback)(void));
 typedef long (CALLBACK* SPUconfigure)(void);
 typedef long (CALLBACK* SPUtest)(void);			
 typedef void (CALLBACK* SPUabout)(void);
+typedef void (CALLBACK* SPUtellFrame) (unsigned long);
 typedef struct {
 	unsigned char PluginName[8];
 	unsigned long PluginVersion;
@@ -232,6 +238,7 @@ SPUplayADPCMchannel SPU_playADPCMchannel;
 SPUfreeze           SPU_freeze;
 SPUregisterCallback SPU_registerCallback;
 SPUasync            SPU_async;
+SPUtellFrame        SPU_tellFrame;
 
 // PAD Functions
 

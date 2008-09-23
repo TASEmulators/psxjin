@@ -12,34 +12,48 @@ HWND hMHkeysDlg = NULL;							// Handle to the MapHotkeys Dialog
 
 struct EMUCMDTABLE EmuCommandTable[]=
 {
-	{ EMUCMD_PAUSE,VK_PAUSE,0,"Pause", },
-	{ EMUCMD_TURBOMODE,VK_TAB,0,"Fast Forward", },
-	{ EMUCMD_FRAMEADVANCE,VK_OEM_5,0,"Frame Advance", },
-	{ EMUCMD_RWTOGGLE,'8',VK_SHIFT,"Read-Only Toggle", },
-	{ EMUCMD_SPEEDDEC,VK_OEM_MINUS,VK_SHIFT,"Decrease Speed", },
-	{ EMUCMD_SPEEDINC,VK_OEM_PLUS,VK_SHIFT,"Increase Speed", },
-	{ EMUCMD_FRAMECOUNTER,VK_BACK,VK_SHIFT,"Frame Counter", },
-	{ EMUCMD_LOADSTATE1,VK_F1,0,"Load State 1", },
-	{ EMUCMD_LOADSTATE2,VK_F2,0,"Load State 2", },
-	{ EMUCMD_LOADSTATE3,VK_F3,0,"Load State 3", },
-	{ EMUCMD_LOADSTATE4,VK_F4,0,"Load State 4", },
-	{ EMUCMD_LOADSTATE5,VK_F5,0,"Load State 5", },
-	{ EMUCMD_LOADSTATE6,VK_F6,0,"Load State 6", },
-	{ EMUCMD_LOADSTATE7,VK_F7,0,"Load State 7", },
-	{ EMUCMD_LOADSTATE8,VK_F8,0,"Load State 8", },
-	{ EMUCMD_LOADSTATE9,VK_F9,0,"Load State 9", },
-	{ EMUCMD_SAVESTATE1,VK_F1,VK_SHIFT,"Save State 1", },
-	{ EMUCMD_SAVESTATE2,VK_F2,VK_SHIFT,"Save State 2", },
-	{ EMUCMD_SAVESTATE3,VK_F3,VK_SHIFT,"Save State 3", },
-	{ EMUCMD_SAVESTATE4,VK_F4,VK_SHIFT,"Save State 4", },
-	{ EMUCMD_SAVESTATE5,VK_F5,VK_SHIFT,"Save State 5", },
-	{ EMUCMD_SAVESTATE6,VK_F6,VK_SHIFT,"Save State 6", },
-	{ EMUCMD_SAVESTATE7,VK_F7,VK_SHIFT,"Save State 7", },
-	{ EMUCMD_SAVESTATE8,VK_F8,VK_SHIFT,"Save State 8", },
-	{ EMUCMD_SAVESTATE9,VK_F9,VK_SHIFT,"Save State 9", }
+	{ VK_ESCAPE,       0,           "Call Menu", },
+	{ VK_PAUSE,        0,           "Pause", },
+	{ VK_TAB,          0,           "Fast Forward", },
+	{ VK_OEM_5,        0,           "Frame Advance", },
+	{ '8',             VK_SHIFT,    "Read-Only Toggle", },
+	{ VK_OEM_MINUS,    0,           "Decrease Speed", },
+	{ VK_OEM_PLUS,     0,           "Increase Speed", },
+	{ VK_NUMPAD0,      0,           "Normal Speed", },
+	{ VK_DECIMAL,      0,           "Turbo Speed", },
+	{ VK_OEM_PERIOD,   0,           "Frame Counter", },
+	{ '0',             0,           "Lag Counter Reset", },
+	{ VK_F12,          0,           "Take Screenshot", },
+	{ VK_F1,           0,           "Load State 1", },
+	{ VK_F2,           0,           "Load State 2", },
+	{ VK_F3,           0,           "Load State 3", },
+	{ VK_F4,           0,           "Load State 4", },
+	{ VK_F5,           0,           "Load State 5", },
+	{ VK_F6,           0,           "Load State 6", },
+	{ VK_F7,           0,           "Load State 7", },
+	{ VK_F8,           0,           "Load State 8", },
+	{ VK_F9,           0,           "Load State 9", },
+	{ VK_F1,           VK_SHIFT,    "Save State 1", },
+	{ VK_F2,           VK_SHIFT,    "Save State 2", },
+	{ VK_F3,           VK_SHIFT,    "Save State 3", },
+	{ VK_F4,           VK_SHIFT,    "Save State 4", },
+	{ VK_F5,           VK_SHIFT,    "Save State 5", },
+	{ VK_F6,           VK_SHIFT,    "Save State 6", },
+	{ VK_F7,           VK_SHIFT,    "Save State 7", },
+	{ VK_F8,           VK_SHIFT,    "Save State 8", },
+	{ VK_F9,           VK_SHIFT,    "Save State 9", },
+	{ '1',             0,           "Select State 1", },
+	{ '2',             0,           "Select State 2", },
+	{ '3',             0,           "Select State 3", },
+	{ '4',             0,           "Select State 4", },
+	{ '5',             0,           "Select State 5", },
+	{ '6',             0,           "Select State 6", },
+	{ '7',             0,           "Select State 7", },
+	{ '8',             0,           "Select State 8", },
+	{ '9',             0,           "Select State 9", },
+	{ VK_F11,          VK_SHIFT,    "SIO IRQ Toggle", },
+	{ VK_F12,          VK_SHIFT,    "SPU IRQ Toggle", }
 };
-#define NUM_EMU_CMDS (sizeof(EmuCommandTable)/sizeof(EmuCommandTable[0]))
-
 static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;			// Last input values/defined
 static int bLastValDefined = 0;					//
@@ -49,7 +63,7 @@ static int receivingKmap;
 
 static char* RealKeyName(int c)
 {
-	static char out[255];
+	static char out[256];
 
 	sprintf(out,GAMEDEVICE_KEY,c);
 	if((c>='0' && c<='9')||(c>='A' &&c<='Z'))
@@ -142,11 +156,11 @@ static int MHkeysUseUpdate()
 	if (hMHkeysList == NULL) {
 		return 1;
 	}
-	char tempTxt[255];
+	char tempTxt[256];
 	unsigned int i;
 
 	// Update the values of all the inputs
-	for (i = 0; i < NUM_EMU_CMDS; i++) {
+	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
 
 		if (!EmuCommandTable[i].key) {
@@ -213,7 +227,7 @@ int MHkeysListMake(int bBuild)
 
 	unsigned int i;
 	// Add all the input names to the list
-	for (i = 0; i < NUM_EMU_CMDS; i++) {
+	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
 
 		memset(&LvItem, 0, sizeof(LvItem));
@@ -238,7 +252,7 @@ static int MHkeysInit()
 	hMHkeysList = GetDlgItem(hMHkeysDlg, IDC_MHKEYS_LIST);
 
 	// Allocate a last val array for the last input values
-	nMemLen = NUM_EMU_CMDS * sizeof(char);
+	nMemLen = EMUCMDMAX * sizeof(char);
 	LastVal = (unsigned char*)malloc(nMemLen);
 	if (LastVal == NULL) {
 		return 1;
@@ -271,12 +285,6 @@ static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
 		return CallNextHookEx(hook, code, wParam, lParam);
 	}
 
-//	if(wParam == VK_ESCAPE)
-//	{
-//		TranslateKey(wParam,temp);
-//	}
-//	else
-//	{
 	if(GetAsyncKeyState(VK_CONTROL))
 		EmuCommandTable[receivingKmap].keymod = VK_CONTROL;
 	else if(GetAsyncKeyState(VK_MENU))
@@ -285,27 +293,16 @@ static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
 		EmuCommandTable[receivingKmap].keymod = VK_SHIFT;
 	else
 		EmuCommandTable[receivingKmap].keymod = 0;
-//	}
-
-	char keyNameBuf[16];
-	unsigned short key = wParam;
-
-////	NewKeyMappings[receivingKmap] = key;
-
-	snprintf(keyNameBuf, 16, "0x%02x", key);
-//	SetDlgItemText(hwndKeyDlg, ID_LAB_KMAP(receivingKmap), keyNameBuf);
-//
-//	EnableAll(TRUE);
 
 	static HWND statusText;
 	statusText = GetDlgItem(hMHkeysDlg, IDC_HKEYSS_STATIC);
-	SetWindowText(statusText, keyNameBuf);
-	EmuCommandTable[receivingKmap].key = key;
+	EmuCommandTable[receivingKmap].key = wParam;
 	MHkeysUseUpdate();
 
 	UnhookWindowsHookEx(hook);
 	hook = 0;
 
+	SetWindowText(statusText, "Double-click a command to change its mapping");
 	return 1;
 }
 
@@ -317,7 +314,7 @@ static int ListItemActivate()
 	static HWND statusText;
 	statusText = GetDlgItem(hMHkeysDlg, IDC_HKEYSS_STATIC);
 
-	sprintf(str, "SETTING KEY: %d", nSel);
+	sprintf(str, "SETTING KEY: %s", EmuCommandTable[nSel].name);
 	SetWindowText(statusText, str);
 	receivingKmap = nSel;
 	hook = SetWindowsHookEx(WH_KEYBOARD, KeyMappingHook, 0, GetCurrentThreadId());
@@ -330,18 +327,20 @@ static BOOL CALLBACK DialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 	if (Msg == WM_INITDIALOG) {
 		hMHkeysDlg = hDlg;
 		MHkeysInit();
-		
+
 		return TRUE;
 	}
 
 	if (Msg == WM_CLOSE) {
 		EnableWindow(gApp.hWnd, TRUE);
 		DestroyWindow(hMHkeysDlg);
+		SaveConfig();
 		return 0;
 	}
 
 	if (Msg == WM_DESTROY) {
 		MHkeysExit();
+		SaveConfig();
 		return 0;
 	}
 
@@ -351,10 +350,12 @@ static BOOL CALLBACK DialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 		if (Id == IDOK && Notify == BN_CLICKED) {
 			ListItemActivate();
+			SaveConfig();
 			return 0;
 		}
 		if (Id == IDCANCEL && Notify == BN_CLICKED) {
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			SaveConfig();
 			return 0;
 		}
 
@@ -382,7 +383,7 @@ static BOOL CALLBACK DialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 int MHkeysCreate()
 {
-	DestroyWindow(hMHkeysDlg);										// Make sure exitted
+	DestroyWindow(hMHkeysDlg); // Make sure exitted
 
 	hMHkeysDlg = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_MHKEYS), gApp.hWnd, DialogProc);
 	if (hMHkeysDlg == NULL) {
