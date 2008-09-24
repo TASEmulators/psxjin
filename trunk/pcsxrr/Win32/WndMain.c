@@ -355,7 +355,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						if (currentMovie.saveStateIncluded) {
 							SetMenu(hWnd, NULL);
 							OpenPlugins(hWnd);
-							ShowCursor(FALSE);
+//							ShowCursor(FALSE);
 							Running = 1;
 							PCSX_MOV_StartMovie(1);
 							psxCpu->Execute();
@@ -373,7 +373,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							SysMessage(_("Could not load Cdrom"));
 							return TRUE;
 						}
-						ShowCursor(FALSE);
+//						ShowCursor(FALSE);
 						Running = 1;
 						PCSX_MOV_StartMovie(1);
 						psxCpu->Execute();
@@ -396,7 +396,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 								SysMessage(_("Could not load Cdrom"));
 								return TRUE;
 							}
-							ShowCursor(FALSE);
+//							ShowCursor(FALSE);
 							Running = 1;
 							PCSX_MOV_StartMovie(2);
 							psxCpu->Execute();
@@ -414,7 +414,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							SysMessage(_("Could not load Cdrom"));
 							return TRUE;
 						}
-						ShowCursor(FALSE);
+//						ShowCursor(FALSE);
 						Running = 1;
 						PCSX_MOV_StartMovie(2);
 						psxCpu->Execute();
@@ -512,7 +512,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						SysMessage(_("Could not load Cdrom"));
 						return TRUE;
 					}
-					ShowCursor(FALSE);
+//					ShowCursor(FALSE);
 					Running = 1;
 					psxCpu->Execute();
 					return TRUE;
@@ -524,7 +524,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					LoadCdBios = 1;
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
-					ShowCursor(FALSE);
+//					ShowCursor(FALSE);
 					CheckCdrom();
 					SysReset();
 					NeedReset = 0;
@@ -560,7 +560,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_EMULATOR_RUN:
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
-					ShowCursor(FALSE);
+//					ShowCursor(FALSE);
 					if (NeedReset) { SysReset(); NeedReset = 0; }
 					Running = 1;
 					psxCpu->Execute();
