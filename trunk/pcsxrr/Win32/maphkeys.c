@@ -51,8 +51,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ '7',             0,           "Select State 7", },
 	{ '8',             0,           "Select State 8", },
 	{ '9',             0,           "Select State 9", },
-	{ VK_F11,          VK_SHIFT,    "SIO IRQ Toggle", },
-	{ VK_F12,          VK_SHIFT,    "SPU IRQ Toggle", }
+	{ VK_F7,           VK_CONTROL,  "Load Current State", },
+	{ VK_F5,           VK_CONTROL,  "Save Current State", }
 };
 static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;			// Last input values/defined
@@ -162,12 +162,8 @@ static int MHkeysUseUpdate()
 	// Update the values of all the inputs
 	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
-
-		if (!EmuCommandTable[i].key) {
-			continue;
-		}
-
 		sprintf(tempTxt, "");
+
 		if(EmuCommandTable[i].keymod == VK_CONTROL)
 			sprintf(tempTxt,"Ctrl + ");
 		else if(EmuCommandTable[i].keymod == VK_MENU)
@@ -176,6 +172,10 @@ static int MHkeysUseUpdate()
 			sprintf(tempTxt,"Shift + ");
 	
 		sprintf(tempTxt,"%s%s",tempTxt,RealKeyName(EmuCommandTable[i].key));
+
+		if (!EmuCommandTable[i].key) {
+			sprintf(tempTxt, "");
+		}
 
 		memset(&LvItem, 0, sizeof(LvItem));
 		LvItem.mask = LVIF_TEXT;
@@ -306,6 +306,31 @@ static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
 	return 1;
 }
 
+// List item(s) deleted; find out which one(s)
+static int ListItemDelete()
+{
+	int nStart = -1;
+	LVITEM LvItem;
+	int nRet;
+
+	while ((nRet = SendMessage(hMHkeysList, LVM_GETNEXTITEM, (WPARAM)nStart, LVNI_SELECTED)) != -1) {
+		nStart = nRet;
+
+		// Get the corresponding input
+		LvItem.mask = LVIF_PARAM;
+		LvItem.iItem = nRet;
+		LvItem.iSubItem = 0;
+		SendMessage(hMHkeysList, LVM_GETITEM, 0, (LPARAM)&LvItem);
+		nRet = LvItem.lParam;
+
+		EmuCommandTable[nRet].key = 0;
+		EmuCommandTable[nRet].keymod = 0;
+	}
+
+	MHkeysListMake(0);
+	return 0;
+}
+
 // List item activated; find out which one
 static int ListItemActivate()
 {
@@ -371,7 +396,7 @@ static BOOL CALLBACK DialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 		if (Id == IDC_MHKEYS_LIST && pnm->code == LVN_KEYDOWN) {
 			NMLVKEYDOWN *pnmkd = (NMLVKEYDOWN*)lParam;
 			if (pnmkd->wVKey == VK_DELETE) {
-//				ListItemDelete();
+				ListItemDelete();
 			}
 		}
 
@@ -385,7 +410,8 @@ int MHkeysCreate()
 {
 	DestroyWindow(hMHkeysDlg); // Make sure exitted
 
-	hMHkeysDlg = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_MHKEYS), gApp.hWnd, DialogProc);
+//	hMHkeysDlg = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_MHKEYS), gApp.hWnd, DialogProc);
+	hMHkeysDlg = DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_MHKEYS),gApp.hWnd,(DLGPROC)DialogProc);
 	if (hMHkeysDlg == NULL) {
 		return 1;
 	}

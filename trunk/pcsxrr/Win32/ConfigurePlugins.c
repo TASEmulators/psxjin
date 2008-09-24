@@ -36,7 +36,6 @@ int LoadConfig() {
 	HKEY myKey;
 	DWORD type,size;
 	PcsxConfig *Conf = &Config;
-	char text[256];
 	int err;
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,cfgfile,0,KEY_ALL_ACCESS,&myKey)!=ERROR_SUCCESS) return -1;
@@ -70,18 +69,23 @@ int LoadConfig() {
 
 	int i;
 	char HotkeysKeys[EMUCMDMAX];
-	QueryKeyV(sizeof(HotkeysKeys), "HotkeysKeys", &HotkeysKeys);
-	for (i = 0; i <= EMUCMDMAX; i++) {
-		if (HotkeysKeys[i] < 0)
-			EmuCommandTable[i].key = HotkeysKeys[i]+0x100; // ugly hack...
-		else
-			EmuCommandTable[i].key = HotkeysKeys[i];
-	}
+	DWORD stupidSize = sizeof(HotkeysKeys);
 
+	if (RegQueryValueEx(myKey, "HotkeysKeys", 0, &type, (LPBYTE) &HotkeysKeys, &stupidSize) == ERROR_SUCCESS) {
+		for (i = 0; i <= EMUCMDMAX; i++) {
+			if (HotkeysKeys[i] < 0)
+				EmuCommandTable[i].key = HotkeysKeys[i]+0x100; // ugly hack...
+			else
+				EmuCommandTable[i].key = HotkeysKeys[i];
+		}
+	}
 	char HotkeysKeymods[EMUCMDMAX];
-	QueryKeyV(sizeof(HotkeysKeymods), "HotkeysKeymods", &HotkeysKeymods);
-	for (i = 0; i <= EMUCMDMAX; i++) {
-		EmuCommandTable[i].keymod = HotkeysKeymods[i];
+	stupidSize = sizeof(HotkeysKeymods);
+
+	if (RegQueryValueEx(myKey, "HotkeysKeymods", 0, &type, (LPBYTE) &HotkeysKeymods, &stupidSize) == ERROR_SUCCESS) {
+		for (i = 0; i <= EMUCMDMAX; i++) {
+			EmuCommandTable[i].keymod = HotkeysKeymods[i];
+		}
 	}
 
 	RegCloseKey(myKey);

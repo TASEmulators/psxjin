@@ -147,6 +147,18 @@ void PADhandleKey(int key) {
 		}
 	}
 
+	if(key == EmuCommandTable[EMUCMD_LOADSTATE].key
+	&& modifiers == EmuCommandTable[EMUCMD_LOADSTATE].keymod)
+	{
+		flagLoadState=StatesC+1;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SAVESTATE].key
+	&& modifiers == EmuCommandTable[EMUCMD_SAVESTATE].keymod)
+	{
+		flagSaveState=StatesC+1;
+	}
+	
 //	if(key == 'Z')
 //		gpuShowPic(); //only shows a black screen :/
 
@@ -186,26 +198,6 @@ void PADhandleKey(int key) {
 	{
 		currentMovie.lagCounter=0;
 		GPU_setlagcounter(currentMovie.lagCounter);
-	}
-
-	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
-	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
-	{
-		Config.Sio ^= 0x1;
-		if (Config.Sio)
-			 sprintf(Text, _("*PCSX*: Sio Irq Always Enabled"));
-		else sprintf(Text, _("*PCSX*: Sio Irq Not Always Enabled"));
-		GPU_displayText(Text);
-	}
-
-	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
-	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
-	{
-		Config.SpuIrq ^= 0x1;
-		if (Config.SpuIrq)
-			 sprintf(Text, _("*PCSX*: Spu Irq Always Enabled"));
-		else sprintf(Text, _("*PCSX*: Spu Irq Not Always Enabled"));
-		GPU_displayText(Text);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SCREENSHOT].key
@@ -252,6 +244,27 @@ void PADhandleKey(int key) {
 	{
 		GPU_showframecounter();
 	}
+
+
+//	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
+//	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
+//	{
+//		Config.Sio ^= 0x1;
+//		if (Config.Sio)
+//			 sprintf(Text, _("*PCSX*: Sio Irq Always Enabled"));
+//		else sprintf(Text, _("*PCSX*: Sio Irq Not Always Enabled"));
+//		GPU_displayText(Text);
+//	}
+
+//	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
+//	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
+//	{
+//		Config.SpuIrq ^= 0x1;
+//		if (Config.SpuIrq)
+//			 sprintf(Text, _("*PCSX*: Spu Irq Always Enabled"));
+//		else sprintf(Text, _("*PCSX*: Spu Irq Not Always Enabled"));
+//		GPU_displayText(Text);
+//	}
 
 //		case VK_F6:
 //			if (Config.QKeys) break;
