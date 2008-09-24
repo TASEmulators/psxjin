@@ -236,7 +236,36 @@ BEGIN
     LTEXT           "Use a prefix of '!' to watch 2 bytes, 'x' to view in hex, and 'X' to view a 2-byte value in hex.",65422,5,222,250,18
 END
 
-
+IDD_CHEATER DIALOGEX 0, 0, 262, 218
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Cheat Entry and Editor"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "List1",IDC_CHEAT_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,5,5,200,125,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Add",IDC_ADD_CHEAT,215,5,40,15,WS_DISABLED
+    PUSHBUTTON      "&Delete",IDC_DELETE_CHEAT,215,25,40,15,WS_DISABLED
+    PUSHBUTTON      "&Update",IDC_UPDATE_CHEAT,215,45,40,15,WS_DISABLED
+    PUSHBUTTON      "C&lear",IDC_CLEAR_CHEATS,215,65,40,15
+    EDITTEXT        IDC_CHEAT_CODE,86,134,118,15,ES_UPPERCASE | 
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_CHEAT_DESCRIPTION,85,154,119,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_CHEAT_ADDRESS,85,175,44,15,ES_UPPERCASE | 
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_CHEAT_BYTE,215,175,26,15,ES_UPPERCASE | 
+                    ES_AUTOHSCROLL
+    PUSHBUTTON      "&OK",IDOK,93,196,50,15
+    PUSHBUTTON      "&Cancel",IDCANCEL,151,196,50,15
+    RTEXT           "Enter Cheat Code:",IDC_LABEL_CHEAT_CODE,23,134,59,15,
+                    SS_CENTERIMAGE
+    RTEXT           "Cheat Description",IDC_LABEL_CHEAT_DESCRIPTION,19,154,
+                    61,15,SS_CENTERIMAGE
+    RTEXT           "Cheat Address (hex)",IDC_LABEL_CHEAT_ADDRESS,18,175,64,
+                    15,SS_CENTERIMAGE
+    RTEXT           "New Value (dec or hex)",IDC_LABEL_CHEAT_BYTE,134,175,74,
+                    15,SS_CENTERIMAGE
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //

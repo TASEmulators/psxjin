@@ -133,6 +133,7 @@ void MWRec_parse(WORD ctl,int changed)
 
 void UpdateMemWatch()
 {
+//	psxMemWrite8(0x97BA0,50); //used for some tests with SOTN
 	int i;
 	if(hwndMemWatch)
 	{

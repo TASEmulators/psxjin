@@ -316,6 +316,21 @@
 #define MW_ValueLabel1                  40054
 #define MW_ValueLabel2                  40055
 #define IDC_HKEYSS_STATIC               40056
+#define ID_CONFIGURATION_CHEATS         40057
+#define IDD_CHEATER                     40058
+#define IDC_CHEAT_LIST                  40059
+#define IDC_ADD_CHEAT                   40060
+#define IDC_DELETE_CHEAT                40061
+#define IDC_UPDATE_CHEAT                40062
+#define IDC_CLEAR_CHEATS                40063
+#define IDC_CHEAT_CODE                  40064
+#define IDC_CHEAT_DESCRIPTION           40065
+#define IDC_CHEAT_ADDRESS               40066
+#define IDC_CHEAT_BYTE                  40067
+#define IDC_LABEL_CHEAT_CODE            40068
+#define IDC_LABEL_CHEAT_DESCRIPTION     40069
+#define IDC_LABEL_CHEAT_ADDRESS         40070
+#define IDC_LABEL_CHEAT_BYTE            40071
 #define ID_LANGS                        50000
 
 #define MW_ADDR00                       1001

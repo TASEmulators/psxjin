@@ -33,6 +33,7 @@
 #include "Win32.h"
 #include "../movie.h"
 #include "../Win32/movie.h"
+//#include "../Win32/cheat.h"
 
 struct Movie_Type currentMovie;
 int flagSaveState;
@@ -592,6 +593,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_CONFIGURATION_MEMWATCH:
 						CreateMemWatch();
+					return TRUE;
+
+				case ID_CONFIGURATION_CHEATS:
+//						ConfigCheats();
 					return TRUE;
 
 				case ID_CONFIGURATION_NETPLAY:
@@ -1493,7 +1498,10 @@ void CreateMainMenu() {
 
 	ADDSUBMENU(0, _("&Tools"));
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
+	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("RAM &Watch"), ID_CONFIGURATION_MEMWATCH);
+	ADDMENUITEM(0, _("RAM &Search"), ID_CONFIGURATION_CHEATS);
+	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 
 	ADDSUBMENU(0, _("&Help"));
@@ -1527,7 +1535,7 @@ void CreateMainWindow(int nCmdShow) {
 	RegisterClass(&wc);
 
 	hWnd = CreateWindow("PCSX Main",
-						"PCSX-RR v0.0.4",
+						"PCSX-RR v0.0.5",
 						WS_OVERLAPPED | WS_SYSMENU,
 						20,
 						20,
