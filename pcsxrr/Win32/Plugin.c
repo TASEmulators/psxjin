@@ -399,7 +399,7 @@ int OpenPlugins(HWND hWnd) {
 	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); return -1; }
 
 	SetCurrentDirectory(PcsxDir);
-	ShowCursor(FALSE);
+//	ShowCursor(FALSE);
 	return 0;
 }
 
