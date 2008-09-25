@@ -33,7 +33,7 @@
 #include "Win32.h"
 #include "../movie.h"
 #include "../Win32/movie.h"
-//#include "../Win32/cheat.h"
+#include "../Win32/cheat.h"
 
 struct Movie_Type currentMovie;
 int flagSaveState;
@@ -596,7 +596,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_CONFIGURATION_CHEATS:
-//						ConfigCheats();
+						PCSXRemoveCheats();
+						CreateCheatEditor();
+						PCSXApplyCheats();
 					return TRUE;
 
 				case ID_CONFIGURATION_NETPLAY:

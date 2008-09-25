@@ -411,12 +411,12 @@ int MHkeysCreate()
 	DestroyWindow(hMHkeysDlg); // Make sure exitted
 
 //	hMHkeysDlg = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_MHKEYS), gApp.hWnd, DialogProc);
-	hMHkeysDlg = DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_MHKEYS),gApp.hWnd,(DLGPROC)DialogProc);
+	/*hMHkeysDlg =*/ DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_MHKEYS),gApp.hWnd,(DLGPROC)DialogProc);
 	if (hMHkeysDlg == NULL) {
 		return 1;
 	}
 
 	ShowWindow(hMHkeysDlg, SW_NORMAL);
-	
+
 	return 0;
 }

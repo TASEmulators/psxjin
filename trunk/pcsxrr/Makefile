@@ -43,7 +43,7 @@ OBJS = PsxBios.o CdRom.o PsxCounters.o PsxDma.o DisR3000A.o \
        Spu.o Sio.o PsxHw.o Mdec.o PsxMem.o Misc.o \
        plugins.o Decode_XA.o R3000A.o PsxInterpreter.o \
        Gte.o PsxHLE.o movie.o
-OBJS+= Win32/WndMain.o Win32/Plugin.o Win32/ConfigurePlugins.o Win32/AboutDlg.o Win32/memwatch.o Win32/maphkeys.o Win32/movie.o ${RESOBJ}
+OBJS+= Win32/WndMain.o Win32/Plugin.o Win32/ConfigurePlugins.o Win32/AboutDlg.o Win32/memwatch.o Win32/cheat.o Win32/maphkeys.o Win32/movie.o ${RESOBJ}
 
 ifeq (${CPU}, ix86)
 	CC = gcc

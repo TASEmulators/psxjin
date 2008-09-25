@@ -193,6 +193,7 @@ GPU_setcurrentmode(modeFlags);
 
 #ifdef WIN32
 	UpdateMemWatch();
+	PCSXApplyCheats();
 #endif
 
 					/* movie stuff end */
