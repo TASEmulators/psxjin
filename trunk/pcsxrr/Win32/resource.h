@@ -331,6 +331,9 @@
 #define IDC_LABEL_CHEAT_DESCRIPTION     40069
 #define IDC_LABEL_CHEAT_ADDRESS         40070
 #define IDC_LABEL_CHEAT_BYTE            40071
+#define ID_CONFIGURATION_MEMSEARCH      40072
+#define IDC_LOAD_CHEATS                 40073
+#define IDC_SAVE_CHEATS                 40074
 #define ID_LANGS                        50000
 
 #define MW_ADDR00                       1001

@@ -129,6 +129,136 @@ void PCSXRemoveCheats()
 		PCSXRemoveCheat(i);
 }
 
+BOOL PCSXLoadCheatFile (const char *filename)
+{
+	Cheat.num_cheats = 0;
+
+	FILE *fs = fopen (filename, "rb");
+	uint8 data [28];
+
+	if (!fs)
+		return (FALSE);
+
+	while (fread ((void *) data, 1, 28, fs) == 28)
+	{
+		Cheat.c [Cheat.num_cheats].enabled = (data [0] & 4) == 0;
+		Cheat.c [Cheat.num_cheats].byte = data [1];
+		Cheat.c [Cheat.num_cheats].address = data [2] | (data [3] << 8) |  (data [4] << 16);
+		Cheat.c [Cheat.num_cheats].saved_byte = data [5];
+		Cheat.c [Cheat.num_cheats].saved = (data [0] & 8) != 0;
+		memmove (Cheat.c [Cheat.num_cheats].name, &data [8], 20);
+		Cheat.c [Cheat.num_cheats++].name [20] = 0;
+	}
+	fclose (fs);
+
+	return (TRUE);
+}
+
+BOOL PCSXSaveCheatFile (const char *filename)
+{
+	if (Cheat.num_cheats == 0)
+	{
+		(void) remove (filename);
+		return (TRUE);
+	}
+
+	FILE *fs = fopen (filename, "wb");
+	uint8 data [28];
+
+	if (!fs)
+	return (FALSE);
+
+	uint32 i;
+	for (i = 0; i < Cheat.num_cheats; i++)
+	{
+		memset (data, 0, 28);
+		if (i == 0)
+		{
+			data [6] = 254;
+			data [7] = 252;
+		}
+		if (!Cheat.c [i].enabled)
+			data [0] |= 4;
+	
+		if (Cheat.c [i].saved)
+			data [0] |= 8;
+	
+		data [1] = Cheat.c [i].byte;
+		data [2] = (uint8) Cheat.c [i].address;
+		data [3] = (uint8) (Cheat.c [i].address >> 8);
+		data [4] = (uint8) (Cheat.c [i].address >> 16);
+		data [5] = Cheat.c [i].saved_byte;
+	
+		memmove (&data [8], Cheat.c [i].name, 19);
+		if (fwrite (data, 28, 1, fs) != 1)
+		{
+			fclose (fs);
+			return (FALSE);
+		}
+	}
+	return (fclose (fs) == 0);
+}
+
+static void LoadCheatFile(char nameo[2048])
+{
+	const char filter[]="PCSX cheat list(*.cht)\0*.cht\0";
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=gApp.hInstance;
+	ofn.lpstrTitle="Load Cheat List...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.lpstrInitialDir=".\\";
+	
+	if(!GetOpenFileName(&ofn))
+		nameo[0]=0;
+}
+
+static void SaveCheatFile(char nameo[2048])
+{
+	const char filter[]="PCSX cheat list(*.cht)\0*.cht\0";
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=gApp.hInstance;
+	ofn.lpstrTitle="Save Cheat List...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+	ofn.lpstrInitialDir=".\\";
+	if(GetSaveFileName(&ofn))
+	{
+		int i;
+
+		//quick get length of nameo
+		for(i=0;i<2048;i++)
+		{
+			if(nameo[i] == 0)
+			{
+				break;
+			}
+		}
+
+		//add .cht if nameo doesn't have it
+		if((i < 4 || nameo[i-4] != '.') && i < 2040)
+		{
+			nameo[i] = '.';
+			nameo[i+1] = 'c';
+			nameo[i+2] = 'h';
+			nameo[i+3] = 't';
+			nameo[i+4] = 0;
+		}
+	}
+	else
+		nameo[0]=0;
+}
+
 uint32 ScanAddress(const char* str)
 {
 	uint32 value = 0;
@@ -168,7 +298,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 //		SendDlgItemMessage(hwndDlg, IDC_CHEAT_CODE, EM_LIMITTEXT, 14, 0);
 		SendDlgItemMessage(hwndDlg, IDC_CHEAT_DESCRIPTION, EM_LIMITTEXT, 22, 0);
-		SendDlgItemMessage(hwndDlg, IDC_CHEAT_ADDRESS, EM_LIMITTEXT, 6, 0);
+		SendDlgItemMessage(hwndDlg, IDC_CHEAT_ADDRESS, EM_LIMITTEXT, 8, 0);
 		SendDlgItemMessage(hwndDlg, IDC_CHEAT_BYTE, EM_LIMITTEXT, 3, 0);
 
 		LVCOLUMN col;
@@ -488,8 +618,8 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			{
 				uint32 j, k;
 				long index;
-				char buffer[7];
-				char buffer2[7];
+				char buffer[9];
+				char buffer2[9];
 				POINT point;
 				switch(HIWORD(wParam))
 				{
@@ -499,7 +629,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						internal_change=0;
 						return 1;
 					}
-					SendMessage((HWND)lParam, WM_GETTEXT, 7,(LPARAM)buffer);
+					SendMessage((HWND)lParam, WM_GETTEXT, 9,(LPARAM)buffer);
 					GetCaretPos(&point);
 
 					index = SendMessage((HWND)lParam,(UINT) EM_CHARFROMPOS, 0, (LPARAM) ((point.x&0x0000FFFF) | (((point.y&0x0000FFFF))<<16)));  
@@ -516,7 +646,15 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					}
 					buffer2[k]='\0';
 
-				
+					// hack to prevent people from using 80xxxxxx addresses
+					if (strlen(buffer2)>7) {
+						for(j=0; j<strlen(buffer2)-2;j++)
+						{
+							buffer2[j]=buffer2[j+2];
+						}
+						buffer2[j]='\0';
+					}
+
 					internal_change=1;
 					SendMessage((HWND)lParam, WM_SETTEXT, 0,(LPARAM)buffer2);
 					SendMessage((HWND)lParam,  (UINT) EM_SETSEL, (WPARAM) (index), index);
@@ -578,9 +716,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					}
 					buffer2[k]='\0';
 					
-//					if(has_sel&&!new_sel&&0!=strlen(buffer2))
-//						SetDlgItemText(hwndDlg, IDC_CHEAT_CODE, "");
-					
 					if(new_sel!=0)
 						new_sel--;
 
@@ -601,9 +736,81 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						EnableWindow(GetDlgItem(hwndDlg, IDC_ADD_CHEAT), 0);
 						EnableWindow(GetDlgItem(hwndDlg, IDC_UPDATE_CHEAT), 0);
 					}
-					//SetDlgItemText(hwndDlg, IDC_CHEAT_CODE, "");
 					break;
 				}
+				break;
+			}
+
+			case IDC_LOAD_CHEATS:
+			{
+				char nameo[2048];
+				LoadCheatFile(nameo);
+				if (!nameo[0]) return 1;
+
+				free(ct.index);
+				free(ct.state);
+				int k=0;
+				int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST));
+				for(k=0;k<totalk; k++) {
+					ListView_DeleteItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), 0);
+				}
+
+				PCSXLoadCheatFile(nameo);
+				ct.index=malloc(sizeof(int)*Cheat.num_cheats);
+				ct.state=malloc(sizeof(DWORD)*Cheat.num_cheats);
+
+				uint32 counter;
+				for(counter=0; counter<Cheat.num_cheats; counter++)
+				{
+					char buffer[7];
+					int curr_idx=-1;
+					sprintf(buffer, "%06X", Cheat.c[counter].address);
+					LVITEM lvi;
+					ZeroMemory(&lvi, sizeof(LVITEM));
+					lvi.mask=LVIF_TEXT;
+					lvi.pszText=buffer;
+					lvi.cchTextMax=7;
+					lvi.iItem=counter;
+					curr_idx=ListView_InsertItem(GetDlgItem(hwndDlg,IDC_CHEAT_LIST), &lvi);
+
+					unsigned int k;
+					for(k=0;k<counter;k++)
+					{
+						if(ct.index[k]>=curr_idx)
+							ct.index[k]++;
+					}
+					ct.index[counter]=curr_idx;
+					ct.state[counter]=Untouched;
+
+					sprintf(buffer, "%02X", Cheat.c[counter].byte);
+					ZeroMemory(&lvi, sizeof(LVITEM));
+					lvi.iItem=curr_idx;
+					lvi.iSubItem=1;
+					lvi.mask=LVIF_TEXT;
+					lvi.pszText=buffer;
+					lvi.cchTextMax=3;
+					SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST, LVM_SETITEM, 0, (LPARAM)&lvi);
+
+					ZeroMemory(&lvi, sizeof(LVITEM));
+					lvi.iItem=curr_idx;
+					lvi.iSubItem=2;
+					lvi.mask=LVIF_TEXT;
+					lvi.pszText=Cheat.c[counter].name;
+					lvi.cchTextMax=23;
+					SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST, LVM_SETITEM, 0, (LPARAM)&lvi);
+
+					ListView_SetCheckState(GetDlgItem(hwndDlg,IDC_CHEAT_LIST), curr_idx, Cheat.c[counter].enabled);
+				}
+				break;
+			}
+
+			case IDC_SAVE_CHEATS:
+			{
+				char nameo[2048];
+				SaveCheatFile(nameo);
+				if (!nameo[0]) return 1;
+
+				PCSXSaveCheatFile(nameo);
 				break;
 			}
 
@@ -612,6 +819,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				int k,l;
 				BOOL hit;
 				unsigned int scanned;
+				int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
 				for(k=0;k<ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST)); k++)
 				{
 					hit=FALSE;
@@ -676,7 +884,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						uint8 byte;
 						uint8 enabled;
 						char buf[25];
-						int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
 						
 						LV_ITEM lvi;
 						ZeroMemory(&lvi, sizeof(LV_ITEM));
