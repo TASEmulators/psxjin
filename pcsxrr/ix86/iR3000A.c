@@ -482,10 +482,10 @@ __inline static void execute() {
 		Running = 0;
 		flagEscPressed=0;
 		flagDontPause = 1;
-		if (currentMovie.mode == 1) {
-			PCSX_MOV_WriteHeader();
-			PCSX_MOV_FlushMovieFile();
-		}
+//		if (currentMovie.mode == 1) {
+//			PCSX_MOV_WriteHeader();
+//			PCSX_MOV_FlushMovieFile();
+//		}
 		ClosePlugins();
 		SysRunGui();
 	}

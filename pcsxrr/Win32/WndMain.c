@@ -667,10 +667,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				if (Running) ClosePlugins();
 				SysClose();
 				PostQuitMessage(0);
-				if (currentMovie.mode == 1) {
-					PCSX_MOV_WriteHeader();
-					PCSX_MOV_FlushMovieFile();
-				}
+//				if (currentMovie.mode == 1) {
+//					PCSX_MOV_WriteHeader();
+//					PCSX_MOV_FlushMovieFile();
+//				}
 				exit(0);
 			}
 			else AccBreak = 0;

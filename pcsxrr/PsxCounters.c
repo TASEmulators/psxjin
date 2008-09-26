@@ -143,6 +143,14 @@ if ((flagDontPause == 2 || flagFakePause == 1) && flagGPUchain == 1) {
 }
 flagGPUchain = 0;
 
+if ((currentMovie.mode == 2) && (currentMovie.frameCounter==currentMovie.totalFrames)) {
+	flagDontPause = 0;
+}
+if ((currentMovie.mode == 2) && (currentMovie.frameCounter>currentMovie.totalFrames)) {
+	GPU_displayText("*PCSX*: Movie End");
+	currentMovie.mode = 0;
+}
+
 PadDataS paddtemp;
 if (HasEmulatedFrame == 2) {
 	if (currentMovie.mode == 1) {
@@ -170,14 +178,6 @@ unsigned long buttonToSend = 0;
 buttonToSend = currentMovie.lastPad1.buttonStatus;
 buttonToSend = (buttonToSend ^ (currentMovie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
-
-if ((currentMovie.mode == 2) && (currentMovie.frameCounter==currentMovie.totalFrames)) {
-	flagDontPause = 0;
-}
-if ((currentMovie.mode == 2) && (currentMovie.frameCounter>currentMovie.totalFrames)) {
-	GPU_displayText("*PCSX*: Movie End");
-	currentMovie.mode = 0;
-}
 
 if ((currentMovie.mode == 1) && (currentMovie.frameCounter%400 == 0))
 	PCSX_MOV_WriteHeader();
