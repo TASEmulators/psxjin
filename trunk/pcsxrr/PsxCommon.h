@@ -197,6 +197,12 @@ struct Movie_Type {
 	//The file name
 	char* movieFilename;
 	//The full path file name
+	char bytesPerFrame;
+	//size of a frame in bytes
+	uint8* inputBuffer;
+	uint32 inputBufferSize;
+	uint8* inputBufferPtr;
+	//new buffer stuff
 };
 
 #define MOVIE_FLAG_FROM_POWERON (1<<1)
