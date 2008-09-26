@@ -958,29 +958,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 	return 0;
 }
 
-int alreadyCreated=0;
-void createFakeCheatList()
-{
-	Cheat.num_cheats = 2;
-	Cheat.c[0].address = 0x97BA8;
-	Cheat.c[0].byte = 99;
-	Cheat.c[0].saved_byte = 99;
-	Cheat.c[0].enabled = 1;
-	Cheat.c[0].saved = 1;
-	strcpy(Cheat.c[0].name,"99 hearts");
-	Cheat.c[1].address = 0x97BA0;
-	Cheat.c[1].byte = 255;
-	Cheat.c[1].saved_byte = 255;
-	Cheat.c[1].enabled = 1;
-	Cheat.c[1].saved = 1;
-	strcpy(Cheat.c[1].name,"255 health points");
-	alreadyCreated = 1;
-}
-
 void CreateCheatEditor()
 {
-	if (!alreadyCreated)
-		createFakeCheatList();
-
 	DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_CHEATER),gApp.hWnd,(DLGPROC)ChtEdtrCallB);
 }
