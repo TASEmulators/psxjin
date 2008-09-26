@@ -70,20 +70,19 @@ int LoadConfig() {
 	int i;
 	char HotkeysKeys[EMUCMDMAX];
 	DWORD stupidSize = sizeof(HotkeysKeys);
-
 	if (RegQueryValueEx(myKey, "HotkeysKeys", 0, &type, (LPBYTE) &HotkeysKeys, &stupidSize) == ERROR_SUCCESS) {
-		for (i = 0; i <= EMUCMDMAX; i++) {
+		for (i = 0; i <= EMUCMDMAX-1; i++) {
 			if (HotkeysKeys[i] < 0)
 				EmuCommandTable[i].key = HotkeysKeys[i]+0x100; // ugly hack...
 			else
 				EmuCommandTable[i].key = HotkeysKeys[i];
 		}
 	}
+
 	char HotkeysKeymods[EMUCMDMAX];
 	stupidSize = sizeof(HotkeysKeymods);
-
 	if (RegQueryValueEx(myKey, "HotkeysKeymods", 0, &type, (LPBYTE) &HotkeysKeymods, &stupidSize) == ERROR_SUCCESS) {
-		for (i = 0; i <= EMUCMDMAX; i++) {
+		for (i = 0; i <= EMUCMDMAX-1; i++) {
 			EmuCommandTable[i].keymod = HotkeysKeymods[i];
 		}
 	}

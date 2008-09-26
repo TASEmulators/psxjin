@@ -29,6 +29,7 @@
 #include "NoPic.h"
 #include "PsxCommon.h"
 #include "../movie.h"
+#include "../Win32/cheat.h"
 extern struct Movie_Type currentMovie;
 #include "maphkeys.h"
 extern int speedModifierFlag;
@@ -245,6 +246,85 @@ void PADhandleKey(int key) {
 		GPU_showframecounter();
 	}
 
+
+	if(key == EmuCommandTable[EMUCMD_CONFCPU].key
+	&& modifiers == EmuCommandTable[EMUCMD_CONFCPU].keymod)
+	{
+		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CPUCONF), gApp.hWnd, (DLGPROC)ConfigureCpuDlgProc);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMWATCH].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMWATCH].keymod)
+	{
+		CreateMemWatch();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CHEATEDITOR].key
+	&& modifiers == EmuCommandTable[EMUCMD_CHEATEDITOR].keymod)
+	{
+		PCSXRemoveCheats();
+		CreateCheatEditor();
+		PCSXApplyCheats();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CONFGPU].key
+	&& modifiers == EmuCommandTable[EMUCMD_CONFGPU].keymod)
+	{
+		if (GPU_configure) GPU_configure();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CONFSPU].key
+	&& modifiers == EmuCommandTable[EMUCMD_CONFSPU].keymod)
+	{
+		if (SPU_configure) SPU_configure();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CONFCDR].key
+	&& modifiers == EmuCommandTable[EMUCMD_CONFCDR].keymod)
+	{
+		if (CDR_configure) CDR_configure();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CONFPAD].key
+	&& modifiers == EmuCommandTable[EMUCMD_CONFPAD].keymod)
+	{
+		if (PAD1_configure) PAD1_configure();
+		if (strcmp(Config.Pad1, Config.Pad2)) if (PAD2_configure) PAD2_configure();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
+	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
+	{
+		PCSX_MOV_StopMovie();
+		GPU_displayText("*PCSX*: Stop Movie");
+		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
+		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
+		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_MEMORYCARDS].key
+	&& modifiers == EmuCommandTable[EMUCMD_MEMORYCARDS].keymod)
+	{
+		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), gApp.hWnd, (DLGPROC)ConfigureMcdsDlgProc);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_STARTRECORDING].key
+	&& modifiers == EmuCommandTable[EMUCMD_STARTRECORDING].keymod)
+	{
+		//add here
+	}
+
+	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
+	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
+	{
+		//add here
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH].keymod)
+	{
+		//add here
+	}
 
 //	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
 //	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
