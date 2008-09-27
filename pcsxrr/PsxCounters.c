@@ -23,6 +23,7 @@
 extern struct Movie_Type currentMovie;
 #ifdef WIN32
 #include "Win32.h"
+#include "./Win32/cheat.h"
 #endif
 
 static int cnts = 4;
@@ -130,8 +131,8 @@ void psxRcntUpdate() {
 
 					/* movie stuff start */
 
-currentMovie.frameCounter++;
-GPU_setframecounter(currentMovie.frameCounter,currentMovie.totalFrames);
+currentMovie.currentFrame++;
+GPU_setframecounter(currentMovie.currentFrame,currentMovie.totalFrames);
 
 if (flagGPUchain == 1)
 	flagVSync = 1;
@@ -143,10 +144,10 @@ if ((flagDontPause == 2 || flagFakePause == 1) && flagGPUchain == 1) {
 }
 flagGPUchain = 0;
 
-if ((currentMovie.mode == 2) && (currentMovie.frameCounter==currentMovie.totalFrames)) {
+if ((currentMovie.mode == 2) && (currentMovie.currentFrame==currentMovie.totalFrames)) {
 	flagDontPause = 0;
 }
-if ((currentMovie.mode == 2) && (currentMovie.frameCounter>currentMovie.totalFrames)) {
+if ((currentMovie.mode == 2) && (currentMovie.currentFrame>currentMovie.totalFrames)) {
 	GPU_displayText("*PCSX*: Movie End");
 	currentMovie.mode = 0;
 }
@@ -179,8 +180,8 @@ buttonToSend = currentMovie.lastPad1.buttonStatus;
 buttonToSend = (buttonToSend ^ (currentMovie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
-if ((currentMovie.mode == 1) && (currentMovie.frameCounter%400 == 0))
-	PCSX_MOV_WriteHeader();
+if ((currentMovie.mode == 1) && (currentMovie.currentFrame%400 == 0))
+	PCSX_MOV_FlushMovieFile();
 
 char modeFlags = 0;
 if (!flagDontPause)
@@ -202,7 +203,7 @@ GPU_setcurrentmode(modeFlags);
 			psxUpdateVSyncRateEnd();
 			psxRcntUpd(3);
 			psxHu32ref(0x1070)|= SWAPu32(1);
-SPU_tellFrame(currentMovie.frameCounter);
+SPU_tellFrame(currentMovie.currentFrame);
 		}
 	}
 
