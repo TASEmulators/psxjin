@@ -86,7 +86,7 @@ void PCSX_LoadState(int newState) {
 	int previousMode = currentMovie.mode;
 	if (currentMovie.mode == 1) {
 		if (currentMovie.readOnly == 1) {
-			PCSX_MOV_WriteHeader();
+			PCSX_MOV_FlushMovieFile();
 			currentMovie.mode = 2;
 		}
 	}
@@ -292,16 +292,6 @@ void PADhandleKey(int key) {
 		if (strcmp(Config.Pad1, Config.Pad2)) if (PAD2_configure) PAD2_configure();
 	}
 
-	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
-	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
-	{
-		PCSX_MOV_StopMovie();
-		GPU_displayText("*PCSX*: Stop Movie");
-		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
-		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
-		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
-	}
-
 	if(key == EmuCommandTable[EMUCMD_MEMORYCARDS].key
 	&& modifiers == EmuCommandTable[EMUCMD_MEMORYCARDS].keymod)
 	{
@@ -311,13 +301,38 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STARTRECORDING].key
 	&& modifiers == EmuCommandTable[EMUCMD_STARTRECORDING].keymod)
 	{
-		//add here
+		if (!currentMovie.mode) {
+			//add here
+		}
+		else {
+			//gpu error message
+		}
+	}
+
+	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
+	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
+	{
+		if (currentMovie.mode) {
+			PCSX_MOV_StopMovie();
+			GPU_displayText("*PCSX*: Stop Movie");
+			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
+			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
+			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
+		}
+		else {
+			GPU_displayText("*PCSX*: error: No Movie To Stop!");
+		}
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
 	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
 	{
-		//add here
+		if (!currentMovie.mode) {
+			//add here
+		}
+		else {
+			//gpu error message
+		}
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key

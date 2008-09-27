@@ -10,4 +10,3 @@ extern int flagGPUchain;
 extern int flagVSync;
 extern int HasEmulatedFrame;
 int movieFreeze(gzFile f, int Mode);
-void PCSX_MOV_WriteHeader();

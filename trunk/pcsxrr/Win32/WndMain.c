@@ -350,7 +350,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //					PCSX_MOV_StartMovie("chocobo.pxm",1,0,"mauro");
 //					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_RECORDINP), gApp.hWnd, (DLGPROC)ConfigureNetPlayDlgProc);
 					if (nRet) {
-						currentMovie.frameCounter = 0;
+						currentMovie.currentFrame = 0;
 						currentMovie.lagCounter = 0;
 						if (currentMovie.saveStateIncluded) {
 							SetMenu(hWnd, NULL);
@@ -383,7 +383,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_REPLAY_MOVIE:
 					nRet = PCSX_MOV_StartReplayDialog();
 					if (nRet) {
-						currentMovie.frameCounter = 0;
+						currentMovie.currentFrame = 0;
 						currentMovie.lagCounter = 0;
 						if (currentMovie.saveStateIncluded) {
 							SetMenu(hWnd, NULL);
@@ -498,7 +498,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_RUN_CD:
 					currentMovie.mode = 0;
-					currentMovie.frameCounter = 0;
+					currentMovie.currentFrame = 0;
 					currentMovie.lagCounter = 0;
 					LoadCdBios = 0;
 					SetMenu(hWnd, NULL);
@@ -519,7 +519,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_RUNCDBIOS:
 					currentMovie.mode = 0;
-					currentMovie.frameCounter = 0;
+					currentMovie.currentFrame = 0;
 					currentMovie.lagCounter = 0;
 					LoadCdBios = 1;
 					SetMenu(hWnd, NULL);
@@ -667,10 +667,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				if (Running) ClosePlugins();
 				SysClose();
 				PostQuitMessage(0);
-//				if (currentMovie.mode == 1) {
-//					PCSX_MOV_WriteHeader();
-//					PCSX_MOV_FlushMovieFile();
-//				}
+				if (currentMovie.mode == 1)
+					PCSX_MOV_FlushMovieFile();
 				exit(0);
 			}
 			else AccBreak = 0;

@@ -146,34 +146,38 @@ static int StartReplay()
 	return 1;
 }
 
-void PCSX_MOV_WriteHeader()
-{
-	fseek(fpRecordingMovie, 8, SEEK_SET);
-	fwrite(&currentMovie.frameCounter, 1, 4, fpRecordingMovie);             //total frames
-	fwrite(&currentMovie.rerecordCount, 1, 4, fpRecordingMovie);            //rerecord count
-	fseek(fpRecordingMovie, currentMovie.currentPosition, SEEK_SET);
-	currentMovie.totalFrames=currentMovie.frameCounter;
-}
-
 void PCSX_MOV_FlushMovieFile()
 {
-	if (fpRecordingMovie) {
-		fflush(fpRecordingMovie);
-		if (currentMovie.mode == 1) {
-			fseek(fpRecordingMovie, currentMovie.inputOffset, SEEK_SET);
-			fwrite(currentMovie.inputBuffer, 1, currentMovie.bytesPerFrame*(currentMovie.totalFrames+1), fpRecordingMovie);
-		}
+	fflush(fpRecordingMovie); // probably not needed...
+	fseek(fpRecordingMovie, 8, SEEK_SET);
+	fwrite(&currentMovie.currentFrame, 1, 4, fpRecordingMovie);  //total frames
+	fwrite(&currentMovie.rerecordCount, 1, 4, fpRecordingMovie); //rerecord count
+	currentMovie.totalFrames=currentMovie.currentFrame; //used when toggling read-only mode
+	fseek(fpRecordingMovie, currentMovie.inputOffset, SEEK_SET);
+	fwrite(currentMovie.inputBuffer, 1, currentMovie.bytesPerFrame*(currentMovie.totalFrames+1), fpRecordingMovie);
+	fflush(fpRecordingMovie); // probably not needed...
+}
+
+static void truncateMovie()
+{
+	long truncLen = currentMovie.inputOffset + currentMovie.bytesPerFrame*(currentMovie.totalFrames+1);
+
+	HANDLE fileHandle = CreateFile(currentMovie.movieFilename, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0);
+	if(fileHandle != NULL)
+	{
+		SetFilePointer(fileHandle, truncLen, 0, FILE_BEGIN);
+		SetEndOfFile(fileHandle);
+		CloseHandle(fileHandle);
 	}
 }
 
 void PCSX_MOV_StopMovie()
 {
-	if (currentMovie.mode == 1) {
-		PCSX_MOV_WriteHeader();
+	if (currentMovie.mode == 1)
 		PCSX_MOV_FlushMovieFile();
-	}
 	currentMovie.mode = 0;
 	fclose(fpRecordingMovie);
+	truncateMovie();
 	fpRecordingMovie = NULL;
 }
 
@@ -289,33 +293,26 @@ PadDataS PCSX_MOV_ReadJoy(int port)
 int movieFreeze(gzFile f, int Mode) {
 	unsigned long bufSize = 0;
 
-//	PCSX_MOV_FlushMovieFile();
-//	if ((Mode != 1) || (currentMovie.mode != 2))
-//		currentMovie.currentPosition = ftell(fpRecordingMovie); // <- break movies when saving state while replaying
-
 	if (Mode == 1) { //  if saving state
-		bufSize = currentMovie.bytesPerFrame * (currentMovie.frameCounter+1);
-		gzfreezel(&currentMovie.frameCounter);
+		bufSize = currentMovie.bytesPerFrame * (currentMovie.currentFrame+1);
+		gzfreezel(&currentMovie.currentFrame);
 		gzfreezel(&bufSize);
 		gzfreeze(currentMovie.inputBuffer, bufSize);
 	}
 
 	if (Mode == 0) { // if loading state
 		if (currentMovie.mode == 1) { // if recording movie
-			gzfreezel(&currentMovie.frameCounter);
+			gzfreezel(&currentMovie.currentFrame);
 			gzfreezel(&bufSize);
 			gzfreeze(currentMovie.inputBuffer, bufSize);
 			currentMovie.rerecordCount++;
 		}
 		else if (currentMovie.mode == 2) { // if replaying movie
-			gzfreezel(&currentMovie.frameCounter);
+			gzfreezel(&currentMovie.currentFrame);
 		}
-		currentMovie.inputBufferPtr = currentMovie.inputBuffer+(currentMovie.bytesPerFrame * currentMovie.frameCounter);
-		GPU_setframecounter(currentMovie.frameCounter,currentMovie.totalFrames);
+		currentMovie.inputBufferPtr = currentMovie.inputBuffer+(currentMovie.bytesPerFrame * currentMovie.currentFrame);
+		GPU_setframecounter(currentMovie.currentFrame,currentMovie.totalFrames);
 	}
-
-//	PCSX_MOV_FlushMovieFile();
-//	currentMovie.currentPosition = ftell(fpRecordingMovie);
 
 	return 0;
 }

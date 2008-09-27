@@ -174,7 +174,7 @@ struct Movie_Type {
 	//pad types
 	unsigned long totalFrames;
 	//Total Movie Frames
-	unsigned long frameCounter;
+	unsigned long currentFrame;
 	//Current Frame
 	unsigned long lagCounter;
 	//Current Lag
