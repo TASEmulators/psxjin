@@ -15,7 +15,6 @@ char *MemWatchDir = 0;
 
 HFONT hFixedFont=NULL;
 
-
 static char *U8ToStr(uint8 a)
 {
  static char TempArray[8];
@@ -81,7 +80,7 @@ static const int MW_ADDR_Lookup[] = {
 static int yPositions[MWNUM];
 static int xPositions[MWNUM];
 
-static struct MWRec
+struct MWRec
 {
 	int valid, twobytes, hex;
 	uint32 addr;

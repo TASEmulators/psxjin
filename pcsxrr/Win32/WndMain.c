@@ -595,6 +595,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						CreateMemWatch();
 					return TRUE;
 
+				case ID_CONFIGURATION_MEMSEARCH:
+						CreateMemSearch();
+					return TRUE;
+
 				case ID_CONFIGURATION_CHEATS:
 						PCSXRemoveCheats();
 						CreateCheatEditor();

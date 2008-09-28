@@ -66,7 +66,7 @@ void PCSXAddCheat (BOOL enable, BOOL save_current_value,
 	{
 		Cheat.c [Cheat.num_cheats].address = address;
 		Cheat.c [Cheat.num_cheats].byte = byte;
-		Cheat.c [Cheat.num_cheats].enabled = TRUE;
+		Cheat.c [Cheat.num_cheats].enabled = enable;
 		if (save_current_value)
 		{
 			Cheat.c [Cheat.num_cheats].saved_byte = psxMs8(address);
@@ -525,6 +525,11 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				lvi.pszText=temp;
 				lvi.cchTextMax=23;
 				SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST, LVM_SETITEM, 0, (LPARAM)&lvi);
+				int j;
+				for(j=0;j<(int)Cheat.num_cheats;j++)
+				{
+					ct.index[j]++;
+				}
 				break;
 			}
 
@@ -816,65 +821,68 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 			case IDOK:
 			{
-				int k,l;
+				int k,l,fakeNumCheats;
 				BOOL hit;
 				unsigned int scanned;
+				fakeNumCheats = (int)Cheat.num_cheats;
 				int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
-				for(k=0;k<ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST)); k++)
+				for(k=totalk;k>=0; k--)
 				{
 					hit=FALSE;
-					for(l=0;l<(int)Cheat.num_cheats;l++)
-					{
-						if(ct.index[l]==k)
+					if (!(k==0 && fakeNumCheats==0)) {
+						for(l=0;l<(int)Cheat.num_cheats;l++)
 						{
-							hit=TRUE;
-							Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),l);
-							if(ct.state[l]==Untouched)
-								l=Cheat.num_cheats;
-							else if(ct.state[l]==(unsigned long)Modified)
+							if(ct.index[l]==k)
 							{
-								if(Cheat.c[l].enabled)
-									PCSXDisableCheat(l);
-								
-								char buf[25];
-								LV_ITEM lvi;
-								ZeroMemory(&lvi, sizeof(LV_ITEM));
-								lvi.iItem= k;
-								lvi.mask=LVIF_TEXT;
-								lvi.pszText=buf;
-								lvi.cchTextMax=7;
-								
-								ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
-								
-								Cheat.c[l].address = ScanAddress(lvi.pszText);
-								
-								ZeroMemory(&lvi, sizeof(LV_ITEM));
-								lvi.iItem= k;
-								lvi.iSubItem=1;
-								lvi.mask=LVIF_TEXT;
-								lvi.pszText=buf;
-								lvi.cchTextMax=3;
-								
-								ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
-								
-								sscanf(lvi.pszText, "%02X", &scanned);
-								Cheat.c[l].byte = (uint8)(scanned & 0xff);
-								
-								ZeroMemory(&lvi, sizeof(LV_ITEM));
-								lvi.iItem= k;
-								lvi.iSubItem=2;
-								lvi.mask=LVIF_TEXT;
-								lvi.pszText=buf;
-								lvi.cchTextMax=24;
-								
-								ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
-								
-								strcpy(Cheat.c[l].name,lvi.pszText);
-								
-								Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),k);
-								
-								if(Cheat.c[l].enabled)
-									PCSXEnableCheat(l);
+								hit=TRUE;
+								Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),ct.index[l]);
+								if(ct.state[l]==Untouched)
+									l=Cheat.num_cheats;
+								else if(ct.state[l]==(unsigned long)Modified)
+								{
+									if(Cheat.c[l].enabled)
+										PCSXDisableCheat(l);
+									
+									char buf[25];
+									LV_ITEM lvi;
+									ZeroMemory(&lvi, sizeof(LV_ITEM));
+									lvi.iItem= k;
+									lvi.mask=LVIF_TEXT;
+									lvi.pszText=buf;
+									lvi.cchTextMax=7;
+									
+									ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+									
+									Cheat.c[l].address = ScanAddress(lvi.pszText);
+									
+									ZeroMemory(&lvi, sizeof(LV_ITEM));
+									lvi.iItem= k;
+									lvi.iSubItem=1;
+									lvi.mask=LVIF_TEXT;
+									lvi.pszText=buf;
+									lvi.cchTextMax=3;
+									
+									ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+									
+									sscanf(lvi.pszText, "%02X", &scanned);
+									Cheat.c[l].byte = (uint8)(scanned & 0xff);
+									
+									ZeroMemory(&lvi, sizeof(LV_ITEM));
+									lvi.iItem= k;
+									lvi.iSubItem=2;
+									lvi.mask=LVIF_TEXT;
+									lvi.pszText=buf;
+									lvi.cchTextMax=24;
+									
+									ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+									
+									strcpy(Cheat.c[l].name,lvi.pszText);
+									
+									Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),ct.index[l]);
+									
+									if(Cheat.c[l].enabled)
+										PCSXEnableCheat(l);
+								}
 							}
 						}
 					}
@@ -887,7 +895,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						
 						LV_ITEM lvi;
 						ZeroMemory(&lvi, sizeof(LV_ITEM));
-						lvi.iItem= totalk-k;
+						lvi.iItem= k;
 						lvi.mask=LVIF_TEXT;
 						lvi.pszText=buf;
 						lvi.cchTextMax=7;
@@ -897,7 +905,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						address = ScanAddress(lvi.pszText);
 						
 						ZeroMemory(&lvi, sizeof(LV_ITEM));
-						lvi.iItem= totalk-k;
+						lvi.iItem= k;
 						lvi.iSubItem=1;
 						lvi.mask=LVIF_TEXT;
 						lvi.pszText=buf;
@@ -908,12 +916,12 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						sscanf(lvi.pszText, "%02X", &scanned);
 						byte = (uint8)(scanned & 0xff);
 						
-						enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),totalk-k);
+						enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),k);
 						
 						PCSXAddCheat(enabled,1,address,byte);
 						
 						ZeroMemory(&lvi, sizeof(LV_ITEM));
-						lvi.iItem= totalk-k;
+						lvi.iItem= k;
 						lvi.iSubItem=2;
 						lvi.mask=LVIF_TEXT;
 						lvi.pszText=buf;

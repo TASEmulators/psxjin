@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <windows.h>
 #include <commctrl.h>
+#include <ctype.h>
 
 AppData gApp;
 HANDLE hConsole;
@@ -83,6 +84,10 @@ void UpdateMemWatch();
 void CreateMemWatch();
 void AddMemWatch();
 extern char * MemWatchDir;
+
+// cheats
+void CreateCheatEditor();
+void CreateMemSearch();
 
 void PCSX_LoadState(int newState);
 void PCSX_SaveState(int newState);
