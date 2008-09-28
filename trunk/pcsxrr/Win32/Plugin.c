@@ -24,14 +24,15 @@
 #include <time.h>
 #include <stdio.h>
 
+#include "../movie.h"
 #include "R3000A.h"
 #include "Win32.h"
 #include "NoPic.h"
 #include "PsxCommon.h"
-#include "../movie.h"
-#include "../Win32/cheat.h"
-extern struct Movie_Type currentMovie;
+#include "cheat.h"
 #include "maphkeys.h"
+
+extern struct Movie_Type currentMovie;
 extern int speedModifierFlag;
 int speedModeTemp = 7;
 
@@ -338,7 +339,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH].keymod)
 	{
-		//add here
+		CreateMemSearch();
 	}
 
 //	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key

@@ -334,7 +334,33 @@
 #define ID_CONFIGURATION_MEMSEARCH      40072
 #define IDC_LOAD_CHEATS                 40073
 #define IDC_SAVE_CHEATS                 40074
-#define ID_LANGS                        50000
+#define IDD_CHEAT_SEARCH                40075
+#define IDC_ADDYS                       40076
+#define IDC_C_SEARCH                    40077
+#define IDC_C_ADD                       40078
+#define IDC_C_RESET                     40079
+#define IDC_1_BYTE                      40080
+#define IDC_2_BYTE                      40081
+#define IDC_3_BYTE                      40082
+#define IDC_4_BYTE                      40083
+#define IDC_LESS_THAN                   40084
+#define IDC_GREATER_THAN                40085
+#define IDC_LESS_THAN_EQUAL             40086
+#define IDC_GREATER_THAN_EQUAL          40087
+#define IDC_ENTER_LABEL                 40088
+#define IDC_EQUAL                       40089
+#define IDC_NOT_EQUAL                   40090
+#define IDC_PREV                        40091
+#define IDC_ENTERED                     40092
+#define IDC_ENTEREDADDRESS              40093
+#define IDC_UNSIGNED                    40094
+#define IDC_SIGNED                      40095
+#define IDC_HEX                         40096
+#define IDC_VALUE_ENTER                 40097
+#define IDC_C_WATCH                     40098
+#define IDC_C_CLEARWATCH                40099
+#define IDC_C_LOADWATCH                 40100
+#define IDC_C_SAVEWATCH                 40101
 
 #define MW_ADDR00                       1001
 #define MW_ADDR01                       1004
@@ -360,6 +386,8 @@
 #define MW_ADDR21                       1064
 #define MW_ADDR22                       1067
 #define MW_ADDR23                       1070
+
+#define ID_LANGS                        50000
 
 // Next default values for new objects
 // 
