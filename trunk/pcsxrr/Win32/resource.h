@@ -388,6 +388,7 @@
 #define MW_ADDR23                       1070
 
 #define ID_LANGS                        50000
+#define IDC_STATIC                      50001
 
 // Next default values for new objects
 // 

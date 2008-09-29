@@ -268,6 +268,12 @@ void PADhandleKey(int key) {
 		PCSXApplyCheats();
 	}
 
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH].keymod)
+	{
+		CreateMemSearch();
+	}
+
 	if(key == EmuCommandTable[EMUCMD_CONFGPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFGPU].keymod)
 	{
@@ -310,6 +316,17 @@ void PADhandleKey(int key) {
 		}
 	}
 
+	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
+	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
+	{
+		if (!currentMovie.mode) {
+			//add here
+		}
+		else {
+			//gpu error message
+		}
+	}
+
 	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
 	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
 	{
@@ -323,23 +340,6 @@ void PADhandleKey(int key) {
 		else {
 			GPU_displayText("*PCSX*: error: No Movie To Stop!");
 		}
-	}
-
-	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
-	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
-	{
-		if (!currentMovie.mode) {
-			//add here
-		}
-		else {
-			//gpu error message
-		}
-	}
-
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH].keymod)
-	{
-		CreateMemSearch();
 	}
 
 //	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
