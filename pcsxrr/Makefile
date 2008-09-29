@@ -15,8 +15,7 @@ CC = gcc
 NASM = nasm
 RM = rm -f
 STRIP = strip
-RC = brcc32
-RC2 = windres
+RC = windres
 
 ifndef CPUTYPE
 	CPUOPT = -march=pentiumpro
@@ -82,5 +81,5 @@ Cpu/ix86/%.o: Cpu/ix86/%.c
 	${CC} ${CFLAGS} -c -o $@ $<
 
 ${RESOBJ}: Win32/pcsx.rc
-	${RC} $< ${RC1FLAGS} -fo$*.res
-	${RC2} -I res -O coff -o $@ -i $*.res
+	${RC} $< $*.res
+	${RC} $*.res $@
