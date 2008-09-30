@@ -127,6 +127,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	CreateMainWindow(nCmdShow);
 //	SysPrintf("%s\n", lpCmdLine);
 
+	PCSXInitCheatData();
+
 	RunGui();
 
 	return 0;
@@ -453,9 +455,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					}
 //					ShowCursor(FALSE);
 					Running = 1;
-					// clean this up, please
-	PCSXInitCheatData();
-	PCSXStartCheatSearch();
 					psxCpu->Execute();
 					return TRUE;
 

@@ -59,15 +59,16 @@ typedef enum
  (s) == PCSX_24_BITS ? (((int32) ((*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16)) << 8)) >> 8): \
  ((int32) (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16) + (*((m) + (o) + 3) << 24))))
 
-void PCSXInitCheatData()
-{
-	Cheat.RAM = (u8*)psxM;
-}
-
 void PCSXStartCheatSearch()
 {
 	memmove (Cheat.CRAM, Cheat.RAM, 0x200000);
 	memset ((char *) Cheat.ALL_BITS, 0xff, 0x200000);
+}
+
+void PCSXInitCheatData()
+{
+	Cheat.RAM = (u8*)psxM;
+	PCSXStartCheatSearch();
 }
 
 struct ICheat
