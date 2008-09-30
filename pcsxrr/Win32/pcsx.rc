@@ -353,7 +353,7 @@ LANGUAGE LANG_SPANISH, 0xB
 //
 
 IDD_CPUCONF DIALOG DISCARDABLE  0, 0, 232, 175
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Cpu Config"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -371,8 +371,8 @@ BEGIN
     COMBOBOX        IDC_PSXTYPES,105,126,53,50,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Select Psx System Type",IDC_SELPSX,5,110,220,35
-    CONTROL         "Disable Misc Quick Keys (F5-F8)",IDC_QKEYS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,105,60,118,10
+//    CONTROL         "Disable Misc Quick Keys (F5-F8)",IDC_QKEYS,"Button",
+//                    BS_AUTOCHECKBOX | WS_TABSTOP,105,60,118,10
     CONTROL         "Disable Cd Audio",IDC_CDDA,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,105,15,70,10
     CONTROL         "Enable Console Output",IDC_PSXOUT,"Button",
