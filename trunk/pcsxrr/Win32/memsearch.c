@@ -244,12 +244,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					i--;
 					if(j=nmlvdi->item.iSubItem==0)
 					{
-						if(i < 0x20000)
-							sprintf(buf, "%06X", i+0x7E0000);
-						else if(i < 0x30000)
-							sprintf(buf, "s%05X", i-0x20000);
-						else
-							sprintf(buf, "i%05X", i-0x30000);
+//						if(i < 0x20000)
+//							sprintf(buf, "%06X", i+0x7E0000);
+//						else if(i < 0x30000)
+//							sprintf(buf, "s%05X", i-0x20000);
+//						else
+							sprintf(buf, "%06X", i+0x1FFFFF);
 						nmlvdi->item.pszText=buf;
 						nmlvdi->item.cchTextMax=8;
 					}
@@ -369,7 +369,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 						nmlvdi->item.pszText=buf;
 						nmlvdi->item.cchTextMax=4;
 					}
-					// nmlvdi->item.mask=LVIF_TEXT; // This is bad as wine relies on this to not change.
+//					nmlvdi->item.mask=LVIF_TEXT; // This is bad as wine relies on this to not change.
 
 				}
 				else if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && (nmh->code == (UINT)LVN_ITEMACTIVATE||nmh->code == (UINT)NM_CLICK))
