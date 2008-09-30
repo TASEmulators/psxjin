@@ -9,6 +9,8 @@
 extern AppData gApp;
 extern struct SCheatData Cheat;
 
+HWND cheatSearchHWND = NULL;
+
 typedef enum
 {
     PCSX_LESS_THAN, PCSX_GREATER_THAN, PCSX_LESS_THAN_OR_EQUAL,
@@ -652,7 +654,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 		case WM_DESTROY:
 		{
-//			cheatSearchHWND = NULL;
+			cheatSearchHWND = NULL;
 //			PCSXSaveCheatFile (PCSXGetFilename (".cht", CHEAT_DIR));
 			break;
 		}
@@ -1088,9 +1090,9 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
 				return TRUE;
 
-//			case IDC_REFRESHLIST:
-//				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x32000);
-//				break;
+			case IDC_REFRESHLIST:
+				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x32000);
+				break;
 
 			case IDC_ENTERED:
 			case IDC_ENTEREDADDRESS:
@@ -1187,12 +1189,10 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				}
 
 				// if non-modal, update "Prev. Value" column after Search
-//				if(cheatSearchHWND)
-//				{
-//					CopyMemory(Cheat.CWRAM, Cheat.RAM, 0x20000);
-//					CopyMemory(Cheat.CSRAM, Cheat.SRAM, 0x10000);
-//					CopyMemory(Cheat.CIRAM, Cheat.FillRAM, 0x2000);
-//				}
+				if(cheatSearchHWND)
+				{
+					CopyMemory(Cheat.CRAM, Cheat.RAM, 0x200000);
+				}
 
 
 				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
@@ -1201,12 +1201,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 			case IDOK:
 				CopyMemory(Cheat.CRAM, Cheat.RAM, 0x200000);
-//				CopyMemory(Cheat.CWRAM, Cheat.RAM, 0x20000);
-//				CopyMemory(Cheat.CSRAM, Cheat.SRAM, 0x10000);
-//				CopyMemory(Cheat.CIRAM, Cheat.FillRAM, 0x2000);
 				/* fall through */
 			case IDCANCEL:
-				EndDialog(hDlg, 0);
+				if(cheatSearchHWND)
+					DestroyWindow(hDlg);
+				else
+					EndDialog(hDlg, 0);
 				if(hBmp)
 				{
 					DeleteObject(hBmp);
@@ -1223,7 +1223,20 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 void CreateMemSearch()
 {
-//	PCSXInitCheatData();
-//	PCSXStartCheatSearch();
-	DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_CHEAT_SEARCH),gApp.hWnd,DlgCheatSearch);
+	if(!cheatSearchHWND) // create and show non-modal cheat search window
+	{
+		cheatSearchHWND = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_CHEAT_SEARCH), gApp.hWnd, DlgCheatSearch);
+		ShowWindow(cheatSearchHWND, SW_SHOW);
+	}
+	else // already open so just reactivate the window
+	{
+		SetActiveWindow(cheatSearchHWND);
+	}
+//	DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_CHEAT_SEARCH),gApp.hWnd,DlgCheatSearch);
+}
+
+void UpdateMemSearch()
+{
+	if(cheatSearchHWND)
+		SendMessage(cheatSearchHWND, WM_COMMAND, (WPARAM)(IDC_REFRESHLIST),(LPARAM)(NULL));
 }

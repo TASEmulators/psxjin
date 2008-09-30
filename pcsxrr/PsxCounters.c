@@ -141,6 +141,7 @@ if (flagGPUchain == 1)
 if ((flagDontPause == 2 || flagFakePause == 1) && flagGPUchain == 1) {
 	flagDontPause = 0;
 	flagFakePause = 0;
+//	UpdateMemSearch();
 }
 flagGPUchain = 0;
 
@@ -195,6 +196,8 @@ GPU_setcurrentmode(modeFlags);
 #ifdef WIN32
 	UpdateMemWatch();
 	PCSXApplyCheats();
+//	if (currentMovie.currentFrame%30 == 0)
+//		UpdateMemSearch();
 #endif
 
 					/* movie stuff end */

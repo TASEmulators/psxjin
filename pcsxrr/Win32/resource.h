@@ -367,6 +367,7 @@
 #define IDC_NC_NEWVAL                   40105
 #define IDC_NC_DESC                     40106
 #define IDD_CHEAT_FROM_SEARCH           40107
+#define IDC_REFRESHLIST                 40108
 
 #define MW_ADDR00                       1001
 #define MW_ADDR01                       1004
