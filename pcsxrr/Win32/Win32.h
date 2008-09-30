@@ -73,8 +73,7 @@ void CloseLanguages();
 void ChangeLanguage(char *lang);
 
 // maphkeys.c
-extern HWND hMHkeysDlg;							// Handle to the MapHotkeys Dialog
-
+extern HWND hMHkeysDlg;
 int MHkeysUpdate();
 int MHkeysCreate();
 int MHkeysListMake(int bBuild);
@@ -96,5 +95,8 @@ void PCSX_SaveState(int newState);
 extern int flagSaveState;
 extern int flagLoadState;
 extern int flagEscPressed;
+
+void WIN32_StartMovieReplay();
+void WIN32_StartMovieRecord();
 
 #endif /* __WIN32_H__ */
