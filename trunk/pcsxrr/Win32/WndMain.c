@@ -429,71 +429,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_START_CAPTURE:
-//					 if(emu_launched) {
-					 if(1) {
-//						BOOL wasPaused = emu_paused;
-//						if (emu_launched&&!emu_paused)
-//							pauseEmu(FALSE) ;
-
-//							char rec_buffer[MAX_PATH];
-							char path_buffer [_MAX_PATH];
-
-							OPENFILENAME oifn;
-							ZeroMemory(&oifn, sizeof(OPENFILENAME));
-							oifn.lStructSize = sizeof(OPENFILENAME);
-							oifn.hwndOwner = NULL;
-							strcpy(path_buffer,"");
-							oifn.lpstrFile = path_buffer;
-							oifn.nMaxFile = sizeof(path_buffer);
-							oifn.lpstrFilter = "Avi files (*.avi)\0*.avi\0All Files\0*.*\0";
-							oifn.lpstrFileTitle = "";
-							oifn.nMaxFileTitle = 0;
-							oifn.lpstrInitialDir = "";
-							oifn.Flags = OFN_NOREADONLYRETURN | OFN_OVERWRITEPROMPT;
-							if (GetSaveFileName(&oifn)) {
-								int len = strlen(path_buffer);
-								if (len < 5 ||
-								   (path_buffer[len-1] != 'i' && path_buffer[len-1] != 'I') ||
-								   (path_buffer[len-2] != 'v' && path_buffer[len-2] != 'V') ||
-								   (path_buffer[len-3] != 'a' && path_buffer[len-3] != 'A') ||
-								   path_buffer[len-4] != '.')
-										strcat(path_buffer, ".avi");
-								Sleep(1000);
-//								if (VCR_startCapture( rec_buffer, path_buffer ) < 0)
-								if (1 < 0)
-								{   
-									MessageBox(NULL, "Couldn't start capturing.", "VCR", MB_OK);
-									recording = FALSE;
-								}
-								else {
-//									SetWindowPos(gApp.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);  //Set on top
-									EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
-									EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
-//									if(!externalReadScreen) {
-//										EnableMenuItem( hMenu, FULL_SCREEN, MF_GRAYED );           //Disables fullscreen menu
-//										SendMessage( hTool, TB_ENABLEBUTTON, FULL_SCREEN, FALSE ); //Disables fullscreen button
-//									}
-//									SetStatusTranslatedString(hStatus,0,"Recording avi...");
-									recording = TRUE;
-								}
-							}
-//							if (emu_launched&&emu_paused&&!wasPaused)
-//								resumeEmu(FALSE);
-							}
-
+					// do something
 					break;
 				case ID_END_CAPTURE:
-					Sleep(1000); // HACK - seems to help crash on closing ROM during capture...?
-//					if (VCR_stopCapture() < 0)
-					if (1 < 0)
-						MessageBox(NULL, "Couldn't stop capturing.", "VCR", MB_OK);
-					else {
-//						SetWindowPos(gApp.hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-						EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
-						EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_ENABLED);
-//						SetStatusTranslatedString(hStatus,0,"Stopped AVI capture");
-						recording = FALSE;
-					}
+					// do something
 					break;
 
 				case ID_FILE_RUN_CD:
