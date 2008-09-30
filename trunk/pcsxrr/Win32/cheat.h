@@ -22,4 +22,5 @@ struct SCheatData
 
 void PCSXApplyCheats();
 void PCSXRemoveCheats();
+void PCSXAddCheat (BOOL enable, BOOL save_current_value, uint32 address, uint8 byte);
 uint32 ScanAddress(const char* str);
