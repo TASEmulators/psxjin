@@ -349,8 +349,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_RECORD_MOVIE:
 					nRet = PCSX_MOV_StartMovieDialog();
-//					PCSX_MOV_StartMovie("chocobo.pxm",1,0,"mauro");
-//					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_RECORDINP), gApp.hWnd, (DLGPROC)ConfigureNetPlayDlgProc);
 					if (nRet) {
 						currentMovie.currentFrame = 0;
 						currentMovie.lagCounter = 0;
@@ -1654,4 +1652,79 @@ void SysUpdate() {
 void SysRunGui() {
 	RestoreWindow();
 	RunGui();
+}
+
+
+void WIN32_StartMovieReplay()
+{
+	int nRet;
+	nRet = PCSX_MOV_StartReplayDialog();
+	if (nRet) {
+		currentMovie.currentFrame = 0;
+		currentMovie.lagCounter = 0;
+		if (currentMovie.saveStateIncluded) {
+			SetMenu(gApp.hWnd, NULL);
+			OpenPlugins(gApp.hWnd);
+			NeedReset = 0;
+			CheckCdrom();
+			if (LoadCdrom() == -1) {
+				ClosePlugins();
+				RestoreWindow();
+				SysMessage(_("Could not load Cdrom"));
+				return;
+			}
+			Running = 1;
+			PCSX_MOV_StartMovie(2);
+			psxCpu->Execute();
+			return;
+		}
+		LoadCdBios = 0;
+		SetMenu(gApp.hWnd, NULL);
+		OpenPlugins(gApp.hWnd);
+		SysReset();
+		NeedReset = 0;
+		CheckCdrom();
+		if (LoadCdrom() == -1) {
+			ClosePlugins();
+			RestoreWindow();
+			SysMessage(_("Could not load Cdrom"));
+			return;
+		}
+		Running = 1;
+		PCSX_MOV_StartMovie(2);
+		psxCpu->Execute();
+	}
+}
+
+void WIN32_StartMovieRecord()
+{
+	int nRet;
+	nRet = PCSX_MOV_StartMovieDialog();
+	if (nRet) {
+		currentMovie.currentFrame = 0;
+		currentMovie.lagCounter = 0;
+		if (currentMovie.saveStateIncluded) {
+			SetMenu(gApp.hWnd, NULL);
+			OpenPlugins(gApp.hWnd);
+			Running = 1;
+			PCSX_MOV_StartMovie(1);
+			psxCpu->Execute();
+			return;
+		}
+		LoadCdBios = 0;
+		SetMenu(gApp.hWnd, NULL);
+		OpenPlugins(gApp.hWnd);
+		SysReset();
+		NeedReset = 0;
+		CheckCdrom();
+		if (LoadCdrom() == -1) {
+			ClosePlugins();
+			RestoreWindow();
+			SysMessage(_("Could not load Cdrom"));
+			return;
+		}
+		Running = 1;
+		PCSX_MOV_StartMovie(1);
+		psxCpu->Execute();
+	}
 }

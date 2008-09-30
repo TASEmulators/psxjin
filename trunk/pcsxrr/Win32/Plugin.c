@@ -309,10 +309,10 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_STARTRECORDING].keymod)
 	{
 		if (!currentMovie.mode) {
-			//add here
+			WIN32_StartMovieRecord();
 		}
 		else {
-			//gpu error message
+			GPU_displayText("*PCSX*: error: Movie Already Active");
 		}
 	}
 
@@ -320,10 +320,10 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
 	{
 		if (!currentMovie.mode) {
-			//add here
+			WIN32_StartMovieReplay();
 		}
 		else {
-			//gpu error message
+			GPU_displayText("*PCSX*: error: Movie Already Active");
 		}
 	}
 
@@ -338,7 +338,7 @@ void PADhandleKey(int key) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 		}
 		else {
-			GPU_displayText("*PCSX*: error: No Movie To Stop!");
+			GPU_displayText("*PCSX*: error: No Movie To Stop");
 		}
 	}
 
