@@ -54,13 +54,13 @@ typedef enum
 
 void PCSXInitCheatData()
 {
-	Cheat.RAM = psxM;
+	Cheat.RAM = (u8*)psxM;
 }
 
 void PCSXStartCheatSearch()
 {
-	memmove (Cheat.CRAM, Cheat.RAM, 0x1FFFFF);
-	memset ((char *) Cheat.ALL_BITS, 0xff, 0x1FFFFF);
+	memmove (Cheat.CRAM, Cheat.RAM, 0x200000);
+	memset ((char *) Cheat.ALL_BITS, 0xff, 0x200000);
 }
 
 BOOL TestRange(int val_type, S9xCheatDataSize bytes,  uint32 value)
@@ -130,7 +130,7 @@ void S9xSearchForChange (S9xCheatComparisonType cmp,S9xCheatDataSize size, uint8
 	int i;
 	if (is_signed)
 	{
-		for (i = 0; i < 0x1FFFFF - l; i++)
+		for (i = 0; i < 0x200000 - l; i++)
 		{
 			if (TEST_BIT (Cheat.ALL_BITS, i) &&
 				_C(cmp, _DS(size, Cheat.RAM, i), _DS(size, Cheat.CRAM, i)))
@@ -144,7 +144,7 @@ void S9xSearchForChange (S9xCheatComparisonType cmp,S9xCheatDataSize size, uint8
 	}
 	else
 	{
-		for (i = 0; i < 0x1FFFFF - l; i++)
+		for (i = 0; i < 0x200000 - l; i++)
 		{
 			if (TEST_BIT (Cheat.ALL_BITS, i) &&
 				_C(cmp, _D(size, Cheat.RAM, i), _D(size, Cheat.CRAM, i)))
@@ -156,7 +156,7 @@ void S9xSearchForChange (S9xCheatComparisonType cmp,S9xCheatDataSize size, uint8
 				BIT_CLEAR (Cheat.ALL_BITS, i);
 		}
 	}
-	for (i = 0x1FFFFF - l; i < 0x1FFFFF; i++)
+	for (i = 0x200000 - l; i < 0x200000; i++)
 		BIT_CLEAR (Cheat.ALL_BITS, i);
 //	for (i = 0x10000 - l; i < 0x10000; i++)
 //		BIT_CLEAR (Cheat.SRAM_BITS, i);
@@ -181,7 +181,7 @@ void S9xSearchForValue (S9xCheatComparisonType cmp,
 
 	if (is_signed)
 	{
-		for (i = 0; i < 0x1FFFFF - l; i++)
+		for (i = 0; i < 0x200000 - l; i++)
 		{
 			if (TEST_BIT (Cheat.ALL_BITS, i) &&
 				_C(cmp, _DS(size, Cheat.RAM, i), (int32) value))
@@ -195,7 +195,7 @@ void S9xSearchForValue (S9xCheatComparisonType cmp,
 	}
 	else
 	{
-		for (i = 0; i < 0x1FFFFF - l; i++)
+		for (i = 0; i < 0x200000 - l; i++)
 		{
 			if (TEST_BIT (Cheat.ALL_BITS, i) &&
 				_C(cmp, _D(size, Cheat.RAM, i), value))
@@ -207,7 +207,7 @@ void S9xSearchForValue (S9xCheatComparisonType cmp,
 				BIT_CLEAR (Cheat.ALL_BITS, i);
 		}
 	}
-	for (i = 0x1FFFFF - l; i < 0x1FFFFF; i++)
+	for (i = 0x200000 - l; i < 0x200000; i++)
 		BIT_CLEAR (Cheat.ALL_BITS, i);
 //	for (i = 0x10000 - l; i < 0x10000; i++)
 //		BIT_CLEAR (Cheat.SRAM_BITS, i);
@@ -231,7 +231,7 @@ void S9xSearchForAddress (S9xCheatComparisonType cmp,
 
 	{
 
-		for (i = 0; i < 0x1FFFFF - l; i++)
+		for (i = 0; i < 0x200000 - l; i++)
 		{
 			if (TEST_BIT (Cheat.ALL_BITS, i) &&
 				_C(cmp, i, (int)value))
@@ -243,7 +243,7 @@ void S9xSearchForAddress (S9xCheatComparisonType cmp,
 				BIT_CLEAR (Cheat.ALL_BITS, i);
 		}
 	}
-	for (i = 0x1FFFFF - l; i < 0x1FFFFF; i++)
+	for (i = 0x200000 - l; i < 0x200000; i++)
 		BIT_CLEAR (Cheat.ALL_BITS, i);
 //	for (i = 0x10000 - l; i < 0x10000; i++)
 //		BIT_CLEAR (Cheat.SRAM_BITS, i);
@@ -252,7 +252,7 @@ void S9xSearchForAddress (S9xCheatComparisonType cmp,
 static inline int CheatCount(int byteSub)
 {
 	int a, b=0;
-	for(a=0;a<0x1FFFFF-byteSub;a++)
+	for(a=0;a<0x200000-byteSub;a++)
 	{
 		if(TEST_BIT(Cheat.ALL_BITS, a))
 			b++;
@@ -438,44 +438,32 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				NMHDR * nmh=(NMHDR*)lParam;
 				if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && nmh->code == LVN_GETDISPINFO)
 				{
-					static TCHAR buf[12]; // the following code assumes this variable is static
+					static char buf[12]; // the following code assumes this variable is static
 					int i, j;
 					NMLVDISPINFO * nmlvdi=(NMLVDISPINFO*)lParam;
 					j=nmlvdi->item.iItem;
 					j++;
-					for(i=0;i<(0x1FFFFF-bytes)&& j>0;i++)
+					for(i=0;i<(0x200000-bytes)&& j>0;i++)
 					{
 						if(TEST_BIT(Cheat.ALL_BITS, i))
 							j--;
 					}
-					if (i>=0x1FFFFF && j!=0)
+					if (i>=0x200000 && j!=0)
 					{
 						return FALSE;
 					}
 					i--;
 					if((j=nmlvdi->item.iSubItem==0))
 					{
-//						if(i < 0x20000)
-//							sprintf(buf, "%06X", i+0x7E0000);
-//						else if(i < 0x30000)
-//							sprintf(buf, "s%05X", i-0x20000);
-//						else
-							sprintf(buf, "%06X", i);
+						sprintf(buf, "%06X", i);
 						nmlvdi->item.pszText=buf;
 						nmlvdi->item.cchTextMax=8;
 					}
 					if((j=nmlvdi->item.iSubItem==1))
 					{
 						int q=0, r=0;
-//						if(i < 0x20000)
 						for(r=0;r<=bytes;r++)
 							q+=(Cheat.RAM[i+r])<<(8*r);
-//						else if(i < 0x30000)
-//							for(r=0;r<=bytes;r++)
-//								q+=(Cheat.SRAM[(i-0x20000)+r])<<(8*r);
-//						else
-//							for(r=0;r<=bytes;r++)
-//								q+=(Cheat.FillRAM[(i-0x30000)+r])<<(8*r);
 						//needs to account for size
 						switch(val_type)
 						{
@@ -626,7 +614,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 						startPos = 0;
 
 					int currentPos, addrPos;
-					for(addrPos=0,currentPos=0;addrPos<(0x1FFFFF-bytes)&&currentPos<startPos;addrPos++)
+					for(addrPos=0,currentPos=0;addrPos<(0x200000-bytes)&&currentPos<startPos;addrPos++)
 					{
 						if(TEST_BIT(Cheat.ALL_BITS, addrPos))
 							currentPos++;
@@ -634,7 +622,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 					pResult=currentPos;
 
-					if (addrPos>=0x1FFFFF && addrPos!=0)
+					if (addrPos>=0x200000 && addrPos!=0)
 						break;
 
 					// ignore leading 0's
@@ -728,7 +716,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 		break;
 
 	case WM_ACTIVATE:
-		ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x1FFFFF);
+		ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
 		break;
 
 		case WM_COMMAND:
@@ -780,7 +768,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_SIGNED))
 					val_type=2;
 				else val_type=3;
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x1FFFFF);
+				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
 				break;
 
 //add
@@ -794,7 +782,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					int l = CheatCount(bytes);
 					ListView_SetItemCount (GetDlgItem(hDlg, IDC_ADDYS), l);
 				}
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x1FFFFF);
+				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
 				return TRUE;
 
 //			case IDC_REFRESHLIST:
@@ -859,7 +847,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTERED) ||
 				   BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTEREDADDRESS))
 				{
-					TCHAR buf[20];
+					char buf[20];
 					GetDlgItemText(hDlg, IDC_VALUE_ENTER, buf, 20);
 					uint32 value;
 					int ret;
@@ -904,12 +892,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 //				}
 
 
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x1FFFFF);
+				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
 				return TRUE;
 				break;
 
 			case IDOK:
-				CopyMemory(Cheat.CRAM, Cheat.RAM, 0x1FFFFF);
+				CopyMemory(Cheat.CRAM, Cheat.RAM, 0x200000);
 //				CopyMemory(Cheat.CWRAM, Cheat.RAM, 0x20000);
 //				CopyMemory(Cheat.CSRAM, Cheat.SRAM, 0x10000);
 //				CopyMemory(Cheat.CIRAM, Cheat.FillRAM, 0x2000);

@@ -14,10 +14,10 @@ struct SCheatData
 {
 	struct SCheat  c [MAX_CHEATS];
 	uint32         num_cheats;
-	s8             CRAM [0x1FFFFF];
-	s8             *RAM;
-	s32            ALL_BITS [(0x1FFFFF >> 5)];
-	s8             CWatchRAM [0x1FFFFF];
+	s8             CRAM [0x200000];
+	u8             *RAM;
+	s32            ALL_BITS [(0x200000 >> 5)];
+	s8             CWatchRAM [0x200000];
 };
 
 void PCSXApplyCheats();
