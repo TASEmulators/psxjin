@@ -82,7 +82,7 @@ int MHkeysListMake(int bBuild);
 // memwatch.c
 void UpdateMemWatch();
 void CreateMemWatch();
-void AddMemWatch();
+void AddMemWatch(char memaddress[32]);
 extern char * MemWatchDir;
 
 // cheats
