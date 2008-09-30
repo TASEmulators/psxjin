@@ -453,6 +453,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					}
 //					ShowCursor(FALSE);
 					Running = 1;
+					// clean this up, please
+	PCSXInitCheatData();
+	PCSXStartCheatSearch();
 					psxCpu->Execute();
 					return TRUE;
 

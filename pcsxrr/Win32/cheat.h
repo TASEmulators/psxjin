@@ -22,3 +22,4 @@ struct SCheatData
 
 void PCSXApplyCheats();
 void PCSXRemoveCheats();
+uint32 ScanAddress(const char* str);

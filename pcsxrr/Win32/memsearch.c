@@ -20,11 +20,41 @@ typedef enum
     S9X_8_BITS, S9X_16_BITS, S9X_24_BITS, S9X_32_BITS
 } S9xCheatDataSize;
 
+#define SEARCH_TITLE_CHEATERROR "PCSX Cheat Error"
+#define SEARCH_ERR_INVALIDSEARCHVALUE "Please enter a valid value for a search!"
+
+#define BIT_CLEAR(a,v) \
+(a)[(v) >> 5] &= ~(1 << ((v) & 31))
+
+#define BIT_SET(a,v) \
+(a)[(v) >> 5] |= 1 << ((v) & 31)
+
+#define TEST_BIT(a,v) \
+((a)[(v) >> 5] & (1 << ((v) & 31)))
+
+#define _C(c,a,b) \
+((c) == S9X_LESS_THAN ? (a) < (b) : \
+ (c) == S9X_GREATER_THAN ? (a) > (b) : \
+ (c) == S9X_LESS_THAN_OR_EQUAL ? (a) <= (b) : \
+ (c) == S9X_GREATER_THAN_OR_EQUAL ? (a) >= (b) : \
+ (c) == S9X_EQUAL ? (a) == (b) : \
+ (a) != (b))
+
+#define _D(s,m,o) \
+((s) == S9X_8_BITS ? (uint8) (*((m) + (o))) : \
+ (s) == S9X_16_BITS ? ((uint16) (*((m) + (o)) + (*((m) + (o) + 1) << 8))) : \
+ (s) == S9X_24_BITS ? ((uint32) (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16))) : \
+((uint32)  (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16) + (*((m) + (o) + 3) << 24))))
+
+#define _DS(s,m,o) \
+((s) == S9X_8_BITS ? ((int8) *((m) + (o))) : \
+ (s) == S9X_16_BITS ? ((int16) (*((m) + (o)) + (*((m) + (o) + 1) << 8))) : \
+ (s) == S9X_24_BITS ? (((int32) ((*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16)) << 8)) >> 8): \
+ ((int32) (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16) + (*((m) + (o) + 3) << 24))))
 
 void PCSXInitCheatData()
 {
 	Cheat.RAM = psxM;
-//	memcpy(Cheat.RAM,psxM,0x1FFFFF);
 }
 
 void PCSXStartCheatSearch()
@@ -33,10 +63,191 @@ void PCSXStartCheatSearch()
 	memset ((char *) Cheat.ALL_BITS, 0xff, 0x1FFFFF);
 }
 
+BOOL TestRange(int val_type, S9xCheatDataSize bytes,  uint32 value)
+{
+	if(val_type!=2)
+	{
+		if(bytes==S9X_8_BITS)
+		{
+			if(value<256)
+				return TRUE;
+			else return FALSE;
+		}
+		if(bytes==S9X_16_BITS)
+		{
+			if(value<65536)
+				return TRUE;
+			else return FALSE;
+		}
+		if(bytes==S9X_24_BITS)
+		{
+			if(value<16777216)
+				return TRUE;
+			else return FALSE;
+		}
+		//if it reads in, it's a valid 32-bit unsigned!
+		return TRUE;
+	}
+	else
+	{
+		if(bytes==S9X_8_BITS)
+		{
+			if((int32)value<128 && (int32)value >= -128)
+				return TRUE;
+			else return FALSE;
+		}
+		if(bytes==S9X_16_BITS)
+		{
+			if((int32)value<32768 && (int32)value >= -32768)
+				return TRUE;
+			else return FALSE;
+		}
+		if(bytes==S9X_24_BITS)
+		{
+			if((int32)value<8388608 && (int32)value >= -8388608)
+				return TRUE;
+			else return FALSE;
+		}
+		//should be handled by sscanf
+		return TRUE;
+	}
+}
 
+//void S9xSearchForChange (SCheatData *d, S9xCheatComparisonType cmp,S9xCheatDataSize size, bool8 is_signed, bool8 update)
+void S9xSearchForChange (S9xCheatComparisonType cmp,S9xCheatDataSize size, uint8 is_signed, uint8 update)
+{
+	int l;
 
-#define TEST_BIT(a,v) \
-((a)[(v) >> 5] & (1 << ((v) & 31)))
+	switch (size)
+	{
+	case S9X_8_BITS: l = 0; break;
+	case S9X_16_BITS: l = 1; break;
+	case S9X_24_BITS: l = 2; break;
+	default:
+	case S9X_32_BITS: l = 3; break;
+	}
+
+	int i;
+	if (is_signed)
+	{
+		for (i = 0; i < 0x1FFFFF - l; i++)
+		{
+			if (TEST_BIT (Cheat.ALL_BITS, i) &&
+				_C(cmp, _DS(size, Cheat.RAM, i), _DS(size, Cheat.CRAM, i)))
+			{
+				if (update)
+					Cheat.CRAM [i] = Cheat.RAM [i];
+			}
+			else
+				BIT_CLEAR (Cheat.ALL_BITS, i);
+		}
+	}
+	else
+	{
+		for (i = 0; i < 0x1FFFFF - l; i++)
+		{
+			if (TEST_BIT (Cheat.ALL_BITS, i) &&
+				_C(cmp, _D(size, Cheat.RAM, i), _D(size, Cheat.CRAM, i)))
+			{
+				if (update)
+					Cheat.CRAM [i] = Cheat.RAM [i];
+			}
+			else
+				BIT_CLEAR (Cheat.ALL_BITS, i);
+		}
+	}
+	for (i = 0x1FFFFF - l; i < 0x1FFFFF; i++)
+		BIT_CLEAR (Cheat.ALL_BITS, i);
+//	for (i = 0x10000 - l; i < 0x10000; i++)
+//		BIT_CLEAR (Cheat.SRAM_BITS, i);
+}
+
+void S9xSearchForValue (S9xCheatComparisonType cmp,
+                        S9xCheatDataSize size, uint32 value,
+                        uint8 is_signed, uint8 update)
+{
+	int l;
+
+	switch (size)
+	{
+	case S9X_8_BITS: l = 0; break;
+	case S9X_16_BITS: l = 1; break;
+	case S9X_24_BITS: l = 2; break;
+	default:
+	case S9X_32_BITS: l = 3; break;
+	}
+
+	int i;
+
+	if (is_signed)
+	{
+		for (i = 0; i < 0x1FFFFF - l; i++)
+		{
+			if (TEST_BIT (Cheat.ALL_BITS, i) &&
+				_C(cmp, _DS(size, Cheat.RAM, i), (int32) value))
+			{
+				if (update)
+					Cheat.CRAM [i] = Cheat.RAM [i];
+			}
+			else
+				BIT_CLEAR (Cheat.ALL_BITS, i);
+		}
+	}
+	else
+	{
+		for (i = 0; i < 0x1FFFFF - l; i++)
+		{
+			if (TEST_BIT (Cheat.ALL_BITS, i) &&
+				_C(cmp, _D(size, Cheat.RAM, i), value))
+			{
+				if (update)
+					Cheat.CRAM [i] = Cheat.RAM [i];
+			}
+			else
+				BIT_CLEAR (Cheat.ALL_BITS, i);
+		}
+	}
+	for (i = 0x1FFFFF - l; i < 0x1FFFFF; i++)
+		BIT_CLEAR (Cheat.ALL_BITS, i);
+//	for (i = 0x10000 - l; i < 0x10000; i++)
+//		BIT_CLEAR (Cheat.SRAM_BITS, i);
+}
+
+void S9xSearchForAddress (S9xCheatComparisonType cmp,
+                          S9xCheatDataSize size, uint32 value, uint8 update)
+{
+	int l;
+
+	switch (size)
+	{
+	case S9X_8_BITS: l = 0; break;
+	case S9X_16_BITS: l = 1; break;
+	case S9X_24_BITS: l = 2; break;
+	default:
+	case S9X_32_BITS: l = 3; break;
+	}
+
+	int i;
+
+	{
+
+		for (i = 0; i < 0x1FFFFF - l; i++)
+		{
+			if (TEST_BIT (Cheat.ALL_BITS, i) &&
+				_C(cmp, i, (int)value))
+			{
+				if (update)
+					Cheat.CRAM [i] = Cheat.RAM [i];
+			}
+			else
+				BIT_CLEAR (Cheat.ALL_BITS, i);
+		}
+	}
+	for (i = 0x1FFFFF - l; i < 0x1FFFFF; i++)
+		BIT_CLEAR (Cheat.ALL_BITS, i);
+//	for (i = 0x10000 - l; i < 0x10000; i++)
+//		BIT_CLEAR (Cheat.SRAM_BITS, i);
+}
 
 static inline int CheatCount(int byteSub)
 {
@@ -242,18 +453,18 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 						return FALSE;
 					}
 					i--;
-					if(j=nmlvdi->item.iSubItem==0)
+					if((j=nmlvdi->item.iSubItem==0))
 					{
 //						if(i < 0x20000)
 //							sprintf(buf, "%06X", i+0x7E0000);
 //						else if(i < 0x30000)
 //							sprintf(buf, "s%05X", i-0x20000);
 //						else
-							sprintf(buf, "%06X", i+0x1FFFFF);
+							sprintf(buf, "%06X", i);
 						nmlvdi->item.pszText=buf;
 						nmlvdi->item.cchTextMax=8;
 					}
-					if(j=nmlvdi->item.iSubItem==1)
+					if((j=nmlvdi->item.iSubItem==1))
 					{
 						int q=0, r=0;
 //						if(i < 0x20000)
@@ -311,7 +522,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 						nmlvdi->item.pszText=buf;
 						nmlvdi->item.cchTextMax=4;
 					}
-					if(j=nmlvdi->item.iSubItem==2)
+					if((j=nmlvdi->item.iSubItem==2))
 					{
 						int q=0, r=0;
 //						if(i < 0x20000)
@@ -432,7 +643,8 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 					int searchNum = 0;
 
-					ScanAddress(searchstr, searchNum);
+//					ScanAddress(searchstr, searchNum);
+					searchNum = ScanAddress(searchstr);
 
 
 //					if (searchstr[0] != '7')
@@ -541,8 +753,8 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					comp_type=S9X_EQUAL;
 				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_NOT_EQUAL))
 					comp_type=S9X_NOT_EQUAL;
-
 				break;
+
 			case IDC_1_BYTE:
 			case IDC_2_BYTE:
 			case IDC_3_BYTE:
@@ -589,7 +801,112 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 //				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x32000);
 //				break;
 
+			case IDC_ENTERED:
+			case IDC_ENTEREDADDRESS:
+			case IDC_PREV:
+				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTERED))
+				{
+					use_entered=1;
+					EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), TRUE);
+					EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), TRUE);
+				}
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTEREDADDRESS))
+				{
+					use_entered=2;
+					EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), TRUE);
+					EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), TRUE);
+				}
+				else
+				{
+					use_entered=0;
+					EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), FALSE);
+					EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), FALSE);
+				}
+				return TRUE;
+				break;
 
+
+			case IDC_C_SEARCH:
+				{
+				val_type=0;
+
+				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_LESS_THAN))
+					comp_type=S9X_LESS_THAN;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_GREATER_THAN))
+					comp_type=S9X_GREATER_THAN;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_LESS_THAN_EQUAL))
+					comp_type=S9X_LESS_THAN_OR_EQUAL;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_GREATER_THAN_EQUAL))
+					comp_type=S9X_GREATER_THAN_OR_EQUAL;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_EQUAL))
+					comp_type=S9X_EQUAL;
+				else comp_type=S9X_NOT_EQUAL;
+
+				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_UNSIGNED))
+					val_type=1;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_SIGNED))
+					val_type=2;
+				else val_type=3;
+
+				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_1_BYTE))
+					bytes=S9X_8_BITS;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_2_BYTE))
+					bytes=S9X_16_BITS;
+				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_3_BYTE))
+					bytes=S9X_24_BITS;
+				else bytes=S9X_32_BITS;
+
+				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTERED) ||
+				   BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTEREDADDRESS))
+				{
+					TCHAR buf[20];
+					GetDlgItemText(hDlg, IDC_VALUE_ENTER, buf, 20);
+					uint32 value;
+					int ret;
+					if(use_entered==2)
+					{
+//						ret = ScanAddress(buf, value);
+//						value -= 0x7E0000;
+						value = ScanAddress(buf);
+						S9xSearchForAddress (comp_type, bytes, value, FALSE);
+					}
+					else
+					{
+						if(val_type==1)
+							ret=sscanf(buf, "%ul", &value);
+						else if (val_type==2)
+							ret=sscanf(buf, "%d", &value);
+						else ret=sscanf(buf, "%x", &value);
+
+						if(ret!=1||!TestRange(val_type, bytes, value))
+						{
+							MessageBox(hDlg, TEXT(SEARCH_ERR_INVALIDSEARCHVALUE), TEXT(SEARCH_TITLE_CHEATERROR), MB_OK);
+							return TRUE;
+						}
+
+						S9xSearchForValue (comp_type,bytes, value,(val_type==2), FALSE);
+					}
+				}
+				else
+				{
+					S9xSearchForChange (comp_type,bytes, (val_type==2), FALSE);
+				}
+				int l = CheatCount(bytes);
+				ListView_SetItemCount (GetDlgItem(hDlg, IDC_ADDYS), l);
+				}
+
+				// if non-modal, update "Prev. Value" column after Search
+//				if(cheatSearchHWND)
+//				{
+//					CopyMemory(Cheat.CWRAM, Cheat.RAM, 0x20000);
+//					CopyMemory(Cheat.CSRAM, Cheat.SRAM, 0x10000);
+//					CopyMemory(Cheat.CIRAM, Cheat.FillRAM, 0x2000);
+//				}
+
+
+				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x1FFFFF);
+				return TRUE;
+				break;
 
 			case IDOK:
 				CopyMemory(Cheat.CRAM, Cheat.RAM, 0x1FFFFF);
@@ -615,7 +932,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 void CreateMemSearch()
 {
-	PCSXInitCheatData();
-	PCSXStartCheatSearch();
+//	PCSXInitCheatData();
+//	PCSXStartCheatSearch();
 	DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_CHEAT_SEARCH),gApp.hWnd,DlgCheatSearch);
 }
