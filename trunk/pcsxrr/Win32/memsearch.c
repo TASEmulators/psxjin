@@ -824,6 +824,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 							enable=FALSE;
 						}
 						EnableWindow(GetDlgItem(hDlg, IDC_C_ADD), enable);
+						EnableWindow(GetDlgItem(hDlg, IDC_C_WATCH), enable);
 					}
 					// allow typing in an address to jump to it
 					else if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && nmh->code == (UINT)LVN_ODFINDITEM)
@@ -1089,6 +1090,22 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				}
 				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
 				return TRUE;
+
+			case IDC_C_WATCH:
+				{
+					uint32 address = (uint32)-1;
+					char buf [12];
+					LVITEM lvi;
+					ITEM_QUERY(lvi, IDC_ADDYS, 0, buf, 7);
+					if(lvi.iItem != -1)
+					{
+						address = ScanAddress(buf);
+						memset(buf, 0, 7);
+						sprintf(buf, "%X", address);
+						AddMemWatch(buf);
+					}
+				}
+				break;
 
 			case IDC_REFRESHLIST:
 				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x32000);
