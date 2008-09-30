@@ -89,6 +89,7 @@ extern char * MemWatchDir;
 void CreateCheatEditor();
 void CreateMemSearch();
 void UpdateMemSearch();
+void PCSXInitCheatData();
 
 void PCSX_LoadState(int newState);
 void PCSX_SaveState(int newState);
