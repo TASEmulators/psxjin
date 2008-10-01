@@ -20,6 +20,7 @@
 
 #include "PsxCommon.h"
 #include "movie.h"
+extern struct Movie_Type currentMovie;
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4018)
@@ -40,10 +41,64 @@ static u32 branchPC;
 #define debugI()
 #endif
 
+#ifdef WIN32
+#include "Win32.h"
+#define execI() \
+{ \
+	if (flagDontPause) \
+	{ \
+		if (flagVSync) { \
+			if (flagSaveState) { \
+				PCSX_SaveState(flagSaveState-1); \
+				flagSaveState = 0; \
+			} \
+		} \
+		flagVSync = 0; \
+ \
+		u32 *code = PSXM(psxRegs.pc); \
+		psxRegs.code = code == NULL ? 0 : *code; \
+		debugI(); \
+		psxRegs.pc+= 4; psxRegs.cycle++; \
+		psxBSC[psxRegs.code >> 26](); \
+	} \
+	else { \
+		char modeFlags = 0; \
+		modeFlags |= MODE_FLAG_PAUSED; \
+		if (currentMovie.mode == 1) \
+			modeFlags |= MODE_FLAG_RECORD; \
+		if (currentMovie.mode == 2) \
+			modeFlags |= MODE_FLAG_REPLAY; \
+		GPU_setcurrentmode(modeFlags); \
+ \
+		GPU_updateframe(); \
+		SysUpdate(); \
+ \
+		if (flagSaveState) { \
+			PCSX_SaveState(flagSaveState-1); \
+			flagSaveState = 0; \
+		} \
+	} \
+	if (flagLoadState) { \
+		PCSX_LoadState(flagLoadState-1); \
+		flagLoadState = 0; \
+	} \
+	if (flagEscPressed) { \
+		Running = 0; \
+		flagEscPressed=0; \
+		flagDontPause = 1; \
+		if (currentMovie.mode == 1) \
+			PCSX_MOV_FlushMovieFile(); \
+		ClosePlugins(); \
+		SysRunGui(); \
+	} \
+}
+
+#else
 #define execI() \
 { \
 	if (flagDontPause)	\
 	{ \
+		flagVSync = 0; \
 		u32 *code = PSXM(psxRegs.pc); \
 		psxRegs.code = code == NULL ? 0 : *code; \
 		debugI(); \
@@ -52,10 +107,19 @@ static u32 branchPC;
 	} \
 	else	\
 	{	\
+		char modeFlags = 0; \
+		modeFlags |= MODE_FLAG_PAUSED; \
+		if (currentMovie.mode == 1) \
+			modeFlags |= MODE_FLAG_RECORD; \
+		if (currentMovie.mode == 2) \
+			modeFlags |= MODE_FLAG_REPLAY; \
+		GPU_setcurrentmode(modeFlags); \
+ \
 		GPU_updateframe(); \
 		SysUpdate(); \
 	}	\
 }
+#endif
 
 // Subsets
 void (*psxBSC[64])();

@@ -605,7 +605,7 @@ if (HasEmulatedFrame == 2) { // only poll once per each frame
 	if (currentMovie.mode == 1) {
 			PCSX_MOV_WriteJoy(padd,1);
 	}
-	else if (currentMovie.mode == 2) {
+	else if (currentMovie.mode == 2 && (currentMovie.currentFrame<currentMovie.totalFrames)) {
 		PadDataS paddtemp = PCSX_MOV_ReadJoy(1);
 		switch (currentMovie.padType1) {
 			case PSE_PAD_TYPE_MOUSE:
@@ -702,7 +702,7 @@ if (HasEmulatedFrame == 1) { // only poll once per each frame
 	if (currentMovie.mode == 1) {
 			PCSX_MOV_WriteJoy(padd,2);
 	}
-	else if (currentMovie.mode == 2) {
+	else if (currentMovie.mode == 2 && (currentMovie.currentFrame<currentMovie.totalFrames)) {
 		PadDataS paddtemp = PCSX_MOV_ReadJoy(2);
 		switch (currentMovie.padType2) {
 			case PSE_PAD_TYPE_MOUSE:

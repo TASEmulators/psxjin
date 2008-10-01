@@ -815,6 +815,128 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				SaveCheatFile(nameo);
 				if (!nameo[0]) return 1;
 
+				//fake IDOK
+				{
+					int k,l,fakeNumCheats;
+					BOOL hit;
+					unsigned int scanned;
+					fakeNumCheats = (int)Cheat.num_cheats;
+					int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
+					for(k=totalk;k>=0; k--)
+					{
+						hit=FALSE;
+						if (!(k==0 && fakeNumCheats==0)) {
+							for(l=0;l<fakeNumCheats;l++)
+							{
+								if(ct.index[l]==k)
+								{
+									hit=TRUE;
+									Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),ct.index[l]);
+									if(ct.state[l]==Untouched)
+										l=Cheat.num_cheats;
+									else if(ct.state[l]==(unsigned long)Modified)
+									{
+										if(Cheat.c[l].enabled)
+											PCSXDisableCheat(l);
+										
+										char buf[25];
+										LV_ITEM lvi;
+										ZeroMemory(&lvi, sizeof(LV_ITEM));
+										lvi.iItem= k;
+										lvi.mask=LVIF_TEXT;
+										lvi.pszText=buf;
+										lvi.cchTextMax=7;
+										
+										ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+										
+										Cheat.c[l].address = ScanAddress(lvi.pszText);
+										
+										ZeroMemory(&lvi, sizeof(LV_ITEM));
+										lvi.iItem= k;
+										lvi.iSubItem=1;
+										lvi.mask=LVIF_TEXT;
+										lvi.pszText=buf;
+										lvi.cchTextMax=3;
+										
+										ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+										
+										sscanf(lvi.pszText, "%02X", &scanned);
+										Cheat.c[l].byte = (uint8)(scanned & 0xff);
+										
+										ZeroMemory(&lvi, sizeof(LV_ITEM));
+										lvi.iItem= k;
+										lvi.iSubItem=2;
+										lvi.mask=LVIF_TEXT;
+										lvi.pszText=buf;
+										lvi.cchTextMax=24;
+										
+										ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+										
+										strcpy(Cheat.c[l].name,lvi.pszText);
+										
+										Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),ct.index[l]);
+										
+										if(Cheat.c[l].enabled)
+											PCSXEnableCheat(l);
+									}
+								}
+							}
+						}
+						if(!hit)
+						{
+							uint32 address;
+							uint8 byte;
+							uint8 enabled;
+							char buf[25];
+							
+							LV_ITEM lvi;
+							ZeroMemory(&lvi, sizeof(LV_ITEM));
+							lvi.iItem= k;
+							lvi.mask=LVIF_TEXT;
+							lvi.pszText=buf;
+							lvi.cchTextMax=7;
+							
+							ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+							
+							address = ScanAddress(lvi.pszText);
+							
+							ZeroMemory(&lvi, sizeof(LV_ITEM));
+							lvi.iItem= k;
+							lvi.iSubItem=1;
+							lvi.mask=LVIF_TEXT;
+							lvi.pszText=buf;
+							lvi.cchTextMax=3;
+							
+							ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+							
+							sscanf(lvi.pszText, "%02X", &scanned);
+							byte = (uint8)(scanned & 0xff);
+							
+							enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),k);
+							
+							PCSXAddCheat(enabled,1,address,byte);
+							
+							ZeroMemory(&lvi, sizeof(LV_ITEM));
+							lvi.iItem= k;
+							lvi.iSubItem=2;
+							lvi.mask=LVIF_TEXT;
+							lvi.pszText=buf;
+							lvi.cchTextMax=24;
+							
+							ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
+							
+							strcpy(Cheat.c[Cheat.num_cheats-1].name, lvi.pszText);
+						}
+					}
+	
+					for(l=(int)Cheat.num_cheats;l>=0;l--)
+					{
+						if(ct.state[l]==Deleted)
+						{
+							PCSXDeleteCheat(l);
+						}
+					}
+				}
 				PCSXSaveCheatFile(nameo);
 				break;
 			}
