@@ -830,7 +830,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				{
 					hit=FALSE;
 					if (!(k==0 && fakeNumCheats==0)) {
-						for(l=0;l<(int)Cheat.num_cheats;l++)
+						for(l=0;l<fakeNumCheats;l++)
 						{
 							if(ct.index[l]==k)
 							{
