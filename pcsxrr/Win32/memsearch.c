@@ -1243,7 +1243,7 @@ void CreateMemSearch()
 {
 	if(!cheatSearchHWND) // create and show non-modal cheat search window
 	{
-		cheatSearchHWND = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_CHEAT_SEARCH), gApp.hWnd, DlgCheatSearch);
+		cheatSearchHWND = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_CHEAT_SEARCH), NULL, DlgCheatSearch);
 		ShowWindow(cheatSearchHWND, SW_SHOW);
 	}
 	else // already open so just reactivate the window

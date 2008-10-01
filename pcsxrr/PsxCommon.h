@@ -205,6 +205,8 @@ struct Movie_Type {
 	//new buffer stuff
 };
 
+#define MOVIE_VERSION 1
+
 #define MOVIE_FLAG_FROM_POWERON (1<<1)
 #define MOVIE_FLAG_PAL_TIMING   (1<<2)
 

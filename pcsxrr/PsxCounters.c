@@ -181,7 +181,7 @@ buttonToSend = currentMovie.lastPad1.buttonStatus;
 buttonToSend = (buttonToSend ^ (currentMovie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
-if ((currentMovie.mode == 1) && (currentMovie.currentFrame%400 == 0))
+if ((currentMovie.mode == 1) && (currentMovie.currentFrame%1800 == 0))
 	PCSX_MOV_FlushMovieFile();
 
 char modeFlags = 0;

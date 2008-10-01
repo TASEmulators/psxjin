@@ -65,7 +65,7 @@ static void ReserveBufferSpace(uint32 space_needed)
 static int StartRecord()
 {
 	int movieFlags=0; int empty=0;
-
+	unsigned long emuVersion = EMU_VERSION; unsigned long movieVersion = MOVIE_VERSION;
 	SetBytesPerFrame();
 
 	currentMovie.rerecordCount = 0;
@@ -78,6 +78,8 @@ static int StartRecord()
 	currentMovie.readOnly = 0;
 
 	fwrite(&szFileHeader, 1, 4, fpRecordingMovie);          //header
+	fwrite(&movieVersion, 1, 4, fpRecordingMovie);          //movie version
+	fwrite(&emuVersion, 1, 4, fpRecordingMovie);            //emu version
 	fwrite(&movieFlags, 1, 1, fpRecordingMovie);            //flags
 	fwrite(&empty, 1, 1, fpRecordingMovie);                 //reserved for flags
 	fwrite(&currentMovie.padType1, 1, 1, fpRecordingMovie); //padType1
@@ -110,7 +112,7 @@ static int StartRecord()
 		fseek (fpRecordingMovie, 0, SEEK_END);
 	}
 	currentMovie.inputOffset = ftell(fpRecordingMovie);     //get input offset
-	fseek (fpRecordingMovie, 16, SEEK_SET);
+	fseek (fpRecordingMovie, 24, SEEK_SET);
 	fwrite(&currentMovie.savestateOffset, 1, 4, fpRecordingMovie); //write savestate offset
 	fwrite(&currentMovie.inputOffset, 1, 4, fpRecordingMovie);     //write input offset
 	fseek (fpRecordingMovie, 0, SEEK_END);
@@ -124,7 +126,7 @@ static int StartReplay()
 
 	if (currentMovie.saveStateIncluded) {
 		fpRecordingMovie = fopen(currentMovie.movieFilename,"r+b");
-		fseek(fpRecordingMovie, 16, SEEK_SET);
+		fseek(fpRecordingMovie, 24, SEEK_SET);
 		fread(&currentMovie.savestateOffset, 1, 4, fpRecordingMovie); //get savestate offset
 		fread(&currentMovie.inputOffset, 1, 4, fpRecordingMovie); //get input offset
 		fclose(fpRecordingMovie);
@@ -132,7 +134,7 @@ static int StartReplay()
 	}
 
 	fpRecordingMovie = fopen(currentMovie.movieFilename,"r+b");
-	fseek(fpRecordingMovie, 20, SEEK_SET);
+	fseek(fpRecordingMovie, 28, SEEK_SET);
 	fread(&currentMovie.inputOffset, 1, 4, fpRecordingMovie); //get input offset
 	fseek(fpRecordingMovie, currentMovie.inputOffset, SEEK_SET);
 //	currentMovie.currentPosition = ftell(fpRecordingMovie);
@@ -149,7 +151,7 @@ static int StartReplay()
 void PCSX_MOV_FlushMovieFile()
 {
 	fflush(fpRecordingMovie); // probably not needed...
-	fseek(fpRecordingMovie, 8, SEEK_SET);
+	fseek(fpRecordingMovie, 16, SEEK_SET);
 	fwrite(&currentMovie.currentFrame, 1, 4, fpRecordingMovie);  //total frames
 	fwrite(&currentMovie.rerecordCount, 1, 4, fpRecordingMovie); //rerecord count
 	currentMovie.totalFrames=currentMovie.currentFrame; //used when toggling read-only mode
@@ -214,13 +216,13 @@ void PCSX_MOV_WriteJoy(PadDataS pad,int port)
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
 			ReserveBufferSpace((uint32)((currentMovie.inputBufferPtr+4)-currentMovie.inputBuffer));
-			JoyWrite16(pad.buttonStatus);
+			JoyWrite16(pad.buttonStatus^0xFFFF);
 			JoyWrite8(pad.moveX);
 			JoyWrite8(pad.moveY);
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
 			ReserveBufferSpace((uint32)((currentMovie.inputBufferPtr+6)-currentMovie.inputBuffer));
-			JoyWrite16(pad.buttonStatus);
+			JoyWrite16(pad.buttonStatus^0xFFFF);
 			JoyWrite8(pad.leftJoyX);
 			JoyWrite8(pad.leftJoyY);
 			JoyWrite8(pad.rightJoyX);
@@ -228,7 +230,7 @@ void PCSX_MOV_WriteJoy(PadDataS pad,int port)
 			break;
 		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
 			ReserveBufferSpace((uint32)((currentMovie.inputBufferPtr+6)-currentMovie.inputBuffer));
-			JoyWrite16(pad.buttonStatus);
+			JoyWrite16(pad.buttonStatus^0xFFFF);
 			JoyWrite8(pad.leftJoyX);
 			JoyWrite8(pad.leftJoyY);
 			JoyWrite8(pad.rightJoyX);
@@ -237,7 +239,7 @@ void PCSX_MOV_WriteJoy(PadDataS pad,int port)
 		case PSE_PAD_TYPE_STANDARD:
 		default:
 			ReserveBufferSpace((uint32)((currentMovie.inputBufferPtr+2)-currentMovie.inputBuffer));
-			JoyWrite16(pad.buttonStatus);
+			JoyWrite16(pad.buttonStatus^0xFFFF);
 	}
 }
 
@@ -287,6 +289,7 @@ PadDataS PCSX_MOV_ReadJoy(int port)
 		default:
 			pad.buttonStatus = JoyRead16();
 	}
+	pad.buttonStatus ^= 0xffff;
 	return(pad);
 }
 

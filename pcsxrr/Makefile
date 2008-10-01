@@ -34,7 +34,7 @@ endif
 #  pentium and i686 is equivalent to pentiumpro.
 
 OPTIMIZE = -O2 -fomit-frame-pointer -finline-functions -ffast-math
-FLAGS = -D__WIN32__ -D__MINGW32__ -DPCSX_VERSION=\"${VERSION}\"
+FLAGS = -D__WIN32__ -D__MINGW32__ -DEMU_VERSION=5 -DPCSX_VERSION=\"${VERSION}\"
 RC1FLAGS = -d__MINGW32__
 LIBS = -lz -lcomctl32
 RESOBJ = Win32/pcsxres.o

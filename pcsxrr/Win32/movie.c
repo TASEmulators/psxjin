@@ -132,24 +132,25 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	}
 
 	memset(ReadHeader, 0, 4);
-	fread(ReadHeader, 1, 4, fd);						// Read identifier
-	if (memcmp(ReadHeader, szFileHeader, 4)) {			// Not the right file type
+	fread(ReadHeader, 1, 4, fd);               // read identifier
+	if (memcmp(ReadHeader, szFileHeader, 4)) { // not the right file type
 		fclose(fd);
 		return;
 	}
 
-	fread(&movieFlags, 1, 1, fd);						// Read identifier
-	if (movieFlags&MOVIE_FLAG_FROM_POWERON)			// starts from reset
+	fseek(fd, 8, SEEK_CUR);                   //skip movie/emu version
+	fread(&movieFlags, 1, 1, fd);             // read flags
+	if (movieFlags&MOVIE_FLAG_FROM_POWERON)   // starts from reset
 		currentMovie.saveStateIncluded = 0;
 	else
 		currentMovie.saveStateIncluded = 1;
 	char palTiming = 0;
-	if (movieFlags&MOVIE_FLAG_PAL_TIMING)
+	if (movieFlags&MOVIE_FLAG_PAL_TIMING)     // get system FPS
 		palTiming = 1;
 
-	fread(&movieFlags, 1, 1, fd);                 //reserved for flags
-	fread(&currentMovie.padType1, 1, 1, fd); //padType1
-	fread(&currentMovie.padType2, 1, 1, fd); //padType2
+	fread(&movieFlags, 1, 1, fd);             //reserved for flags
+	fread(&currentMovie.padType1, 1, 1, fd);  //padType1
+	fread(&currentMovie.padType2, 1, 1, fd);  //padType2
 
 	fread(&currentMovie.totalFrames, 1, 4, fd);
 	fread(&currentMovie.rerecordCount, 1, 4, fd);
