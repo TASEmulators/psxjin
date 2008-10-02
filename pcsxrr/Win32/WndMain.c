@@ -336,7 +336,6 @@ void OnStates_SaveOther() {
 
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	char File[256];
-	int nRet;
 
 	switch (msg) {
 		case WM_COMMAND:
@@ -348,77 +347,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_RECORD_MOVIE:
-					nRet = PCSX_MOV_StartMovieDialog();
-					if (nRet) {
-						currentMovie.currentFrame = 0;
-						currentMovie.lagCounter = 0;
-						if (currentMovie.saveStateIncluded) {
-							PCSX_MOV_StartMovie(1);
-							SetMenu(hWnd, NULL);
-							OpenPlugins(hWnd);
-//							ShowCursor(FALSE);
-							Running = 1;
-							psxCpu->Execute();
-							return TRUE;
-						}
-						PCSX_MOV_StartMovie(1);
-						LoadCdBios = 0;
-						SetMenu(hWnd, NULL);
-						OpenPlugins(hWnd);
-						SysReset();
-						NeedReset = 0;
-						CheckCdrom();
-						if (LoadCdrom() == -1) {
-							ClosePlugins();
-							RestoreWindow();
-							SysMessage(_("Could not load Cdrom"));
-							return TRUE;
-						}
-//						ShowCursor(FALSE);
-						Running = 1;
-						psxCpu->Execute();
-					}
+					WIN32_StartMovieRecord();
 					return TRUE;
 
 				case ID_FILE_REPLAY_MOVIE:
-					nRet = PCSX_MOV_StartReplayDialog();
-					if (nRet) {
-						currentMovie.currentFrame = 0;
-						currentMovie.lagCounter = 0;
-						if (currentMovie.saveStateIncluded) {
-							PCSX_MOV_StartMovie(2);
-							SetMenu(hWnd, NULL);
-							OpenPlugins(hWnd);
-							NeedReset = 0;
-							CheckCdrom();
-							if (LoadCdrom() == -1) {
-								ClosePlugins();
-								RestoreWindow();
-								SysMessage(_("Could not load Cdrom"));
-								return TRUE;
-							}
-//							ShowCursor(FALSE);
-							Running = 1;
-							psxCpu->Execute();
-							return TRUE;
-						}
-						PCSX_MOV_StartMovie(2);
-						LoadCdBios = 0;
-						SetMenu(hWnd, NULL);
-						OpenPlugins(hWnd);
-						SysReset();
-						NeedReset = 0;
-						CheckCdrom();
-						if (LoadCdrom() == -1) {
-							ClosePlugins();
-							RestoreWindow();
-							SysMessage(_("Could not load Cdrom"));
-							return TRUE;
-						}
-//						ShowCursor(FALSE);
-						Running = 1;
-						psxCpu->Execute();
-					}
+					WIN32_StartMovieReplay();
 					return TRUE;
 
 				case ID_FILE_STOP_MOVIE:
@@ -1660,8 +1593,6 @@ void WIN32_StartMovieReplay()
 	int nRet;
 	nRet = PCSX_MOV_StartReplayDialog();
 	if (nRet) {
-		currentMovie.currentFrame = 0;
-		currentMovie.lagCounter = 0;
 		if (currentMovie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
@@ -1701,8 +1632,6 @@ void WIN32_StartMovieRecord()
 	int nRet;
 	nRet = PCSX_MOV_StartMovieDialog();
 	if (nRet) {
-		currentMovie.currentFrame = 0;
-		currentMovie.lagCounter = 0;
 		if (currentMovie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);

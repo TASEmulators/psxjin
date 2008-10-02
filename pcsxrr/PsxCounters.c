@@ -198,7 +198,7 @@ GPU_setcurrentmode(modeFlags);
 //	if (currentMovie.currentFrame%30 == 0)
 //		UpdateMemSearch();
 #endif
-//if (currentMovie.currentFrame>9)
+//if (currentMovie.inputBufferPtr)
 //SysPrintf("%d/%d\n---\n",currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
 
 
