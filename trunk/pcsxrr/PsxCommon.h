@@ -189,8 +189,6 @@ struct Movie_Type {
 	unsigned long inputOffset;
 	unsigned long savestateOffset;
 	//Locations in file
-	unsigned long currentPosition;
-	//Current Location in file
 	char authorInfo[MOVIE_MAX_METADATA];
 	//Author Info
 	char movieFilenameMini[MAX_PATH];

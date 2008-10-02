@@ -19,6 +19,9 @@ extern struct Movie_Type currentMovie;
 
 static const char szFileHeader[] = "PXM ";				// File identifier
 
+void PCSX_MOV_WriteJoy(PadDataS pad,int port);
+PadDataS PCSX_MOV_ReadJoy(int port);
+
 static void SetBytesPerFrame()
 {
 	currentMovie.bytesPerFrame = 0;
@@ -116,7 +119,10 @@ static int StartRecord()
 	fwrite(&currentMovie.savestateOffset, 1, 4, fpRecordingMovie); //write savestate offset
 	fwrite(&currentMovie.inputOffset, 1, 4, fpRecordingMovie);     //write input offset
 	fseek (fpRecordingMovie, 0, SEEK_END);
-	currentMovie.currentPosition = ftell(fpRecordingMovie);
+	currentMovie.inputBufferPtr = currentMovie.inputBuffer;
+
+	//currentMovie.inputBufferPtr gets behind by 1 frame if we don't do this first...
+	PCSX_MOV_WriteJoy(currentMovie.lastPad1,1); PCSX_MOV_WriteJoy(currentMovie.lastPad2,2);
 	return 1;
 }
 
@@ -137,7 +143,6 @@ static int StartReplay()
 	fseek(fpRecordingMovie, 28, SEEK_SET);
 	fread(&currentMovie.inputOffset, 1, 4, fpRecordingMovie); //get input offset
 	fseek(fpRecordingMovie, currentMovie.inputOffset, SEEK_SET);
-//	currentMovie.currentPosition = ftell(fpRecordingMovie);
 
 	// fill input buffer
 	currentMovie.inputBufferPtr = currentMovie.inputBuffer;
@@ -145,6 +150,9 @@ static int StartReplay()
 	ReserveBufferSpace(to_read);
 	fread(currentMovie.inputBufferPtr, 1, to_read, fpRecordingMovie);
 
+	//currentMovie.inputBufferPtr gets behind by 1 frame if we don't do this first...
+	PadDataS desync;
+	desync=PCSX_MOV_ReadJoy(1); desync=PCSX_MOV_ReadJoy(2);
 	return 1;
 }
 
@@ -177,14 +185,25 @@ void PCSX_MOV_StopMovie()
 {
 	if (currentMovie.mode == 1)
 		PCSX_MOV_FlushMovieFile();
-	currentMovie.mode = 0;
 	fclose(fpRecordingMovie);
-	truncateMovie();
+	if (currentMovie.mode == 1)
+		truncateMovie();
+	currentMovie.mode = 0;
 	fpRecordingMovie = NULL;
+//	if(currentMovie.inputBuffer)
+//	{
+//		free(currentMovie.inputBuffer);
+//		currentMovie.inputBuffer = NULL;
+//	}
 }
 
 void PCSX_MOV_StartMovie(int mode)
 {
+//	if(currentMovie.inputBuffer)
+//	{
+//		free(currentMovie.inputBuffer);
+//		currentMovie.inputBuffer = NULL;
+//	}
 	currentMovie.mode = mode;
 	if (currentMovie.mode == 1)
 		StartRecord();
@@ -295,6 +314,7 @@ PadDataS PCSX_MOV_ReadJoy(int port)
 
 int movieFreeze(gzFile f, int Mode) {
 	unsigned long bufSize = 0;
+//SysPrintf("Mode %d - %d/%d\n",Mode,currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
 
 	if (Mode == 1) { //  if saving state
 		bufSize = currentMovie.bytesPerFrame * (currentMovie.currentFrame+1);
@@ -317,5 +337,6 @@ int movieFreeze(gzFile f, int Mode) {
 		GPU_setframecounter(currentMovie.currentFrame,currentMovie.totalFrames);
 	}
 
+//SysPrintf("Mode %d - %d/%d\n---\n",Mode,currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
 	return 0;
 }
