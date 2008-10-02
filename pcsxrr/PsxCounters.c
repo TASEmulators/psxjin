@@ -130,7 +130,6 @@ void psxRcntUpdate() {
 	#endif
 
 					/* movie stuff start */
-
 currentMovie.currentFrame++;
 GPU_setframecounter(currentMovie.currentFrame,currentMovie.totalFrames);
 
@@ -199,6 +198,9 @@ GPU_setcurrentmode(modeFlags);
 //	if (currentMovie.currentFrame%30 == 0)
 //		UpdateMemSearch();
 #endif
+//if (currentMovie.currentFrame>9)
+//SysPrintf("%d/%d\n---\n",currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
+
 
 					/* movie stuff end */
 		} else { // VSync Start (240 hsyncs) 

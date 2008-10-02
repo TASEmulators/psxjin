@@ -353,14 +353,15 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						currentMovie.currentFrame = 0;
 						currentMovie.lagCounter = 0;
 						if (currentMovie.saveStateIncluded) {
+							PCSX_MOV_StartMovie(1);
 							SetMenu(hWnd, NULL);
 							OpenPlugins(hWnd);
 //							ShowCursor(FALSE);
 							Running = 1;
-							PCSX_MOV_StartMovie(1);
 							psxCpu->Execute();
 							return TRUE;
 						}
+						PCSX_MOV_StartMovie(1);
 						LoadCdBios = 0;
 						SetMenu(hWnd, NULL);
 						OpenPlugins(hWnd);
@@ -375,7 +376,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						}
 //						ShowCursor(FALSE);
 						Running = 1;
-						PCSX_MOV_StartMovie(1);
 						psxCpu->Execute();
 					}
 					return TRUE;
@@ -386,6 +386,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						currentMovie.currentFrame = 0;
 						currentMovie.lagCounter = 0;
 						if (currentMovie.saveStateIncluded) {
+							PCSX_MOV_StartMovie(2);
 							SetMenu(hWnd, NULL);
 							OpenPlugins(hWnd);
 							NeedReset = 0;
@@ -398,10 +399,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							}
 //							ShowCursor(FALSE);
 							Running = 1;
-							PCSX_MOV_StartMovie(2);
 							psxCpu->Execute();
 							return TRUE;
 						}
+						PCSX_MOV_StartMovie(2);
 						LoadCdBios = 0;
 						SetMenu(hWnd, NULL);
 						OpenPlugins(hWnd);
@@ -416,7 +417,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						}
 //						ShowCursor(FALSE);
 						Running = 1;
-						PCSX_MOV_StartMovie(2);
 						psxCpu->Execute();
 					}
 					return TRUE;
