@@ -121,8 +121,6 @@ static int StartRecord()
 	fseek (fpRecordingMovie, 0, SEEK_END);
 	currentMovie.inputBufferPtr = currentMovie.inputBuffer;
 
-	//currentMovie.inputBufferPtr gets behind by 1 frame if we don't do this first...
-	PCSX_MOV_WriteJoy(currentMovie.lastPad1,1); PCSX_MOV_WriteJoy(currentMovie.lastPad2,2);
 	return 1;
 }
 
@@ -150,9 +148,6 @@ static int StartReplay()
 	ReserveBufferSpace(to_read);
 	fread(currentMovie.inputBufferPtr, 1, to_read, fpRecordingMovie);
 
-	//currentMovie.inputBufferPtr gets behind by 1 frame if we don't do this first...
-	PadDataS desync;
-	desync=PCSX_MOV_ReadJoy(1); desync=PCSX_MOV_ReadJoy(2);
 	return 1;
 }
 
@@ -205,6 +200,8 @@ void PCSX_MOV_StartMovie(int mode)
 //		currentMovie.inputBuffer = NULL;
 //	}
 	currentMovie.mode = mode;
+	currentMovie.currentFrame = 0;
+	currentMovie.lagCounter = 0;
 	if (currentMovie.mode == 1)
 		StartRecord();
 	else if (currentMovie.mode == 2)
