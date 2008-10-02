@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "PsxCommon.h"
+#include "movie.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)
@@ -230,7 +231,7 @@ u32 psxHwRead32(u32 add) {
 			return hard;
 
 		case 0x1f801820: hard = mdecRead0(); break;
-		case 0x1f801824: hard = mdecRead1(); break;
+		case 0x1f801824: flagGPUchain=1; hard = mdecRead1(); break;
 
 #ifdef PSXHW_LOG
 		case 0x1f8010a0:
