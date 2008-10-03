@@ -8,7 +8,7 @@
 
 extern AppData gApp;
 
-HWND hMHkeysDlg = NULL;							// Handle to the MapHotkeys Dialog
+HWND hMHkeysDlg = NULL;
 
 struct EMUCMDTABLE EmuCommandTable[]=
 {
@@ -67,8 +67,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'X',             VK_CONTROL,  "Configure CPU", }
 };
 static HWND hMHkeysList = NULL;
-static unsigned char *LastVal = NULL;			// Last input values/defined
-static int bLastValDefined = 0;					//
+static unsigned char *LastVal = NULL;
+static int bLastValDefined = 0;
 
 static HHOOK hook;
 static int receivingKmap;

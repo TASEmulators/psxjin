@@ -600,6 +600,8 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	PAD1_readPort1(&padd);
 
 /* movie stuff start */
+//SysPrintf("HasEmulatedFrame %d\n",HasEmulatedFrame);
+
 
 if (HasEmulatedFrame == 2) { // only poll once per each frame
 	if (currentMovie.mode == 1) {
@@ -634,11 +636,11 @@ if (HasEmulatedFrame == 2) { // only poll once per each frame
 		padd.controllerType=currentMovie.padType1;
 	}
 	memcpy(&currentMovie.lastPad1,&padd,sizeof(padd));
+	HasEmulatedFrame = 1;
 }
 else {
 	memcpy(&padd,&currentMovie.lastPad1,sizeof(currentMovie.lastPad1));
 }
-	HasEmulatedFrame = 1;
 
 /* movie stuff end */
 
@@ -735,7 +737,7 @@ if (HasEmulatedFrame == 1) { // only poll once per each frame
 else {
 	memcpy(&padd,&currentMovie.lastPad2,sizeof(currentMovie.lastPad2));
 }
-	HasEmulatedFrame = 0;
+HasEmulatedFrame = 0;
 
 /* movie stuff end */
 
