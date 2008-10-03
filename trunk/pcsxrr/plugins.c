@@ -602,7 +602,6 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 /* movie stuff start */
 //SysPrintf("HasEmulatedFrame %d\n",HasEmulatedFrame);
 
-
 if (HasEmulatedFrame == 2) { // only poll once per each frame
 	if (currentMovie.mode == 1) {
 			PCSX_MOV_WriteJoy(padd,1);
