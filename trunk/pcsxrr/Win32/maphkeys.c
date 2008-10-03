@@ -53,8 +53,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ '9',             0,           "Select State 9", },
 	{ VK_F7,           VK_CONTROL,  "Load Current State", },
 	{ VK_F5,           VK_CONTROL,  "Save Current State", },
-	{ 0,               0,           "Start Recording", },
-	{ 0,               0,           "Start Playback", },
+	{ 'N',             VK_CONTROL,  "Start Recording", },
+	{ 'R',             VK_CONTROL,  "Start Playback", },
 	{ 'T',             VK_CONTROL,  "Stop Movie", },
 	{ 'M',             VK_CONTROL,  "Memory Cards", },
 	{ 'C',             VK_CONTROL,  "Cheat Editor", },
@@ -62,7 +62,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'W',             VK_CONTROL,  "RAM Watch", },
 	{ 'G',             VK_CONTROL,  "Configure Graphics", },
 	{ 'S',             VK_CONTROL,  "Configure Sound", },
-	{ 'R',             VK_CONTROL,  "Configure CD-ROM", },
+	{ 'D',             VK_CONTROL,  "Configure CD-ROM", },
 	{ 'P',             VK_CONTROL,  "Configure Controllers", },
 	{ 'X',             VK_CONTROL,  "Configure CPU", }
 };
