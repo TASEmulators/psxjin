@@ -1,5 +1,7 @@
 = PXM file format description =
 
+(This isn't the real PlayStation protocol. See this page for that: [http://www.gamesx.com/controldata/psxcont/psxcont.htm|SONY PLAYSTATION® CONTROLLER INFORMATION].
+
 == Header ==
 
 {{{
