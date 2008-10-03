@@ -369,9 +369,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_FILE_RUN_CD:
-					currentMovie.mode = 0;
-					currentMovie.currentFrame = 0;
-					currentMovie.lagCounter = 0;
+//					currentMovie.mode = 0;
+//					currentMovie.currentFrame = 0;
+//					currentMovie.lagCounter = 0;
 					LoadCdBios = 0;
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
@@ -390,9 +390,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_RUNCDBIOS:
-					currentMovie.mode = 0;
-					currentMovie.currentFrame = 0;
-					currentMovie.lagCounter = 0;
+//					currentMovie.mode = 0;
+//					currentMovie.currentFrame = 0;
+//					currentMovie.lagCounter = 0;
 					LoadCdBios = 1;
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
