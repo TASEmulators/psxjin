@@ -70,9 +70,9 @@ void gpuShowPic() {
 void PCSX_SaveState(int newState) {
 	StatesC=newState;
 	if (currentMovie.mode)
-		sprintf(Text, "sstates\\%s.pxm.%3.3d", currentMovie.movieFilenameMini, StatesC);
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, currentMovie.movieFilenameMini, StatesC);
 	else
-		sprintf(Text, "sstates\\%10.10s.%3.3d", CdromLabel, StatesC);
+		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
 	GPU_freeze(2, (GPUFreeze_t *)&StatesC);
 	ret = SaveState(Text);
 	if (ret == 0)
@@ -95,9 +95,9 @@ void PCSX_LoadState(int newState) {
 	}
 	StatesC=newState;
 	if (currentMovie.mode)
-		sprintf(Text, "sstates\\%s.pxm.%3.3d", currentMovie.movieFilenameMini, StatesC);
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, currentMovie.movieFilenameMini, StatesC);
 	else
-		sprintf(Text, "sstates\\%10.10s.%3.3d", CdromLabel, StatesC);
+		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
 	ret = LoadState(Text);
 	if (ret == 0)
 		sprintf(Text, _("*PCSX*: Loaded State %d"), StatesC+1);

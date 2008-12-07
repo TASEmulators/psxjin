@@ -95,6 +95,7 @@ void PCSX_SaveState(int newState);
 extern int flagSaveState;
 extern int flagLoadState;
 extern int flagEscPressed;
+extern char szCurrentPath[MAX_PATH];
 
 void WIN32_StartMovieReplay(char* szFilenanme);
 void WIN32_StartMovieRecord();
