@@ -2,6 +2,7 @@
 # plugin specific makefile
 #
 
+CPUTYPE=i686
 PLUGIN = gpuPeopsSoft
 #PLUGINTYPE = libgpu.so
 ifndef CPUTYPE

@@ -134,10 +134,10 @@
 
 #define XPSXCOL(r,g,b) ((g&0x7c00)|(b&0x3e0)|(r&0x1f))
 
-#ifdef _WINDOWS
-#pragma warning (disable:4244)
-#pragma warning (disable:4761)
-#endif
+//#ifdef _WINDOWS
+//#pragma warning (disable:4244)
+//#pragma warning (disable:4761)
+//#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 // soft globals
@@ -1565,7 +1565,7 @@ __inline BOOL SetupSections_G(short x1,short y1,short x2,short y2,short x3,short
   }
 
  Ymin=v1->y;
- Ymax=min(v3->y-1,drawH);    
+ Ymax=min(v3->y-1,drawH);
 
  delta_right_R=shl10idiv(temp*((v3->R - v1->R)>>10)+((v1->R - v2->R)<<6),longest);
  delta_right_G=shl10idiv(temp*((v3->G - v1->G)>>10)+((v1->G - v2->G)<<6),longest);

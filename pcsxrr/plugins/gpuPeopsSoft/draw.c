@@ -4496,6 +4496,7 @@ int DXinitialize()
 
 	if(iDebugMode || iUseNoStretchBlt>=3)
 						ddsd.dwWidth        = 1024;
+//	else ddsd.dwWidth        = 320;
 	else ddsd.dwWidth        = 640;
 
 	if(iUseNoStretchBlt>=3)
@@ -4503,6 +4504,7 @@ int DXinitialize()
 	else
 		{
 			if(iDebugMode) ddsd.dwHeight = iGPUHeight;
+//			else           ddsd.dwHeight = 240;
 			else           ddsd.dwHeight = 512;
 		}
 

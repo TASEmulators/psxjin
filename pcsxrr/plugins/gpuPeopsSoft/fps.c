@@ -121,7 +121,7 @@ void FrameCap (void)                                   // frame limit func
 	static DWORD TicksToWait = 0;
 	static LARGE_INTEGER  CurrentTime;
 	static LARGE_INTEGER  LastTime;
-	static BOOL SkipNextWait = FALSE;
+//	static BOOL SkipNextWait = FALSE;
 	BOOL Waiting = TRUE;
 
 //---------------------------------------------------------
@@ -564,7 +564,7 @@ void PCcalcfps(void)
 	else
 		{
 			curticks = timeGetTime();
-			if(_ticks_since_last_update=curticks-lastticks)
+			if((_ticks_since_last_update=curticks-lastticks))
 								CurrentFPS=(float)1000/(float)_ticks_since_last_update;
 			else CurrentFPS = 0;
 			lastticks = curticks;
