@@ -24,7 +24,7 @@
 014 4-byte unsigned long: rerecord count
 018 4-byte unsigned long: offset to the savestate inside file
 01C 4-byte unsigned long: offset to the controller data inside file
-020 4-byte unsigned long: string lenght
+020 4-byte unsigned long: string length
 024 string: name of the author
 }}}
 
