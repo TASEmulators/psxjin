@@ -293,7 +293,7 @@ unsigned char nStatusSymbols[3] = {0x3D, 0x34, 0x3B};
 memset(cCurrentMode, 0, sizeof(cCurrentMode));
 int j = 0;int i = 0;
 for (i = 0; i < 3; i++) {
-	if (modeFlags & (1 << i+1)) {
+	if (modeFlags & (1 << (i+1))) {
 		cCurrentMode[j] = nStatusSymbols[i];
 		j++;
 	}

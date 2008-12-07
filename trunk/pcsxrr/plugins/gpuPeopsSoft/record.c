@@ -40,7 +40,7 @@
 #include "record.h"
 #include "gpu.h"
 
-extern BOOL			RECORD_RECORDING = FALSE;
+BOOL			RECORD_RECORDING = FALSE;
 BITMAPINFOHEADER	RECORD_BI = {40,0,0,1,16,0,0,2048,2048,0,0};
 unsigned char		RECORD_BUFFER[1600*1200*3];
 unsigned long		RECORD_INDEX;
@@ -77,7 +77,7 @@ if(HIWORD(VideoForWindowsVersion())<0x010a) {MessageBox(NULL,"Video for Windows 
 mkdir("DEMO");
 while(TRUE)
 	{
-	sprintf(filename,"DEMO\\DEMO%04d.AVI",RECORD_INDEX++);
+	sprintf(filename,"DEMO\\DEMO%04lu.AVI",RECORD_INDEX++);
 	if((data=fopen(filename,"rb"))==NULL) break;
 	fclose(data);
 	if(RECORD_INDEX>9999) goto error;

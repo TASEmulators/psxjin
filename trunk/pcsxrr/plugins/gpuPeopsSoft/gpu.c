@@ -433,7 +433,7 @@ void DoTextSnapShot(int iNum)
 
 ////////////////////////////////////////////////////////////////////////
 
-void CALLBACK GPUmakeSnapshot(void)                    // snapshot of whole vram
+void CALLBACK GPUmakeSnapshot(void)
 {
 	makeCleanSnapshot();
 }
@@ -484,7 +484,7 @@ void makeCleanSnapshot(void)                    // snapshot of current screen
 		{
 			snapshotnr++;
 #ifdef _WINDOWS
-			sprintf(filename,"SNAP\\snap_%03d.bmp",snapshotnr);
+			sprintf(filename,"SNAP\\snap_%03lu.bmp",snapshotnr);
 #else
 			sprintf(filename,"%s/peopssoft%03ld.bmp",getenv("HOME"),snapshotnr);
 #endif
@@ -514,7 +514,9 @@ void makeCleanSnapshot(void)                    // snapshot of current screen
 	fwrite(empty,0x2,1,bmpfile);
 	fclose(bmpfile);  
 
-//	DoTextSnapShot(snapshotnr);
+	char sendThisText[50];
+	sprintf(sendThisText,"Snap saved as \"snap_%03lu.bmp\".",snapshotnr);
+	GPUdisplayText(sendThisText);
 }
 
 void makeSnapshot(void)                    // snapshot of whole vram
@@ -561,7 +563,7 @@ void makeSnapshot(void)                    // snapshot of whole vram
 		{
 			snapshotnr++;
 #ifdef _WINDOWS
-			sprintf(filename,"SNAP\\PEOPSSOFT%03d.bmp",snapshotnr);
+			sprintf(filename,"SNAP\\PEOPSSOFT%03lu.bmp",snapshotnr);
 #else
 			sprintf(filename,"%s/peopssoft%03ld.bmp",getenv("HOME"),snapshotnr);
 #endif

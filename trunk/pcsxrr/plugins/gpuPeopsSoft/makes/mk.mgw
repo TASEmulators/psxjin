@@ -3,6 +3,7 @@
 #
 
 CPU = i386
+#CPU = ix86
 
 CC = gcc
 LD = dllwrap

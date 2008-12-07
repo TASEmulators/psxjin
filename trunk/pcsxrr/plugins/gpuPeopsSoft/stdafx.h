@@ -49,10 +49,10 @@
                                                        
 
 // stupid intel compiler warning on extern __inline funcs
-#pragma warning (disable:864)
+//#pragma warning (disable:864)
 // disable stupid MSVC2005 warnings as well...
-#pragma warning (disable:4996)
-#pragma warning (disable:4244)
+//#pragma warning (disable:4996)
+//#pragma warning (disable:4244)
 
 // enable that for auxprintf();
 //#define SMALLDEBUG

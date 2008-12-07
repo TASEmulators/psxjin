@@ -291,10 +291,10 @@ void GPU_DmaExec(UINT32 adr,UINT32 bcr,UINT32 chcr)
     switch(chcr){
     case 0x01000200:
         Flush(adr,adr+size*4);
-	GPUreadDataMem(ram32, size);
+	GPUreadDataMem((unsigned long*)ram32, size);
         break;
     case 0x01000201:
-	GPUwriteDataMem(ram32, size);
+	GPUwriteDataMem((unsigned long*)ram32, size);
         break;
     case 0x01000401:
         GPUdmaChain((unsigned long*)ram,adr&0x1fffff);
