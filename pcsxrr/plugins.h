@@ -196,7 +196,6 @@ typedef void (CALLBACK* SPUregisterCallback)(void (CALLBACK *callback)(void));
 typedef long (CALLBACK* SPUconfigure)(void);
 typedef long (CALLBACK* SPUtest)(void);			
 typedef void (CALLBACK* SPUabout)(void);
-typedef void (CALLBACK* SPUtellFrame) (unsigned long);
 typedef struct {
 	unsigned char PluginName[8];
 	unsigned long PluginVersion;
@@ -238,8 +237,6 @@ SPUplayADPCMchannel SPU_playADPCMchannel;
 SPUfreeze           SPU_freeze;
 SPUregisterCallback SPU_registerCallback;
 SPUasync            SPU_async;
-SPUtellFrame        SPU_tellFrame;
-
 // PAD Functions
 
 typedef long (CALLBACK* PADconfigure)(void);

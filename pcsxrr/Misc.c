@@ -27,8 +27,6 @@
 #include "plugins.h"
 #include "movie.h"
 
-extern struct Movie_Type currentMovie;
-
 int Log = 0;
 
 char *LabelAuthors = { N_(

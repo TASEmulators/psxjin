@@ -20,7 +20,6 @@
 
 #include "PsxCommon.h"
 #include "movie.h"
-extern struct Movie_Type currentMovie;
 #ifdef WIN32
 #include "Win32.h"
 #include "./Win32/cheat.h"
@@ -211,7 +210,6 @@ GPU_setcurrentmode(modeFlags);
 			psxUpdateVSyncRateEnd();
 			psxRcntUpd(3);
 			psxHu32ref(0x1070)|= SWAPu32(1);
-SPU_tellFrame(currentMovie.currentFrame);
 		}
 	}
 

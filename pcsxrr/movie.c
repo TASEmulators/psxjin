@@ -8,6 +8,8 @@
 #include <windows.h>
 #endif
 
+struct Movie_Type currentMovie;
+
 FILE* fpRecordingMovie = 0;
 FILE* fpTempMovie = 0;
 int flagDontPause = 1;
@@ -15,9 +17,8 @@ int flagFakePause = 0;
 int flagGPUchain = 0;
 int flagVSync = 0;
 int HasEmulatedFrame = 0;
-extern struct Movie_Type currentMovie;
 
-static const char szFileHeader[] = "PXM ";				// File identifier
+static const char szFileHeader[] = "PXM "; // File identifier
 
 void PCSX_MOV_WriteJoy(PadDataS pad,int port);
 PadDataS PCSX_MOV_ReadJoy(int port);
@@ -128,25 +129,19 @@ static int StartReplay()
 {
 	SetBytesPerFrame();
 
-	if (currentMovie.saveStateIncluded) {
-		fpRecordingMovie = fopen(currentMovie.movieFilename,"r+b");
-		fseek(fpRecordingMovie, 24, SEEK_SET);
-		fread(&currentMovie.savestateOffset, 1, 4, fpRecordingMovie); //get savestate offset
-		fread(&currentMovie.inputOffset, 1, 4, fpRecordingMovie); //get input offset
-		fclose(fpRecordingMovie);
+	if (currentMovie.saveStateIncluded)
 		LoadStateEmbed(currentMovie.movieFilename);
-	}
-
-	fpRecordingMovie = fopen(currentMovie.movieFilename,"r+b");
-	fseek(fpRecordingMovie, 28, SEEK_SET);
-	fread(&currentMovie.inputOffset, 1, 4, fpRecordingMovie); //get input offset
-	fseek(fpRecordingMovie, currentMovie.inputOffset, SEEK_SET);
 
 	// fill input buffer
-	currentMovie.inputBufferPtr = currentMovie.inputBuffer;
-	uint32 to_read = currentMovie.bytesPerFrame * (currentMovie.totalFrames+1);
-	ReserveBufferSpace(to_read);
-	fread(currentMovie.inputBufferPtr, 1, to_read, fpRecordingMovie);
+	fpRecordingMovie = fopen(currentMovie.movieFilename,"r+b");
+	fseek(fpRecordingMovie, currentMovie.inputOffset, SEEK_SET);
+	{
+		currentMovie.inputBufferPtr = currentMovie.inputBuffer;
+		uint32 to_read = currentMovie.bytesPerFrame * (currentMovie.totalFrames+1);
+		ReserveBufferSpace(to_read);
+		fread(currentMovie.inputBufferPtr, 1, to_read, fpRecordingMovie);
+	}
+	fclose(fpRecordingMovie);
 
 	return 1;
 }
@@ -336,4 +331,67 @@ int movieFreeze(gzFile f, int Mode) {
 
 //SysPrintf("Mode %d - %d/%d\n---\n",Mode,currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
 	return 0;
+}
+
+int loadMovieFile(char* szChoice, struct Movie_Type *tempMovie) {
+	char readHeader[4];
+	int movieFlags = 0;
+	const char szFileHeader[] = "PXM "; // file identifier
+
+	tempMovie->movieFilename = szChoice;
+
+	FILE* fd = fopen(tempMovie->movieFilename, "r+b");
+	if (!fd)
+		return 0;
+
+	fread(readHeader, 1, 4, fd);              // read identifier
+	if (memcmp(readHeader,szFileHeader,4)) {  // not the right file type
+		fclose(fd);
+		return 0;
+	}
+
+	fread(&tempMovie->formatVersion,1,4,fd);  // file format version number
+	fread(&tempMovie->emuVersion, 1, 4, fd);  // emulator version number
+	fread(&movieFlags, 1, 1, fd);             // read flags
+	{
+		if (movieFlags&MOVIE_FLAG_FROM_POWERON) // starts from reset
+			tempMovie->saveStateIncluded = 0;
+		else
+			tempMovie->saveStateIncluded = 1;
+	
+		if (movieFlags&MOVIE_FLAG_PAL_TIMING)   // get system FPS
+			tempMovie->palTiming = 1;
+		else
+			tempMovie->palTiming = 0;
+	}
+
+	fread(&movieFlags, 1, 1, fd);             //reserved for flags
+	fread(&tempMovie->padType1, 1, 1, fd);    //padType1
+	fread(&tempMovie->padType2, 1, 1, fd);    //padType2
+
+	fread(&tempMovie->totalFrames, 1, 4, fd);
+	fread(&tempMovie->rerecordCount, 1, 4, fd);
+	fread(&tempMovie->savestateOffset, 1, 4, fd);
+	fread(&tempMovie->inputOffset, 1, 4, fd);
+
+	// read metadata
+	int nMetaLen;
+	fread(&nMetaLen, 1, 4, fd);
+
+	if(nMetaLen >= MOVIE_MAX_METADATA)
+		nMetaLen = MOVIE_MAX_METADATA-1;
+
+//	tempMovie->authorInfo = (char*)malloc((nMetaLen+1)*sizeof(char));
+	int i;
+	for(i=0; i<nMetaLen; ++i) {
+		char c = 0;
+		c |= fgetc(fd) & 0xff;
+		tempMovie->authorInfo[i] = c;
+	}
+	tempMovie->authorInfo[i] = '\0';
+
+	// done reading file
+	fclose(fd);
+
+	return 1;
 }

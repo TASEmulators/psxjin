@@ -5,10 +5,10 @@
 #include <windows.h>
 #include "PsxCommon.h"
 #include "resource.h"
+#include "../movie.h"
 
 //------------------------------------------------------
 
-extern struct Movie_Type currentMovie;
 char szFilter[1024];
 char szChoice[MAX_PATH];
 OPENFILENAME ofn;
@@ -71,11 +71,7 @@ static char* GetRecordingPath(char* szPath)
 
 static void DisplayReplayProperties(HWND hDlg, int bClear)
 {
-	// save status of read only checkbox
-//	static bool bReadOnlyStatus = false;
-//	if (IsWindowEnabled(GetDlgItem(hDlg, IDC_READONLY))) {
-//		bReadOnlyStatus = (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_READONLY, BM_GETCHECK, 0, 0));
-//	}
+	struct Movie_Type dataMovie;
 
 	// set default values
 	SetDlgItemTextA(hDlg, IDC_LENGTH, "");
@@ -83,130 +79,81 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	SetDlgItemTextA(hDlg, IDC_UNDO, "");
 	SetDlgItemTextA(hDlg, IDC_METADATA, "");
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "");
+	SetDlgItemTextA(hDlg, IDC_PADTYPE1, "");
+	SetDlgItemTextA(hDlg, IDC_PADTYPE2, "");
 	EnableWindow(GetDlgItem(hDlg, IDC_READONLY), FALSE);
 	SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, BST_UNCHECKED, 0);
 	EnableWindow(GetDlgItem(hDlg, IDOK), FALSE);
-	if(bClear) {
+	if(bClear)
 		return;
-	}
 
 	long lCount = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCOUNT, 0, 0);
 	long lIndex = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCURSEL, 0, 0);
-	if (lIndex == CB_ERR) {
+	if (lIndex == CB_ERR)
 		return;
-	}
 
-	if (lIndex == lCount - 1) {							// Last item is "Browse..."
-		EnableWindow(GetDlgItem(hDlg, IDOK), TRUE);		// Browse is selectable
+	if (lIndex == lCount - 1) {                   // Last item is "Browse..."
+		EnableWindow(GetDlgItem(hDlg, IDOK), TRUE); // Browse is selectable
 		return;
 	}
 
 	long lStringLength = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
-	if(lStringLength + 1 > MAX_PATH) {
+	if(lStringLength + 1 > MAX_PATH)
 		return;
-	}
 
+	// save movie filename in szChoice
 	SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETLBTEXT, (WPARAM)lIndex, (LPARAM)szChoice);
 
-	// check relative path
+	// ensure a relative path has the "movies\" path in prepended to it
 	GetRecordingPath(szChoice);
-	currentMovie.movieFilename = szChoice;
-	GetMovieFilenameMini(currentMovie.movieFilename);
 
-	const char szFileHeader[] = "PXM "; // File identifier
-	char ReadHeader[4];
-	int movieFlags = 0;
-	char* local_metadata = NULL;
-
-	FILE* fd = fopen(szChoice, "r+b");
-	if (!fd) {
+	if (! loadMovieFile(szChoice,&dataMovie) )
 		return;
-	}
 
-	if (_access(szChoice, W_OK)) {
+	GetMovieFilenameMini(dataMovie.movieFilename);
+	
+	if (_access(szChoice, W_OK)) // is the file read-only?
 		SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, BST_CHECKED, 0);
-	} else {
+	else {
 		EnableWindow(GetDlgItem(hDlg, IDC_READONLY), TRUE);
-//		SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, (currentMovie.readOnly) ? BST_CHECKED : BST_UNCHECKED, 0);
+//		SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, (dataMovie.readOnly) ? BST_CHECKED : BST_UNCHECKED, 0);
 		SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, BST_CHECKED, 0);
 	}
 
-	memset(ReadHeader, 0, 4);
-	fread(ReadHeader, 1, 4, fd);               // read identifier
-	if (memcmp(ReadHeader, szFileHeader, 4)) { // not the right file type
-		fclose(fd);
-		return;
-	}
-
-	fseek(fd, 8, SEEK_CUR);                   //skip movie/emu version
-	fread(&movieFlags, 1, 1, fd);             // read flags
-	if (movieFlags&MOVIE_FLAG_FROM_POWERON)   // starts from reset
-		currentMovie.saveStateIncluded = 0;
-	else
-		currentMovie.saveStateIncluded = 1;
-	char palTiming = 0;
-	if (movieFlags&MOVIE_FLAG_PAL_TIMING)     // get system FPS
-		palTiming = 1;
-
-	fread(&movieFlags, 1, 1, fd);             //reserved for flags
-	fread(&currentMovie.padType1, 1, 1, fd);  //padType1
-	fread(&currentMovie.padType2, 1, 1, fd);  //padType2
-
-	fread(&currentMovie.totalFrames, 1, 4, fd);
-	fread(&currentMovie.rerecordCount, 1, 4, fd);
-	fread(&currentMovie.savestateOffset, 1, 4, fd);
-	fread(&currentMovie.inputOffset, 1, 4, fd);
-
-	// read metadata
-	int nMetaLen;
-	fread(&nMetaLen, 1, 4, fd);
-
-	if(nMetaLen >= MOVIE_MAX_METADATA) {
-		nMetaLen = MOVIE_MAX_METADATA-1;
-	}
-	local_metadata = (char*)malloc((nMetaLen+1)*sizeof(char));
-	int i;
-	for(i=0; i<nMetaLen; ++i) {
-		char c = 0;
-		c |= fgetc(fd) & 0xff;
-		local_metadata[i] = c;
-	}
-	local_metadata[i] = '\0';
-
-	// done reading file
-	fclose(fd);
-
-	// file exists and is the corrent format,
+	// file exists and it has correct format
 	// so enable the "Ok" button
 	EnableWindow(GetDlgItem(hDlg, IDOK), TRUE);
 
 	// turn totalFrames into a length string
 	int nFPS;
-	if (palTiming)
+	if (dataMovie.palTiming)
 		nFPS = 50;
 	else
 		nFPS = 60;
-	int nSeconds = currentMovie.totalFrames / nFPS;
+	int nSeconds = dataMovie.totalFrames / nFPS;
 	int nMinutes = nSeconds / 60;
 	int nHours = nSeconds / 3600;
 
-	// write strings to dialog
+	//format strings
 	char szFramesString[32];
 	char szLengthString[32];
 	char szUndoCountString[32];
-	sprintf(szFramesString, "%lu", currentMovie.totalFrames);
+	sprintf(szFramesString, "%lu", dataMovie.totalFrames);
 	sprintf(szLengthString, "%02d:%02d:%02d", nHours, nMinutes % 60, nSeconds % 60);
-	sprintf(szUndoCountString, "%lu", currentMovie.rerecordCount);
+	sprintf(szUndoCountString, "%lu", dataMovie.rerecordCount);
 
+	// write strings to dialog
 	SetDlgItemTextA(hDlg, IDC_LENGTH, szLengthString);
 	SetDlgItemTextA(hDlg, IDC_FRAMES, szFramesString);
 	SetDlgItemTextA(hDlg, IDC_UNDO, szUndoCountString);
-	SetDlgItemTextA(hDlg, IDC_METADATA, local_metadata);
-	if (!currentMovie.saveStateIncluded)
+	SetDlgItemTextA(hDlg, IDC_METADATA, dataMovie.authorInfo);
+
+	if (!dataMovie.saveStateIncluded)
 		SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "Power-On");
 	else
 		SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "Savestate");
-	switch (currentMovie.padType1) {
+
+	switch (dataMovie.padType1) {
 		case PSE_PAD_TYPE_MOUSE:
 			SetDlgItemTextA(hDlg, IDC_PADTYPE1, "Mouse");
 			break;
@@ -220,7 +167,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 		default:
 			SetDlgItemTextA(hDlg, IDC_PADTYPE1, "Standard");
 	}
-	switch (currentMovie.padType2) {
+	switch (dataMovie.padType2) {
 		case PSE_PAD_TYPE_MOUSE:
 			SetDlgItemTextA(hDlg, IDC_PADTYPE2, "Mouse");
 			break;
@@ -234,7 +181,6 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 		default:
 			SetDlgItemTextA(hDlg, IDC_PADTYPE2, "Standard");
 	}
-	free(local_metadata);
 }
 
 static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
@@ -326,11 +272,11 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 									}
 								}
 							} else {
+								loadMovieFile(szChoice,&currentMovie);
 								// get readonly status
 								currentMovie.readOnly = 0;
-								if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_READONLY, BM_GETCHECK, 0, 0)) {
+								if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_READONLY, BM_GETCHECK, 0, 0))
 									currentMovie.readOnly = 1;
-								}
 								EndDialog(hDlg, 1);					// only allow OK if a valid selection was made
 							}
 						}
@@ -355,9 +301,8 @@ int PCSX_MOV_StartReplayDialog()
 static int VerifyRecordingAccessMode(char* szFilename, int mode)
 {
 	GetRecordingPath(szFilename);
-	if(_access(szFilename, mode)) {
-		return 0;							// not writeable, return failure
-	}
+	if(_access(szFilename, mode))
+		return 0; // not writeable, return failure
 
 	return 1;
 }

@@ -35,7 +35,6 @@
 #include "../Win32/movie.h"
 #include "../Win32/cheat.h"
 
-struct Movie_Type currentMovie;
 int flagSaveState;
 int flagLoadState;
 int flagEscPressed;
@@ -351,7 +350,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_REPLAY_MOVIE:
-					WIN32_StartMovieReplay();
+					WIN32_StartMovieReplay("");
 					return TRUE;
 
 				case ID_FILE_STOP_MOVIE:
@@ -1588,10 +1587,13 @@ void SysRunGui() {
 }
 
 
-void WIN32_StartMovieReplay()
+void WIN32_StartMovieReplay(char* szFilenanme)
 {
-	int nRet;
-	nRet = PCSX_MOV_StartReplayDialog();
+	int nRet=1;
+	if (szFilenanme != "")
+		loadMovieFile(szFilenanme,&currentMovie);
+	else
+		nRet = PCSX_MOV_StartReplayDialog();
 	if (nRet) {
 		if (currentMovie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);

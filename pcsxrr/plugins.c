@@ -22,7 +22,6 @@
 
 #include "PsxCommon.h"
 #include "movie.h"
-extern struct Movie_Type currentMovie;
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)
@@ -71,7 +70,6 @@ void CALLBACK GPU__displayText(char *pText) {
 	SysPrintf("%s\n", pText);
 }
 
-extern int StatesC;
 long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 	pF->ulFreezeVersion = 1;
 	if (ulGetFreezeData == 0) {
@@ -454,7 +452,6 @@ long CALLBACK SPU__freeze(unsigned long ulFreezeMode, SPUFreeze_t *pF) {
 }
 
 void CALLBACK SPU__registerCallback(void (CALLBACK *callback)(void)) {}
-void CALLBACK SPU__tellFrame(unsigned long newCurrentFrame) {}
 
 #define LoadSpuSym1(dest, name) \
 	LoadSym(SPU_##dest, SPU##dest, name, 1);
@@ -510,7 +507,6 @@ int LoadSPUplugin(char *SPUdll) {
 	LoadSpuSym0(freeze, "SPUfreeze");
 	LoadSpuSym0(registerCallback, "SPUregisterCallback");
 	LoadSpuSymN(async, "SPUasync");
-	LoadSpuSym0(tellFrame,"SPUtellFrame");
 
 	return 0;
 }

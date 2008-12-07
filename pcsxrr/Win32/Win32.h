@@ -96,7 +96,7 @@ extern int flagSaveState;
 extern int flagLoadState;
 extern int flagEscPressed;
 
-void WIN32_StartMovieReplay();
+void WIN32_StartMovieReplay(char* szFilenanme);
 void WIN32_StartMovieRecord();
 
 #endif /* __WIN32_H__ */
