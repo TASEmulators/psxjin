@@ -106,6 +106,7 @@ void PCSX_LoadState(int newState) {
 		currentMovie.mode = previousMode;
 	}
 	GPU_displayText(Text);
+	UpdateMemWatch();
 }
 
 void PADhandleKey(int key) {
@@ -341,6 +342,30 @@ void PADhandleKey(int key) {
 		}
 	}
 
+	if(key == EmuCommandTable[EMUCMD_RESET].key
+	&& modifiers == EmuCommandTable[EMUCMD_RESET].keymod)
+	{
+		GPU_displayText("*PCSX*: CPU Reset");
+		LoadCdBios = 0;
+		SysReset();
+		NeedReset = 0;
+		CheckCdrom();
+		if (LoadCdrom() == -1)
+			SysMessage(_("Could not load Cdrom"));
+		Running = 1;
+		psxCpu->Execute();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CDCASE].key
+	&& modifiers == EmuCommandTable[EMUCMD_CDCASE].keymod)
+	{
+		cdOpenCase ^= 1;
+		if (cdOpenCase)
+			GPU_displayText(_("*PCSX*: CD Case Opened"));
+		else
+			GPU_displayText(_("*PCSX*: CD Case Closed"));
+	}
+
 //	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
 //	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
 //	{
@@ -377,21 +402,6 @@ void PADhandleKey(int key) {
 //				 sprintf (Text, _("*PCSX*: Xa Enabled"));
 //			else sprintf (Text, _("*PCSX*: Xa Disabled"));
 //			GPU_displayText(Text);
-//			break;
-//
-//		case VK_F9:
-//			GPU_displayText(_("*PCSX*: CdRom Case Opened"));
-//			cdOpenCase = 1;
-//			break;
-//
-//		case VK_F10:
-//			GPU_displayText(_("*PCSX*: CdRom Case Closed"));
-//			cdOpenCase = 0;
-//			break;
-//
-//		case VK_F12:
-//			SysPrintf("*PCSX*: CpuReset\n");
-//			psxCpu->Reset();
 //			break;
 }
 

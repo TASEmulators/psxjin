@@ -1109,7 +1109,8 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				break;
 
 			case IDC_REFRESHLIST:
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x32000);
+				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
+//				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 15);
 				break;
 
 			case IDC_ENTERED:

@@ -9,7 +9,8 @@ VERSION = ${MAJ}.${MIN}
 all: pcsx
 
 CPU = ix86
-# CPUTYPE=k6-2
+CPUTYPE = i686
+# CPUTYPE = k6-2
 
 CC = gcc
 NASM = nasm
@@ -18,7 +19,7 @@ STRIP = strip
 RC = windres
 
 ifndef CPUTYPE
-	CPUOPT = -march=pentiumpro
+	CPUOPT = -mcpu=pentiumpro
 else
 	CPUOPT = -march=${CPUTYPE}
 endif
