@@ -166,41 +166,46 @@ typedef struct
 #define MOVIE_MAX_METADATA 512
 
 struct Movie_Type {
+	//Last Polled Joypad Buttons
 	PadDataS lastPad1;
 	PadDataS lastPad2;
-	//Last Polled Joypad Buttons
+	//pad types
 	unsigned char padType1;
 	unsigned char padType2;
-	//pad types
-	unsigned long totalFrames;
 	//Total Movie Frames
-	unsigned long currentFrame;
+	unsigned long totalFrames;
 	//Current Frame
-	unsigned long lagCounter;
+	unsigned long currentFrame;
 	//Current Lag
-	unsigned char mode;
+	unsigned long lagCounter;
 	//is the Movie Recording (1) or Playing (2) or not active (0)?
-	unsigned char readOnly;
+	unsigned char mode;
 	//is the Movie Read Only (1) or Read+Write (0)?
-	unsigned long rerecordCount;
+	unsigned char readOnly;
 	//How many Rerecords
-	unsigned char saveStateIncluded;
+	unsigned long rerecordCount;
 	//00 No save state information | Includes Save State info
+	unsigned char saveStateIncluded;
+	//Locations in file
 	unsigned long inputOffset;
 	unsigned long savestateOffset;
-	//Locations in file
-	char authorInfo[MOVIE_MAX_METADATA];
 	//Author Info
-	char movieFilenameMini[MAX_PATH];
+	char authorInfo[MOVIE_MAX_METADATA];
+	//version numbers
+	unsigned long formatVersion;
+	unsigned long emuVersion;
 	//The file name
-	char* movieFilename;
+	char movieFilenameMini[MAX_PATH];
 	//The full path file name
-	char bytesPerFrame;
+	char* movieFilename;
 	//size of a frame in bytes
+	char bytesPerFrame;
+	//PAL mode?
+	char palTiming;
+	//movie buffer stuff
 	uint8* inputBuffer;
 	uint32 inputBufferSize;
 	uint8* inputBufferPtr;
-	//new buffer stuff
 };
 
 #define MOVIE_VERSION 1

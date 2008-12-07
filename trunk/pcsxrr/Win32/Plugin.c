@@ -32,7 +32,6 @@
 #include "cheat.h"
 #include "maphkeys.h"
 
-extern struct Movie_Type currentMovie;
 extern int speedModifierFlag;
 int speedModeTemp = 7;
 
@@ -320,7 +319,7 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
 	{
 		if (!currentMovie.mode) {
-			WIN32_StartMovieReplay();
+			WIN32_StartMovieReplay("");
 		}
 		else {
 			GPU_displayText("*PCSX*: error: Movie Already Active");

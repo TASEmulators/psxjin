@@ -20,7 +20,6 @@
 
 #include "PsxCommon.h"
 #include "movie.h"
-extern struct Movie_Type currentMovie;
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4018)

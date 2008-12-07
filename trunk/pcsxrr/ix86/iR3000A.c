@@ -27,7 +27,6 @@
 #include "PsxCommon.h"
 #include "ix86.h"
 #include "../movie.h"
-extern struct Movie_Type currentMovie;
 #ifdef WIN32
 #include "Win32.h"
 #endif
