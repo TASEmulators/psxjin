@@ -64,7 +64,9 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'S',             VK_CONTROL,  "Configure Sound", },
 	{ 'D',             VK_CONTROL,  "Configure CD-ROM", },
 	{ 'P',             VK_CONTROL,  "Configure Controllers", },
-	{ 'X',             VK_CONTROL,  "Configure CPU", }
+	{ 'X',             VK_CONTROL,  "Configure CPU", },
+	{ 'O',             VK_CONTROL,  "CD Case Open/Close", },
+	{ VK_F3,           VK_CONTROL,  "Reset", }
 };
 static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;
