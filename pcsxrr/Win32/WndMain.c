@@ -38,6 +38,7 @@
 int flagSaveState;
 int flagLoadState;
 int flagEscPressed;
+char szCurrentPath[MAX_PATH];
 
 #ifdef __MINGW32__
 #ifndef LVM_GETSELECTIONMARK
@@ -73,12 +74,30 @@ void strcatz(char *dst, char *src) {
 	strcpy(dst + len, src);
 }
 
+void GetCurrentPath()
+{
+	char szPath[MAX_PATH];
+	char szDrive[MAX_PATH];
+	char szDirectory[MAX_PATH];
+	char szFilename[MAX_PATH];
+	char szExt[MAX_PATH];
+	szDrive[0] = '\0';
+	szDirectory[0] = '\0';
+	szFilename[0] = '\0';
+	szExt[0] = '\0';
+	GetModuleFileName(NULL, szPath, MAX_PATH);
+	_splitpath(szPath, szDrive, szDirectory, szFilename, szExt);
+
+	sprintf(szCurrentPath,"%s%s" + '\0',szDrive, szDirectory);
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 //	char *file = NULL;
 //	int runcd = 0;
 //	int loadst = 0;
 //	int i;
 
+	GetCurrentPath();
 	strcpy(cfgfile, "Software\\Pcsx");
 
 /*

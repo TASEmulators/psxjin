@@ -5,6 +5,7 @@
 #include <windows.h>
 #include "PsxCommon.h"
 #include "resource.h"
+#include "Win32.h"
 #include "../movie.h"
 
 //------------------------------------------------------
@@ -60,7 +61,7 @@ static char* GetRecordingPath(char* szPath)
 	_splitpath(szPath, szDrive, szDirectory, szFilename, szExt);
 	if (szDrive[0] == '\0' && szDirectory[0] == '\0') {
 		char szTmpPath[MAX_PATH];
-		strcpy(szTmpPath, "movies\\");
+		sprintf(szTmpPath, "%smovies\\", szCurrentPath);
 		strncpy(szTmpPath + strlen(szTmpPath), szPath, MAX_PATH - strlen(szTmpPath));
 		szTmpPath[MAX_PATH-1] = '\0';
 		strcpy(szPath, szTmpPath);
@@ -186,7 +187,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	if (Msg == WM_INITDIALOG) {
-		char szFindPath[32] = "movies\\*.pxm";
+		char szFindPath[32];
 		WIN32_FIND_DATA wfd;
 		HANDLE hFind;
 		int i = 0;
@@ -197,7 +198,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 //		if (bDrvOkay) {
 //			_stprintf(szFindPath, _T("movies\\%.8s*.pxm"), BurnDrvGetText(DRV_NAME));
 //		}
-		sprintf(szFindPath, "movies\\*.pxm");
+		sprintf(szFindPath, "%smovies\\*.pxm", szCurrentPath);
 
 		hFind = FindFirstFile(szFindPath, &wfd);
 		if (hFind != INVALID_HANDLE_VALUE) {
