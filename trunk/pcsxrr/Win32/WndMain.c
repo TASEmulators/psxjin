@@ -39,6 +39,7 @@ int flagSaveState;
 int flagLoadState;
 int flagEscPressed;
 char szCurrentPath[MAX_PATH];
+char szMovieToLoad[MAX_PATH];
 
 #ifdef __MINGW32__
 #ifndef LVM_GETSELECTIONMARK
@@ -94,8 +95,24 @@ void GetCurrentPath()
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 //	char *file = NULL;
 //	int runcd = 0;
+	int runcd = 0;
+	char* arg;
 //	int loadst = 0;
 //	int i;
+
+	printf ("PCSX\n");
+	strcpy(cfgfile, "Software\\Pcsx");
+
+	for (arg = strtok(lpCmdLine, " "); arg; arg = strtok(0, " ")) {
+		if (runcd == 3)
+			sprintf(szMovieToLoad,"%s",arg);
+		if (!strcmp(arg, "-runcd"))
+			runcd = 1;
+		else if (!strcmp(arg, "-runcdbios"))
+			runcd = 2;
+		else if (!strcmp(arg, "-play"))
+			runcd = 3;
+	}
 
 	GetCurrentPath();
 	strcpy(cfgfile, "Software\\Pcsx");
@@ -143,9 +160,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (SysInit() == -1) return 1;
 
 	CreateMainWindow(nCmdShow);
-//	SysPrintf("%s\n", lpCmdLine);
 
 	PCSXInitCheatData();
+
+	//process some command line options
+	if (runcd == 1)
+		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUN_CD, 0);
+	else if (runcd == 2)
+		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUNCDBIOS, 0);
+	else if (runcd == 3)
+		WIN32_StartMovieReplay(szMovieToLoad);
 
 	RunGui();
 
@@ -1606,11 +1630,13 @@ void SysRunGui() {
 }
 
 
-void WIN32_StartMovieReplay(char* szFilenanme)
+void WIN32_StartMovieReplay(char* szFilename)
 {
 	int nRet=1;
-	if (szFilenanme != "")
-		loadMovieFile(szFilenanme,&currentMovie);
+	if (szFilename != "") {
+		loadMovieFile(szFilename,&currentMovie);
+		GetMovieFilenameMini(currentMovie.movieFilename);
+	}
 	else
 		nRet = PCSX_MOV_StartReplayDialog();
 	if (nRet) {

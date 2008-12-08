@@ -33,7 +33,7 @@ static void MakeOfn(char* pszFilter)
 	return;
 }
 
-static void GetMovieFilenameMini(char* filenameMini)
+void GetMovieFilenameMini(char* filenameMini)
 {
 	char fszDrive[MAX_PATH];
 	char fszDirectory[MAX_PATH];
@@ -112,7 +112,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 		return;
 
 	GetMovieFilenameMini(dataMovie.movieFilename);
-	
+
 	if (_access(szChoice, W_OK)) // is the file read-only?
 		SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, BST_CHECKED, 0);
 	else {
