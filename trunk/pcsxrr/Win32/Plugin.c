@@ -86,7 +86,7 @@ void PCSX_LoadState(int newState) {
 	int previousMode = currentMovie.mode;
 	if (currentMovie.mode == 1) {
 		if (currentMovie.readOnly == 1) {
-			PCSX_MOV_FlushMovieFile();
+			WriteMovieFile();
 			currentMovie.mode = 2;
 		}
 	}

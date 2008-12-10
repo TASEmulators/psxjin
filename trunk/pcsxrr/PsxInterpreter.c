@@ -86,7 +86,7 @@ static u32 branchPC;
 		flagEscPressed=0; \
 		flagDontPause = 1; \
 		if (currentMovie.mode == 1) \
-			PCSX_MOV_FlushMovieFile(); \
+			WriteMovieFile(); \
 		ClosePlugins(); \
 		SysRunGui(); \
 	} \
