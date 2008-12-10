@@ -108,7 +108,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	// ensure a relative path has the "movies\" path in prepended to it
 	GetRecordingPath(szChoice);
 
-	if (! loadMovieFile(szChoice,&dataMovie) )
+	if (! ReadMovieFile(szChoice,&dataMovie) )
 		return;
 
 	GetMovieFilenameMini(dataMovie.movieFilename);
@@ -273,7 +273,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 									}
 								}
 							} else {
-								loadMovieFile(szChoice,&currentMovie);
+								ReadMovieFile(szChoice,&currentMovie);
 								// get readonly status
 								currentMovie.readOnly = 0;
 								if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_READONLY, BM_GETCHECK, 0, 0))

@@ -474,7 +474,7 @@ int SaveState(char *file) {
 	mdecFreeze(f, 1);
 
 	if (currentMovie.mode)
-		movieFreeze(f, 1);
+		MovieFreeze(f, 1);
 
 	gzclose(f);
 
@@ -524,7 +524,7 @@ int LoadState(char *file) {
 	mdecFreeze(f, 0);
 
 	if (currentMovie.mode)
-		movieFreeze(f, 0);
+		MovieFreeze(f, 0);
 
 	gzclose(f);
 

@@ -180,7 +180,7 @@ buttonToSend = (buttonToSend ^ (currentMovie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
 if ((currentMovie.mode == 1) && (currentMovie.currentFrame%1800 == 0))
-	PCSX_MOV_FlushMovieFile();
+	WriteMovieFile();
 
 char modeFlags = 0;
 if (!flagDontPause)

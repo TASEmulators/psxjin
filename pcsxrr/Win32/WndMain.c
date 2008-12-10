@@ -586,11 +586,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SysClose();
 				PostQuitMessage(0);
 				if (currentMovie.mode == 1)
-					PCSX_MOV_FlushMovieFile();
+					WriteMovieFile();
 				exit(0);
 			}
 			else AccBreak = 0;
-		
 			return TRUE;
 
 		case WM_QUIT:
@@ -1634,7 +1633,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 {
 	int nRet=1;
 	if (szFilename != "") {
-		loadMovieFile(szFilename,&currentMovie);
+		ReadMovieFile(szFilename,&currentMovie);
 		GetMovieFilenameMini(currentMovie.movieFilename);
 	}
 	else
