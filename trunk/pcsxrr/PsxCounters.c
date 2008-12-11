@@ -129,8 +129,8 @@ void psxRcntUpdate() {
 	#endif
 
 					/* movie stuff start */
-currentMovie.currentFrame++;
-GPU_setframecounter(currentMovie.currentFrame,currentMovie.totalFrames);
+Movie.currentFrame++;
+GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
 
 if (flagGPUchain == 1)
 	flagVSync = 1;
@@ -143,65 +143,65 @@ if ((flagDontPause == 2 || flagFakePause == 1) && flagGPUchain == 1) {
 }
 flagGPUchain = 0;
 
-if ((currentMovie.mode == 2) && (currentMovie.currentFrame==currentMovie.totalFrames)) {
+if ((Movie.mode == 2) && (Movie.currentFrame==Movie.totalFrames)) {
 	flagDontPause = 0;
 }
-if ((currentMovie.mode == 2) && (currentMovie.currentFrame>currentMovie.totalFrames)) {
+if ((Movie.mode == 2) && (Movie.currentFrame>Movie.totalFrames)) {
 	GPU_displayText("*PCSX*: Movie End");
-	currentMovie.mode = 0;
+	Movie.mode = 0;
 }
 
 PadDataS paddtemp;
 if (HasEmulatedFrame == 2) {
-	if (currentMovie.mode == 1) {
-		PCSX_MOV_WriteJoy(currentMovie.lastPad1,1);
-		PCSX_MOV_WriteJoy(currentMovie.lastPad2,2);
+	if (Movie.mode == 1) {
+		PCSX_MOV_WriteJoy(Movie.lastPad1,1);
+		PCSX_MOV_WriteJoy(Movie.lastPad2,2);
 	}
-	else if (currentMovie.mode == 2) {
+	else if (Movie.mode == 2) {
 		paddtemp = PCSX_MOV_ReadJoy(1);
 		paddtemp = PCSX_MOV_ReadJoy(2);
 	}
-	currentMovie.lagCounter++;
-	GPU_setlagcounter(currentMovie.lagCounter);
+	Movie.lagCounter++;
+	GPU_setlagcounter(Movie.lagCounter);
 }
 else if (HasEmulatedFrame == 1) { //this should never happen, but you never know
-	if (currentMovie.mode == 1) {
-		PCSX_MOV_WriteJoy(currentMovie.lastPad2,2);
+	if (Movie.mode == 1) {
+		PCSX_MOV_WriteJoy(Movie.lastPad2,2);
 	}
-	else if (currentMovie.mode == 2) {
+	else if (Movie.mode == 2) {
 		paddtemp = PCSX_MOV_ReadJoy(2);
 	}
 }
 HasEmulatedFrame = 2;
 
 unsigned long buttonToSend = 0;
-buttonToSend = currentMovie.lastPad1.buttonStatus;
-buttonToSend = (buttonToSend ^ (currentMovie.lastPad2.buttonStatus << 16));
+buttonToSend = Movie.lastPad1.buttonStatus;
+buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
-if ((currentMovie.mode == 1) && (currentMovie.currentFrame%1800 == 0))
+if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
 	WriteMovieFile();
 
 char modeFlags = 0;
 if (!flagDontPause)
 	modeFlags |= MODE_FLAG_PAUSED;
-if (currentMovie.mode == 1)
+if (Movie.mode == 1)
 	modeFlags |= MODE_FLAG_RECORD;
-if (currentMovie.mode == 2)
+if (Movie.mode == 2)
 	modeFlags |= MODE_FLAG_REPLAY;
 GPU_setcurrentmode(modeFlags);
 
 #ifdef WIN32
 	UpdateMemWatch();
 	PCSXApplyCheats();
-//	if (currentMovie.currentFrame%30 == 0)
+//	if (Movie.currentFrame%30 == 0)
 //		UpdateMemSearch();
 #endif
 
-//if (currentMovie.inputBufferPtr) {
-//SysPrintf("%d/%d\n---\n",currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
-//if ((currentMovie.inputBufferPtr-currentMovie.inputBuffer)%currentMovie.bytesPerFrame != 0)
-//SysPrintf("%d/%d\n---\n",currentMovie.currentFrame,((currentMovie.inputBufferPtr-currentMovie.inputBuffer)/currentMovie.bytesPerFrame));
+//if (Movie.inputBufferPtr) {
+//SysPrintf("%d/%d\n---\n",Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
+//if ((Movie.inputBufferPtr-Movie.inputBuffer)%Movie.bytesPerFrame != 0)
+//SysPrintf("%d/%d\n---\n",Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
 //}
 
 					/* movie stuff end */

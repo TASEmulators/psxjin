@@ -456,9 +456,9 @@ __inline static void execute() {
 	else { // pause
 		char modeFlags = 0;
 		modeFlags |= MODE_FLAG_PAUSED;
-		if (currentMovie.mode == 1)
+		if (Movie.mode == 1)
 			modeFlags |= MODE_FLAG_RECORD;
-		if (currentMovie.mode == 2)
+		if (Movie.mode == 2)
 			modeFlags |= MODE_FLAG_REPLAY;
 		GPU_setcurrentmode(modeFlags);
 
@@ -481,7 +481,7 @@ __inline static void execute() {
 		Running = 0;
 		flagEscPressed=0;
 		flagDontPause = 1;
-		if (currentMovie.mode == 1)
+		if (Movie.mode == 1)
 			WriteMovieFile();
 		ClosePlugins();
 		SysRunGui();

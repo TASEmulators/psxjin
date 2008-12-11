@@ -45,7 +45,7 @@ void GetMovieFilenameMini(char* filenameMini)
 	fszExt[0] = '\0';
 	_splitpath(filenameMini, fszDrive, fszDirectory, fszFilename, fszExt);
 
-	strcpy(currentMovie.movieFilenameMini, fszFilename);
+	strcpy(Movie.movieFilenameMini, fszFilename);
 }
 
 static char* GetRecordingPath(char* szPath)
@@ -72,7 +72,7 @@ static char* GetRecordingPath(char* szPath)
 
 static void DisplayReplayProperties(HWND hDlg, int bClear)
 {
-	struct Movie_Type dataMovie;
+	struct MovieType dataMovie;
 
 	// set default values
 	SetDlgItemTextA(hDlg, IDC_LENGTH, "");
@@ -273,11 +273,11 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 									}
 								}
 							} else {
-								ReadMovieFile(szChoice,&currentMovie);
+								ReadMovieFile(szChoice,&Movie);
 								// get readonly status
-								currentMovie.readOnly = 0;
+								Movie.readOnly = 0;
 								if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_READONLY, BM_GETCHECK, 0, 0))
-									currentMovie.readOnly = 1;
+									Movie.readOnly = 1;
 								EndDialog(hDlg, 1);					// only allow OK if a valid selection was made
 							}
 						}
@@ -383,40 +383,40 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 					return TRUE;
 				case IDOK:
 					GetDlgItemText(hDlg, IDC_FILENAME, szChoice, MAX_PATH);
-					GetDlgItemText(hDlg, IDC_METADATA, currentMovie.authorInfo, MOVIE_MAX_METADATA);
-					currentMovie.saveStateIncluded = 1;
+					GetDlgItemText(hDlg, IDC_METADATA, Movie.authorInfo, MOVIE_MAX_METADATA);
+					Movie.saveStateIncluded = 1;
 					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_REPLAYRESET, BM_GETCHECK, 0, 0)) {
-						currentMovie.saveStateIncluded = 0;
+						Movie.saveStateIncluded = 0;
 					}
-				currentMovie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';
+				Movie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';
 					// ensure a relative path has the "movies\" path in prepended to it
-					currentMovie.movieFilename = GetRecordingPath(szChoice);
-					GetMovieFilenameMini(currentMovie.movieFilename);
+					Movie.movieFilename = GetRecordingPath(szChoice);
+					GetMovieFilenameMini(Movie.movieFilename);
 					LONG lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_GETCURSEL, 0, 0);
-					currentMovie.padType1 = (unsigned char)lIndex;
-					switch (currentMovie.padType1) {
+					Movie.padType1 = (unsigned char)lIndex;
+					switch (Movie.padType1) {
 						case 2:
-							currentMovie.padType1=PSE_PAD_TYPE_MOUSE;
+							Movie.padType1=PSE_PAD_TYPE_MOUSE;
 							break;
 						case 1:
-							currentMovie.padType1=PSE_PAD_TYPE_ANALOGPAD;
+							Movie.padType1=PSE_PAD_TYPE_ANALOGPAD;
 							break;
 						case 0:
 						default:
-							currentMovie.padType1=PSE_PAD_TYPE_STANDARD;
+							Movie.padType1=PSE_PAD_TYPE_STANDARD;
 					}
 					lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_GETCURSEL, 0, 0);
-					currentMovie.padType2 = (unsigned char)lIndex;
-					switch (currentMovie.padType2) {
+					Movie.padType2 = (unsigned char)lIndex;
+					switch (Movie.padType2) {
 						case 2:
-							currentMovie.padType2=PSE_PAD_TYPE_MOUSE;
+							Movie.padType2=PSE_PAD_TYPE_MOUSE;
 							break;
 						case 1:
-							currentMovie.padType2=PSE_PAD_TYPE_ANALOGPAD;
+							Movie.padType2=PSE_PAD_TYPE_ANALOGPAD;
 							break;
 						case 0:
 						default:
-							currentMovie.padType2=PSE_PAD_TYPE_STANDARD;
+							Movie.padType2=PSE_PAD_TYPE_STANDARD;
 					}
 					EndDialog(hDlg, 1);
 					return TRUE;

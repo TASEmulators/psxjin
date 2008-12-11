@@ -473,7 +473,7 @@ int SaveState(char *file) {
 	psxRcntFreeze(f, 1);
 	mdecFreeze(f, 1);
 
-	if (currentMovie.mode)
+	if (Movie.mode)
 		MovieFreeze(f, 1);
 
 	gzclose(f);
@@ -523,7 +523,7 @@ int LoadState(char *file) {
 	psxRcntFreeze(f, 0);
 	mdecFreeze(f, 0);
 
-	if (currentMovie.mode)
+	if (Movie.mode)
 		MovieFreeze(f, 0);
 
 	gzclose(f);
@@ -608,10 +608,10 @@ int LoadStateEmbed(char *file) {
 
 	FILE* fp;
 	FILE* fp2;
-	char embSaveTmp[currentMovie.inputOffset-currentMovie.savestateOffset];
+	char embSaveTmp[Movie.inputOffset-Movie.savestateOffset];
 	fp = fopen(file,"rb");
 	fp2 = fopen("embsave.tmp","wb");
-	fseek(fp, currentMovie.savestateOffset, SEEK_SET);
+	fseek(fp, Movie.savestateOffset, SEEK_SET);
 	fread(embSaveTmp, 1, sizeof(embSaveTmp), fp);
 	fwrite(embSaveTmp, 1, sizeof(embSaveTmp), fp2);
 	fclose(fp);

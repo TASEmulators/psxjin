@@ -69,8 +69,8 @@ void gpuShowPic() {
 
 void PCSX_SaveState(int newState) {
 	StatesC=newState;
-	if (currentMovie.mode)
-		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, currentMovie.movieFilenameMini, StatesC);
+	if (Movie.mode)
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC);
 	else
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
 	GPU_freeze(2, (GPUFreeze_t *)&StatesC);
@@ -83,19 +83,19 @@ void PCSX_SaveState(int newState) {
 }
 
 void PCSX_LoadState(int newState) {
-	int previousMode = currentMovie.mode;
-	if (currentMovie.mode == 1) {
-		if (currentMovie.readOnly == 1) {
+	int previousMode = Movie.mode;
+	if (Movie.mode == 1) {
+		if (Movie.readOnly == 1) {
 			WriteMovieFile();
-			currentMovie.mode = 2;
+			Movie.mode = 2;
 		}
 	}
-	else if (currentMovie.mode == 2) {
-		if (currentMovie.readOnly == 0) currentMovie.mode = 1;
+	else if (Movie.mode == 2) {
+		if (Movie.readOnly == 0) Movie.mode = 1;
 	}
 	StatesC=newState;
-	if (currentMovie.mode)
-		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, currentMovie.movieFilenameMini, StatesC);
+	if (Movie.mode)
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC);
 	else
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
 	ret = LoadState(Text);
@@ -103,7 +103,7 @@ void PCSX_LoadState(int newState) {
 		sprintf(Text, _("*PCSX*: Loaded State %d"), StatesC+1);
 	else {
 		sprintf(Text, _("*PCSX*: Error Loading State %d"), StatesC+1);
-		currentMovie.mode = previousMode;
+		Movie.mode = previousMode;
 	}
 	GPU_displayText(Text);
 	UpdateMemWatch();
@@ -188,8 +188,8 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RWTOGGLE].key
 	&& modifiers == EmuCommandTable[EMUCMD_RWTOGGLE].keymod)
 	{
-		currentMovie.readOnly^=1;
-		if (currentMovie.readOnly)
+		Movie.readOnly^=1;
+		if (Movie.readOnly)
 			GPU_displayText("*PCSX*: Read-Only mode");
 		else
 			GPU_displayText("*PCSX*: Read+Write mode");
@@ -198,8 +198,8 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].key
 	&& modifiers == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].keymod)
 	{
-		currentMovie.lagCounter=0;
-		GPU_setlagcounter(currentMovie.lagCounter);
+		Movie.lagCounter=0;
+		GPU_setlagcounter(Movie.lagCounter);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SCREENSHOT].key
@@ -308,7 +308,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STARTRECORDING].key
 	&& modifiers == EmuCommandTable[EMUCMD_STARTRECORDING].keymod)
 	{
-		if (!currentMovie.mode) {
+		if (!Movie.mode) {
 			WIN32_StartMovieRecord();
 		}
 		else {
@@ -319,7 +319,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
 	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
 	{
-		if (!currentMovie.mode) {
+		if (!Movie.mode) {
 			WIN32_StartMovieReplay("");
 		}
 		else {
@@ -330,7 +330,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
 	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
 	{
-		if (currentMovie.mode) {
+		if (Movie.mode) {
 			PCSX_MOV_StopMovie();
 			GPU_displayText("*PCSX*: Stop Movie");
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
