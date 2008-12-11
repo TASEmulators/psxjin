@@ -599,12 +599,12 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 //SysPrintf("HasEmulatedFrame %d\n",HasEmulatedFrame);
 
 if (HasEmulatedFrame == 2) { // only poll once per each frame
-	if (currentMovie.mode == 1) {
+	if (Movie.mode == 1) {
 			PCSX_MOV_WriteJoy(padd,1);
 	}
-	else if (currentMovie.mode == 2 && (currentMovie.currentFrame<currentMovie.totalFrames)) {
+	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames)) {
 		PadDataS paddtemp = PCSX_MOV_ReadJoy(1);
-		switch (currentMovie.padType1) {
+		switch (Movie.padType1) {
 			case PSE_PAD_TYPE_MOUSE:
 				padd.buttonStatus = paddtemp.buttonStatus;
 				padd.moveX = paddtemp.moveX;
@@ -628,13 +628,13 @@ if (HasEmulatedFrame == 2) { // only poll once per each frame
 			default:
 				padd.buttonStatus = paddtemp.buttonStatus;
 		}
-		padd.controllerType=currentMovie.padType1;
+		padd.controllerType=Movie.padType1;
 	}
-	memcpy(&currentMovie.lastPad1,&padd,sizeof(padd));
+	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
 	HasEmulatedFrame = 1;
 }
 else {
-	memcpy(&padd,&currentMovie.lastPad1,sizeof(currentMovie.lastPad1));
+	memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
 }
 
 /* movie stuff end */
@@ -696,12 +696,12 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 /* movie stuff start */
 
 if (HasEmulatedFrame == 1) { // only poll once per each frame
-	if (currentMovie.mode == 1) {
+	if (Movie.mode == 1) {
 			PCSX_MOV_WriteJoy(padd,2);
 	}
-	else if (currentMovie.mode == 2 && (currentMovie.currentFrame<currentMovie.totalFrames)) {
+	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames)) {
 		PadDataS paddtemp = PCSX_MOV_ReadJoy(2);
-		switch (currentMovie.padType2) {
+		switch (Movie.padType2) {
 			case PSE_PAD_TYPE_MOUSE:
 				padd.buttonStatus = paddtemp.buttonStatus;
 				padd.moveX = paddtemp.moveX;
@@ -725,12 +725,12 @@ if (HasEmulatedFrame == 1) { // only poll once per each frame
 			default:
 				padd.buttonStatus = paddtemp.buttonStatus;
 		}
-		padd.controllerType=currentMovie.padType2;
+		padd.controllerType=Movie.padType2;
 	}
-	memcpy(&currentMovie.lastPad2,&padd,sizeof(padd));
+	memcpy(&Movie.lastPad2,&padd,sizeof(padd));
 }
 else {
-	memcpy(&padd,&currentMovie.lastPad2,sizeof(currentMovie.lastPad2));
+	memcpy(&padd,&Movie.lastPad2,sizeof(Movie.lastPad2));
 }
 HasEmulatedFrame = 0;
 

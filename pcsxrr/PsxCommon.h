@@ -165,7 +165,7 @@ typedef struct
 
 #define MOVIE_MAX_METADATA 512
 
-struct Movie_Type {
+struct MovieType {
 	//Last Polled Joypad Buttons
 	PadDataS lastPad1;
 	PadDataS lastPad2;

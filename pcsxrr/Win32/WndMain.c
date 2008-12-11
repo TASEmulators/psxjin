@@ -411,9 +411,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_FILE_RUN_CD:
-//					currentMovie.mode = 0;
-//					currentMovie.currentFrame = 0;
-//					currentMovie.lagCounter = 0;
 					LoadCdBios = 0;
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
@@ -426,19 +423,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						SysMessage(_("Could not load Cdrom"));
 						return TRUE;
 					}
-//					ShowCursor(FALSE);
 					Running = 1;
 					psxCpu->Execute();
 					return TRUE;
 
 				case ID_FILE_RUNCDBIOS:
-//					currentMovie.mode = 0;
-//					currentMovie.currentFrame = 0;
-//					currentMovie.lagCounter = 0;
 					LoadCdBios = 1;
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
-//					ShowCursor(FALSE);
 					CheckCdrom();
 					SysReset();
 					NeedReset = 0;
@@ -585,7 +577,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				if (Running) ClosePlugins();
 				SysClose();
 				PostQuitMessage(0);
-				if (currentMovie.mode == 1)
+				if (Movie.mode == 1)
 					WriteMovieFile();
 				exit(0);
 			}
@@ -1470,7 +1462,7 @@ void CreateMainWindow(int nCmdShow) {
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
 
-	if (currentMovie.mode) {
+	if (Movie.mode) {
 		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_ENABLED);
@@ -1633,13 +1625,13 @@ void WIN32_StartMovieReplay(char* szFilename)
 {
 	int nRet=1;
 	if (szFilename != "") {
-		ReadMovieFile(szFilename,&currentMovie);
-		GetMovieFilenameMini(currentMovie.movieFilename);
+		ReadMovieFile(szFilename,&Movie);
+		GetMovieFilenameMini(Movie.movieFilename);
 	}
 	else
 		nRet = PCSX_MOV_StartReplayDialog();
 	if (nRet) {
-		if (currentMovie.saveStateIncluded) {
+		if (Movie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			NeedReset = 0;
@@ -1678,7 +1670,7 @@ void WIN32_StartMovieRecord()
 	int nRet;
 	nRet = PCSX_MOV_StartMovieDialog();
 	if (nRet) {
-		if (currentMovie.saveStateIncluded) {
+		if (Movie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			Running = 1;
