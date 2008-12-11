@@ -176,7 +176,7 @@ static int MHkeysUseUpdate()
 	// Update the values of all the inputs
 	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
-		sprintf(tempTxt, "");
+		tempTxt[0] = '\0';
 
 		if(EmuCommandTable[i].keymod == VK_CONTROL)
 			sprintf(tempTxt,"Ctrl + ");
@@ -187,9 +187,8 @@ static int MHkeysUseUpdate()
 	
 		sprintf(tempTxt,"%s%s",tempTxt,RealKeyName(EmuCommandTable[i].key));
 
-		if (!EmuCommandTable[i].key) {
-			sprintf(tempTxt, "");
-		}
+		if (!EmuCommandTable[i].key)
+			tempTxt[0] = '\0';
 
 		memset(&LvItem, 0, sizeof(LvItem));
 		LvItem.mask = LVIF_TEXT;
