@@ -383,13 +383,14 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			if(i>=MWNUM/2)
 				col=1;
 			RECT r;
+			uint8* rPtr = (uint8*)&r;
 			GetWindowRect(GetDlgItem(hwndDlg,MW_ADDR_Lookup[i]),&r);
-			ScreenToClient(hwndDlg,(LPPOINT)&r);
+			ScreenToClient(hwndDlg,(LPPOINT)rPtr);
 			ScreenToClient(hwndDlg,(LPPOINT)&r.right);
 			yPositions[i] = r.top;
 			yPositions[i] += ((r.bottom-r.top)-13)/2; //vertically center
 			GetWindowRect(GetDlgItem(hwndDlg,kLabelControls[col]),&r);
-			ScreenToClient(hwndDlg,(LPPOINT)&r);
+			ScreenToClient(hwndDlg,(LPPOINT)rPtr);
 			xPositions[i] = r.left;
 		}
 		break;
