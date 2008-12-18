@@ -271,6 +271,7 @@
 #define IDC_CHOOSE_LIST                 1264
 #define IDC_PADTYPE1                    1265
 #define IDC_PADTYPE2                    1266
+#define IDC_USECHEATS                   1267
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
