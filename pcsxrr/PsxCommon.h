@@ -166,52 +166,43 @@ typedef struct
 #define MOVIE_MAX_METADATA 512
 
 struct MovieType {
-	//Last Polled Joypad Buttons
-	PadDataS lastPad1;
-	PadDataS lastPad2;
-	//pad types
-	unsigned char padType1;
-	unsigned char padType2;
-	//Total Movie Frames
-	unsigned long totalFrames;
-	//Current Frame
-	unsigned long currentFrame;
-	//Current Lag
-	unsigned long lagCounter;
-	//is the Movie Recording (1) or Playing (2) or not active (0)?
-	unsigned char mode;
-	//is the Movie Read Only (1) or Read+Write (0)?
-	unsigned char readOnly;
-	//How many Rerecords
-	unsigned long rerecordCount;
-	//00 No save state information | Includes Save State info
-	unsigned char saveStateIncluded;
-	//Locations in file
-	unsigned long inputOffset;
-	unsigned long savestateOffset;
-	//Author Info
-	char authorInfo[MOVIE_MAX_METADATA];
-	//version numbers
-	unsigned long formatVersion;
-	unsigned long emuVersion;
-	//The file name
-	char movieFilenameMini[MAX_PATH];
-	//The full path file name
-	char* movieFilename;
-	//size of a frame in bytes
-	char bytesPerFrame;
-	//PAL mode?
-	char palTiming;
-	//movie buffer stuff
-	uint8* inputBuffer;
-	uint32 inputBufferSize;
-	uint8* inputBufferPtr;
+	PadDataS lastPad1;                   //last joypad1 buttons polled
+	PadDataS lastPad2;                   //last joypad2 buttons polled
+	unsigned char padType1;              //joypad1 type
+	unsigned char padType2;              //joypad2 type
+	unsigned long totalFrames;           //total movie frames
+	unsigned long currentFrame;          //current frame in movie
+	unsigned long lagCounter;            //current lag count
+	unsigned char mode;                  //movie is | 1: recording | 2: playing | 0: not active
+	unsigned char readOnly;              //movie is | 1: read-only | 0: read+write
+	unsigned long rerecordCount;         //total movie rerecords
+	unsigned char saveStateIncluded;     //0: no save state | 1: includes save state
+	unsigned char memoryCardIncluded;    //0: no memory cards | 1: includes memory cards
+	unsigned char cheatListIncluded;     //0: no cheat list | 1: includes cheat list
+	unsigned long saveStateOffset;       //savestate chunk location in file
+	unsigned long memoryCardOffset;       //savestate chunk location in file
+	unsigned long cheatListOffset;       //savestate chunk location in file
+	unsigned long inputOffset;           //input chunk location in file
+	char authorInfo[MOVIE_MAX_METADATA]; //author info
+	unsigned long formatVersion;         //movie file format version number
+	unsigned long emuVersion;            //emulator version used in recording
+	char movieFilenameMini[MAX_PATH];    //short movie filename (ex: "movie") used for savestates
+	char* movieFilename;                 //full path file name (ex:"c:/pcsx/movies/movie.pxm")
+	char bytesPerFrame;                  //size of each frame in bytes
+	char palTiming;                      //PAL mode (50 FPS instead of 60)
+	uint8* inputBuffer;                  //full movie input buffer
+	uint32 inputBufferSize;              //movie input buffer size
+	uint8* inputBufferPtr;               //pointer to the full movie input buffer
 };
 
+#define EMU_VERSION 6
 #define MOVIE_VERSION 1
 
-#define MOVIE_FLAG_FROM_POWERON (1<<1)
-#define MOVIE_FLAG_PAL_TIMING   (1<<2)
+#define MOVIE_FLAG_FROM_SAVESTATE (1<<1)
+#define MOVIE_FLAG_PAL_TIMING     (1<<2)
+#define MOVIE_FLAG_MEMORY_CARDS   (1<<3)
+#define MOVIE_FLAG_CHEAT_LIST     (1<<4)
+#define MOVIE_FLAG_IRQ_HACKS      (1<<5)
 
 #define MODE_FLAG_RECORD (1<<1)
 #define MODE_FLAG_REPLAY (1<<2)

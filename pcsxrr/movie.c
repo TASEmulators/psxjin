@@ -71,7 +71,7 @@ static void ReserveBufferSpace(uint32 space_needed)
 int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	char readHeader[4];
 	int movieFlags = 0;
-	const char szFileHeader[] = "PXM "; // file identifier
+	const char szFileHeader[] = "PXM ";       //file identifier
 
 	tempMovie->movieFilename = szChoice;
 
@@ -79,34 +79,31 @@ int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	if (!fd)
 		return 0;
 
-	fread(readHeader, 1, 4, fd);              // read identifier
-	if (memcmp(readHeader,szFileHeader,4)) {  // not the right file type
+	fread(readHeader, 1, 4, fd);              //read identifier
+	if (memcmp(readHeader,szFileHeader,4)) {  //not the right file type
 		fclose(fd);
 		return 0;
 	}
 
-	fread(&tempMovie->formatVersion,1,4,fd);  // file format version number
-	fread(&tempMovie->emuVersion, 1, 4, fd);  // emulator version number
-	fread(&movieFlags, 1, 1, fd);             // read flags
+	fread(&tempMovie->formatVersion,1,4,fd);  //file format version number
+	fread(&tempMovie->emuVersion, 1, 4, fd);  //emulator version number
+	fread(&movieFlags, 1, 1, fd);             //read flags
 	{
-		if (movieFlags&MOVIE_FLAG_FROM_POWERON) // starts from reset
-			tempMovie->saveStateIncluded = 0;
-		else
-			tempMovie->saveStateIncluded = 1;
-	
-		if (movieFlags&MOVIE_FLAG_PAL_TIMING)   // get system FPS
-			tempMovie->palTiming = 1;
-		else
-			tempMovie->palTiming = 0;
+		tempMovie->saveStateIncluded = movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
+		tempMovie->memoryCardIncluded = movieFlags&MOVIE_FLAG_MEMORY_CARDS;
+		tempMovie->cheatListIncluded = movieFlags&MOVIE_FLAG_CHEAT_LIST;
+		tempMovie->palTiming = movieFlags&MOVIE_FLAG_PAL_TIMING;
 	}
+	fread(&movieFlags, 1, 1, fd);             //reserved for more flags
 
-	fread(&movieFlags, 1, 1, fd);             //reserved for flags
-	fread(&tempMovie->padType1, 1, 1, fd);    //padType1
-	fread(&tempMovie->padType2, 1, 1, fd);    //padType2
+	fread(&tempMovie->padType1, 1, 1, fd);
+	fread(&tempMovie->padType2, 1, 1, fd);
 
 	fread(&tempMovie->totalFrames, 1, 4, fd);
 	fread(&tempMovie->rerecordCount, 1, 4, fd);
-	fread(&tempMovie->savestateOffset, 1, 4, fd);
+	fread(&tempMovie->saveStateOffset, 1, 4, fd);
+	fread(&tempMovie->memoryCardOffset, 1, 4, fd);
+	fread(&tempMovie->cheatListOffset, 1, 4, fd);
 	fread(&tempMovie->inputOffset, 1, 4, fd);
 
 	// read metadata
@@ -147,8 +144,12 @@ static void WriteMovieHeader()
 	int empty=0;
 	unsigned long emuVersion = EMU_VERSION;
 	unsigned long movieVersion = MOVIE_VERSION;
-	if (!Movie.saveStateIncluded)
-		movieFlags |= MOVIE_FLAG_FROM_POWERON;
+	if (Movie.saveStateIncluded)
+		movieFlags |= MOVIE_FLAG_FROM_SAVESTATE;
+	if (Movie.memoryCardIncluded)
+		movieFlags |= MOVIE_FLAG_MEMORY_CARDS;
+	if (Movie.cheatListIncluded)
+		movieFlags |= MOVIE_FLAG_CHEAT_LIST;
 	if (Config.PsxType)
 		movieFlags |= MOVIE_FLAG_PAL_TIMING;
 
@@ -156,28 +157,30 @@ static void WriteMovieHeader()
 	fwrite(&movieVersion, 1, 4, fpRecordingMovie);          //movie version
 	fwrite(&emuVersion, 1, 4, fpRecordingMovie);            //emu version
 	fwrite(&movieFlags, 1, 1, fpRecordingMovie);            //flags
-	fwrite(&empty, 1, 1, fpRecordingMovie);                 //reserved for flags
-	fwrite(&Movie.padType1, 1, 1, fpRecordingMovie); //padType1
-	fwrite(&Movie.padType2, 1, 1, fpRecordingMovie); //padType2
+	fwrite(&empty, 1, 1, fpRecordingMovie);                 //reserved for more flags
+	fwrite(&Movie.padType1, 1, 1, fpRecordingMovie);        //padType1
+	fwrite(&Movie.padType2, 1, 1, fpRecordingMovie);        //padType2
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //total frames
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //rerecord count
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //savestate offset
+	fwrite(&empty, 1, 4, fpRecordingMovie);                 //memory card offset
+	fwrite(&empty, 1, 4, fpRecordingMovie);                 //cheat list offset
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //input offset
 
 	int authLen = strlen(Movie.authorInfo);
 	if (authLen > 0) {
-		fwrite(&authLen, 1, 4, fpRecordingMovie);         //author info size
+		fwrite(&authLen, 1, 4, fpRecordingMovie);             //author info size
 		unsigned char* authbuf = (unsigned char*)malloc(authLen);
 		int i;
 		for(i=0; i<authLen; ++i) {
 			authbuf[i + 0] = Movie.authorInfo[i] & 0xff;
 			authbuf[i + 1] = (Movie.authorInfo[i] >> 8) & 0xff;
 		}
-		fwrite(authbuf, 1, authLen, fpRecordingMovie);    //author info
+		fwrite(authbuf, 1, authLen, fpRecordingMovie);        //author info
 		free(authbuf);
 	}
 
-	Movie.savestateOffset = ftell(fpRecordingMovie); //get savestate offset
+	Movie.saveStateOffset = ftell(fpRecordingMovie);        //get savestate offset
 	if (!Movie.saveStateIncluded)
 		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte savestate
 	else {
@@ -186,9 +189,21 @@ static void WriteMovieHeader()
 		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
 		fseek (fpRecordingMovie, 0, SEEK_END);
 	}
-	Movie.inputOffset = ftell(fpRecordingMovie);     //get input offset
+	
+	Movie.memoryCardOffset = ftell(fpRecordingMovie);       //get memory cards offset
+	if (!Movie.memoryCardIncluded)
+		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte memory card
+
+	Movie.cheatListOffset = ftell(fpRecordingMovie);        //get cheat list offset
+	if (!Movie.cheatListIncluded)
+		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte cheat list
+
+	Movie.inputOffset = ftell(fpRecordingMovie);            //get input offset
+
 	fseek (fpRecordingMovie, 24, SEEK_SET);
-	fwrite(&Movie.savestateOffset, 1, 4, fpRecordingMovie); //write savestate offset
+	fwrite(&Movie.saveStateOffset, 1, 4, fpRecordingMovie); //write savestate offset
+	fwrite(&Movie.memoryCardOffset, 1, 4, fpRecordingMovie);//write memory cards offset
+	fwrite(&Movie.cheatListOffset, 1, 4, fpRecordingMovie); //write cheat list offset
 	fwrite(&Movie.inputOffset, 1, 4, fpRecordingMovie);     //write input offset
 	fseek (fpRecordingMovie, 0, SEEK_END);
 	Movie.inputBufferPtr = Movie.inputBuffer;

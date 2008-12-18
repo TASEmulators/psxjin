@@ -50,6 +50,7 @@ void GetMovieFilenameMini(char* filenameMini)
 
 static char* GetRecordingPath(char* szPath)
 {
+	//this function makes sure a relative path has the "movies\" path prepended to it
 	char szDrive[MAX_PATH];
 	char szDirectory[MAX_PATH];
 	char szFilename[MAX_PATH];
@@ -334,6 +335,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 		char szFilename[MAX_PATH];
 		int i = 0;
 //		sprintf(szFilename, "%.8s.pxm", BurnDrvGetText(DRV_NAME));
+		//TODO: make it use the CD label name?
 		sprintf(szFilename, "%.8s.pxm", defaultFilename);
 		strcpy(szPath, szFilename);
 		while(VerifyRecordingAccessMode(szPath, 0) == 1) {
@@ -344,8 +346,12 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 
 		SetDlgItemText(hDlg, IDC_FILENAME, szFilename);
 		SetDlgItemText(hDlg, IDC_METADATA, "");
-		CheckDlgButton(hDlg, IDC_REPLAYRESET, BST_CHECKED);
+//		CheckDlgButton(hDlg, IDC_REPLAYRESET, BST_CHECKED);
 
+		SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_INSERTSTRING, -1, (LPARAM)"Power-On");
+		SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_INSERTSTRING, -1, (LPARAM)"Power-On + Current Memory Cards");
+		SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_INSERTSTRING, -1, (LPARAM)"Current State");
+		SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_INSERTSTRING, -1, (LPARAM)"Current State + Current Memory Cards");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"Standard");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"Dual Analog");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"Mouse");
@@ -353,6 +359,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_INSERTSTRING, -1, (LPARAM)"Dual Analog");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_INSERTSTRING, -1, (LPARAM)"Mouse");
 		
+		SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_SETCURSEL, 0, 0);
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_SETCURSEL, 0, 0);
 		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_SETCURSEL, 0, 0);
 
@@ -365,36 +372,61 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 	if (Msg == WM_COMMAND) {
 		if (HIWORD(wParam) == EN_CHANGE) {
 			VerifyRecordingFilename(hDlg);
-		} else {
+		}
+		else {
 			int wID = LOWORD(wParam);
 			switch (wID) {
 				case IDC_BROWSE:
-					{
-						sprintf(szChoice, "%.8s", defaultFilename);
-						MakeOfn(szFilter);
-						ofn.lpstrTitle = "Record Input to File";
-						ofn.Flags |= OFN_OVERWRITEPROMPT;
-						int nRet = GetSaveFileName(&ofn);
-						if (nRet != 0) {
-							// this should trigger an EN_CHANGE message
-							SetDlgItemText(hDlg, IDC_FILENAME, szChoice);
-						}
-					}
+				{
+					sprintf(szChoice, "%.8s", defaultFilename);
+					MakeOfn(szFilter);
+					ofn.lpstrTitle = "Record Input to File";
+					ofn.Flags |= OFN_OVERWRITEPROMPT;
+					int nRet = GetSaveFileName(&ofn);
+					if (nRet != 0) //this triggers an EN_CHANGE message
+						SetDlgItemText(hDlg, IDC_FILENAME, szChoice);
 					return TRUE;
+				}
 				case IDOK:
+				{
+					//save movie filename stuff
 					GetDlgItemText(hDlg, IDC_FILENAME, szChoice, MAX_PATH);
-					GetDlgItemText(hDlg, IDC_METADATA, Movie.authorInfo, MOVIE_MAX_METADATA);
-					Movie.saveStateIncluded = 1;
-					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_REPLAYRESET, BM_GETCHECK, 0, 0)) {
-						Movie.saveStateIncluded = 0;
-					}
-				Movie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';
-					// ensure a relative path has the "movies\" path in prepended to it
 					Movie.movieFilename = GetRecordingPath(szChoice);
 					GetMovieFilenameMini(Movie.movieFilename);
-					LONG lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_GETCURSEL, 0, 0);
-					Movie.padType1 = (unsigned char)lIndex;
-					switch (Movie.padType1) {
+
+					//save author info
+					GetDlgItemText(hDlg, IDC_METADATA, Movie.authorInfo, MOVIE_MAX_METADATA);
+					Movie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';
+
+					//save cheat list checkbox
+					Movie.cheatListIncluded = 1;
+					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_USECHEATS, BM_GETCHECK, 0, 0))
+						Movie.cheatListIncluded = 0;
+
+					//save "start from" option list
+					LONG lIndex = SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_GETCURSEL, 0, 0);
+					switch (lIndex) {
+						case 3:
+							Movie.saveStateIncluded = 1;
+							Movie.memoryCardIncluded = 1;
+							break;
+						case 2:
+							Movie.saveStateIncluded = 1;
+							Movie.memoryCardIncluded = 0;
+							break;
+						case 1:
+							Movie.saveStateIncluded = 0;
+							Movie.memoryCardIncluded = 1;
+							break;
+						case 0:
+						default:
+							Movie.saveStateIncluded = 0;
+							Movie.memoryCardIncluded = 0;
+					}
+
+					//save "joypad type" option lists
+					lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_GETCURSEL, 0, 0);
+					switch (lIndex) {
 						case 2:
 							Movie.padType1=PSE_PAD_TYPE_MOUSE;
 							break;
@@ -406,8 +438,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 							Movie.padType1=PSE_PAD_TYPE_STANDARD;
 					}
 					lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_GETCURSEL, 0, 0);
-					Movie.padType2 = (unsigned char)lIndex;
-					switch (Movie.padType2) {
+					switch (lIndex) {
 						case 2:
 							Movie.padType2=PSE_PAD_TYPE_MOUSE;
 							break;
@@ -418,12 +449,16 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 						default:
 							Movie.padType2=PSE_PAD_TYPE_STANDARD;
 					}
+
 					EndDialog(hDlg, 1);
 					return TRUE;
+				}
 				case IDCANCEL:
+				{
 					szChoice[0] = '\0';
 					EndDialog(hDlg, 0);
 					return TRUE;
+				}
 			}
 		}
 	}
@@ -431,7 +466,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 	return FALSE;
 }
 
-int PCSX_MOV_StartMovieDialog()
+int PCSX_MOV_StartRecordDialog()
 {
 	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_RECORDINP), gApp.hWnd, RecordDialogProc);
 }

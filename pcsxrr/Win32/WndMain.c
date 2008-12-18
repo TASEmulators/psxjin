@@ -1607,7 +1607,7 @@ void SysCloseLibrary(void *lib) {
 }
 
 void SysUpdate() {
-    MSG msg;
+	MSG msg;
 
 	while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
 		TranslateMessage(&msg);
@@ -1668,7 +1668,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 void WIN32_StartMovieRecord()
 {
 	int nRet;
-	nRet = PCSX_MOV_StartMovieDialog();
+	nRet = PCSX_MOV_StartRecordDialog();
 	if (nRet) {
 		if (Movie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);
