@@ -596,46 +596,17 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	PAD1_readPort1(&padd);
 
 /* movie stuff start */
-//SysPrintf("HasEmulatedFrame %d\n",HasEmulatedFrame);
 
 if (HasEmulatedFrame == 2) { // only poll once per each frame
-	if (Movie.mode == 1) {
-			PCSX_MOV_WriteJoy(padd,1);
-	}
-	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames)) {
-		PadDataS paddtemp = PCSX_MOV_ReadJoy(1);
-		switch (Movie.padType1) {
-			case PSE_PAD_TYPE_MOUSE:
-				padd.buttonStatus = paddtemp.buttonStatus;
-				padd.moveX = paddtemp.moveX;
-				padd.moveY = paddtemp.moveY;
-				break;
-			case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-				padd.buttonStatus = paddtemp.buttonStatus;
-				padd.leftJoyX = paddtemp.leftJoyX;
-				padd.leftJoyY = paddtemp.leftJoyY;
-				padd.rightJoyX = paddtemp.rightJoyX;
-				padd.rightJoyY = paddtemp.rightJoyY;
-				break;
-			case PSE_PAD_TYPE_ANALOGJOY: // scph1110
-				padd.buttonStatus = paddtemp.buttonStatus;
-				padd.leftJoyX = paddtemp.leftJoyX;
-				padd.leftJoyY = paddtemp.leftJoyY;
-				padd.rightJoyX = paddtemp.rightJoyX;
-				padd.rightJoyY = paddtemp.rightJoyY;
-				break;
-			case PSE_PAD_TYPE_STANDARD:
-			default:
-				padd.buttonStatus = paddtemp.buttonStatus;
-		}
-		padd.controllerType=Movie.padType1;
-	}
+	if (Movie.mode == 1)
+		PCSX_MOV_WriteJoy(&padd,Movie.padType1);
+	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
+		PCSX_MOV_ReadJoy(&padd,Movie.padType1);
 	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
 	HasEmulatedFrame = 1;
 }
-else {
+else
 	memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
-}
 
 /* movie stuff end */
 
@@ -696,43 +667,15 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 /* movie stuff start */
 
 if (HasEmulatedFrame == 1) { // only poll once per each frame
-	if (Movie.mode == 1) {
-			PCSX_MOV_WriteJoy(padd,2);
-	}
-	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames)) {
-		PadDataS paddtemp = PCSX_MOV_ReadJoy(2);
-		switch (Movie.padType2) {
-			case PSE_PAD_TYPE_MOUSE:
-				padd.buttonStatus = paddtemp.buttonStatus;
-				padd.moveX = paddtemp.moveX;
-				padd.moveY = paddtemp.moveY;
-				break;
-			case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-				padd.buttonStatus = paddtemp.buttonStatus;
-				padd.leftJoyX = paddtemp.leftJoyX;
-				padd.leftJoyY = paddtemp.leftJoyY;
-				padd.rightJoyX = paddtemp.rightJoyX;
-				padd.rightJoyY = paddtemp.rightJoyY;
-				break;
-			case PSE_PAD_TYPE_ANALOGJOY: // scph1110
-				padd.buttonStatus = paddtemp.buttonStatus;
-				padd.leftJoyX = paddtemp.leftJoyX;
-				padd.leftJoyY = paddtemp.leftJoyY;
-				padd.rightJoyX = paddtemp.rightJoyX;
-				padd.rightJoyY = paddtemp.rightJoyY;
-				break;
-			case PSE_PAD_TYPE_STANDARD:
-			default:
-				padd.buttonStatus = paddtemp.buttonStatus;
-		}
-		padd.controllerType=Movie.padType2;
-	}
+	if (Movie.mode == 1)
+		PCSX_MOV_WriteJoy(&padd,Movie.padType2);
+	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
+		PCSX_MOV_ReadJoy(&padd,Movie.padType2);
 	memcpy(&Movie.lastPad2,&padd,sizeof(padd));
+	HasEmulatedFrame = 0;
 }
-else {
+else
 	memcpy(&padd,&Movie.lastPad2,sizeof(Movie.lastPad2));
-}
-HasEmulatedFrame = 0;
 
 /* movie stuff end */
 

@@ -145,22 +145,11 @@ extern int NetOpened;
 
 typedef struct
 {
-	// controler type - fill it withe predefined values above
-	unsigned char controllerType;
-
-	// status of buttons - every controller fills this field
-	unsigned short buttonStatus;
-
-	// for analog pad fill those next 4 bytes
-	// values are analog in range 0-255 where 128 is center position
-	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY;
-
-	// for mouse fill those next 2 bytes
-	// values are in range -128 - 127
-	unsigned char moveX, moveY;
-
-	unsigned char reserved[91];
-
+	unsigned char controllerType;                           //controler type
+	unsigned short buttonStatus;                            //normal buttons, all types use it
+	//next values are in range 0-255 where 128 is center
+	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY; //for analog
+	unsigned char moveX, moveY;                             //for mouse
 } PadDataS;
 
 #define MOVIE_MAX_METADATA 512
