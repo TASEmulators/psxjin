@@ -154,23 +154,21 @@ if ((Movie.mode == 2) && (Movie.currentFrame>Movie.totalFrames)) {
 PadDataS paddtemp;
 if (HasEmulatedFrame == 2) {
 	if (Movie.mode == 1) {
-		PCSX_MOV_WriteJoy(Movie.lastPad1,1);
-		PCSX_MOV_WriteJoy(Movie.lastPad2,2);
+		PCSX_MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
+		PCSX_MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	}
 	else if (Movie.mode == 2) {
-		paddtemp = PCSX_MOV_ReadJoy(1);
-		paddtemp = PCSX_MOV_ReadJoy(2);
+		PCSX_MOV_ReadJoy(&paddtemp,Movie.padType1);
+		PCSX_MOV_ReadJoy(&paddtemp,Movie.padType2);
 	}
 	Movie.lagCounter++;
 	GPU_setlagcounter(Movie.lagCounter);
 }
 else if (HasEmulatedFrame == 1) { //this should never happen, but you never know
-	if (Movie.mode == 1) {
-		PCSX_MOV_WriteJoy(Movie.lastPad2,2);
-	}
-	else if (Movie.mode == 2) {
-		paddtemp = PCSX_MOV_ReadJoy(2);
-	}
+	if (Movie.mode == 1)
+		PCSX_MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
+	else if (Movie.mode == 2)
+		PCSX_MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
 HasEmulatedFrame = 2;
 

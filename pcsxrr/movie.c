@@ -348,42 +348,35 @@ static void JoyWrite16(uint16 v)
 	Movie.inputBufferPtr += 2;
 }
 
-void PCSX_MOV_WriteJoy(PadDataS pad,int port)
+void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
-	int type;
-
-	if (port == 1)
-		type = Movie.padType1;
-	else
-		type = Movie.padType2;
-
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
 			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+4)-Movie.inputBuffer));
-			JoyWrite16(pad.buttonStatus^0xFFFF);
-			JoyWrite8(pad.moveX);
-			JoyWrite8(pad.moveY);
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+			JoyWrite8(pad->moveX);
+			JoyWrite8(pad->moveY);
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
 			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
-			JoyWrite16(pad.buttonStatus^0xFFFF);
-			JoyWrite8(pad.leftJoyX);
-			JoyWrite8(pad.leftJoyY);
-			JoyWrite8(pad.rightJoyX);
-			JoyWrite8(pad.rightJoyY);
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+			JoyWrite8(pad->leftJoyX);
+			JoyWrite8(pad->leftJoyY);
+			JoyWrite8(pad->rightJoyX);
+			JoyWrite8(pad->rightJoyY);
 			break;
 		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
 			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
-			JoyWrite16(pad.buttonStatus^0xFFFF);
-			JoyWrite8(pad.leftJoyX);
-			JoyWrite8(pad.leftJoyY);
-			JoyWrite8(pad.rightJoyX);
-			JoyWrite8(pad.rightJoyY);
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+			JoyWrite8(pad->leftJoyX);
+			JoyWrite8(pad->leftJoyY);
+			JoyWrite8(pad->rightJoyX);
+			JoyWrite8(pad->rightJoyY);
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
 			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+2)-Movie.inputBuffer));
-			JoyWrite16(pad.buttonStatus^0xFFFF);
+			JoyWrite16(pad->buttonStatus^0xFFFF);
 	}
 }
 
@@ -400,41 +393,34 @@ static inline uint16 JoyRead16()
 	return v;
 }
 
-PadDataS PCSX_MOV_ReadJoy(int port)
+void PCSX_MOV_ReadJoy(PadDataS *pad,unsigned char type)
 {
-	PadDataS pad; int type;
-
-	if (port == 1)
-		type = Movie.padType1;
-	else
-		type = Movie.padType2;
-
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
-			pad.buttonStatus = JoyRead16();
-			pad.moveX = JoyRead8();
-			pad.moveY = JoyRead8();
+			pad->buttonStatus = JoyRead16();
+			pad->moveX = JoyRead8();
+			pad->moveY = JoyRead8();
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-			pad.buttonStatus = JoyRead16();
-			pad.leftJoyX = JoyRead8();
-			pad.leftJoyY = JoyRead8();
-			pad.rightJoyX = JoyRead8();
-			pad.rightJoyY = JoyRead8();
+			pad->buttonStatus = JoyRead16();
+			pad->leftJoyX = JoyRead8();
+			pad->leftJoyY = JoyRead8();
+			pad->rightJoyX = JoyRead8();
+			pad->rightJoyY = JoyRead8();
 			break;
 		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
-			pad.buttonStatus = JoyRead16();
-			pad.leftJoyX = JoyRead8();
-			pad.leftJoyY = JoyRead8();
-			pad.rightJoyX = JoyRead8();
-			pad.rightJoyY = JoyRead8();
+			pad->buttonStatus = JoyRead16();
+			pad->leftJoyX = JoyRead8();
+			pad->leftJoyY = JoyRead8();
+			pad->rightJoyX = JoyRead8();
+			pad->rightJoyY = JoyRead8();
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
-			pad.buttonStatus = JoyRead16();
+			pad->buttonStatus = JoyRead16();
 	}
-	pad.buttonStatus ^= 0xffff;
-	return(pad);
+	pad->buttonStatus ^= 0xffff;
+	pad->controllerType = type;
 }
 
 int MovieFreeze(gzFile f, int Mode) {
