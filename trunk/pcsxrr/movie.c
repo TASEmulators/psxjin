@@ -165,7 +165,8 @@ static void WriteMovieHeader()
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //total frames
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //rerecord count
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //savestate offset
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //memory card offset
+	fwrite(&empty, 1, 4, fpRecordingMovie);                 //memory card 1 offset
+	fwrite(&empty, 1, 4, fpRecordingMovie);                 //memory card 2 offset
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //cheat list offset
 	fwrite(&empty, 1, 4, fpRecordingMovie);                 //input offset
 

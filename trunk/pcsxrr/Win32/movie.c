@@ -144,16 +144,29 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	sprintf(szLengthString, "%02d:%02d:%02d", nHours, nMinutes % 60, nSeconds % 60);
 	sprintf(szUndoCountString, "%lu", dataMovie.rerecordCount);
 
-	// write strings to dialog
+	//write strings to dialog
 	SetDlgItemTextA(hDlg, IDC_LENGTH, szLengthString);
 	SetDlgItemTextA(hDlg, IDC_FRAMES, szFramesString);
 	SetDlgItemTextA(hDlg, IDC_UNDO, szUndoCountString);
 	SetDlgItemTextA(hDlg, IDC_METADATA, dataMovie.authorInfo);
 
+	//start from?
+	char szStartFrom[128];
 	if (!dataMovie.saveStateIncluded)
-		SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "Power-On");
+		sprintf(szStartFrom, "Power-On");
 	else
-		SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "Savestate");
+		sprintf(szStartFrom, "Savestate");
+	if (dataMovie.memoryCardIncluded)
+		sprintf(szStartFrom, "%s + Memory Cards",szStartFrom);
+	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, szStartFrom);
+
+	//cheats? hacks?
+	char szExtras[128];
+	if (dataMovie.cheatListIncluded)
+		sprintf(szExtras, "Cheats");
+	else
+		sprintf(szExtras, "None");
+	SetDlgItemTextA(hDlg, IDC_USECHEATS, szExtras);
 
 	switch (dataMovie.padType1) {
 		case PSE_PAD_TYPE_MOUSE:

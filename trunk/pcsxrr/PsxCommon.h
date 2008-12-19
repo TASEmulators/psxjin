@@ -147,10 +147,10 @@ typedef struct
 {
 	// controler type - fill it withe predefined values above
 	unsigned char controllerType;
-	
+
 	// status of buttons - every controller fills this field
 	unsigned short buttonStatus;
-	
+
 	// for analog pad fill those next 4 bytes
 	// values are analog in range 0-255 where 128 is center position
 	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY;
