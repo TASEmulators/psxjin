@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "PsxCommon.h"
 #include "movie.h"
+#include "cheat.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -187,7 +188,7 @@ static void WriteMovieHeader()
 		fclose(fpRecordingMovie);
 		SaveStateEmbed(Movie.movieFilename);
 		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
-		fseek (fpRecordingMovie, 0, SEEK_END);
+		fseek(fpRecordingMovie, 0, SEEK_END);
 	}
 	
 	Movie.memoryCardOffset = ftell(fpRecordingMovie);       //get memory cards offset
@@ -197,6 +198,12 @@ static void WriteMovieHeader()
 	Movie.cheatListOffset = ftell(fpRecordingMovie);        //get cheat list offset
 	if (!Movie.cheatListIncluded)
 		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte cheat list
+	else {
+		fclose(fpRecordingMovie);
+		PCSX_CHT_SaveCheatFileEmbed(Movie.movieFilename);
+		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpRecordingMovie, 0, SEEK_END);
+	}
 
 	Movie.inputOffset = ftell(fpRecordingMovie);            //get input offset
 
@@ -245,6 +252,8 @@ static int StartReplay()
 
 	if (Movie.saveStateIncluded)
 		LoadStateEmbed(Movie.movieFilename);
+	if (Movie.cheatListIncluded)
+		PCSX_CHT_LoadCheatFileEmbed(Movie.movieFilename);
 
 	// fill input buffer
 	fpRecordingMovie = fopen(Movie.movieFilename,"r+b");

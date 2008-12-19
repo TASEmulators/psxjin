@@ -399,9 +399,9 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 					Movie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';
 
 					//save cheat list checkbox
-					Movie.cheatListIncluded = 1;
+					Movie.cheatListIncluded = 0;
 					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_USECHEATS, BM_GETCHECK, 0, 0))
-						Movie.cheatListIncluded = 0;
+						Movie.cheatListIncluded = 1;
 
 					//save "start from" option list
 					LONG lIndex = SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_GETCURSEL, 0, 0);
