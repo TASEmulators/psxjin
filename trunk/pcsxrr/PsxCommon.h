@@ -180,9 +180,12 @@ struct MovieType {
 	unsigned char memoryCardIncluded;    //0: no memory cards | 1: includes memory cards
 	unsigned char cheatListIncluded;     //0: no cheat list | 1: includes cheat list
 	unsigned long saveStateOffset;       //savestate chunk location in file
-	unsigned long memoryCardOffset;       //savestate chunk location in file
-	unsigned long cheatListOffset;       //savestate chunk location in file
+	unsigned long memoryCard1Offset;     //memcard1 chunk location in file
+	unsigned long memoryCard2Offset;     //memcard2 chunk location in file
+	unsigned long cheatListOffset;       //cheat list chunk location in file
 	unsigned long inputOffset;           //input chunk location in file
+	unsigned long memoryCard1Size;       //memcard1 file size
+	unsigned long memoryCard2Size;       //memcard2 file size
 	char authorInfo[MOVIE_MAX_METADATA]; //author info
 	unsigned long formatVersion;         //movie file format version number
 	unsigned long emuVersion;            //emulator version used in recording
@@ -196,7 +199,7 @@ struct MovieType {
 };
 
 #define EMU_VERSION 6
-#define MOVIE_VERSION 1
+#define MOVIE_VERSION 2
 
 #define MOVIE_FLAG_FROM_SAVESTATE (1<<1)
 #define MOVIE_FLAG_PAL_TIMING     (1<<2)

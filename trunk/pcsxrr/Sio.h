@@ -74,4 +74,8 @@ typedef struct {
 
 void GetMcdBlockInfo(int mcd, int block, McdBlock *info);
 
+void SIO_SaveMemoryCardsEmbed(char *file,char slot);
+void SIO_LoadMemoryCardsEmbed(char *file);
+void SIO_ClearMemoryCardsEmbed();
+
 #endif

@@ -29,6 +29,7 @@
 #endif
 
 #include "PsxCommon.h"
+#include "movie.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)
@@ -630,4 +631,108 @@ int sioFreeze(gzFile f, int Mode) {
 	gzfreezel(Unused);
 
 	return 0;
+}
+
+static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefile) {
+	FILE *infile;
+	gzFile f;
+	char *buffer;
+	unsigned long numbytes;
+
+	//read old mcd file
+	infile = fopen(file, "rb");
+	if(infile == NULL)
+		return 0;
+	fseek(infile, 0L, SEEK_END);
+	numbytes = ftell(infile);
+	fseek(infile, 0L, SEEK_SET);
+	buffer = (char*)calloc(numbytes, sizeof(char));
+	if(buffer == NULL)
+		return 0;
+	fread(buffer, sizeof(char), numbytes, infile);
+	fclose(infile);
+
+	//write new mcd temp file
+	infile = fopen(newfile, "wb");
+	fwrite(buffer,sizeof(char),numbytes,infile);
+	fclose(infile);
+
+	//write uncompressed mcd size to movie file
+	infile = fopen(moviefile, "ab");
+	fwrite(&numbytes, 1, 4, infile);
+	fclose(infile);
+
+	//write compressed embed mcd to movie file
+	f = gzopen(moviefile, "ab");
+	if (f == NULL)
+		return 0;
+	gzwrite(f, (void*)buffer, numbytes);
+	gzclose(f);
+
+	free(buffer);
+	return 1;
+}
+
+void SIO_SaveMemoryCardsEmbed(char *file,char slot) {
+	if (slot == 1) {
+		SaveMemoryCardEmbed(Config.Mcd1,"memcards\\movie001.tmp",file);
+		strcpy(Config.Mcd1, "memcards\\movie001.tmp");
+	}
+	else {
+		SaveMemoryCardEmbed(Config.Mcd2,"memcards\\movie002.tmp",file);
+		strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+	}
+}
+
+static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
+                               unsigned long fileOffsetBegin,unsigned long fileOffsetEnd) {
+	unsigned long embMcdSize;
+	FILE* fp;
+	FILE* fp2;
+
+	char embMcdTmp[fileOffsetEnd-fileOffsetBegin];
+
+	//read embedded mcd size and full compressed mcd file
+	fp = fopen(moviefile,"rb");
+	fseek(fp, fileOffsetBegin, SEEK_SET);
+	fread(&embMcdSize, 1, 4, fp);
+	fread(embMcdTmp, 1, sizeof(embMcdTmp)-4, fp);
+	fclose(fp);
+
+	//write compressed mcd file to temp destination
+	fp2 = fopen("movie_mcd.tmp","wb");
+	fwrite(embMcdTmp, 1, sizeof(embMcdTmp)-4, fp2);
+	fclose(fp2);
+
+	//open temp compressed mcd file and uncompress it
+	gzFile fs = gzopen("movie_mcd.tmp", "rb");
+	if (!fs)
+		return 1;
+	uint8 data[embMcdSize];
+	gzread(fs, (void *) data, embMcdSize);
+	gzclose(fs);
+	remove("movie_mcd.tmp");
+
+	//write uncompressed mcd to new movie temp destination
+	fp2 = fopen(newmcdfile,"wb");
+	fwrite(data, 1, sizeof(data), fp2);
+	fclose(fp2);
+
+	return 0;
+}
+
+void SIO_LoadMemoryCardsEmbed(char *file) {
+	LoadMemoryCardEmbed(file,"memcards\\movie001.tmp",Movie.memoryCard1Offset,Movie.memoryCard2Offset);
+	LoadMemoryCardEmbed(file,"memcards\\movie002.tmp",Movie.memoryCard2Offset,Movie.cheatListOffset);
+	strcpy(Config.Mcd1, "memcards\\movie001.tmp");
+	strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+	LoadMcds(Config.Mcd1, Config.Mcd2);
+}
+
+void SIO_ClearMemoryCardsEmbed() {
+	remove("memcards\\movie001.tmp");
+	remove("memcards\\movie002.tmp");
+	strcpy(Config.Mcd1, "memcards\\movie001.tmp");
+	strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+	LoadMcds(Config.Mcd1, Config.Mcd2);
 }

@@ -1097,7 +1097,7 @@ void CreateCheatEditor()
 	DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_CHEATER),gApp.hWnd,(DLGPROC)ChtEdtrCallB);
 }
 
-BOOL PCSX_CHT_SaveCheatFileEmbed(const char *filename)
+BOOL CHT_SaveCheatFileEmbed(const char *filename)
 {
 	if (Cheat.num_cheats == 0)
 		return (FALSE);
@@ -1140,7 +1140,7 @@ BOOL PCSX_CHT_SaveCheatFileEmbed(const char *filename)
 	return (gzclose(fs) == 0);
 }
 
-BOOL PCSX_CHT_LoadCheatFileEmbed(const char *filename)
+BOOL CHT_LoadCheatFileEmbed(const char *filename)
 {
 	gzFile fs;
 	FILE* fp;
@@ -1176,4 +1176,11 @@ BOOL PCSX_CHT_LoadCheatFileEmbed(const char *filename)
 	remove("embcheat.tmp");
 
 	return (TRUE);
+}
+
+void CHT_ClearCheatFileEmbed() {
+	uint32 i;
+	for (i = 0; i < Cheat.num_cheats; i++)
+		PCSXDeleteCheat(i);
+	Cheat.num_cheats=0;
 }
