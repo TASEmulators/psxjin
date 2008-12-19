@@ -103,7 +103,8 @@ int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	fread(&tempMovie->totalFrames, 1, 4, fd);
 	fread(&tempMovie->rerecordCount, 1, 4, fd);
 	fread(&tempMovie->saveStateOffset, 1, 4, fd);
-	fread(&tempMovie->memoryCardOffset, 1, 4, fd);
+	fread(&tempMovie->memoryCard1Offset, 1, 4, fd);
+	fread(&tempMovie->memoryCard2Offset, 1, 4, fd);
 	fread(&tempMovie->cheatListOffset, 1, 4, fd);
 	fread(&tempMovie->inputOffset, 1, 4, fd);
 
@@ -191,16 +192,38 @@ static void WriteMovieHeader()
 		fseek(fpRecordingMovie, 0, SEEK_END);
 	}
 	
-	Movie.memoryCardOffset = ftell(fpRecordingMovie);       //get memory cards offset
-	if (!Movie.memoryCardIncluded)
+	Movie.memoryCard1Offset = ftell(fpRecordingMovie);      //get memory card 1 offset
+	if (!Movie.memoryCardIncluded) {
 		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte memory card
-
-	Movie.cheatListOffset = ftell(fpRecordingMovie);        //get cheat list offset
-	if (!Movie.cheatListIncluded)
-		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte cheat list
+		SIO_ClearMemoryCardsEmbed();
+	}
 	else {
 		fclose(fpRecordingMovie);
-		PCSX_CHT_SaveCheatFileEmbed(Movie.movieFilename);
+		SIO_SaveMemoryCardsEmbed(Movie.movieFilename,1);
+		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpRecordingMovie, 0, SEEK_END);
+	}
+	Movie.memoryCard2Offset = ftell(fpRecordingMovie);      //get memory card 2 offset
+	if (!Movie.memoryCardIncluded) {
+		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte memory card
+		SIO_ClearMemoryCardsEmbed();
+	}
+	else {
+		fclose(fpRecordingMovie);
+		SIO_SaveMemoryCardsEmbed(Movie.movieFilename,2);
+		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpRecordingMovie, 0, SEEK_END);
+	}
+	LoadMcds(Config.Mcd1, Config.Mcd2);
+
+	Movie.cheatListOffset = ftell(fpRecordingMovie);        //get cheat list offset
+	if (!Movie.cheatListIncluded) {
+		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte cheat list
+		CHT_ClearCheatFileEmbed();
+	}
+	else {
+		fclose(fpRecordingMovie);
+		CHT_SaveCheatFileEmbed(Movie.movieFilename);
 		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
 		fseek(fpRecordingMovie, 0, SEEK_END);
 	}
@@ -209,7 +232,8 @@ static void WriteMovieHeader()
 
 	fseek (fpRecordingMovie, 24, SEEK_SET);
 	fwrite(&Movie.saveStateOffset, 1, 4, fpRecordingMovie); //write savestate offset
-	fwrite(&Movie.memoryCardOffset, 1, 4, fpRecordingMovie);//write memory cards offset
+	fwrite(&Movie.memoryCard1Offset, 1,4,fpRecordingMovie); //write memory card 1 offset
+	fwrite(&Movie.memoryCard2Offset, 1,4,fpRecordingMovie); //write memory card 2 offset
 	fwrite(&Movie.cheatListOffset, 1, 4, fpRecordingMovie); //write cheat list offset
 	fwrite(&Movie.inputOffset, 1, 4, fpRecordingMovie);     //write input offset
 	fseek (fpRecordingMovie, 0, SEEK_END);
@@ -252,8 +276,16 @@ static int StartReplay()
 
 	if (Movie.saveStateIncluded)
 		LoadStateEmbed(Movie.movieFilename);
+
 	if (Movie.cheatListIncluded)
-		PCSX_CHT_LoadCheatFileEmbed(Movie.movieFilename);
+		CHT_LoadCheatFileEmbed(Movie.movieFilename);
+	else
+		CHT_ClearCheatFileEmbed();
+
+	if (Movie.memoryCardIncluded)
+		SIO_LoadMemoryCardsEmbed(Movie.movieFilename);
+	else
+		SIO_ClearMemoryCardsEmbed();
 
 	// fill input buffer
 	fpRecordingMovie = fopen(Movie.movieFilename,"r+b");

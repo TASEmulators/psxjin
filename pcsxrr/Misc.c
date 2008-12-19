@@ -434,7 +434,7 @@ int SaveState(char *file) {
 	int Size;
 	unsigned char *pMem;
 
-	f = gzopen(file, "wb");
+	f = gzopen(file, "wb1");
 	if (f == NULL) return -1;
 
 	gzwrite(f, (void*)PcsxHeader, 32);
@@ -608,7 +608,7 @@ int LoadStateEmbed(char *file) {
 
 	FILE* fp;
 	FILE* fp2;
-	char embSaveTmp[Movie.memoryCardOffset-Movie.saveStateOffset];
+	char embSaveTmp[Movie.memoryCard1Offset-Movie.saveStateOffset];
 	fp = fopen(file,"rb");
 	fp2 = fopen("embsave.tmp","wb");
 	fseek(fp, Movie.saveStateOffset, SEEK_SET);
