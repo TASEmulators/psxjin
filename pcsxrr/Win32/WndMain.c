@@ -1631,22 +1631,6 @@ void WIN32_StartMovieReplay(char* szFilename)
 	else
 		nRet = PCSX_MOV_StartReplayDialog();
 	if (nRet) {
-		if (Movie.saveStateIncluded) {
-			SetMenu(gApp.hWnd, NULL);
-			OpenPlugins(gApp.hWnd);
-			NeedReset = 0;
-			CheckCdrom();
-			if (LoadCdrom() == -1) {
-				ClosePlugins();
-				RestoreWindow();
-				SysMessage(_("Could not load Cdrom"));
-				return;
-			}
-			Running = 1;
-			PCSX_MOV_StartMovie(2);
-			psxCpu->Execute();
-			return;
-		}
 		LoadCdBios = 0;
 		SetMenu(gApp.hWnd, NULL);
 		OpenPlugins(gApp.hWnd);

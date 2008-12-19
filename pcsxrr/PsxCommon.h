@@ -179,6 +179,7 @@ struct MovieType {
 	unsigned char saveStateIncluded;     //0: no save state | 1: includes save state
 	unsigned char memoryCardIncluded;    //0: no memory cards | 1: includes memory cards
 	unsigned char cheatListIncluded;     //0: no cheat list | 1: includes cheat list
+	unsigned char irqHacksIncluded;      //0: no irq hacks used | 1: uses irq hacks
 	unsigned long saveStateOffset;       //savestate chunk location in file
 	unsigned long memoryCard1Offset;     //memcard1 chunk location in file
 	unsigned long memoryCard2Offset;     //memcard2 chunk location in file
