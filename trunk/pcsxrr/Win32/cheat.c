@@ -1,6 +1,7 @@
 #include "resource.h"
 #include "PsxCommon.h"
 #include "cheat.h"
+#include "../movie.h"
 
 #ifdef WIN32
 #include "Win32.h"
@@ -1094,4 +1095,85 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 void CreateCheatEditor()
 {
 	DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_CHEATER),gApp.hWnd,(DLGPROC)ChtEdtrCallB);
+}
+
+BOOL PCSX_CHT_SaveCheatFileEmbed(const char *filename)
+{
+	if (Cheat.num_cheats == 0)
+		return (FALSE);
+
+	gzFile fs = gzopen(filename, "ab");
+	uint8 data [28];
+
+	if (!fs)
+		return (FALSE);
+
+	uint32 i;
+	for (i = 0; i < Cheat.num_cheats; i++)
+	{
+		memset (data, 0, 28);
+		if (i == 0)
+		{
+			data [6] = 254;
+			data [7] = 252;
+		}
+		if (!Cheat.c [i].enabled)
+			data [0] |= 4;
+
+		if (Cheat.c [i].saved)
+			data [0] |= 8;
+
+		data [1] = Cheat.c [i].byte;
+		data [2] = (uint8) Cheat.c [i].address;
+		data [3] = (uint8) (Cheat.c [i].address >> 8);
+		data [4] = (uint8) (Cheat.c [i].address >> 16);
+		data [5] = Cheat.c [i].saved_byte;
+
+		memmove (&data [8], Cheat.c [i].name, 19);
+
+		if (gzwrite(fs, data, 28) <= 0)
+		{
+			gzclose (fs);
+			return (FALSE);
+		}
+	}
+	return (gzclose(fs) == 0);
+}
+
+BOOL PCSX_CHT_LoadCheatFileEmbed(const char *filename)
+{
+	gzFile fs;
+	FILE* fp;
+	FILE* fp2;
+	char embCheatTmp[Movie.inputOffset-Movie.cheatListOffset];
+	fp = fopen(filename,"rb");
+	fp2 = fopen("embcheat.tmp","wb");
+	fseek(fp, Movie.cheatListOffset, SEEK_SET);
+	fread(embCheatTmp, 1, sizeof(embCheatTmp), fp);
+	fwrite(embCheatTmp, 1, sizeof(embCheatTmp), fp2);
+	fclose(fp);
+	fclose(fp2);
+
+	Cheat.num_cheats = 0;
+
+	fs = gzopen("embcheat.tmp", "rb");
+	uint8 data [28];
+
+	if (!fs)
+		return (FALSE);
+
+	while (gzread(fs, (void *) data, 28) == 28)
+	{
+		Cheat.c [Cheat.num_cheats].enabled = (data [0] & 4) == 0;
+		Cheat.c [Cheat.num_cheats].byte = data [1];
+		Cheat.c [Cheat.num_cheats].address = data [2] | (data [3] << 8) |  (data [4] << 16);
+		Cheat.c [Cheat.num_cheats].saved_byte = data [5];
+		Cheat.c [Cheat.num_cheats].saved = (data [0] & 8) != 0;
+		memmove (Cheat.c [Cheat.num_cheats].name, &data [8], 20);
+		Cheat.c [Cheat.num_cheats++].name [20] = 0;
+	}
+	gzclose(fs);
+	remove("embcheat.tmp");
+
+	return (TRUE);
 }

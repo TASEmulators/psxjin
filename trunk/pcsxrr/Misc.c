@@ -608,7 +608,7 @@ int LoadStateEmbed(char *file) {
 
 	FILE* fp;
 	FILE* fp2;
-	char embSaveTmp[Movie.inputOffset-Movie.saveStateOffset];
+	char embSaveTmp[Movie.memoryCardOffset-Movie.saveStateOffset];
 	fp = fopen(file,"rb");
 	fp2 = fopen("embsave.tmp","wb");
 	fseek(fp, Movie.saveStateOffset, SEEK_SET);

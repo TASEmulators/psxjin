@@ -22,7 +22,7 @@
 #include "movie.h"
 #ifdef WIN32
 #include "Win32.h"
-#include "./Win32/cheat.h"
+#include "cheat.h"
 #endif
 
 static int cnts = 4;
