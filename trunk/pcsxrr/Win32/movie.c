@@ -83,6 +83,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "");
 	SetDlgItemTextA(hDlg, IDC_PADTYPE1, "");
 	SetDlgItemTextA(hDlg, IDC_PADTYPE2, "");
+	SetDlgItemTextA(hDlg, IDC_USECHEATS, "");
 	EnableWindow(GetDlgItem(hDlg, IDC_READONLY), FALSE);
 	SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, BST_UNCHECKED, 0);
 	EnableWindow(GetDlgItem(hDlg, IDOK), FALSE);
@@ -162,8 +163,12 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 
 	//cheats? hacks?
 	char szExtras[128];
-	if (dataMovie.cheatListIncluded)
+	if (dataMovie.cheatListIncluded && dataMovie.irqHacksIncluded)
+		sprintf(szExtras, "Cheats + IRQ Hacks");
+	else if (dataMovie.cheatListIncluded)
 		sprintf(szExtras, "Cheats");
+	else if (dataMovie.irqHacksIncluded)
+		sprintf(szExtras, "IRQ Hacks");
 	else
 		sprintf(szExtras, "None");
 	SetDlgItemTextA(hDlg, IDC_USECHEATS, szExtras);

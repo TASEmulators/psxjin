@@ -93,6 +93,7 @@ int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->saveStateIncluded = movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
 		tempMovie->memoryCardIncluded = movieFlags&MOVIE_FLAG_MEMORY_CARDS;
 		tempMovie->cheatListIncluded = movieFlags&MOVIE_FLAG_CHEAT_LIST;
+		tempMovie->irqHacksIncluded = movieFlags&MOVIE_FLAG_IRQ_HACKS;
 		tempMovie->palTiming = movieFlags&MOVIE_FLAG_PAL_TIMING;
 	}
 	fread(&movieFlags, 1, 1, fd);             //reserved for more flags
@@ -152,6 +153,8 @@ static void WriteMovieHeader()
 		movieFlags |= MOVIE_FLAG_MEMORY_CARDS;
 	if (Movie.cheatListIncluded)
 		movieFlags |= MOVIE_FLAG_CHEAT_LIST;
+	if (Movie.irqHacksIncluded)
+		movieFlags |= MOVIE_FLAG_IRQ_HACKS;
 	if (Config.PsxType)
 		movieFlags |= MOVIE_FLAG_PAL_TIMING;
 
