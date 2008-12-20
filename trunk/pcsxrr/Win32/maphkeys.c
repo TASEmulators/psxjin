@@ -65,7 +65,10 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'D',             VK_CONTROL,  "Configure CD-ROM", },
 	{ 'P',             VK_CONTROL,  "Configure Controllers", },
 	{ 'X',             VK_CONTROL,  "Configure CPU", },
+	{ 0,               0,           "Cheats Enable/Disable", },
 	{ 'O',             VK_CONTROL,  "CD Case Open/Close", },
+	{ 0,               0,           "SIO IRQ Enable/Disable", },
+	{ 0,               0,           "SPU IRQ Enable/Disable", },
 	{ VK_F3,           VK_CONTROL,  "Reset", }
 };
 static HWND hMHkeysList = NULL;

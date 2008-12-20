@@ -141,6 +141,7 @@ PcsxConfig Config;
 extern long LoadCdBios;
 extern int StatesC;
 extern int cdOpenCase;
+extern int cheatState;
 extern int NetOpened;
 
 typedef struct
