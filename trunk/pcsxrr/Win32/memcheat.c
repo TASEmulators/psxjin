@@ -854,6 +854,10 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				}
 
 				UpdateMemWatch();
+				if (!cheatsEnabled) {
+					cheatsEnabled = 1;
+					GPU_displayText(_("*PCSX*: Cheats Enabled"));
+				}
 			}
 
 			case IDCANCEL:

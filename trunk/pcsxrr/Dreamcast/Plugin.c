@@ -43,7 +43,7 @@ int StatesC = 0;
 extern char CdromLabel[256];
 extern int UseGui;
 int cdOpenCase = 0;
-int cheatState=0; //0: disabled 1: enabled
+int cheatsEnabled = 0;
 
 /*
 void PADhandleKey(int key) {

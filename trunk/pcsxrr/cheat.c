@@ -8,26 +8,15 @@
 
 void PCSXRemoveCheat (uint32 which1)
 {
-	if (Cheat.c [which1].saved)
-	{
+	if (Cheat.c [which1].saved) {
 		uint32 address = Cheat.c[which1].address;
-
-//		int block = (address >> MEMMAP_SHIFT) & MEMMAP_MASK;
-//		uint8 *ptr = Memory.Map [block];
-
-//		if (ptr >= (uint8 *) CMemory::MAP_LAST)
-//			*(ptr + (address & 0xffff)) = Cheat.c [which1].saved_byte;
-//		else
-//			S9xSetByte (Cheat.c [which1].saved_byte, address);
-
 		psxMemWrite8(address,Cheat.c[which1].saved_byte);
 	}
 }
 
 void PCSXDeleteCheat (uint32 which1)
 {
-	if (which1 < Cheat.num_cheats)
-	{
+	if (which1 < Cheat.num_cheats) {
 		if (Cheat.c[which1].enabled)
 			PCSXRemoveCheat (which1);
 		
@@ -40,13 +29,11 @@ void PCSXDeleteCheat (uint32 which1)
 void PCSXAddCheat (BOOL enable, BOOL save_current_value, 
                   uint32 address, uint8 byte)
 {
-	if (Cheat.num_cheats < sizeof (Cheat.c) / sizeof (Cheat.c[0]))
-	{
+	if (Cheat.num_cheats < sizeof (Cheat.c) / sizeof (Cheat.c[0])) {
 		Cheat.c [Cheat.num_cheats].address = address;
 		Cheat.c [Cheat.num_cheats].byte = byte;
 		Cheat.c [Cheat.num_cheats].enabled = enable;
-		if (save_current_value)
-		{
+		if (save_current_value) {
 			Cheat.c [Cheat.num_cheats].saved_byte = psxMs8(address);
 			Cheat.c [Cheat.num_cheats].saved = TRUE;
 		}
@@ -56,8 +43,7 @@ void PCSXAddCheat (BOOL enable, BOOL save_current_value,
 
 void PCSXDisableCheat (uint32 which1)
 {
-	if (which1 < Cheat.num_cheats && Cheat.c[which1].enabled)
-	{
+	if (which1 < Cheat.num_cheats && Cheat.c[which1].enabled) {
 		PCSXRemoveCheat(which1);
 		Cheat.c[which1].enabled = FALSE;
 	}
@@ -70,22 +56,13 @@ void PCSXApplyCheat(uint32 which1)
 	if (!Cheat.c[which1].saved)
 		Cheat.c[which1].saved_byte = psxMs8(address);
 
-//	int block = (address >> MEMMAP_SHIFT) & MEMMAP_MASK;
-//	uint8 *ptr = Memory.Map [block];
-//
-//	if (ptr >= (uint8 *) CMemory::MAP_LAST)
-//		*(ptr + (address & 0xffff)) = Cheat.c [which1].byte;
-//	else
-//		S9xSetByte (Cheat.c [which1].byte, address);
-
 	psxMemWrite8(address,Cheat.c[which1].byte);
 	Cheat.c [which1].saved = TRUE;
 }
 
 void PCSXEnableCheat (uint32 which1)
 {
-	if (which1 < Cheat.num_cheats && !Cheat.c[which1].enabled)
-	{
+	if (which1 < Cheat.num_cheats && !Cheat.c[which1].enabled) {
 		Cheat.c[which1].enabled = TRUE;
 		PCSXApplyCheat(which1);
 	}
@@ -93,6 +70,8 @@ void PCSXEnableCheat (uint32 which1)
 
 void PCSXApplyCheats()
 {
+	if (!cheatsEnabled)
+		return;
 	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++)
 		if (Cheat.c[i].enabled)
@@ -101,6 +80,8 @@ void PCSXApplyCheats()
 
 void PCSXRemoveCheats()
 {
+	if (!cheatsEnabled)
+		return;
 	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++)
 	if (Cheat.c[i].enabled)
@@ -117,8 +98,7 @@ BOOL PCSXLoadCheatFile (const char *filename)
 	if (!fs)
 		return (FALSE);
 
-	while (fread ((void *) data, 1, 28, fs) == 28)
-	{
+	while (fread ((void *) data, 1, 28, fs) == 28) {
 		Cheat.c [Cheat.num_cheats].enabled = (data [0] & 4) == 0;
 		Cheat.c [Cheat.num_cheats].byte = data [1];
 		Cheat.c [Cheat.num_cheats].address = data [2] | (data [3] << 8) |  (data [4] << 16);
@@ -134,8 +114,7 @@ BOOL PCSXLoadCheatFile (const char *filename)
 
 BOOL PCSXSaveCheatFile (const char *filename)
 {
-	if (Cheat.num_cheats == 0)
-	{
+	if (Cheat.num_cheats == 0) {
 		(void) remove (filename);
 		return (TRUE);
 	}
@@ -147,11 +126,9 @@ BOOL PCSXSaveCheatFile (const char *filename)
 	return (FALSE);
 
 	uint32 i;
-	for (i = 0; i < Cheat.num_cheats; i++)
-	{
+	for (i = 0; i < Cheat.num_cheats; i++) {
 		memset (data, 0, 28);
-		if (i == 0)
-		{
+		if (i == 0) {
 			data [6] = 254;
 			data [7] = 252;
 		}
@@ -168,8 +145,7 @@ BOOL PCSXSaveCheatFile (const char *filename)
 		data [5] = Cheat.c [i].saved_byte;
 	
 		memmove (&data [8], Cheat.c [i].name, 19);
-		if (fwrite (data, 28, 1, fs) != 1)
-		{
+		if (fwrite (data, 28, 1, fs) != 1) {
 			fclose (fs);
 			return (FALSE);
 		}
@@ -205,11 +181,9 @@ BOOL CHT_SaveCheatFileEmbed(const char *filename)
 		return (FALSE);
 
 	uint32 i;
-	for (i = 0; i < Cheat.num_cheats; i++)
-	{
+	for (i = 0; i < Cheat.num_cheats; i++) {
 		memset (data, 0, 28);
-		if (i == 0)
-		{
+		if (i == 0) {
 			data [6] = 254;
 			data [7] = 252;
 		}
@@ -227,8 +201,7 @@ BOOL CHT_SaveCheatFileEmbed(const char *filename)
 
 		memmove (&data [8], Cheat.c [i].name, 19);
 
-		if (gzwrite(fs, data, 28) <= 0)
-		{
+		if (gzwrite(fs, data, 28) <= 0) {
 			gzclose (fs);
 			return (FALSE);
 		}
@@ -258,8 +231,7 @@ BOOL CHT_LoadCheatFileEmbed(const char *filename)
 	if (!fs)
 		return (FALSE);
 
-	while (gzread(fs, (void *) data, 28) == 28)
-	{
+	while (gzread(fs, (void *) data, 28) == 28) {
 		Cheat.c [Cheat.num_cheats].enabled = (data [0] & 4) == 0;
 		Cheat.c [Cheat.num_cheats].byte = data [1];
 		Cheat.c [Cheat.num_cheats].address = data [2] | (data [3] << 8) |  (data [4] << 16);
