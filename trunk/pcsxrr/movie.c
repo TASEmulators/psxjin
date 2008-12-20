@@ -429,44 +429,35 @@ void PCSX_MOV_ReadJoy(PadDataS *pad,unsigned char type)
 
 int MovieFreeze(gzFile f, int Mode) {
 	unsigned long bufSize = 0;
+	unsigned long buttonToSend = 0;
 //SysPrintf("Mode %d - %d/%d\n",Mode,Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
 
-	// saving state
-	if (Mode == 1) {
+	//saving state
+	if (Mode == 1)
 		bufSize = Movie.bytesPerFrame * (Movie.currentFrame+1);
-		gzfreezel(&Movie.currentFrame);
-		gzfreezel(&Movie.lagCounter);
-		gzfreezel(&Movie.lastPad1);
-		gzfreezel(&Movie.lastPad2);
-		gzfreezel(&bufSize);
-		gzfreeze(Movie.inputBuffer, bufSize);
-	}
 
-	// loading state
+	//saving/loading state
+	gzfreezel(&Movie.currentFrame);
+	gzfreezel(&Movie.lagCounter);
+	gzfreezel(&cdOpenCase);
+	gzfreezel(&cheatsEnabled);
+	gzfreezel(&Config.Sio);
+	gzfreezel(&Config.SpuIrq);
+	gzfreezel(&Movie.lastPad1);
+	gzfreezel(&Movie.lastPad2);
+	gzfreezel(&bufSize);
+	if (!(Movie.mode == 2 && Mode == 0))
+		gzfreeze(Movie.inputBuffer, bufSize);
+
+	//loading state
 	if (Mode == 0) {
-		// recording
-		if (Movie.mode == 1) {
-			gzfreezel(&Movie.currentFrame);
-			gzfreezel(&Movie.lagCounter);
-			gzfreezel(&Movie.lastPad1);
-			gzfreezel(&Movie.lastPad2);
-			gzfreezel(&bufSize);
-			gzfreeze(Movie.inputBuffer, bufSize);
+		if (Movie.mode == 1)
 			Movie.rerecordCount++;
-		}
-		// replaying
-		else if (Movie.mode == 2) {
-			gzfreezel(&Movie.currentFrame);
-			gzfreezel(&Movie.lagCounter);
-			gzfreezel(&Movie.lastPad1);
-			gzfreezel(&Movie.lastPad2);
-		}
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
 		
 		//update information GPU OSD after loading a savestate
 		GPU_setlagcounter(Movie.lagCounter);
 		GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
-		unsigned long buttonToSend = 0;
 		buttonToSend = Movie.lastPad1.buttonStatus;
 		buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 		GPU_inputdisplay(buttonToSend);
