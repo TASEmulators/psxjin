@@ -20,9 +20,9 @@
 
 #include "PsxCommon.h"
 #include "movie.h"
-#ifdef WIN32
-#include "Win32.h"
 #include "cheat.h"
+#ifdef WIN32
+#include "Win32/Win32.h"
 #endif
 
 static int cnts = 4;

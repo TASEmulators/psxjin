@@ -19,17 +19,17 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <stdio.h>
-#include "plugins.h"
-#include "resource.h"
 #include <time.h>
 #include <stdio.h>
-
+#include "../plugins.h"
+#include "../PsxCommon.h"
 #include "../movie.h"
-#include "R3000A.h"
+#include "../cheat.h"
+#include "../R3000A.h"
+#include "../NoPic.h"
+
 #include "Win32.h"
-#include "NoPic.h"
-#include "PsxCommon.h"
-#include "cheat.h"
+#include "resource.h"
 #include "maphkeys.h"
 
 extern int speedModifierFlag;
