@@ -314,6 +314,10 @@ void PCSX_MOV_StartMovie(int mode)
 	Movie.mode = mode;
 	Movie.currentFrame = 0;
 	Movie.lagCounter = 0;
+	cdOpenCase = 0;
+	cheatsEnabled = 0;
+	Config.Sio = 0;
+	Config.SpuIrq = 0;
 	if (Movie.mode == 1)
 		StartRecord();
 	else if (Movie.mode == 2)

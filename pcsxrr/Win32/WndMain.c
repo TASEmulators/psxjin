@@ -60,7 +60,7 @@ int ConfPlug=0;
 int StatesC=0;
 int NeedReset=1;
 int cdOpenCase=0;
-int cheatState=0; //0: disabled 1: enabled
+int cheatsEnabled=0;
 int CancelQuit=0;
 int UseGui = 1;
 unsigned int langsMax;

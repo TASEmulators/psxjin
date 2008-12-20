@@ -39,7 +39,7 @@ long SPU__open(void) {
 int StatesC = 0;
 extern int UseGui;
 int cdOpenCase = 0;
-int cheatState=0; //0: disabled 1: enabled
+int cheatsEnabled = 0;
 int ShowPic=0;
 
 void gpuShowPic() {

@@ -366,14 +366,15 @@ void PADhandleKey(int key) {
 			GPU_displayText(_("*PCSX*: CD Case Closed"));
 	}
 
-	if(key == EmuCommandTable[EMUCMD_CHEATSTATE].key
-	&& modifiers == EmuCommandTable[EMUCMD_CHEATSTATE].keymod)
+	if(key == EmuCommandTable[EMUCMD_CHEATTOGLE].key
+	&& modifiers == EmuCommandTable[EMUCMD_CHEATTOGLE].keymod)
 	{
-		cheatState ^= 1;
-		if (cheatState)
+		cheatsEnabled ^= 1;
+		if (cheatsEnabled)
 			GPU_displayText(_("*PCSX*: Cheats Enabled"));
 		else
 			GPU_displayText(_("*PCSX*: Cheats Disabled"));
+		PCSXApplyCheats();
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
