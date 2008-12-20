@@ -1,6 +1,6 @@
 #include "resource.h"
 #include "PsxCommon.h"
-#include "cheat.h"
+#include "../cheat.h"
 
 #ifdef WIN32
 #include "Win32.h"
@@ -232,14 +232,6 @@ void PCSXSearchForValue (PCSXCheatComparisonType cmp,
 //	for (i = 0x10000 - l; i < 0x10000; i++)
 //		BIT_CLEAR (Cheat.SRAM_BITS, i);
 }
-
-#define ITEM_QUERY(a, b, c, d, e)  ZeroMemory(&a, sizeof(LV_ITEM)); \
-						a.iItem= ListView_GetSelectionMark(GetDlgItem(hDlg, b)); \
-						a.iSubItem=c; \
-						a.mask=LVIF_TEXT; \
-						a.pszText=d; \
-						a.cchTextMax=e; \
-						ListView_GetItem(GetDlgItem(hDlg, b), &a);
 
 void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
                           PCSXCheatDataSize size, uint32 value, uint8 update)
@@ -514,7 +506,7 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 	}
 }
 
-INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static HBITMAP hBmp;
 	static PCSXCheatDataSize bytes;
@@ -528,83 +520,83 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			if(val_type==0)
 				val_type=1;
 			hBmp=(HBITMAP)LoadImage(NULL, TEXT("Raptor.bmp"), IMAGE_BITMAP, 0,0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
-			ListView_SetExtendedListViewStyle(GetDlgItem(hDlg, IDC_ADDYS), LVS_EX_FULLROWSELECT);
+			ListView_SetExtendedListViewStyle(GetDlgItem(hwndDlg, IDC_ADDYS), LVS_EX_FULLROWSELECT);
 
 			//defaults
-			SendDlgItemMessage(hDlg, IDC_LESS_THAN, BM_SETCHECK, BST_CHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_CHECKED, 0);
 			if(!use_entered)
-				SendDlgItemMessage(hDlg, IDC_PREV, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_PREV, BM_SETCHECK, BST_CHECKED, 0);
 			else if(use_entered==1)
 			{
-				SendDlgItemMessage(hDlg, IDC_ENTERED, BM_SETCHECK, BST_CHECKED, 0);
-				EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), TRUE);
-				EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), TRUE);
+				SendDlgItemMessage(hwndDlg, IDC_ENTERED, BM_SETCHECK, BST_CHECKED, 0);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), TRUE);
 			}
 			else if(use_entered==2)
 			{
-				SendDlgItemMessage(hDlg, IDC_ENTEREDADDRESS, BM_SETCHECK, BST_CHECKED, 0);
-				EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), TRUE);
-				EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), TRUE);
+				SendDlgItemMessage(hwndDlg, IDC_ENTEREDADDRESS, BM_SETCHECK, BST_CHECKED, 0);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), TRUE);
+				EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), TRUE);
 			}
-			SendDlgItemMessage(hDlg, IDC_UNSIGNED, BM_SETCHECK, BST_CHECKED, 0);
-			SendDlgItemMessage(hDlg, IDC_1_BYTE, BM_SETCHECK, BST_CHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_CHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 
 			if(comp_type==PCSX_GREATER_THAN)
 			{
-				SendDlgItemMessage(hDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_GREATER_THAN, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_GREATER_THAN, BM_SETCHECK, BST_CHECKED, 0);
 			}
 			else if(comp_type==PCSX_LESS_THAN_OR_EQUAL)
 			{
-				SendDlgItemMessage(hDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_LESS_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 
 			}
 			else if(comp_type==PCSX_GREATER_THAN_OR_EQUAL)
 			{
-				SendDlgItemMessage(hDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_GREATER_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_GREATER_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 
 			}
 			else if(comp_type==PCSX_EQUAL)
 			{
-				SendDlgItemMessage(hDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 
 			}
 			else if(comp_type==PCSX_NOT_EQUAL)
 			{
-				SendDlgItemMessage(hDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_NOT_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_NOT_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 
 			}
 
 			if(val_type==2)
 			{
-				SendDlgItemMessage(hDlg, IDC_UNSIGNED, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_SIGNED, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_SIGNED, BM_SETCHECK, BST_CHECKED, 0);
 
 			}
 			else if(val_type==3)
 			{
-				SendDlgItemMessage(hDlg, IDC_UNSIGNED, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
 			}
 
 			if(bytes==PCSX_16_BITS)
 			{
-				SendDlgItemMessage(hDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_2_BYTE, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_2_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
 			else if(bytes==PCSX_24_BITS)
 			{
-				SendDlgItemMessage(hDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_3_BYTE, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_3_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
 			else if(bytes==PCSX_32_BITS)
 			{
-				SendDlgItemMessage(hDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
-				SendDlgItemMessage(hDlg, IDC_4_BYTE, BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendDlgItemMessage(hwndDlg, IDC_4_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
 
 			LVCOLUMN col;
@@ -618,7 +610,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			col.cchTextMax=7;
 			col.pszText=temp;
 
-			ListView_InsertColumn(GetDlgItem(hDlg,IDC_ADDYS),   0,   &col);
+			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS),   0,   &col);
 
 			strcpy(temp,"Curr. Value");
 			ZeroMemory(&col, sizeof(LVCOLUMN));
@@ -630,7 +622,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			col.pszText=temp;
 			col.iSubItem=1;
 
-			ListView_InsertColumn(GetDlgItem(hDlg,IDC_ADDYS),    1,   &col);
+			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS),    1,   &col);
 
 			strcpy(temp,"Prev. Value");
 			ZeroMemory(&col, sizeof(LVCOLUMN));
@@ -642,11 +634,11 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			col.pszText=temp;
 			col.iSubItem=2;
 
-			ListView_InsertColumn(GetDlgItem(hDlg,IDC_ADDYS),    2,   &col);
+			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS),    2,   &col);
 
 			{
 					int l = CheatCount(bytes);
-					ListView_SetItemCount (GetDlgItem(hDlg, IDC_ADDYS), l);
+					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 			}
 
 		}
@@ -662,24 +654,24 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 		case WM_PAINT:
 		{
 		PAINTSTRUCT ps;
-		BeginPaint (hDlg, &ps);
+		BeginPaint (hwndDlg, &ps);
 		if(hBmp)
 		{
 			BITMAP bmp;
 			ZeroMemory(&bmp, sizeof(BITMAP));
 			RECT r;
-			GetClientRect(hDlg, &r);
-			HDC hdc=GetDC(hDlg);
+			GetClientRect(hwndDlg, &r);
+			HDC hdc=GetDC(hwndDlg);
 			HDC hDCbmp=CreateCompatibleDC(hdc);
 			GetObject(hBmp, sizeof(BITMAP), &bmp);
 			HBITMAP hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
 			StretchBlt(hdc, 0,0,r.right,r.bottom,hDCbmp,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
 			SelectObject(hDCbmp, hOldBmp);
 			DeleteDC(hDCbmp);
-			ReleaseDC(hDlg, hdc);
+			ReleaseDC(hwndDlg, hdc);
 		}
 
-		EndPaint (hDlg, &ps);
+		EndPaint (hwndDlg, &ps);
 		}
 		return TRUE;
 
@@ -690,7 +682,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				if(wParam == IDC_ADDYS)
 				{
 					NMHDR * nmh=(NMHDR*)lParam;
-					if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && nmh->code == LVN_GETDISPINFO)
+					if(nmh->hwndFrom == GetDlgItem(hwndDlg, IDC_ADDYS) && nmh->code == LVN_GETDISPINFO)
 					{
 						static char buf[12]; // the following code assumes this variable is static
 						int i, j;
@@ -816,18 +808,18 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 							nmlvdi->item.cchTextMax=4;
 						}
 					}
-					else if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && (nmh->code == (UINT)LVN_ITEMACTIVATE||nmh->code == (UINT)NM_CLICK))
+					else if(nmh->hwndFrom == GetDlgItem(hwndDlg, IDC_ADDYS) && (nmh->code == (UINT)LVN_ITEMACTIVATE||nmh->code == (UINT)NM_CLICK))
 					{
 						BOOL enable=TRUE;
 						if(-1==ListView_GetSelectionMark(nmh->hwndFrom))
 						{
 							enable=FALSE;
 						}
-						EnableWindow(GetDlgItem(hDlg, IDC_C_ADD), enable);
-						EnableWindow(GetDlgItem(hDlg, IDC_C_WATCH), enable);
+						EnableWindow(GetDlgItem(hwndDlg, IDC_C_ADD), enable);
+						EnableWindow(GetDlgItem(hwndDlg, IDC_C_WATCH), enable);
 					}
 					// allow typing in an address to jump to it
-					else if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && nmh->code == (UINT)LVN_ODFINDITEM)
+					else if(nmh->hwndFrom == GetDlgItem(hwndDlg, IDC_ADDYS) && nmh->code == (UINT)LVN_ODFINDITEM)
 					{
 						LRESULT pResult;
 	
@@ -856,7 +848,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	
 						int startPos = pFindInfo->iStart;
 						//Is startPos outside the list (happens if last item is selected)
-						if(startPos >= ListView_GetItemCount(GetDlgItem(hDlg,IDC_ADDYS)))
+						if(startPos >= ListView_GetItemCount(GetDlgItem(hwndDlg,IDC_ADDYS)))
 							startPos = 0;
 	
 						int currentPos, addrPos;
@@ -918,7 +910,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 							currentPos++;
 	
 							//Need to restart at top?
-							if(currentPos >= ListView_GetItemCount(GetDlgItem(hDlg,IDC_ADDYS)))
+							if(currentPos >= ListView_GetItemCount(GetDlgItem(hwndDlg,IDC_ADDYS)))
 							{
 								currentPos = 0;
 								addrPos = 0;
@@ -932,11 +924,11 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 						foundItemOverride = pResult;
 	
 						// in case previously-selected item is 0
-						ListView_SetItemState (GetDlgItem(hDlg,IDC_ADDYS), 1, LVIS_SELECTED|LVIS_FOCUSED,LVIS_SELECTED|LVIS_FOCUSED);
+						ListView_SetItemState (GetDlgItem(hwndDlg,IDC_ADDYS), 1, LVIS_SELECTED|LVIS_FOCUSED,LVIS_SELECTED|LVIS_FOCUSED);
 	
 						return pResult; // HACK: for some reason this selects the first item instead of what it's returning... current workaround is to manually re-select this return value upon the next changed event
 					}
-					else if(nmh->hwndFrom == GetDlgItem(hDlg, IDC_ADDYS) && nmh->code == LVN_ITEMCHANGED)
+					else if(nmh->hwndFrom == GetDlgItem(hwndDlg, IDC_ADDYS) && nmh->code == LVN_ITEMCHANGED)
 					{
 						// hack - see note directly above
 						LPNMLISTVIEW lpnmlv = (LPNMLISTVIEW)lParam;
@@ -944,8 +936,8 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 						{
 							if(foundItemOverride != -1 && lpnmlv->iItem == 0)
 							{
-								ListView_SetItemState (GetDlgItem(hDlg,IDC_ADDYS), foundItemOverride, LVIS_SELECTED|LVIS_FOCUSED,LVIS_SELECTED|LVIS_FOCUSED);
-								ListView_EnsureVisible (GetDlgItem(hDlg,IDC_ADDYS), foundItemOverride, FALSE);
+								ListView_SetItemState (GetDlgItem(hwndDlg,IDC_ADDYS), foundItemOverride, LVIS_SELECTED|LVIS_FOCUSED,LVIS_SELECTED|LVIS_FOCUSED);
+								ListView_EnsureVisible (GetDlgItem(hwndDlg,IDC_ADDYS), foundItemOverride, FALSE);
 								selectionMarkOverride = foundItemOverride;
 								foundItemOverride = -1;
 							}
@@ -960,7 +952,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			break;
 
 		case WM_ACTIVATE:
-			ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
+			ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
 			break;
 
 		case WM_COMMAND:
@@ -973,17 +965,17 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			case IDC_GREATER_THAN_EQUAL:
 			case IDC_EQUAL:
 			case IDC_NOT_EQUAL:
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_LESS_THAN))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN))
 					comp_type=PCSX_LESS_THAN;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_GREATER_THAN))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN))
 					comp_type=PCSX_GREATER_THAN;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_LESS_THAN_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN_EQUAL))
 					comp_type=PCSX_LESS_THAN_OR_EQUAL;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_GREATER_THAN_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN_EQUAL))
 					comp_type=PCSX_GREATER_THAN_OR_EQUAL;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_EQUAL))
 					comp_type=PCSX_EQUAL;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_NOT_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_NOT_EQUAL))
 					comp_type=PCSX_NOT_EQUAL;
 				break;
 
@@ -991,28 +983,28 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			case IDC_2_BYTE:
 			case IDC_3_BYTE:
 			case IDC_4_BYTE:
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_1_BYTE))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_1_BYTE))
 					bytes=PCSX_8_BITS;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_2_BYTE))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_2_BYTE))
 					bytes=PCSX_16_BITS;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_3_BYTE))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_3_BYTE))
 					bytes=PCSX_24_BITS;
 				else bytes=PCSX_32_BITS;
 				{
 					int l = CheatCount(bytes);
-					ListView_SetItemCount (GetDlgItem(hDlg, IDC_ADDYS), l);
+					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 				}
 				break;
 
 			case IDC_SIGNED:
 			case IDC_UNSIGNED:
 			case IDC_HEX:
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_UNSIGNED))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_UNSIGNED))
 					val_type=1;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_SIGNED))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_SIGNED))
 					val_type=2;
 				else val_type=3;
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
+				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
 				break;
 
 
@@ -1067,7 +1059,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					cht.format=val_type;
 
 					//invoke dialog
-					if(!DialogBoxParam(gApp.hInstance, MAKEINTRESOURCE(IDD_CHEAT_FROM_SEARCH), hDlg, DlgCheatSearchAdd, (LPARAM)&cht))
+					if(!DialogBoxParam(gApp.hInstance, MAKEINTRESOURCE(IDD_CHEAT_FROM_SEARCH), hwndDlg, DlgCheatSearchAdd, (LPARAM)&cht))
 					{
 						int p;
 						for(p=0; p<cht.size; p++)
@@ -1083,9 +1075,9 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				PCSXStartCheatSearch();
 				{
 					int l = CheatCount(bytes);
-					ListView_SetItemCount (GetDlgItem(hDlg, IDC_ADDYS), l);
+					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 				}
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
+				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
 				return TRUE;
 
 			case IDC_C_WATCH:
@@ -1105,29 +1097,29 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				break;
 
 			case IDC_REFRESHLIST:
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
+				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
 				break;
 
 			case IDC_ENTERED:
 			case IDC_ENTEREDADDRESS:
 			case IDC_PREV:
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTERED))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTERED))
 				{
 					use_entered=1;
-					EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), TRUE);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), TRUE);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), TRUE);
 				}
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTEREDADDRESS))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTEREDADDRESS))
 				{
 					use_entered=2;
-					EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), TRUE);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), TRUE);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), TRUE);
 				}
 				else
 				{
 					use_entered=0;
-					EnableWindow(GetDlgItem(hDlg, IDC_VALUE_ENTER), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_ENTER_LABEL), FALSE);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), FALSE);
+					EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), FALSE);
 				}
 				return TRUE;
 				break;
@@ -1137,37 +1129,37 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				{
 				val_type=0;
 
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_LESS_THAN))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN))
 					comp_type=PCSX_LESS_THAN;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_GREATER_THAN))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN))
 					comp_type=PCSX_GREATER_THAN;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_LESS_THAN_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN_EQUAL))
 					comp_type=PCSX_LESS_THAN_OR_EQUAL;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_GREATER_THAN_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN_EQUAL))
 					comp_type=PCSX_GREATER_THAN_OR_EQUAL;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_EQUAL))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_EQUAL))
 					comp_type=PCSX_EQUAL;
 				else comp_type=PCSX_NOT_EQUAL;
 
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_UNSIGNED))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_UNSIGNED))
 					val_type=1;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_SIGNED))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_SIGNED))
 					val_type=2;
 				else val_type=3;
 
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_1_BYTE))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_1_BYTE))
 					bytes=PCSX_8_BITS;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_2_BYTE))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_2_BYTE))
 					bytes=PCSX_16_BITS;
-				else if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_3_BYTE))
+				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_3_BYTE))
 					bytes=PCSX_24_BITS;
 				else bytes=PCSX_32_BITS;
 
-				if(BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTERED) ||
-				   BST_CHECKED==IsDlgButtonChecked(hDlg, IDC_ENTEREDADDRESS))
+				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTERED) ||
+				   BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTEREDADDRESS))
 				{
 					char buf[20];
-					GetDlgItemText(hDlg, IDC_VALUE_ENTER, buf, 20);
+					GetDlgItemText(hwndDlg, IDC_VALUE_ENTER, buf, 20);
 					uint32 value;
 					int ret;
 					if(use_entered==2)
@@ -1187,7 +1179,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 						if(ret!=1||!TestRange(val_type, bytes, value))
 						{
-							MessageBox(hDlg, TEXT(SEARCH_ERR_INVALIDSEARCHVALUE), TEXT(SEARCH_TITLE_CHEATERROR), MB_OK);
+							MessageBox(hwndDlg, TEXT(SEARCH_ERR_INVALIDSEARCHVALUE), TEXT(SEARCH_TITLE_CHEATERROR), MB_OK);
 							return TRUE;
 						}
 
@@ -1199,7 +1191,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					PCSXSearchForChange (comp_type,bytes, (val_type==2), FALSE);
 				}
 				int l = CheatCount(bytes);
-				ListView_SetItemCount (GetDlgItem(hDlg, IDC_ADDYS), l);
+				ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 				}
 
 				// if non-modal, update "Prev. Value" column after Search
@@ -1209,7 +1201,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				}
 
 
-				ListView_RedrawItems(GetDlgItem(hDlg, IDC_ADDYS),0, 0x200000);
+				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
 				return TRUE;
 				break;
 
@@ -1218,9 +1210,9 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				/* fall through */
 			case IDCANCEL:
 				if(cheatSearchHWND)
-					DestroyWindow(hDlg);
+					DestroyWindow(hwndDlg);
 				else
-					EndDialog(hDlg, 0);
+					EndDialog(hwndDlg, 0);
 				if(hBmp)
 				{
 					DeleteObject(hBmp);

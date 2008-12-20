@@ -1,3 +1,6 @@
+#ifndef __MAPHKEYS_H__
+#define __MAPHKEYS_H__
+
 #ifdef WIN32
 #include "Win32.h"
 #endif
@@ -96,3 +99,5 @@ extern struct EMUCMDTABLE EmuCommandTable[];
 #define GAMEDEVICE_VK_DIVIDE "Numpad /"
 #define GAMEDEVICE_VK_NUMLOCK "Num-lock"
 #define GAMEDEVICE_VK_SCROLL "Scroll-lock"
+
+#endif /* __MAPHKEYS_H__ */

@@ -31,9 +31,9 @@
 #include "plugin.h"
 #include "Debug.h"
 #include "Win32.h"
+#include "../cheat.h"
 #include "../movie.h"
 #include "../Win32/movie.h"
-#include "../Win32/cheat.h"
 
 int flagSaveState;
 int flagLoadState;

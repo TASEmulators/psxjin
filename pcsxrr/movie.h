@@ -1,3 +1,6 @@
+#ifndef __MOVIE_H__
+#define __MOVIE_H__
+
 extern int flagDontPause;
 extern int flagFakePause;
 extern int flagGPUchain;
@@ -12,3 +15,5 @@ void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type);
 int ReadMovieFile(char* filename, struct MovieType *tempMovie);
 void WriteMovieFile();
 int MovieFreeze(gzFile f, int Mode);
+
+#endif /* __MOVIE_H__ */
