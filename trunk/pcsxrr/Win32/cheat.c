@@ -260,25 +260,20 @@ static void SaveCheatFile(char nameo[2048])
 		nameo[0]=0;
 }
 
-uint32 ScanAddress(const char* str)
+void ScanAddress(const char* str, uint32 *value)
 {
-	uint32 value = 0;
-	if(tolower(*str) == 's')
-	{
-		sscanf(str+1, "%x", &value);
+	if(tolower(*str) == 's') {
+		sscanf(str+1, "%x", value);
 		value += 0x7E0000 + 0x20000;
 	}
-	else if(tolower(*str) == 'i')
-	{
-		sscanf(str+1, "%x", &value);
+	else if(tolower(*str) == 'i') {
+		sscanf(str+1, "%x", value);
 		value += 0x7E0000 + 0x30000;
 	}
-	else
-	{
+	else {
 		int plus = (*str == '0' && tolower(str[1]) == 'x') ? 2 : 0;
-		sscanf(str+plus, "%x", &value);
+		sscanf(str+plus, "%x", value);
 	}
-	return value;
 }
 
 static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -851,7 +846,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 										
 										ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
 										
-										Cheat.c[l].address = ScanAddress(lvi.pszText);
+										ScanAddress(lvi.pszText,&Cheat.c[l].address);
 										
 										ZeroMemory(&lvi, sizeof(LV_ITEM));
 										lvi.iItem= k;
@@ -900,7 +895,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 							
 							ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
 							
-							address = ScanAddress(lvi.pszText);
+							ScanAddress(lvi.pszText,&address);
 							
 							ZeroMemory(&lvi, sizeof(LV_ITEM));
 							lvi.iItem= k;
@@ -977,7 +972,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 									
 									ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
 									
-									Cheat.c[l].address = ScanAddress(lvi.pszText);
+									ScanAddress(lvi.pszText,&Cheat.c[l].address);
 									
 									ZeroMemory(&lvi, sizeof(LV_ITEM));
 									lvi.iItem= k;
@@ -1026,7 +1021,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						
 						ListView_GetItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), &lvi);
 						
-						address = ScanAddress(lvi.pszText);
+						ScanAddress(lvi.pszText,&address);
 						
 						ZeroMemory(&lvi, sizeof(LV_ITEM));
 						lvi.iItem= k;

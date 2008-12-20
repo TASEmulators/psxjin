@@ -435,8 +435,7 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 					ZeroMemory(new_cheat, sizeof(struct SCheat));
 					new_cheat->size=temp;
 					GetDlgItemText(hDlg, IDC_NC_ADDRESS, buf, 7);
-//					ScanAddress(buf, new_cheat->address);
-					new_cheat->address = ScanAddress(buf);
+					ScanAddress(buf,&new_cheat->address);
 
 					if(temp==1)
 						tmp=PCSX_8_BITS;
@@ -878,12 +877,10 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	
 						int searchNum = 0;
 	
-	//					ScanAddress(searchstr, searchNum);
-						searchNum = ScanAddress(searchstr);
+						ScanAddress(searchstr,&searchNum);
 	
-	
-	//					if (searchstr[0] != '7')
-	//						break; // all searchable addresses begin with a 7
+//						if (searchstr[0] != '7')
+//							break; // all searchable addresses begin with a 7
 	
 						BOOL looped = FALSE;
 	
@@ -1040,8 +1037,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 
 					ITEM_QUERY(lvi, IDC_ADDYS, 0, buf, 7);
 
-//					ScanAddress(buf, cht.address);
-					cht.address = ScanAddress(buf);
+					ScanAddress(buf,&cht.address);
 
 					memset(buf, 0, 7);
 					if(val_type==1)
@@ -1100,7 +1096,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					ITEM_QUERY(lvi, IDC_ADDYS, 0, buf, 7);
 					if(lvi.iItem != -1)
 					{
-						address = ScanAddress(buf);
+						ScanAddress(buf,&address);
 						memset(buf, 0, 7);
 						sprintf(buf, "%X", address);
 						AddMemWatch(buf);
@@ -1176,9 +1172,9 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 					int ret;
 					if(use_entered==2)
 					{
-//						ret = ScanAddress(buf, value);
+//						ScanAddress(buf, &value);
 //						value -= 0x7E0000;
-						value = ScanAddress(buf);
+						ScanAddress(buf,&value);
 						PCSXSearchForAddress (comp_type, bytes, value, FALSE);
 					}
 					else

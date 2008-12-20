@@ -597,7 +597,7 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 /* movie stuff start */
 
-if (HasEmulatedFrame == 2) { // only poll once per each frame
+if (HasEmulatedFrame == 2) { // only poll once each frame
 	if (Movie.mode == 1)
 		PCSX_MOV_WriteJoy(&padd,Movie.padType1);
 	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
@@ -666,7 +666,7 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 
 /* movie stuff start */
 
-if (HasEmulatedFrame == 1) { // only poll once per each frame
+if (HasEmulatedFrame == 1) { // only poll once each frame
 	if (Movie.mode == 1)
 		PCSX_MOV_WriteJoy(&padd,Movie.padType2);
 	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
