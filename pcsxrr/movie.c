@@ -431,6 +431,9 @@ int MovieFreeze(gzFile f, int Mode) {
 	if (Mode == 1) {
 		bufSize = Movie.bytesPerFrame * (Movie.currentFrame+1);
 		gzfreezel(&Movie.currentFrame);
+		gzfreezel(&Movie.lagCounter);
+		gzfreezel(&Movie.lastPad1);
+		gzfreezel(&Movie.lastPad2);
 		gzfreezel(&bufSize);
 		gzfreeze(Movie.inputBuffer, bufSize);
 	}
@@ -440,6 +443,9 @@ int MovieFreeze(gzFile f, int Mode) {
 		// recording
 		if (Movie.mode == 1) {
 			gzfreezel(&Movie.currentFrame);
+			gzfreezel(&Movie.lagCounter);
+			gzfreezel(&Movie.lastPad1);
+			gzfreezel(&Movie.lastPad2);
 			gzfreezel(&bufSize);
 			gzfreeze(Movie.inputBuffer, bufSize);
 			Movie.rerecordCount++;
@@ -447,9 +453,19 @@ int MovieFreeze(gzFile f, int Mode) {
 		// replaying
 		else if (Movie.mode == 2) {
 			gzfreezel(&Movie.currentFrame);
+			gzfreezel(&Movie.lagCounter);
+			gzfreezel(&Movie.lastPad1);
+			gzfreezel(&Movie.lastPad2);
 		}
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
+		
+		//update information GPU OSD after loading a savestate
+		GPU_setlagcounter(Movie.lagCounter);
 		GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
+		unsigned long buttonToSend = 0;
+		buttonToSend = Movie.lastPad1.buttonStatus;
+		buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
+		GPU_inputdisplay(buttonToSend);
 	}
 
 //SysPrintf("Mode %d - %d/%d\n---\n",Mode,Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
