@@ -366,25 +366,35 @@ void PADhandleKey(int key) {
 			GPU_displayText(_("*PCSX*: CD Case Closed"));
 	}
 
-//	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
-//	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
-//	{
-//		Config.Sio ^= 0x1;
-//		if (Config.Sio)
-//			 sprintf(Text, _("*PCSX*: Sio Irq Always Enabled"));
-//		else sprintf(Text, _("*PCSX*: Sio Irq Not Always Enabled"));
-//		GPU_displayText(Text);
-//	}
+	if(key == EmuCommandTable[EMUCMD_CHEATSTATE].key
+	&& modifiers == EmuCommandTable[EMUCMD_CHEATSTATE].keymod)
+	{
+		cheatState ^= 1;
+		if (cheatState)
+			GPU_displayText(_("*PCSX*: Cheats Enabled"));
+		else
+			GPU_displayText(_("*PCSX*: Cheats Disabled"));
+	}
 
-//	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
-//	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
-//	{
-//		Config.SpuIrq ^= 0x1;
-//		if (Config.SpuIrq)
-//			 sprintf(Text, _("*PCSX*: Spu Irq Always Enabled"));
-//		else sprintf(Text, _("*PCSX*: Spu Irq Not Always Enabled"));
-//		GPU_displayText(Text);
-//	}
+	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
+	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
+	{
+		Config.Sio ^= 0x1;
+		if (Config.Sio)
+			GPU_displayText(_("*PCSX*: Sio Irq Always Enabled"));
+		else
+			GPU_displayText(_("*PCSX*: Sio Irq Not Always Enabled"));
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
+	{
+		Config.SpuIrq ^= 0x1;
+		if (Config.SpuIrq)
+			GPU_displayText(_("*PCSX*: Spu Irq Always Enabled"));
+		else
+			GPU_displayText(_("*PCSX*: Spu Irq Not Always Enabled"));
+	}
 
 //		case VK_F6:
 //			if (Config.QKeys) break;
