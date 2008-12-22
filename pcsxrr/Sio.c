@@ -536,7 +536,7 @@ void ConvertMcd(char *mcd, char *data) {
 }
 
 void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
-	unsigned char *data = NULL, *ptr, *str;
+	char *data = NULL, *ptr, *str;
 	unsigned short clut[16];
 	unsigned short c;
 	int i, x;
@@ -545,8 +545,10 @@ void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
 
 	str = Info->Title;
 
-	if (mcd == 1) data = Mcd1Data;
-	if (mcd == 2) data = Mcd2Data;
+	if (mcd == 1)
+		data = Mcd1Data;
+	if (mcd == 2)
+		data = Mcd2Data;
 
 	ptr = data + block * 8192 + 2;
 

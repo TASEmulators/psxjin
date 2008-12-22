@@ -526,14 +526,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_CHECKED, 0);
 			if(!use_entered)
 				SendDlgItemMessage(hwndDlg, IDC_PREV, BM_SETCHECK, BST_CHECKED, 0);
-			else if(use_entered==1)
-			{
+			else if(use_entered==1) {
 				SendDlgItemMessage(hwndDlg, IDC_ENTERED, BM_SETCHECK, BST_CHECKED, 0);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), TRUE);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), TRUE);
 			}
-			else if(use_entered==2)
-			{
+			else if(use_entered==2) {
 				SendDlgItemMessage(hwndDlg, IDC_ENTEREDADDRESS, BM_SETCHECK, BST_CHECKED, 0);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_VALUE_ENTER), TRUE);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_ENTER_LABEL), TRUE);
@@ -541,60 +539,45 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_CHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 
-			if(comp_type==PCSX_GREATER_THAN)
-			{
+			if(comp_type==PCSX_GREATER_THAN) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_GREATER_THAN, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(comp_type==PCSX_LESS_THAN_OR_EQUAL)
-			{
+			else if(comp_type==PCSX_LESS_THAN_OR_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
-
 			}
-			else if(comp_type==PCSX_GREATER_THAN_OR_EQUAL)
-			{
+			else if(comp_type==PCSX_GREATER_THAN_OR_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_GREATER_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
-
 			}
-			else if(comp_type==PCSX_EQUAL)
-			{
+			else if(comp_type==PCSX_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
-
 			}
-			else if(comp_type==PCSX_NOT_EQUAL)
-			{
+			else if(comp_type==PCSX_NOT_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_NOT_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
-
 			}
 
-			if(val_type==2)
-			{
+			if(val_type==2) {
 				SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_SIGNED, BM_SETCHECK, BST_CHECKED, 0);
-
 			}
-			else if(val_type==3)
-			{
+			else if(val_type==3) {
 				SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
 			}
 
-			if(bytes==PCSX_16_BITS)
-			{
+			if(bytes==PCSX_16_BITS) {
 				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_2_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(bytes==PCSX_24_BITS)
-			{
+			else if(bytes==PCSX_24_BITS) {
 				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_3_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(bytes==PCSX_32_BITS)
-			{
+			else if(bytes==PCSX_32_BITS) {
 				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_4_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
@@ -610,7 +593,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			col.cchTextMax=7;
 			col.pszText=temp;
 
-			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS),   0,   &col);
+			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS), 0, &col);
 
 			strcpy(temp,"Curr. Value");
 			ZeroMemory(&col, sizeof(LVCOLUMN));
@@ -622,7 +605,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			col.pszText=temp;
 			col.iSubItem=1;
 
-			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS),    1,   &col);
+			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS), 1, &col);
 
 			strcpy(temp,"Prev. Value");
 			ZeroMemory(&col, sizeof(LVCOLUMN));
@@ -634,12 +617,10 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			col.pszText=temp;
 			col.iSubItem=2;
 
-			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS),    2,   &col);
+			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS), 2, &col);
 
-			{
-					int l = CheatCount(bytes);
-					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
-			}
+			int l = CheatCount(bytes);
+			ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 
 		}
 		return TRUE;
@@ -867,7 +848,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						while(searchstr[0] == '0' && searchstr[1] != '\0')
 							searchstr++;
 	
-						int searchNum = 0;
+						uint32 searchNum = 0;
 	
 						ScanAddress(searchstr,&searchNum);
 	

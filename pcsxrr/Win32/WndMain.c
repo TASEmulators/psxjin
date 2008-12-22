@@ -178,9 +178,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 
 void RunGui() {
-    MSG msg;
+	MSG msg;
 
-    for (;;) {
+	for (;;) {
 		if(PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

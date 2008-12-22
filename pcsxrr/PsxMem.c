@@ -25,8 +25,8 @@
 int psxMemInit() {
 	int i;
 
-	psxMemRLUT = (long*)malloc(0x10000 * 4);
-	psxMemWLUT = (long*)malloc(0x10000 * 4);
+	psxMemRLUT = (u32*)malloc(0x10000 * 4);
+	psxMemWLUT = (u32*)malloc(0x10000 * 4);
 	memset(psxMemRLUT, 0, 0x10000 * 4);
 	memset(psxMemWLUT, 0, 0x10000 * 4);
 
