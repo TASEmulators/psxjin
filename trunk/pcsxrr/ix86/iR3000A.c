@@ -317,7 +317,7 @@ void iLogM32(u32 mem) {
 	ADD32ItoR(ESP, 4*2);
 }
 
-static void iDumpRegs() {
+/*static void iDumpRegs() {
 	int i, j;
 
 	printf("%lx %lx\n", psxRegs.pc, psxRegs.cycle);
@@ -326,7 +326,7 @@ static void iDumpRegs() {
 			printf("%lx ", psxRegs.GPR.r[j*i]);
 		printf("\n");
 	}
-}
+}*/
 
 void iDumpBlock(char *ptr) {
 	FILE *f;
@@ -1584,7 +1584,7 @@ void recLWL() {
 	}
 }
 
-static void recLWBlock(int count) {
+/*static void recLWBlock(int count) {
 	u32 *code = PSXM(pc);
 	int i, respsave;
 // Rt = mem[Rs + Im] (unsigned)
@@ -1654,7 +1654,7 @@ static void recLWBlock(int count) {
 	ADD32ItoR(ESP, resp);
 	x86SetJ32(j32Ptr[5]);
 	resp = respsave;
-}
+}*/
 
 extern u32 LWR_MASK[4];
 extern u32 LWR_SHIFT[4];
@@ -1916,7 +1916,7 @@ static void recSW() {
 }
 //#endif
 
-static void recSWBlock(int count) {
+/*static void recSWBlock(int count) {
 	u32 *code;
 	int i, respsave;
 // mem[Rs + Im] = Rt
@@ -1979,7 +1979,7 @@ static void recSWBlock(int count) {
 	ADD32ItoR(ESP, resp);
 	x86SetJ32(j32Ptr[5]);
 	resp = respsave;
-}
+}*/
 
 extern u32 SWL_MASK[4];
 extern u32 SWL_SHIFT[4];

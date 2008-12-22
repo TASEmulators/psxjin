@@ -25,6 +25,8 @@
 #include "Win32.h"
 #include "maphkeys.h"
 
+int tempDest; //this is for the compiler to not throw in a million of warnings
+
 #define QueryKeyV(s, name, var) \
 	size = s; \
 	if (RegQueryValueEx(myKey, name, 0, &type, (LPBYTE) var, &size) != 0) { if (err) { RegCloseKey(myKey); return -1; } }
@@ -153,9 +155,9 @@ void SaveConfig() {
 	lp = (char *)malloc(strlen(FindData.cFileName)+8); \
 	sprintf(lp, "%s", FindData.cFileName); \
 	i = ComboBox_AddString(hw, tmpStr); \
-	ComboBox_SetItemData(hw, i, lp); \
+	tempDest = ComboBox_SetItemData(hw, i, lp); \
 	if (stricmp(str, lp)==0) \
-		ComboBox_SetCurSel(hw, i); \
+		tempDest = ComboBox_SetCurSel(hw, i); \
 }
 
 BOOL OnConfigurePluginsDialog(HWND hW) {
@@ -230,9 +232,9 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 	lp=(char *)malloc(strlen("HLE") + 1);
 	sprintf(lp, "HLE");
 	i=ComboBox_AddString(hWC_BIOS, "Internal HLE Bios");
-	ComboBox_SetItemData(hWC_BIOS, i, lp);
+	tempDest = ComboBox_SetItemData(hWC_BIOS, i, lp);
 	if (stricmp(Config.Bios, lp)==0)
-		ComboBox_SetCurSel(hWC_BIOS, i);
+		tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
 
 	strcpy(tmpStr, Config.BiosDir);
 	strcat(tmpStr, "*");
@@ -246,25 +248,25 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 		lp = (char *)malloc(strlen(FindData.cFileName)+8);
 		sprintf(lp, "%s", (char *)FindData.cFileName);
 		i = ComboBox_AddString(hWC_BIOS, FindData.cFileName);
-		ComboBox_SetItemData(hWC_BIOS, i, lp);
+		tempDest = ComboBox_SetItemData(hWC_BIOS, i, lp);
 		if (stricmp(Config.Bios, FindData.cFileName)==0)
-			ComboBox_SetCurSel(hWC_BIOS, i);
+			tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
 	} while (FindNextFile(Find,&FindData));
-    
+
 	if (Find!=INVALID_HANDLE_VALUE) FindClose(Find);
 
 	if (ComboBox_GetCurSel(hWC_CDR ) == -1)
-		ComboBox_SetCurSel(hWC_CDR,  0);
+		tempDest = ComboBox_SetCurSel(hWC_CDR,  0);
 	if (ComboBox_GetCurSel(hWC_GPU ) == -1)
-		ComboBox_SetCurSel(hWC_GPU,  0);
+		tempDest = ComboBox_SetCurSel(hWC_GPU,  0);
 	if (ComboBox_GetCurSel(hWC_SPU ) == -1)
-		ComboBox_SetCurSel(hWC_SPU,  0);
+		tempDest = ComboBox_SetCurSel(hWC_SPU,  0);
 	if (ComboBox_GetCurSel(hWC_PAD1) == -1)
-		ComboBox_SetCurSel(hWC_PAD1, 0);
+		tempDest = ComboBox_SetCurSel(hWC_PAD1, 0);
 	if (ComboBox_GetCurSel(hWC_PAD2) == -1)
-		ComboBox_SetCurSel(hWC_PAD2, 0);
+		tempDest = ComboBox_SetCurSel(hWC_PAD2, 0);
 	if (ComboBox_GetCurSel(hWC_BIOS) == -1)
-		ComboBox_SetCurSel(hWC_BIOS, 0);
+		tempDest = ComboBox_SetCurSel(hWC_BIOS, 0);
 
 	return TRUE;
 }
@@ -276,7 +278,7 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 		lp = (char *)ComboBox_GetItemData(hWC, i); \
 		if (lp) free(lp); \
 	} \
-	ComboBox_ResetContent(hWC);
+	tempDest = ComboBox_ResetContent(hWC);
 
 void CleanUpCombos(HWND hW) {
 	int i,iCnt;HWND hWC;char * lp;
@@ -590,8 +592,8 @@ BOOL OnConfigureNetPlayDialog(HWND hW) {
 	lp = (char *)malloc(strlen("Disabled")+8);
 	sprintf(lp, "Disabled");
 	i = ComboBox_AddString(hWC_NET, "Disabled");
-	ComboBox_SetItemData(hWC_NET, i, lp);
-	ComboBox_SetCurSel(hWC_NET,  0);
+	tempDest = ComboBox_SetItemData(hWC_NET, i, lp);
+	tempDest = ComboBox_SetCurSel(hWC_NET,  0);
 
 	do {
 		if (Find==INVALID_HANDLE_VALUE) break;
