@@ -187,6 +187,9 @@ struct MovieType {
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
+	char CdromCount;                     //how many different cds are used in the movie
+	unsigned long CdromIdsSize;          //size of the CdromIds string
+	char* CdromIds;                      //every CD ID used in the movie
 };
 
 #define EMU_VERSION 6

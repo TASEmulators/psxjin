@@ -1625,6 +1625,7 @@ void SysRunGui() {
 void WIN32_StartMovieReplay(char* szFilename)
 {
 	int nRet=1;
+	CheckCdrom(); //get CdromId
 	if (szFilename != "") {
 		ReadMovieFile(szFilename,&Movie);
 		GetMovieFilenameMini(Movie.movieFilename);
@@ -1653,6 +1654,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 void WIN32_StartMovieRecord()
 {
 	int nRet;
+	CheckCdrom(); //get CdromId
 	nRet = PCSX_MOV_StartRecordDialog();
 	if (nRet) {
 		if (Movie.saveStateIncluded) {

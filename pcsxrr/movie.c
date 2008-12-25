@@ -53,14 +53,22 @@ static void SetBytesPerFrame()
 
 #define BUFFER_GROWTH_SIZE (4096)
 
-static void ReserveBufferSpace(uint32 space_needed)
+static void ReserveInputBufferSpace(uint32 spaceNeeded)
 {
-	if (space_needed > Movie.inputBufferSize) {
-		uint32 ptr_offset = Movie.inputBufferPtr - Movie.inputBuffer;
-		uint32 alloc_chunks = space_needed / BUFFER_GROWTH_SIZE;
-		Movie.inputBufferSize = BUFFER_GROWTH_SIZE * (alloc_chunks+1);
+	if (spaceNeeded > Movie.inputBufferSize) {
+		uint32 ptrOffset = Movie.inputBufferPtr - Movie.inputBuffer;
+		uint32 allocChunks = spaceNeeded / BUFFER_GROWTH_SIZE;
+		Movie.inputBufferSize = BUFFER_GROWTH_SIZE * (allocChunks+1);
 		Movie.inputBuffer = (uint8*)realloc(Movie.inputBuffer, Movie.inputBufferSize);
-		Movie.inputBufferPtr = Movie.inputBuffer + ptr_offset;
+		Movie.inputBufferPtr = Movie.inputBuffer + ptrOffset;
+	}
+}
+
+static void ReserveCdromIdsSpace(struct MovieType *tempMovie, uint32 spaceNeeded)
+{
+	if (spaceNeeded > tempMovie->CdromIdsSize) {
+		tempMovie->CdromIdsSize = spaceNeeded;
+		tempMovie->CdromIds = (char*)realloc(tempMovie->CdromIds, tempMovie->CdromIdsSize);
 	}
 }
 
@@ -125,6 +133,16 @@ int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	}
 	tempMovie->authorInfo[i] = '\0';
 
+	// read CDs IDs information
+	fread(&tempMovie->CdromCount, 1, 1, fd);                 //total CDs used
+	int nCdidsLen = tempMovie->CdromCount*9;                 //CDs IDs
+	ReserveCdromIdsSpace(tempMovie,nCdidsLen);
+	for(i=0; i<nCdidsLen; ++i) {
+		char c = 0;
+		c |= fgetc(fd) & 0xff;
+		tempMovie->CdromIds[i] = c;
+	}
+
 	// done reading file
 	fclose(fd);
 
@@ -184,6 +202,19 @@ static void WriteMovieHeader()
 		}
 		fwrite(authbuf, 1, authLen, fpRecordingMovie);        //author info
 		free(authbuf);
+	}
+
+	fwrite(&Movie.CdromCount, 1, 1, fpRecordingMovie);      //total CDs used
+	int cdidsLen = Movie.CdromCount*9;
+	if (cdidsLen > 0) {
+		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
+		int i;
+		for(i=0; i<cdidsLen; ++i) {
+			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
+			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
+		}
+		fwrite(cdidsbuf, 1, cdidsLen, fpRecordingMovie);      //CDs IDs
+		free(cdidsbuf);
 	}
 
 	Movie.saveStateOffset = ftell(fpRecordingMovie);        //get savestate offset
@@ -268,6 +299,10 @@ static int StartRecord()
 
 	Movie.rerecordCount = 0;
 	Movie.readOnly = 0;
+	Movie.CdromCount = 1;
+	ReserveCdromIdsSpace(&Movie,9);
+	sprintf(Movie.CdromIds, "%9.9s", CdromId);
+	Movie.CdromIdsSize = 9;
 
 	WriteMovieHeader();
 
@@ -297,7 +332,7 @@ static int StartReplay()
 		fseek(fpRecordingMovie, Movie.inputOffset, SEEK_SET);
 		Movie.inputBufferPtr = Movie.inputBuffer;
 		uint32 toRead = Movie.bytesPerFrame * (Movie.totalFrames+1);
-		ReserveBufferSpace(toRead);
+		ReserveInputBufferSpace(toRead);
 		fread(Movie.inputBufferPtr, 1, toRead, fpRecordingMovie);
 	}
 	fclose(fpRecordingMovie);
@@ -307,13 +342,10 @@ static int StartReplay()
 
 void PCSX_MOV_StartMovie(int mode)
 {
-//	if (Movie.inputBuffer) {
-//		free(Movie.inputBuffer);
-//		Movie.inputBuffer = NULL;
-//	}
 	Movie.mode = mode;
 	Movie.currentFrame = 0;
 	Movie.lagCounter = 0;
+	Movie.CdromIdsSize = 0;
 	cdOpenCase = 0;
 	cheatsEnabled = 0;
 	Config.Sio = 0;
@@ -333,10 +365,6 @@ void PCSX_MOV_StopMovie()
 	}
 	Movie.mode = 0;
 	fpRecordingMovie = NULL;
-//	if(Movie.inputBuffer) {
-//		free(Movie.inputBuffer);
-//		Movie.inputBuffer = NULL;
-//	}
 }
 
 
@@ -356,13 +384,13 @@ void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
-			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+4)-Movie.inputBuffer));
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+4)-Movie.inputBuffer));
 			JoyWrite16(pad->buttonStatus^0xFFFF);
 			JoyWrite8(pad->moveX);
 			JoyWrite8(pad->moveY);
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
 			JoyWrite16(pad->buttonStatus^0xFFFF);
 			JoyWrite8(pad->leftJoyX);
 			JoyWrite8(pad->leftJoyY);
@@ -370,7 +398,7 @@ void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			JoyWrite8(pad->rightJoyY);
 			break;
 		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
-			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
 			JoyWrite16(pad->buttonStatus^0xFFFF);
 			JoyWrite8(pad->leftJoyX);
 			JoyWrite8(pad->leftJoyY);
@@ -379,7 +407,7 @@ void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
-			ReserveBufferSpace((uint32)((Movie.inputBufferPtr+2)-Movie.inputBuffer));
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+2)-Movie.inputBuffer));
 			JoyWrite16(pad->buttonStatus^0xFFFF);
 	}
 }
@@ -441,10 +469,13 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Movie.lagCounter);
 	gzfreezel(&cdOpenCase);
 	gzfreezel(&cheatsEnabled);
+	gzfreezel(&Movie.irqHacksIncluded);
 	gzfreezel(&Config.Sio);
 	gzfreezel(&Config.SpuIrq);
 	gzfreezel(&Movie.lastPad1);
 	gzfreezel(&Movie.lastPad2);
+	gzfreezel(&Movie.CdromCount);
+	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
 	gzfreezel(&bufSize);
 	if (!(Movie.mode == 2 && Mode == 0))
 		gzfreeze(Movie.inputBuffer, bufSize);
