@@ -272,6 +272,8 @@
 #define IDC_PADTYPE1                    1265
 #define IDC_PADTYPE2                    1266
 #define IDC_USECHEATS                   1267
+#define IDC_USEDCDROM                   1268
+#define IDC_CURRENTCDROM                1269
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003

@@ -79,11 +79,13 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	SetDlgItemTextA(hDlg, IDC_LENGTH, "");
 	SetDlgItemTextA(hDlg, IDC_FRAMES, "");
 	SetDlgItemTextA(hDlg, IDC_UNDO, "");
-	SetDlgItemTextA(hDlg, IDC_METADATA, "");
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, "");
+	SetDlgItemTextA(hDlg, IDC_USEDCDROM, "");
+	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, "");
 	SetDlgItemTextA(hDlg, IDC_PADTYPE1, "");
 	SetDlgItemTextA(hDlg, IDC_PADTYPE2, "");
 	SetDlgItemTextA(hDlg, IDC_USECHEATS, "");
+	SetDlgItemTextA(hDlg, IDC_METADATA, "");
 	EnableWindow(GetDlgItem(hDlg, IDC_READONLY), FALSE);
 	SendDlgItemMessage(hDlg, IDC_READONLY, BM_SETCHECK, BST_UNCHECKED, 0);
 	EnableWindow(GetDlgItem(hDlg, IDOK), FALSE);
@@ -160,6 +162,12 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	if (dataMovie.memoryCardIncluded)
 		sprintf(szStartFrom, "%s + Memory Cards",szStartFrom);
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, szStartFrom);
+
+	//cd-rom ids
+	char szUsedCdrom[9];
+	sprintf(szUsedCdrom, "%9.9s", dataMovie.CdromIds);
+	SetDlgItemTextA(hDlg, IDC_USEDCDROM, szUsedCdrom);
+	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, CdromId);
 
 	//cheats? hacks?
 	char szExtras[128];
