@@ -10,10 +10,12 @@ extern struct MovieType Movie;
 
 void MOV_StartMovie(int mode);
 void MOV_StopMovie();
-void MOV_ReadJoy(PadDataS *pad,unsigned char type);
 void MOV_WriteJoy(PadDataS *pad,unsigned char type);
-int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
+void MOV_ReadJoy(PadDataS *pad,unsigned char type);
+void MOV_WriteControl(char type);
+void MOV_ReadControl(char *type);
 void MOV_WriteMovieFile();
+int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
 
 int MovieFreeze(gzFile f, int Mode);
 

@@ -91,11 +91,6 @@ int LoadConfig() {
 
 	RegCloseKey(myKey);
 
-#ifdef ENABLE_NLS
-	sprintf(text, "LANGUAGE=%s", Conf->Lang);
-	gettext_putenv(text);
-#endif
-
 	return 0;
 }
 

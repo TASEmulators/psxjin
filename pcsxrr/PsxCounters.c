@@ -164,13 +164,19 @@ if (HasEmulatedFrame == 2) {
 	Movie.lagCounter++;
 	GPU_setlagcounter(Movie.lagCounter);
 }
-else if (HasEmulatedFrame == 1) { //this should never happen, but you never know
+else if (HasEmulatedFrame == 1) { //this should never happen, but one can never know
 	if (Movie.mode == 1)
 		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	else if (Movie.mode == 2)
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
 HasEmulatedFrame = 2;
+
+
+if (Movie.mode == 1)
+	MOV_WriteControl(Movie.control);
+else if (Movie.mode == 2)
+	MOV_ReadControl(&Movie.control);
 
 unsigned long buttonToSend = 0;
 buttonToSend = Movie.lastPad1.buttonStatus;
@@ -192,15 +198,8 @@ GPU_setcurrentmode(modeFlags);
 #ifdef WIN32
 	UpdateMemWatch();
 	PCSXApplyCheats();
-//	if (Movie.currentFrame%30 == 0)
 //		UpdateMemSearch();
 #endif
-
-//if (Movie.inputBufferPtr) {
-//SysPrintf("%d/%d\n---\n",Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
-//if ((Movie.inputBufferPtr-Movie.inputBuffer)%Movie.bytesPerFrame != 0)
-//SysPrintf("%d/%d\n---\n",Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
-//}
 
 					/* movie stuff end */
 		} else { // VSync Start (240 hsyncs) 
