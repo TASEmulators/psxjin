@@ -63,11 +63,6 @@ int cdOpenCase=0;
 int cheatsEnabled=0;
 int CancelQuit=0;
 int UseGui = 1;
-unsigned int langsMax;
-typedef struct {
-	char lang[256];
-} _langs;
-_langs *langs = NULL;
 
 #define MAXFILENAME 256
 
@@ -132,10 +127,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}*/
 
 	gApp.hInstance = hInstance;
-#ifdef ENABLE_NLS
-	bindtextdomain(PACKAGE, "Langs\\");
-	textdomain(PACKAGE);
-#endif
 
 	Running=0;
 
@@ -153,9 +144,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), gApp.hWnd, (DLGPROC)ConfigureMcdsDlgProc);
 		SysMessage(_("Pcsx now will quit, restart it"));
 		return 0;
-	}
-	if (Config.Lang[0] == 0) {
-		strcpy(Config.Lang, "English");
 	}
 
 	if (SysInit() == -1) return 1;
@@ -535,15 +523,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_HELP_ABOUT:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(ABOUT_DIALOG), hWnd, (DLGPROC)AboutDlgProc);
 					return TRUE;
-
-				default:
-					if (LOWORD(wParam) >= ID_LANGS && LOWORD(wParam) <= (ID_LANGS + langsMax)) {
-						AccBreak = 1;
-						DestroyWindow(gApp.hWnd);
-						ChangeLanguage(langs[LOWORD(wParam) - ID_LANGS].lang);
-						CreateMainWindow(SW_NORMAL);
-						return TRUE;
-					}
 			}
 			break;
 
@@ -1366,8 +1345,6 @@ void CreateMainMenu() {
 	MENUITEMINFO item;
 	HMENU submenu[3];
 	char buf[256];
-//	char *lang;
-//	int i;
 
 	item.cbSize = sizeof(MENUITEMINFO);
 	item.dwTypeData = buf;
@@ -1475,44 +1452,6 @@ void CreateMainWindow(int nCmdShow) {
 WIN32_FIND_DATA lFindData;
 HANDLE lFind;
 int lFirst;
-
-void InitLanguages() {
-	lFind = FindFirstFile("Langs\\*", &lFindData);
-	lFirst = 1;
-}
-
-char *GetLanguageNext() {
-	for (;;) {
-		if (!strcmp(lFindData.cFileName, ".")) {
-			if (FindNextFile(lFind, &lFindData) == FALSE)
-				return NULL;
-			continue;
-		}
-		if (!strcmp(lFindData.cFileName, "..")) {
-			if (FindNextFile(lFind, &lFindData) == FALSE)
-				return NULL;
-			continue;
-		}
-		break;
-	}
-	if (lFirst == 0) {
-		if (FindNextFile(lFind, &lFindData) == FALSE)
-			return NULL;
-	} else lFirst = 0;
-	if (lFind==INVALID_HANDLE_VALUE) return NULL;
-
-	return lFindData.cFileName;
-}
-
-void CloseLanguages() {
-	if (lFind!=INVALID_HANDLE_VALUE) FindClose(lFind);
-}
-
-void ChangeLanguage(char *lang) {
-	strcpy(Config.Lang, lang);
-	SaveConfig();
-	LoadConfig();
-}
 
 int SysInit() {
 	if (Config.PsxOut) OpenConsole();

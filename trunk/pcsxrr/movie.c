@@ -355,6 +355,48 @@ void MOV_StopMovie()
 	fpRecordingMovie = NULL;
 }
 
+static inline uint8 JoyRead8()
+{
+	uint8 v=Movie.inputBufferPtr[0];
+	Movie.inputBufferPtr++;
+	return v;
+}
+static inline uint16 JoyRead16()
+{
+	uint16 v=(Movie.inputBufferPtr[0] | (Movie.inputBufferPtr[1]<<8));
+	Movie.inputBufferPtr += 2;
+	return v;
+}
+
+void MOV_ReadJoy(PadDataS *pad,unsigned char type)
+{
+	switch (type) {
+		case PSE_PAD_TYPE_MOUSE:
+			pad->buttonStatus = JoyRead16();
+			pad->moveX = JoyRead8();
+			pad->moveY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+			pad->buttonStatus = JoyRead16();
+			pad->leftJoyX = JoyRead8();
+			pad->leftJoyY = JoyRead8();
+			pad->rightJoyX = JoyRead8();
+			pad->rightJoyY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+			pad->buttonStatus = JoyRead16();
+			pad->leftJoyX = JoyRead8();
+			pad->leftJoyY = JoyRead8();
+			pad->rightJoyX = JoyRead8();
+			pad->rightJoyY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_STANDARD:
+		default:
+			pad->buttonStatus = JoyRead16();
+	}
+	pad->buttonStatus ^= 0xffff;
+	pad->controllerType = type;
+}
 
 static void JoyWrite8(uint8 v)
 {
@@ -400,47 +442,12 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 	}
 }
 
-static inline uint8 JoyRead8()
-{
-	uint8 v=Movie.inputBufferPtr[0];
-	Movie.inputBufferPtr++;
-	return v;
-}
-static inline uint16 JoyRead16()
-{
-	uint16 v=(Movie.inputBufferPtr[0] | (Movie.inputBufferPtr[1]<<8));
-	Movie.inputBufferPtr += 2;
-	return v;
+void MOV_ReadControl(char *type) {
+	//bla
 }
 
-void MOV_ReadJoy(PadDataS *pad,unsigned char type)
-{
-	switch (type) {
-		case PSE_PAD_TYPE_MOUSE:
-			pad->buttonStatus = JoyRead16();
-			pad->moveX = JoyRead8();
-			pad->moveY = JoyRead8();
-			break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-			pad->buttonStatus = JoyRead16();
-			pad->leftJoyX = JoyRead8();
-			pad->leftJoyY = JoyRead8();
-			pad->rightJoyX = JoyRead8();
-			pad->rightJoyY = JoyRead8();
-			break;
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
-			pad->buttonStatus = JoyRead16();
-			pad->leftJoyX = JoyRead8();
-			pad->leftJoyY = JoyRead8();
-			pad->rightJoyX = JoyRead8();
-			pad->rightJoyY = JoyRead8();
-			break;
-		case PSE_PAD_TYPE_STANDARD:
-		default:
-			pad->buttonStatus = JoyRead16();
-	}
-	pad->buttonStatus ^= 0xffff;
-	pad->controllerType = type;
+void MOV_WriteControl(char type) {
+	//bla
 }
 
 int MovieFreeze(gzFile f, int Mode) {

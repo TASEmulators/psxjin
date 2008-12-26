@@ -85,24 +85,8 @@ typedef unsigned long long u64;
 
 #endif
 
-#ifdef ENABLE_NLS
-
-#include <libintl.h>
-
-#undef _
-#define _(String) dgettext (PACKAGE, String)
-#ifdef gettext_noop
-#  define N_(String) gettext_noop (String)
-#else
-#  define N_(String) (String)
-#endif
-
-#else
-
 #define _(msgid) msgid
 #define N_(msgid) msgid
-
-#endif
 
 extern int Log;
 void __Log(char *fmt, ...);
@@ -159,6 +143,7 @@ typedef struct
 struct MovieType {
 	PadDataS lastPad1;                   //last joypad1 buttons polled
 	PadDataS lastPad2;                   //last joypad2 buttons polled
+	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
 	unsigned char padType1;              //joypad1 type
 	unsigned char padType2;              //joypad2 type
 	unsigned long totalFrames;           //total movie frames
@@ -200,6 +185,12 @@ struct MovieType {
 #define MOVIE_FLAG_MEMORY_CARDS   (1<<3)
 #define MOVIE_FLAG_CHEAT_LIST     (1<<4)
 #define MOVIE_FLAG_IRQ_HACKS      (1<<5)
+
+#define MOVIE_CONTROL_RESET       (1<<1)
+#define MOVIE_CONTROL_CDCOVER     (1<<2)
+#define MOVIE_CONTROL_SIO         (1<<3)
+#define MOVIE_CONTROL_SPU         (1<<4)
+#define MOVIE_CONTROL_CHEAT       (1<<5)
 
 #define MODE_FLAG_RECORD (1<<1)
 #define MODE_FLAG_REPLAY (1<<2)

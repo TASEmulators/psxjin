@@ -67,11 +67,6 @@ void SaveConfig();
 void UpdateMenuSlots();
 void ResetMenuSlots();
 
-void InitLanguages();
-char *GetLanguageNext();
-void CloseLanguages();
-void ChangeLanguage(char *lang);
-
 // maphkeys.c
 extern HWND hMHkeysDlg;
 int MHkeysUpdate();
