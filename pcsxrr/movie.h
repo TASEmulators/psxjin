@@ -8,12 +8,13 @@ extern int flagVSync;
 extern int HasEmulatedFrame;
 extern struct MovieType Movie;
 
-void PCSX_MOV_StartMovie(int mode);
-void PCSX_MOV_StopMovie();
-void PCSX_MOV_ReadJoy(PadDataS *pad,unsigned char type);
-void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type);
-int ReadMovieFile(char* filename, struct MovieType *tempMovie);
-void WriteMovieFile();
+void MOV_StartMovie(int mode);
+void MOV_StopMovie();
+void MOV_ReadJoy(PadDataS *pad,unsigned char type);
+void MOV_WriteJoy(PadDataS *pad,unsigned char type);
+int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
+void MOV_WriteMovieFile();
+
 int MovieFreeze(gzFile f, int Mode);
 
 #endif /* __MOVIE_H__ */

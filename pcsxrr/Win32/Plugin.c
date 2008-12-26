@@ -86,7 +86,7 @@ void PCSX_LoadState(int newState) {
 	int previousMode = Movie.mode;
 	if (Movie.mode == 1) {
 		if (Movie.readOnly == 1) {
-			WriteMovieFile();
+			MOV_WriteMovieFile();
 			Movie.mode = 2;
 		}
 	}
@@ -331,7 +331,7 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
 	{
 		if (Movie.mode) {
-			PCSX_MOV_StopMovie();
+			MOV_StopMovie();
 			GPU_displayText("*PCSX*: Stop Movie");
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);

@@ -69,7 +69,7 @@ static void ReserveInputBufferSpace(uint32 spaceNeeded)
 -                              FILE OPERATIONS                                -
 -----------------------------------------------------------------------------*/
 
-int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
+int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	char readHeader[4];
 	int movieFlags = 0;
 	const char szFileHeader[] = "PXM ";       //file identifier
@@ -140,7 +140,7 @@ int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	return 1;
 }
 
-void WriteMovieFile()
+void MOV_WriteMovieFile()
 {
 	fseek(fpRecordingMovie, 16, SEEK_SET);
 	fwrite(&Movie.currentFrame, 1, 4, fpRecordingMovie);  //total frames
@@ -329,7 +329,7 @@ static int StartReplay()
 	return 1;
 }
 
-void PCSX_MOV_StartMovie(int mode)
+void MOV_StartMovie(int mode)
 {
 	Movie.mode = mode;
 	Movie.currentFrame = 0;
@@ -344,10 +344,10 @@ void PCSX_MOV_StartMovie(int mode)
 		StartReplay();
 }
 
-void PCSX_MOV_StopMovie()
+void MOV_StopMovie()
 {
 	if (Movie.mode == 1) {
-		WriteMovieFile();
+		MOV_WriteMovieFile();
 		fclose(fpRecordingMovie);
 		TruncateMovie();
 	}
@@ -368,7 +368,7 @@ static void JoyWrite16(uint16 v)
 	Movie.inputBufferPtr += 2;
 }
 
-void PCSX_MOV_WriteJoy(PadDataS *pad,unsigned char type)
+void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
@@ -413,7 +413,7 @@ static inline uint16 JoyRead16()
 	return v;
 }
 
-void PCSX_MOV_ReadJoy(PadDataS *pad,unsigned char type)
+void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 {
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:

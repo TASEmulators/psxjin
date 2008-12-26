@@ -154,21 +154,21 @@ if ((Movie.mode == 2) && (Movie.currentFrame>Movie.totalFrames)) {
 PadDataS paddtemp;
 if (HasEmulatedFrame == 2) {
 	if (Movie.mode == 1) {
-		PCSX_MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
-		PCSX_MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
+		MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
+		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	}
 	else if (Movie.mode == 2) {
-		PCSX_MOV_ReadJoy(&paddtemp,Movie.padType1);
-		PCSX_MOV_ReadJoy(&paddtemp,Movie.padType2);
+		MOV_ReadJoy(&paddtemp,Movie.padType1);
+		MOV_ReadJoy(&paddtemp,Movie.padType2);
 	}
 	Movie.lagCounter++;
 	GPU_setlagcounter(Movie.lagCounter);
 }
 else if (HasEmulatedFrame == 1) { //this should never happen, but you never know
 	if (Movie.mode == 1)
-		PCSX_MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
+		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	else if (Movie.mode == 2)
-		PCSX_MOV_ReadJoy(&paddtemp,Movie.padType2);
+		MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
 HasEmulatedFrame = 2;
 
@@ -178,7 +178,7 @@ buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
 if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
-	WriteMovieFile();
+	MOV_WriteMovieFile();
 
 char modeFlags = 0;
 if (!flagDontPause)

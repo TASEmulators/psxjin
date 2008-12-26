@@ -482,7 +482,7 @@ __inline static void execute() {
 		flagEscPressed=0;
 		flagDontPause = 1;
 		if (Movie.mode == 1)
-			WriteMovieFile();
+			MOV_WriteMovieFile();
 		ClosePlugins();
 		SysRunGui();
 	}
