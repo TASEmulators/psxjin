@@ -154,6 +154,7 @@ typedef struct
 } PadDataS;
 
 #define MOVIE_MAX_METADATA 512
+#define MOVIE_MAX_CDROM_IDS 252
 
 struct MovieType {
 	PadDataS lastPad1;                   //last joypad1 buttons polled
@@ -184,12 +185,11 @@ struct MovieType {
 	char* movieFilename;                 //full path file name (ex:"c:/pcsx/movies/movie.pxm")
 	char bytesPerFrame;                  //size of each frame in bytes
 	char palTiming;                      //PAL mode (50 FPS instead of 60)
+	char CdromCount;                     //how many different cds are used in the movie
+	char CdromIds[MOVIE_MAX_CDROM_IDS];  //every CD ID used in the movie
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
-	char CdromCount;                     //how many different cds are used in the movie
-	unsigned long CdromIdsSize;          //size of the CdromIds string
-	char* CdromIds;                      //every CD ID used in the movie
 };
 
 #define EMU_VERSION 6

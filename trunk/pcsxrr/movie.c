@@ -64,14 +64,6 @@ static void ReserveInputBufferSpace(uint32 spaceNeeded)
 	}
 }
 
-static void ReserveCdromIdsSpace(struct MovieType *tempMovie, uint32 spaceNeeded)
-{
-	if (spaceNeeded > tempMovie->CdromIdsSize) {
-		tempMovie->CdromIdsSize = spaceNeeded;
-		tempMovie->CdromIds = (char*)realloc(tempMovie->CdromIds, tempMovie->CdromIdsSize);
-	}
-}
-
 
 /*-----------------------------------------------------------------------------
 -                              FILE OPERATIONS                                -
@@ -136,7 +128,6 @@ int ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	// read CDs IDs information
 	fread(&tempMovie->CdromCount, 1, 1, fd);                 //total CDs used
 	int nCdidsLen = tempMovie->CdromCount*9;                 //CDs IDs
-	ReserveCdromIdsSpace(tempMovie,nCdidsLen);
 	for(i=0; i<nCdidsLen; ++i) {
 		char c = 0;
 		c |= fgetc(fd) & 0xff;
@@ -300,9 +291,7 @@ static int StartRecord()
 	Movie.rerecordCount = 0;
 	Movie.readOnly = 0;
 	Movie.CdromCount = 1;
-	ReserveCdromIdsSpace(&Movie,9);
 	sprintf(Movie.CdromIds, "%9.9s", CdromId);
-	Movie.CdromIdsSize = 9;
 
 	WriteMovieHeader();
 
@@ -345,7 +334,6 @@ void PCSX_MOV_StartMovie(int mode)
 	Movie.mode = mode;
 	Movie.currentFrame = 0;
 	Movie.lagCounter = 0;
-	Movie.CdromIdsSize = 0;
 	cdOpenCase = 0;
 	cheatsEnabled = 0;
 	Config.Sio = 0;
