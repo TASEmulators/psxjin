@@ -398,7 +398,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_STOP_MOVIE:
-						PCSX_MOV_StopMovie();
+						MOV_StopMovie();
 						EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
 						EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
 						EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
@@ -579,7 +579,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SysClose();
 				PostQuitMessage(0);
 				if (Movie.mode == 1)
-					WriteMovieFile();
+					MOV_WriteMovieFile();
 				exit(0);
 			}
 			else AccBreak = 0;
@@ -1627,11 +1627,11 @@ void WIN32_StartMovieReplay(char* szFilename)
 	int nRet=1;
 	CheckCdrom(); //get CdromId
 	if (szFilename != "") {
-		ReadMovieFile(szFilename,&Movie);
+		MOV_ReadMovieFile(szFilename,&Movie);
 		GetMovieFilenameMini(Movie.movieFilename);
 	}
 	else
-		nRet = PCSX_MOV_StartReplayDialog();
+		nRet = MOV_W32_StartReplayDialog();
 	if (nRet) {
 		LoadCdBios = 0;
 		SetMenu(gApp.hWnd, NULL);
@@ -1646,7 +1646,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 			return;
 		}
 		Running = 1;
-		PCSX_MOV_StartMovie(2);
+		MOV_StartMovie(2);
 		psxCpu->Execute();
 	}
 }
@@ -1655,13 +1655,13 @@ void WIN32_StartMovieRecord()
 {
 	int nRet;
 	CheckCdrom(); //get CdromId
-	nRet = PCSX_MOV_StartRecordDialog();
+	nRet = MOV_W32_StartRecordDialog();
 	if (nRet) {
 		if (Movie.saveStateIncluded) {
 			SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			Running = 1;
-			PCSX_MOV_StartMovie(1);
+			MOV_StartMovie(1);
 			psxCpu->Execute();
 			return;
 		}
@@ -1678,7 +1678,7 @@ void WIN32_StartMovieRecord()
 			return;
 		}
 		Running = 1;
-		PCSX_MOV_StartMovie(1);
+		MOV_StartMovie(1);
 		psxCpu->Execute();
 	}
 }

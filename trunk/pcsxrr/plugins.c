@@ -599,9 +599,9 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 if (HasEmulatedFrame == 2) { // only poll once each frame
 	if (Movie.mode == 1)
-		PCSX_MOV_WriteJoy(&padd,Movie.padType1);
+		MOV_WriteJoy(&padd,Movie.padType1);
 	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
-		PCSX_MOV_ReadJoy(&padd,Movie.padType1);
+		MOV_ReadJoy(&padd,Movie.padType1);
 	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
 	HasEmulatedFrame = 1;
 }
@@ -668,9 +668,9 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 
 if (HasEmulatedFrame == 1) { // only poll once each frame
 	if (Movie.mode == 1)
-		PCSX_MOV_WriteJoy(&padd,Movie.padType2);
+		MOV_WriteJoy(&padd,Movie.padType2);
 	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
-		PCSX_MOV_ReadJoy(&padd,Movie.padType2);
+		MOV_ReadJoy(&padd,Movie.padType2);
 	memcpy(&Movie.lastPad2,&padd,sizeof(padd));
 	HasEmulatedFrame = 0;
 }

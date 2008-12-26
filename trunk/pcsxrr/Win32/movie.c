@@ -112,7 +112,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	// ensure a relative path has the "movies\" path in prepended to it
 	GetRecordingPath(szChoice);
 
-	if (! ReadMovieFile(szChoice,&dataMovie) )
+	if (! MOV_ReadMovieFile(szChoice,&dataMovie) )
 		return;
 
 	GetMovieFilenameMini(dataMovie.movieFilename);
@@ -300,7 +300,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 									}
 								}
 							} else {
-								ReadMovieFile(szChoice,&Movie);
+								MOV_ReadMovieFile(szChoice,&Movie);
 								// get readonly status
 								Movie.readOnly = 0;
 								if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_READONLY, BM_GETCHECK, 0, 0))
@@ -321,7 +321,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 	return FALSE;
 }
 
-int PCSX_MOV_StartReplayDialog()
+int MOV_W32_StartReplayDialog()
 {
 	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_REPLAYINP), gApp.hWnd, ReplayDialogProc);
 }
@@ -492,7 +492,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 	return FALSE;
 }
 
-int PCSX_MOV_StartRecordDialog()
+int MOV_W32_StartRecordDialog()
 {
 	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_RECORDINP), gApp.hWnd, RecordDialogProc);
 }
