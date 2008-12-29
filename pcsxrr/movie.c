@@ -24,7 +24,7 @@ static const char szFileHeader[] = "PXM "; //movie file identifier
 
 static void SetBytesPerFrame()
 {
-	Movie.bytesPerFrame = 0;
+	Movie.bytesPerFrame = 1;
 	switch (Movie.padType1) {
 		case PSE_PAD_TYPE_STANDARD:
 			Movie.bytesPerFrame += 2;
