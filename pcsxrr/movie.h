@@ -7,13 +7,14 @@ extern int flagGPUchain;
 extern int flagVSync;
 extern int HasEmulatedFrame;
 extern struct MovieType Movie;
+extern struct MovieControlType MovieControl;
 
 void MOV_StartMovie(int mode);
 void MOV_StopMovie();
 void MOV_WriteJoy(PadDataS *pad,unsigned char type);
 void MOV_ReadJoy(PadDataS *pad,unsigned char type);
-void MOV_WriteControl(char type);
-void MOV_ReadControl(char *type);
+void MOV_WriteControl();
+void MOV_ReadControl();
 void MOV_WriteMovieFile();
 int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
 
