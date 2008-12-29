@@ -130,27 +130,32 @@ void psxRcntUpdate() {
 
 					/* movie stuff start */
 Movie.currentFrame++;
-GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
 
-if (flagGPUchain == 1)
+// if GPUchain has already been called within this frame
+if (flagGPUchain == 1) {
+	// raise VSync flag
 	flagVSync = 1;
-
- // frame advance or real pause
-if ((flagDontPause == 2 || flagFakePause == 1) && flagGPUchain == 1) {
-	flagDontPause = 0;
-	flagFakePause = 0;
-//	UpdateMemSearch();
-}
-flagGPUchain = 0;
-
-if ((Movie.mode == 2) && (Movie.currentFrame==Movie.totalFrames)) {
-	flagDontPause = 0;
-}
-if ((Movie.mode == 2) && (Movie.currentFrame>Movie.totalFrames)) {
-	GPU_displayText("*PCSX*: Movie End");
-	Movie.mode = 0;
+	// frame advance or pause
+	if (flagDontPause == 2 || flagFakePause == 1) {
+		flagDontPause = 0;
+		flagFakePause = 0;
+	}
+	flagGPUchain = 0;
 }
 
+// handle movie end while in replay mode
+if (Movie.mode == 2) {
+	// pause at last movie frame
+	if (Movie.currentFrame==Movie.totalFrames)
+		flagDontPause = 0;
+	// stop if we're beyond last frame
+	if (Movie.currentFrame>Movie.totalFrames) {
+		GPU_displayText("*PCSX*: Movie End");
+		Movie.mode = 0;
+	}
+}
+
+// write/read joypad information for this frame
 PadDataS paddtemp;
 if (HasEmulatedFrame == 2) {
 	if (Movie.mode == 1) {
@@ -164,7 +169,7 @@ if (HasEmulatedFrame == 2) {
 	Movie.lagCounter++;
 	GPU_setlagcounter(Movie.lagCounter);
 }
-else if (HasEmulatedFrame == 1) { //this should never happen, but one can never know
+else if (HasEmulatedFrame == 1) { //this should never happen, but one can never be sure
 	if (Movie.mode == 1)
 		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	else if (Movie.mode == 2)
@@ -172,19 +177,23 @@ else if (HasEmulatedFrame == 1) { //this should never happen, but one can never 
 }
 HasEmulatedFrame = 2;
 
-
+// write/read control byte for this frame
 if (Movie.mode == 1)
-	MOV_WriteControl(Movie.control);
+	MOV_WriteControl();
 else if (Movie.mode == 2)
-	MOV_ReadControl(&Movie.control);
+	MOV_ReadControl();
+
+// write file once in a while to prevent data loss
+if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
+	MOV_WriteMovieFile();
+
+// update OSD information
+GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
 
 unsigned long buttonToSend = 0;
 buttonToSend = Movie.lastPad1.buttonStatus;
 buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
-
-if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
-	MOV_WriteMovieFile();
 
 char modeFlags = 0;
 if (!flagDontPause)
@@ -195,6 +204,7 @@ if (Movie.mode == 2)
 	modeFlags |= MODE_FLAG_REPLAY;
 GPU_setcurrentmode(modeFlags);
 
+// update WIN32 tools
 #ifdef WIN32
 	UpdateMemWatch();
 	PCSXApplyCheats();

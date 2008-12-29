@@ -132,7 +132,7 @@ typedef struct
 {
 	unsigned char controllerType;                           //controler type
 	unsigned short buttonStatus;                            //normal buttons, all types use it
-	//next values are in range 0-255 where 128 is center
+	// next values are in range 0-255 where 128 is center
 	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY; //for analog
 	unsigned char moveX, moveY;                             //for mouse
 } PadDataS;
@@ -177,6 +177,14 @@ struct MovieType {
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
 };
 
+struct MovieControlType {
+	char reset;
+	char cdCase;
+	char sioIrq;
+	char spuIrq;
+	char cheats;
+};
+
 #define EMU_VERSION 6
 #define MOVIE_VERSION 2
 
@@ -187,10 +195,10 @@ struct MovieType {
 #define MOVIE_FLAG_IRQ_HACKS      (1<<5)
 
 #define MOVIE_CONTROL_RESET       (1<<1)
-#define MOVIE_CONTROL_CDCOVER     (1<<2)
-#define MOVIE_CONTROL_SIO         (1<<3)
-#define MOVIE_CONTROL_SPU         (1<<4)
-#define MOVIE_CONTROL_CHEAT       (1<<5)
+#define MOVIE_CONTROL_CDCASE      (1<<2)
+#define MOVIE_CONTROL_SIOIRQ      (1<<3)
+#define MOVIE_CONTROL_SPUIRQ      (1<<4)
+#define MOVIE_CONTROL_CHEATS      (1<<5)
 
 #define MODE_FLAG_RECORD (1<<1)
 #define MODE_FLAG_REPLAY (1<<2)

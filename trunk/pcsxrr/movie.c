@@ -11,16 +11,16 @@
 #endif
 
 struct MovieType Movie;
+struct MovieControlType MovieControl;
 
-FILE* fpRecordingMovie = 0;
-FILE* fpTempMovie = 0;
-int flagDontPause = 1;
-int flagFakePause = 0;
-int flagGPUchain = 0;
-int flagVSync = 0;
-int HasEmulatedFrame = 0;
+FILE* fpMovie = 0;
+int flagDontPause = 1;    //1: keep running emulation | 2: frame advance | 3: real pause
+int flagFakePause = 0;    //if 1 call pause at next VSync
+int flagGPUchain = 0;     //has the GPUchain function been called already?
+int flagVSync = 0;        //has a VSync while flagGPUchain==1 already occured?
+int HasEmulatedFrame = 0; //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
 
-static const char szFileHeader[] = "PXM "; // File identifier
+static const char szFileHeader[] = "PXM "; //movie file identifier
 
 static void SetBytesPerFrame()
 {
@@ -142,12 +142,12 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 
 void MOV_WriteMovieFile()
 {
-	fseek(fpRecordingMovie, 16, SEEK_SET);
-	fwrite(&Movie.currentFrame, 1, 4, fpRecordingMovie);  //total frames
-	fwrite(&Movie.rerecordCount, 1, 4, fpRecordingMovie); //rerecord count
+	fseek(fpMovie, 16, SEEK_SET);
+	fwrite(&Movie.currentFrame, 1, 4, fpMovie);  //total frames
+	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); //rerecord count
 	Movie.totalFrames=Movie.currentFrame; //used when toggling read-only mode
-	fseek(fpRecordingMovie, Movie.inputOffset, SEEK_SET);
-	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames+1), fpRecordingMovie);
+	fseek(fpMovie, Movie.inputOffset, SEEK_SET);
+	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames+1), fpMovie);
 }
 
 static void WriteMovieHeader()
@@ -167,35 +167,35 @@ static void WriteMovieHeader()
 	if (Config.PsxType)
 		movieFlags |= MOVIE_FLAG_PAL_TIMING;
 
-	fwrite(&szFileHeader, 1, 4, fpRecordingMovie);          //header
-	fwrite(&movieVersion, 1, 4, fpRecordingMovie);          //movie version
-	fwrite(&emuVersion, 1, 4, fpRecordingMovie);            //emu version
-	fwrite(&movieFlags, 1, 1, fpRecordingMovie);            //flags
-	fwrite(&empty, 1, 1, fpRecordingMovie);                 //reserved for more flags
-	fwrite(&Movie.padType1, 1, 1, fpRecordingMovie);        //padType1
-	fwrite(&Movie.padType2, 1, 1, fpRecordingMovie);        //padType2
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //total frames
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //rerecord count
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //savestate offset
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //memory card 1 offset
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //memory card 2 offset
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //cheat list offset
-	fwrite(&empty, 1, 4, fpRecordingMovie);                 //input offset
+	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
+	fwrite(&movieVersion, 1, 4, fpMovie);          //movie version
+	fwrite(&emuVersion, 1, 4, fpMovie);            //emu version
+	fwrite(&movieFlags, 1, 1, fpMovie);            //flags
+	fwrite(&empty, 1, 1, fpMovie);                 //reserved for more flags
+	fwrite(&Movie.padType1, 1, 1, fpMovie);        //padType1
+	fwrite(&Movie.padType2, 1, 1, fpMovie);        //padType2
+	fwrite(&empty, 1, 4, fpMovie);                 //total frames
+	fwrite(&empty, 1, 4, fpMovie);                 //rerecord count
+	fwrite(&empty, 1, 4, fpMovie);                 //savestate offset
+	fwrite(&empty, 1, 4, fpMovie);                 //memory card 1 offset
+	fwrite(&empty, 1, 4, fpMovie);                 //memory card 2 offset
+	fwrite(&empty, 1, 4, fpMovie);                 //cheat list offset
+	fwrite(&empty, 1, 4, fpMovie);                 //input offset
 
 	int authLen = strlen(Movie.authorInfo);
 	if (authLen > 0) {
-		fwrite(&authLen, 1, 4, fpRecordingMovie);             //author info size
+		fwrite(&authLen, 1, 4, fpMovie);             //author info size
 		unsigned char* authbuf = (unsigned char*)malloc(authLen);
 		int i;
 		for(i=0; i<authLen; ++i) {
 			authbuf[i + 0] = Movie.authorInfo[i] & 0xff;
 			authbuf[i + 1] = (Movie.authorInfo[i] >> 8) & 0xff;
 		}
-		fwrite(authbuf, 1, authLen, fpRecordingMovie);        //author info
+		fwrite(authbuf, 1, authLen, fpMovie);        //author info
 		free(authbuf);
 	}
 
-	fwrite(&Movie.CdromCount, 1, 1, fpRecordingMovie);      //total CDs used
+	fwrite(&Movie.CdromCount, 1, 1, fpMovie);      //total CDs used
 	int cdidsLen = Movie.CdromCount*9;
 	if (cdidsLen > 0) {
 		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
@@ -204,65 +204,65 @@ static void WriteMovieHeader()
 			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
 			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
 		}
-		fwrite(cdidsbuf, 1, cdidsLen, fpRecordingMovie);      //CDs IDs
+		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
 		free(cdidsbuf);
 	}
 
-	Movie.saveStateOffset = ftell(fpRecordingMovie);        //get savestate offset
+	Movie.saveStateOffset = ftell(fpMovie);        //get savestate offset
 	if (!Movie.saveStateIncluded)
-		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte savestate
+		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte savestate
 	else {
-		fclose(fpRecordingMovie);
+		fclose(fpMovie);
 		SaveStateEmbed(Movie.movieFilename);
-		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
-		fseek(fpRecordingMovie, 0, SEEK_END);
+		fpMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpMovie, 0, SEEK_END);
 	}
 	
-	Movie.memoryCard1Offset = ftell(fpRecordingMovie);      //get memory card 1 offset
+	Movie.memoryCard1Offset = ftell(fpMovie);      //get memory card 1 offset
 	if (!Movie.memoryCardIncluded) {
-		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte memory card
+		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte memory card
 		SIO_ClearMemoryCardsEmbed();
 	}
 	else {
-		fclose(fpRecordingMovie);
+		fclose(fpMovie);
 		SIO_SaveMemoryCardsEmbed(Movie.movieFilename,1);
-		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
-		fseek(fpRecordingMovie, 0, SEEK_END);
+		fpMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpMovie, 0, SEEK_END);
 	}
-	Movie.memoryCard2Offset = ftell(fpRecordingMovie);      //get memory card 2 offset
+	Movie.memoryCard2Offset = ftell(fpMovie);      //get memory card 2 offset
 	if (!Movie.memoryCardIncluded) {
-		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte memory card
+		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte memory card
 		SIO_ClearMemoryCardsEmbed();
 	}
 	else {
-		fclose(fpRecordingMovie);
+		fclose(fpMovie);
 		SIO_SaveMemoryCardsEmbed(Movie.movieFilename,2);
-		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
-		fseek(fpRecordingMovie, 0, SEEK_END);
+		fpMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpMovie, 0, SEEK_END);
 	}
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 
-	Movie.cheatListOffset = ftell(fpRecordingMovie);        //get cheat list offset
+	Movie.cheatListOffset = ftell(fpMovie);        //get cheat list offset
 	if (!Movie.cheatListIncluded) {
-		fwrite(&empty, 1, 4, fpRecordingMovie);               //empty 4-byte cheat list
+		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte cheat list
 		CHT_ClearCheatFileEmbed();
 	}
 	else {
-		fclose(fpRecordingMovie);
+		fclose(fpMovie);
 		CHT_SaveCheatFileEmbed(Movie.movieFilename);
-		fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
-		fseek(fpRecordingMovie, 0, SEEK_END);
+		fpMovie = fopen(Movie.movieFilename,"r+b");
+		fseek(fpMovie, 0, SEEK_END);
 	}
 
-	Movie.inputOffset = ftell(fpRecordingMovie);            //get input offset
+	Movie.inputOffset = ftell(fpMovie);            //get input offset
 
-	fseek (fpRecordingMovie, 24, SEEK_SET);
-	fwrite(&Movie.saveStateOffset, 1, 4, fpRecordingMovie); //write savestate offset
-	fwrite(&Movie.memoryCard1Offset, 1,4,fpRecordingMovie); //write memory card 1 offset
-	fwrite(&Movie.memoryCard2Offset, 1,4,fpRecordingMovie); //write memory card 2 offset
-	fwrite(&Movie.cheatListOffset, 1, 4, fpRecordingMovie); //write cheat list offset
-	fwrite(&Movie.inputOffset, 1, 4, fpRecordingMovie);     //write input offset
-	fseek (fpRecordingMovie, 0, SEEK_END);
+	fseek (fpMovie, 24, SEEK_SET);
+	fwrite(&Movie.saveStateOffset, 1, 4, fpMovie); //write savestate offset
+	fwrite(&Movie.memoryCard1Offset, 1,4,fpMovie); //write memory card 1 offset
+	fwrite(&Movie.memoryCard2Offset, 1,4,fpMovie); //write memory card 2 offset
+	fwrite(&Movie.cheatListOffset, 1, 4, fpMovie); //write cheat list offset
+	fwrite(&Movie.inputOffset, 1, 4, fpMovie);     //write input offset
+	fseek (fpMovie, 0, SEEK_END);
 	Movie.inputBufferPtr = Movie.inputBuffer;
 }
 
@@ -285,7 +285,7 @@ static void TruncateMovie()
 
 static int StartRecord()
 {
-	fpRecordingMovie = fopen(Movie.movieFilename,"w+b");
+	fpMovie = fopen(Movie.movieFilename,"w+b");
 	SetBytesPerFrame();
 
 	Movie.rerecordCount = 0;
@@ -316,15 +316,15 @@ static int StartReplay()
 		SIO_ClearMemoryCardsEmbed();
 
 	// fill input buffer
-	fpRecordingMovie = fopen(Movie.movieFilename,"r+b");
+	fpMovie = fopen(Movie.movieFilename,"r+b");
 	{
-		fseek(fpRecordingMovie, Movie.inputOffset, SEEK_SET);
+		fseek(fpMovie, Movie.inputOffset, SEEK_SET);
 		Movie.inputBufferPtr = Movie.inputBuffer;
 		uint32 toRead = Movie.bytesPerFrame * (Movie.totalFrames+1);
 		ReserveInputBufferSpace(toRead);
-		fread(Movie.inputBufferPtr, 1, toRead, fpRecordingMovie);
+		fread(Movie.inputBufferPtr, 1, toRead, fpMovie);
 	}
-	fclose(fpRecordingMovie);
+	fclose(fpMovie);
 
 	return 1;
 }
@@ -348,11 +348,11 @@ void MOV_StopMovie()
 {
 	if (Movie.mode == 1) {
 		MOV_WriteMovieFile();
-		fclose(fpRecordingMovie);
+		fclose(fpMovie);
 		TruncateMovie();
 	}
 	Movie.mode = 0;
-	fpRecordingMovie = NULL;
+	fpMovie = NULL;
 }
 
 static inline uint8 JoyRead8()
@@ -442,12 +442,32 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 	}
 }
 
-void MOV_ReadControl(char *type) {
-	//bla
+void MOV_ReadControl() {
+	char controlFlags = JoyRead8();
+
+	MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
+	MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
+	MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
+	MovieControl.spuIrq = controlFlags&MOVIE_CONTROL_SPUIRQ;
+	MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
 }
 
-void MOV_WriteControl(char type) {
-	//bla
+void MOV_WriteControl() {
+	char controlFlags = 0;
+
+	if (MovieControl.reset)
+		controlFlags |= MOVIE_CONTROL_RESET;
+	if (MovieControl.cdCase)
+		controlFlags |= MOVIE_CONTROL_CDCASE;
+	if (MovieControl.sioIrq)
+		controlFlags |= MOVIE_CONTROL_SIOIRQ;
+	if (MovieControl.spuIrq)
+		controlFlags |= MOVIE_CONTROL_SPUIRQ;
+	if (MovieControl.cheats)
+		controlFlags |= MOVIE_CONTROL_CHEATS;
+
+	ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+1)-Movie.inputBuffer));
+	JoyWrite8(controlFlags);
 }
 
 int MovieFreeze(gzFile f, int Mode) {
