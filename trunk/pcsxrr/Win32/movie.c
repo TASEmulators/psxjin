@@ -496,3 +496,17 @@ int MOV_W32_StartRecordDialog()
 {
 	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_RECORDINP), gApp.hWnd, RecordDialogProc);
 }
+
+static BOOL CALLBACK CdChangeDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	if (Msg == WM_COMMAND && LOWORD(wParam) == IDOK) {
+		EndDialog(hDlg, 1);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+int MOV_W32_StartCdChangeDialog()
+{
+	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CDCHANGE), gApp.hWnd, CdChangeDialogProc);
+}

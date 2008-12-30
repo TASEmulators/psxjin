@@ -8,6 +8,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include "Win32/movie.h"
 #endif
 
 struct MovieType Movie;
@@ -476,8 +477,16 @@ void MOV_WriteControl() {
 }
 
 void MOV_ProcessControlFlags() {
-	if (MovieControl.cdCase)
+	if (MovieControl.cdCase) {
 		cdOpenCase ^= 1;
+		if (cdOpenCase) {
+			#ifdef WIN32
+				MOV_W32_StartCdChangeDialog();
+			#else
+				//TODO: pause and ask for a new CD?
+			#endif
+		}
+	}
 	if (MovieControl.sioIrq)
 		Config.Sio ^= 1;
 	if (MovieControl.spuIrq)
@@ -493,6 +502,10 @@ void MOV_ProcessControlFlags() {
 			SysMessage(_("Could not load Cdrom"));
 		psxCpu->Execute();
 	}
+
+	if ((MovieControl.spuIrq || MovieControl.sioIrq) && !Movie.irqHacksIncluded)
+		Movie.irqHacksIncluded = 1;
+
 	memset(&MovieControl, 0, sizeof(MovieControl));
 }
 

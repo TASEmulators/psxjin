@@ -391,18 +391,20 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_CHEATTOGLE].keymod)
 	{
 		if (Movie.mode == 1) {
-			MovieControl.cheats ^= 1;
-			if (!cheatsEnabled) {
-				if (MovieControl.cheats)
-					GPU_displayText("*PCSX*: Cheats Will Activate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Cheats Won't Activate On Next Frame");
-			}
-			else {
-				if (MovieControl.cheats)
-					GPU_displayText("*PCSX*: Cheats Will Deactivate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Cheats Won't Deactivate On Next Frame");
+			if (Movie.cheatListIncluded) {
+				MovieControl.cheats ^= 1;
+				if (!cheatsEnabled) {
+					if (MovieControl.cheats)
+						GPU_displayText("*PCSX*: Cheats Will Activate On Next Frame");
+					else
+						GPU_displayText("*PCSX*: Cheats Won't Activate On Next Frame");
+				}
+				else {
+					if (MovieControl.cheats)
+						GPU_displayText("*PCSX*: Cheats Will Deactivate On Next Frame");
+					else
+						GPU_displayText("*PCSX*: Cheats Won't Deactivate On Next Frame");
+				}
 			}
 		}
 		else {
