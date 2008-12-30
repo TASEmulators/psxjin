@@ -48,7 +48,7 @@ static u32 branchPC;
 	{ \
 		if (flagVSync) { \
 			if (flagSaveState) { \
-				PCSX_SaveState(flagSaveState-1); \
+				WIN32_SaveState(flagSaveState-1); \
 				flagSaveState = 0; \
 			} \
 		} \
@@ -73,12 +73,12 @@ static u32 branchPC;
 		SysUpdate(); \
  \
 		if (flagSaveState) { \
-			PCSX_SaveState(flagSaveState-1); \
+			WIN32_SaveState(flagSaveState-1); \
 			flagSaveState = 0; \
 		} \
 	} \
 	if (flagLoadState) { \
-		PCSX_LoadState(flagLoadState-1); \
+		WIN32_LoadState(flagLoadState-1); \
 		flagLoadState = 0; \
 	} \
 	if (flagEscPressed) { \

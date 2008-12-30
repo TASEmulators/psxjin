@@ -15,6 +15,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type);
 void MOV_ReadJoy(PadDataS *pad,unsigned char type);
 void MOV_WriteControl();
 void MOV_ReadControl();
+void MOV_ProcessControlFlags();
 void MOV_WriteMovieFile();
 int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
 

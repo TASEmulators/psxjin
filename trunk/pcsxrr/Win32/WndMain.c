@@ -565,6 +565,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return TRUE;
 
 		case WM_QUIT:
+			if (Movie.mode == 1)
+				MOV_WriteMovieFile();
 			exit(0);
 			break;
 

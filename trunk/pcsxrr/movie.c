@@ -338,6 +338,7 @@ void MOV_StartMovie(int mode)
 	cheatsEnabled = 0;
 	Config.Sio = 0;
 	Config.SpuIrq = 0;
+	memset(&MovieControl, 0, sizeof(MovieControl));
 	if (Movie.mode == 1)
 		StartRecord();
 	else if (Movie.mode == 2)
@@ -468,6 +469,27 @@ void MOV_WriteControl() {
 
 	ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+1)-Movie.inputBuffer));
 	JoyWrite8(controlFlags);
+}
+
+void MOV_ProcessControlFlags() {
+	if (MovieControl.cdCase)
+		cdOpenCase ^= 1;
+	if (MovieControl.sioIrq)
+		Config.Sio ^= 1;
+	if (MovieControl.spuIrq)
+		Config.SpuIrq ^= 1;
+	if (MovieControl.cheats)
+		cheatsEnabled ^= 1;
+	if (MovieControl.reset) {
+		MovieControl.reset = 0;
+		LoadCdBios = 0;
+		SysReset();
+		CheckCdrom();
+		if (LoadCdrom() == -1)
+			SysMessage(_("Could not load Cdrom"));
+		psxCpu->Execute();
+	}
+	memset(&MovieControl, 0, sizeof(MovieControl));
 }
 
 int MovieFreeze(gzFile f, int Mode) {

@@ -85,8 +85,8 @@ void CreateMemSearch();
 void UpdateMemSearch();
 void PCSXInitCheatData();
 
-void PCSX_LoadState(int newState);
-void PCSX_SaveState(int newState);
+void WIN32_LoadState(int newState);
+void WIN32_SaveState(int newState);
 extern int flagSaveState;
 extern int flagLoadState;
 extern int flagEscPressed;
