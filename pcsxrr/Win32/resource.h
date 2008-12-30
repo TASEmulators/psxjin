@@ -18,6 +18,7 @@
 #define IDD_CP0REGS                     115
 #define IDD_COP2D                       116
 #define IDD_COP2C                       117
+#define IDD_CDCHANGE                    118
 #define IDD_CONFIG                      120
 #define IDD_MEMVIEW                     136
 #define IDC_EDIT2                       1001
