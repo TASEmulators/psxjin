@@ -87,6 +87,10 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	}
 
 	fread(&tempMovie->formatVersion,1,4,fd);  //file format version number
+	if (tempMovie->formatVersion != MOVIE_VERSION) { //not the right version number
+		fclose(fd);
+		return 0;
+	}
 	fread(&tempMovie->emuVersion, 1, 4, fd);  //emulator version number
 	fread(&movieFlags, 1, 1, fd);             //read flags
 	{
