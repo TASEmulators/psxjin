@@ -183,6 +183,8 @@ if (Movie.mode == 1)
 else if (Movie.mode == 2)
 	MOV_ReadControl();
 
+MOV_ProcessControlFlags();
+
 // write file once in a while to prevent data loss
 if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
 	MOV_WriteMovieFile();

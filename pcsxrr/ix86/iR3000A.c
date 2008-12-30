@@ -434,7 +434,7 @@ __inline static void execute() {
 		if (flagVSync) {
 			#ifdef WIN32
 			if (flagSaveState) {
-				PCSX_SaveState(flagSaveState-1);
+				WIN32_SaveState(flagSaveState-1);
 				flagSaveState = 0;
 			}
 			#endif
@@ -467,14 +467,14 @@ __inline static void execute() {
 
 		#ifdef WIN32
 		if (flagSaveState) {
-			PCSX_SaveState(flagSaveState-1);
+			WIN32_SaveState(flagSaveState-1);
 			flagSaveState = 0;
 		}
 		#endif
 	}
 	#ifdef WIN32
 	if (flagLoadState) {
-		PCSX_LoadState(flagLoadState-1);
+		WIN32_LoadState(flagLoadState-1);
 		flagLoadState = 0;
 	}
 	if (flagEscPressed) {
