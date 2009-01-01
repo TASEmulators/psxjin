@@ -72,7 +72,6 @@ static void ReserveInputBufferSpace(uint32 spaceNeeded)
 
 int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	char readHeader[4];
-	int movieFlags = 0;
 	const char szFileHeader[] = "PXM ";       //file identifier
 
 	tempMovie->movieFilename = szChoice;
@@ -93,15 +92,17 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		return 0;
 	}
 	fread(&tempMovie->emuVersion, 1, 4, fd);  //emulator version number
-	fread(&movieFlags, 1, 1, fd);             //read flags
+
+	Movie.movieFlags = 0;
+	fread(&Movie.movieFlags, 1, 1, fd);             //read flags
 	{
-		tempMovie->saveStateIncluded = movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
-		tempMovie->memoryCardIncluded = movieFlags&MOVIE_FLAG_MEMORY_CARDS;
-		tempMovie->cheatListIncluded = movieFlags&MOVIE_FLAG_CHEAT_LIST;
-		tempMovie->irqHacksIncluded = movieFlags&MOVIE_FLAG_IRQ_HACKS;
-		tempMovie->palTiming = movieFlags&MOVIE_FLAG_PAL_TIMING;
+		tempMovie->saveStateIncluded = Movie.movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
+		tempMovie->memoryCardIncluded = Movie.movieFlags&MOVIE_FLAG_MEMORY_CARDS;
+		tempMovie->cheatListIncluded = Movie.movieFlags&MOVIE_FLAG_CHEAT_LIST;
+		tempMovie->irqHacksIncluded = Movie.movieFlags&MOVIE_FLAG_IRQ_HACKS;
+		tempMovie->palTiming = Movie.movieFlags&MOVIE_FLAG_PAL_TIMING;
 	}
-	fread(&movieFlags, 1, 1, fd);             //reserved for more flags
+	fread(&Movie.movieFlags, 1, 1, fd);             //reserved for more flags
 
 	fread(&tempMovie->padType1, 1, 1, fd);
 	fread(&tempMovie->padType2, 1, 1, fd);
@@ -147,6 +148,8 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 
 void MOV_WriteMovieFile()
 {
+	fseek(fpMovie, 12, SEEK_SET);
+	fwrite(&Movie.movieFlags, 1, 1, fpMovie);    //flags
 	fseek(fpMovie, 16, SEEK_SET);
 	fwrite(&Movie.currentFrame, 1, 4, fpMovie);  //total frames
 	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); //rerecord count
@@ -157,25 +160,26 @@ void MOV_WriteMovieFile()
 
 static void WriteMovieHeader()
 {
-	int movieFlags=0;
 	int empty=0;
 	unsigned long emuVersion = EMU_VERSION;
 	unsigned long movieVersion = MOVIE_VERSION;
+
+	Movie.movieFlags=0;
 	if (Movie.saveStateIncluded)
-		movieFlags |= MOVIE_FLAG_FROM_SAVESTATE;
+		Movie.movieFlags |= MOVIE_FLAG_FROM_SAVESTATE;
 	if (Movie.memoryCardIncluded)
-		movieFlags |= MOVIE_FLAG_MEMORY_CARDS;
+		Movie.movieFlags |= MOVIE_FLAG_MEMORY_CARDS;
 	if (Movie.cheatListIncluded)
-		movieFlags |= MOVIE_FLAG_CHEAT_LIST;
+		Movie.movieFlags |= MOVIE_FLAG_CHEAT_LIST;
 	if (Movie.irqHacksIncluded)
-		movieFlags |= MOVIE_FLAG_IRQ_HACKS;
+		Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
 	if (Config.PsxType)
-		movieFlags |= MOVIE_FLAG_PAL_TIMING;
+		Movie.movieFlags |= MOVIE_FLAG_PAL_TIMING;
 
 	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
 	fwrite(&movieVersion, 1, 4, fpMovie);          //movie version
 	fwrite(&emuVersion, 1, 4, fpMovie);            //emu version
-	fwrite(&movieFlags, 1, 1, fpMovie);            //flags
+	fwrite(&Movie.movieFlags, 1, 1, fpMovie);      //flags
 	fwrite(&empty, 1, 1, fpMovie);                 //reserved for more flags
 	fwrite(&Movie.padType1, 1, 1, fpMovie);        //padType1
 	fwrite(&Movie.padType2, 1, 1, fpMovie);        //padType2
@@ -267,8 +271,7 @@ static void WriteMovieHeader()
 	fwrite(&Movie.memoryCard2Offset, 1,4,fpMovie); //write memory card 2 offset
 	fwrite(&Movie.cheatListOffset, 1, 4, fpMovie); //write cheat list offset
 	fwrite(&Movie.inputOffset, 1, 4, fpMovie);     //write input offset
-	fseek (fpMovie, 0, SEEK_END);
-	Movie.inputBufferPtr = Movie.inputBuffer;
+	fseek(fpMovie, 0, SEEK_END);
 }
 
 static void TruncateMovie()
@@ -299,6 +302,7 @@ static int StartRecord()
 	sprintf(Movie.CdromIds, "%9.9s", CdromId);
 
 	WriteMovieHeader();
+	Movie.inputBufferPtr = Movie.inputBuffer;
 
 	return 1;
 }
@@ -486,6 +490,8 @@ void MOV_ProcessControlFlags() {
 				//TODO: pause and ask for a new CD?
 			#endif
 		}
+		else
+			Movie.CdromCount++;
 	}
 	if (MovieControl.sioIrq)
 		Config.Sio ^= 1;
@@ -501,6 +507,12 @@ void MOV_ProcessControlFlags() {
 		if (LoadCdrom() == -1)
 			SysMessage(_("Could not load Cdrom"));
 		psxCpu->Execute();
+	}
+	if (MovieControl.spuIrq || MovieControl.sioIrq) {
+		if (!Movie.irqHacksIncluded) {
+			Movie.irqHacksIncluded = 1;
+			Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
+		}
 	}
 
 	if ((MovieControl.spuIrq || MovieControl.sioIrq) && !Movie.irqHacksIncluded)

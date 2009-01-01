@@ -449,7 +449,7 @@ void PADhandleKey(int key) {
 	{
 		if (Movie.mode == 1) {
 			MovieControl.spuIrq ^= 1;
-			if (!Config.Spu) {
+			if (!Config.SpuIrq) {
 				if (MovieControl.spuIrq)
 					GPU_displayText("*PCSX*: Spu Irq Will Activate On Next Frame");
 				else

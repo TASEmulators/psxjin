@@ -144,6 +144,7 @@ struct MovieType {
 	PadDataS lastPad1;                   //last joypad1 buttons polled
 	PadDataS lastPad2;                   //last joypad2 buttons polled
 	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
+	char movieFlags;                     //movie flags byte used in header
 	unsigned char padType1;              //joypad1 type
 	unsigned char padType2;              //joypad2 type
 	unsigned long totalFrames;           //total movie frames
