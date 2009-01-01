@@ -10,8 +10,7 @@ LD = dllwrap
 STRIP = strip
 NASM = nasmw
 RM = rm -f
-RC1 = brcc32
-RC2 = windres
+RC = windres
 
 CFLAGS += -c -D__i386__ -D_WINDOWS -DNDEBUG -DWIN32 -D__MINGW32__ -mwindows
 ASMFLAGS += -O1 -f win32 -D__WIN32__ -D__i386__
@@ -39,8 +38,8 @@ ifndef DEBUG
 endif
 
 $(RESOBJ):gpuPeopsSoft.rc
-	$(RC1) $< $(RC1FLAGS) -fo$(TARGETDIR)$*.res -d__MINGW32__ -dNDEBUG
-	$(RC2) $(RC2FLAGS) -o $(TARGETDIR)$@ -i $(TARGETDIR)$*.res 
+	$(RC) $< $(TARGETDIR)$*.res -D__MINGW32__ -DNDEBUG
+	$(RC) $(RC2FLAGS) -o $(TARGETDIR)$@ -i $(TARGETDIR)$*.res 
 
 %.o:%.asm
 	$(NASM) $(ASMFLAGS) $< -o $(TARGETDIR)$@
