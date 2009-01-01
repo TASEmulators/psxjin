@@ -125,6 +125,7 @@
 // CONFIG FILE helpers.... used in (non-fpse) Linux and ZN Windows
 /////////////////////////////////////////////////////////////////////////////
 
+int tempDest; //this is for the compiler to not throw in a million of warnings
 char * pConfigFile=NULL;
 
 #ifndef _FPSE
@@ -355,7 +356,7 @@ void ComboBoxAddRes(HWND hWC,char * cs)
 {
  int i=ComboBox_FindString(hWC,-1,cs);
  if(i!=CB_ERR) return;
- ComboBox_AddString(hWC,cs);
+ tempDest = ComboBox_AddString(hWC,cs);
 }
 
 BOOL OnInitSoftDialog(HWND hW) 
@@ -402,21 +403,21 @@ BOOL OnInitSoftDialog(HWND hW)
 
  i=ComboBox_FindString(hWC,-1,cs);
  if(i==CB_ERR) i=0;
- ComboBox_SetCurSel(hWC,i);
+ tempDest = ComboBox_SetCurSel(hWC,i);
 
  hWC=GetDlgItem(hW,IDC_COLDEPTH);
- ComboBox_AddString(hWC,"16 Bit");
- ComboBox_AddString(hWC,"32 Bit");
+ tempDest = ComboBox_AddString(hWC,"16 Bit");
+ tempDest = ComboBox_AddString(hWC,"32 Bit");
  wsprintf(cs,"%d Bit",iColDepth);                      // resolution
  i=ComboBox_FindString(hWC,-1,cs);
  if(i==CB_ERR) i=0;
- ComboBox_SetCurSel(hWC,i);
+ tempDest = ComboBox_SetCurSel(hWC,i);
 
  hWC=GetDlgItem(hW,IDC_SCANLINES);
- ComboBox_AddString(hWC,"Scanlines disabled");
- ComboBox_AddString(hWC,"Scanlines enabled (standard)");
- ComboBox_AddString(hWC,"Scanlines enabled (double blitting - nVidia fix)");
- ComboBox_SetCurSel(hWC,iUseScanLines);
+ tempDest = ComboBox_AddString(hWC,"Scanlines disabled");
+ tempDest = ComboBox_AddString(hWC,"Scanlines enabled (standard)");
+ tempDest = ComboBox_AddString(hWC,"Scanlines enabled (double blitting - nVidia fix)");
+ tempDest = ComboBox_SetCurSel(hWC,iUseScanLines);
 
  SetDlgItemInt(hW,IDC_WINX,LOWORD(iWinSize),FALSE);    // window size
  SetDlgItemInt(hW,IDC_WINY,HIWORD(iWinSize),FALSE);
@@ -435,30 +436,30 @@ BOOL OnInitSoftDialog(HWND hW)
  if(bSSSPSXLimit)	  CheckDlgButton(hW,IDC_SSSPSXLIMIT,TRUE);
 
  hWC=GetDlgItem(hW,IDC_NOSTRETCH);                     // stretching
- ComboBox_AddString(hWC,"Stretch to full window size");
- ComboBox_AddString(hWC,"1:1 (faster with some cards)");
- ComboBox_AddString(hWC,"Scale to window size, keep aspect ratio");
- ComboBox_AddString(hWC,"2xSaI stretching (needs a fast cpu)");
- ComboBox_AddString(hWC,"2xSaI unstretched (needs a fast cpu)");
- ComboBox_AddString(hWC,"Super2xSaI stretching (needs a very fast cpu)");
- ComboBox_AddString(hWC,"Super2xSaI unstretched (needs a very fast cpu)");
- ComboBox_AddString(hWC,"SuperEagle stretching (needs a fast cpu)");
- ComboBox_AddString(hWC,"SuperEagle unstretched (needs a fast cpu)");
- ComboBox_AddString(hWC,"Scale2x stretching (needs a fast cpu)");
- ComboBox_AddString(hWC,"Scale2x unstretched (needs a fast cpu)");
- ComboBox_AddString(hWC,"HQ2X unstretched (Fast CPU+mmx)");
- ComboBox_AddString(hWC,"HQ2X stretched (Fast CPU+mmx)");
- ComboBox_AddString(hWC,"Scale3x stretching (needs a fast cpu)");
- ComboBox_AddString(hWC,"Scale3x unstretched (needs a fast cpu)");
- ComboBox_AddString(hWC,"HQ3X unstretched (Fast CPU+mmx)");
- ComboBox_AddString(hWC,"HQ3X stretching (Fast CPU+mmx)");
- ComboBox_SetCurSel(hWC,iUseNoStretchBlt);
+ tempDest = ComboBox_AddString(hWC,"Stretch to full window size");
+ tempDest = ComboBox_AddString(hWC,"1:1 (faster with some cards)");
+ tempDest = ComboBox_AddString(hWC,"Scale to window size, keep aspect ratio");
+ tempDest = ComboBox_AddString(hWC,"2xSaI stretching (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"2xSaI unstretched (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"Super2xSaI stretching (needs a very fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"Super2xSaI unstretched (needs a very fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"SuperEagle stretching (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"SuperEagle unstretched (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"Scale2x stretching (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"Scale2x unstretched (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"HQ2X unstretched (Fast CPU+mmx)");
+ tempDest = ComboBox_AddString(hWC,"HQ2X stretched (Fast CPU+mmx)");
+ tempDest = ComboBox_AddString(hWC,"Scale3x stretching (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"Scale3x unstretched (needs a fast cpu)");
+ tempDest = ComboBox_AddString(hWC,"HQ3X unstretched (Fast CPU+mmx)");
+ tempDest = ComboBox_AddString(hWC,"HQ3X stretching (Fast CPU+mmx)");
+ tempDest = ComboBox_SetCurSel(hWC,iUseNoStretchBlt);
 
  hWC=GetDlgItem(hW,IDC_DITHER);                        // dithering
- ComboBox_AddString(hWC,"No dithering (fastest)");
- ComboBox_AddString(hWC,"Game dependend dithering (slow)");
- ComboBox_AddString(hWC,"Always dither g-shaded polygons (slowest)");
- ComboBox_SetCurSel(hWC,iUseDither);
+ tempDest = ComboBox_AddString(hWC,"No dithering (fastest)");
+ tempDest = ComboBox_AddString(hWC,"Game dependend dithering (slow)");
+ tempDest = ComboBox_AddString(hWC,"Always dither g-shaded polygons (slowest)");
+ tempDest = ComboBox_SetCurSel(hWC,iUseDither);
 
  if(iFrameLimit==2)                                    // frame limit wrapper
       CheckDlgButton(hW,IDC_FRAMEAUTO,TRUE);
@@ -480,7 +481,7 @@ void GetSettings(HWND hW)
 
  hWC=GetDlgItem(hW,IDC_RESOLUTION);                    // get resolution
  i=ComboBox_GetCurSel(hWC);
- ComboBox_GetLBText(hWC,i,cs);
+ tempDest = ComboBox_GetLBText(hWC,i,cs);
  iResX=atol(cs);
  p=strchr(cs,'x');
  iResY=atol(p+1);
@@ -490,7 +491,7 @@ void GetSettings(HWND hW)
 
  hWC=GetDlgItem(hW,IDC_COLDEPTH);                      // get color depth
  i=ComboBox_GetCurSel(hWC);
- ComboBox_GetLBText(hWC,i,cs);
+ tempDest = ComboBox_GetLBText(hWC,i,cs);
  iColDepth=atol(cs);
 
  hWC=GetDlgItem(hW,IDC_SCANLINES);                     // scanlines
@@ -697,26 +698,26 @@ BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
      CheckDlgButton(hW,IDC_REC_MODE1,RECORD_RECORDING_MODE==0);
      CheckDlgButton(hW,IDC_REC_MODE2,RECORD_RECORDING_MODE==1);
      hWC = GetDlgItem(hW,IDC_VIDEO_SIZE);
-     ComboBox_ResetContent(hWC);
-     ComboBox_AddString(hWC,"Full");
-     ComboBox_AddString(hWC,"Half");
-     ComboBox_AddString(hWC,"Quarter");
-     ComboBox_SetCurSel(hWC,RECORD_VIDEO_SIZE);
+     tempDest = ComboBox_ResetContent(hWC);
+     tempDest = ComboBox_AddString(hWC,"Full");
+     tempDest = ComboBox_AddString(hWC,"Half");
+     tempDest = ComboBox_AddString(hWC,"Quarter");
+     tempDest = ComboBox_SetCurSel(hWC,RECORD_VIDEO_SIZE);
 
      SetDlgItemInt(hW,IDC_REC_WIDTH,RECORD_RECORDING_WIDTH,FALSE);
      SetDlgItemInt(hW,IDC_REC_HEIGHT,RECORD_RECORDING_HEIGHT,FALSE);
 
      hWC = GetDlgItem(hW,IDC_FRAME_RATE);
-     ComboBox_ResetContent(hWC);
-     ComboBox_AddString(hWC,"1");
-     ComboBox_AddString(hWC,"2");
-     ComboBox_AddString(hWC,"3");
-     ComboBox_AddString(hWC,"4");
-     ComboBox_AddString(hWC,"5");
-     ComboBox_AddString(hWC,"6");
-     ComboBox_AddString(hWC,"7");
-     ComboBox_AddString(hWC,"8");
-     ComboBox_SetCurSel(hWC,RECORD_FRAME_RATE_SCALE);
+     tempDest = ComboBox_ResetContent(hWC);
+     tempDest = ComboBox_AddString(hWC,"1");
+     tempDest = ComboBox_AddString(hWC,"2");
+     tempDest = ComboBox_AddString(hWC,"3");
+     tempDest = ComboBox_AddString(hWC,"4");
+     tempDest = ComboBox_AddString(hWC,"5");
+     tempDest = ComboBox_AddString(hWC,"6");
+     tempDest = ComboBox_AddString(hWC,"7");
+     tempDest = ComboBox_AddString(hWC,"8");
+     tempDest = ComboBox_SetCurSel(hWC,RECORD_FRAME_RATE_SCALE);
      CheckDlgButton(hW,IDC_COMPRESSION1,RECORD_COMPRESSION_MODE==0);
      CheckDlgButton(hW,IDC_COMPRESSION2,RECORD_COMPRESSION_MODE==1);
      RefreshCodec(hW);
@@ -806,11 +807,11 @@ void OnCfgDef1(HWND hW)
  HWND hWC;
  
  hWC=GetDlgItem(hW,IDC_RESOLUTION);
- ComboBox_SetCurSel(hWC,1);
+ tempDest = ComboBox_SetCurSel(hWC,1);
  hWC=GetDlgItem(hW,IDC_COLDEPTH);
- ComboBox_SetCurSel(hWC,0);
+ tempDest = ComboBox_SetCurSel(hWC,0);
  hWC=GetDlgItem(hW,IDC_SCANLINES);
- ComboBox_SetCurSel(hWC,0);
+ tempDest = ComboBox_SetCurSel(hWC,0);
  CheckDlgButton(hW,IDC_USELIMIT,FALSE);
  CheckDlgButton(hW,IDC_USESKIPPING,TRUE);
  CheckRadioButton(hW,IDC_DISPMODE1,IDC_DISPMODE2,IDC_DISPMODE1);
@@ -818,9 +819,9 @@ void OnCfgDef1(HWND hW)
  CheckDlgButton(hW,IDC_FRAMEMANUELL,TRUE);
  CheckDlgButton(hW,IDC_SHOWFPS,FALSE);
  hWC=GetDlgItem(hW,IDC_NOSTRETCH);
- ComboBox_SetCurSel(hWC,1);
+ tempDest = ComboBox_SetCurSel(hWC,1);
  hWC=GetDlgItem(hW,IDC_DITHER);
- ComboBox_SetCurSel(hWC,0);
+ tempDest = ComboBox_SetCurSel(hWC,0);
  SetDlgItemInt(hW,IDC_FRAMELIM,200,FALSE);
  SetDlgItemInt(hW,IDC_WINX,320,FALSE);
  SetDlgItemInt(hW,IDC_WINY,240,FALSE);
@@ -838,11 +839,11 @@ void OnCfgDef2(HWND hW)
  HWND hWC;
  
  hWC=GetDlgItem(hW,IDC_RESOLUTION);
- ComboBox_SetCurSel(hWC,2);
+ tempDest = ComboBox_SetCurSel(hWC,2);
  hWC=GetDlgItem(hW,IDC_COLDEPTH);
- ComboBox_SetCurSel(hWC,0);
+ tempDest = ComboBox_SetCurSel(hWC,0);
  hWC=GetDlgItem(hW,IDC_SCANLINES);
- ComboBox_SetCurSel(hWC,0);
+ tempDest = ComboBox_SetCurSel(hWC,0);
  CheckDlgButton(hW,IDC_USELIMIT,TRUE);
  CheckDlgButton(hW,IDC_USESKIPPING,FALSE);
  CheckRadioButton(hW,IDC_DISPMODE1,IDC_DISPMODE2,IDC_DISPMODE1);
@@ -853,9 +854,9 @@ void OnCfgDef2(HWND hW)
  CheckDlgButton(hW,IDC_TRANSPARENT,TRUE);
  CheckDlgButton(hW,IDC_DEBUGMODE,FALSE);
  hWC=GetDlgItem(hW,IDC_NOSTRETCH);
- ComboBox_SetCurSel(hWC,0);
+ tempDest = ComboBox_SetCurSel(hWC,0);
  hWC=GetDlgItem(hW,IDC_DITHER);
- ComboBox_SetCurSel(hWC,2);
+ tempDest = ComboBox_SetCurSel(hWC,2);
 
  SetDlgItemInt(hW,IDC_FRAMELIM,200,FALSE);
  SetDlgItemInt(hW,IDC_WINX,640,FALSE);
@@ -962,7 +963,7 @@ void ReadConfig(void)
      fFrameRate=0.0f;
      size = 4;
      if(RegQueryValueEx(myKey,"FrameRateFloat",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-      fFrameRate=*((float *)(&temp));
+      fFrameRate=*(&temp);
      if(fFrameRate==0.0f)
       {
        fFrameRate=200.0f;
@@ -1120,7 +1121,7 @@ void WriteConfig(void)
  RegSetValueEx(myKey,"UseGamma",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
  temp=(DWORD)fFrameRate;
  RegSetValueEx(myKey,"FrameRate",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
- temp=*((DWORD *)&fFrameRate);
+ temp=*(&fFrameRate);
  RegSetValueEx(myKey,"FrameRateFloat",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
  temp=bVsync;
  RegSetValueEx(myKey,"WaitVSYNC",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
@@ -1245,7 +1246,7 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
    GUID * g=(GUID *)malloc(sizeof(GUID));
    if(NULL != pGUID) *g=*pGUID;
    else              memset(g,0,sizeof(GUID));
-   ComboBox_SetItemData(hWC,i,g);
+   tempDest = ComboBox_SetItemData(hWC,i,g);
   }
 
  IDirect3D3_Release(pD3D);
@@ -1310,7 +1311,7 @@ BOOL CALLBACK DeviceDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
      hWC=GetDlgItem(hW,IDC_DEVICE);
      i=ComboBox_FindStringExact(hWC,-1,szDevName);
      if(i==CB_ERR) i=0;
-     ComboBox_SetCurSel(hWC,i);
+     tempDest = ComboBox_SetCurSel(hWC,i);
      hWC=GetDlgItem(hW,IDC_GAMMA);
      ScrollBar_SetRange(hWC,0,1024,FALSE);
      if(iUseGammaVal==2048) ScrollBar_SetPos(hWC,512,FALSE);
@@ -1359,7 +1360,7 @@ BOOL CALLBACK DeviceDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
          int i=ComboBox_GetCurSel(hWC);
          if(i==CB_ERR) return TRUE;
          guiDev=*((GUID *)ComboBox_GetItemData(hWC,i));
-         ComboBox_GetLBText(hWC,i,szDevName);
+         tempDest = ComboBox_GetLBText(hWC,i,szDevName);
          FreeGui(hW);
 
          if(!IsDlgButtonChecked(hW,IDC_USEGAMMA))
@@ -1496,7 +1497,7 @@ void SetGPUKey(HWND hWC,char szKey)
   {
    if(ComboBox_GetItemData(hWC,i)==szKey) break;
   }
- if(i!=iCnt) ComboBox_SetCurSel(hWC,i);
+ if(i!=iCnt) tempDest = ComboBox_SetCurSel(hWC,i);
 }                                 
 
 BOOL CALLBACK KeyDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -1513,19 +1514,19 @@ BOOL CALLBACK KeyDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
        for(j=0;tMKeys[j].cCode!=0;j++)
         {
          k=ComboBox_AddString(hWC,tMKeys[j].szName);
-         ComboBox_SetItemData(hWC,k,tMKeys[j].cCode);
+         tempDest = ComboBox_SetItemData(hWC,k,tMKeys[j].cCode);
         }
        for(j=0x30;j<=0x39;j++)
         {
          wsprintf(szB,"%c",j);
          k=ComboBox_AddString(hWC,szB);
-         ComboBox_SetItemData(hWC,k,j);
+         tempDest = ComboBox_SetItemData(hWC,k,j);
         }
        for(j=0x41;j<=0x5a;j++)
         {
          wsprintf(szB,"%c",j);
          k=ComboBox_AddString(hWC,szB);
-         ComboBox_SetItemData(hWC,k,j);
+         tempDest = ComboBox_SetItemData(hWC,k,j);
         }                              
        SetGPUKey(GetDlgItem(hW,i),szGPUKeys[i-IDC_KEY1]);
       }
