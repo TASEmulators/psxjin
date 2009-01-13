@@ -72,6 +72,7 @@ static void ReserveInputBufferSpace(uint32 spaceNeeded)
 
 int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	char readHeader[4];
+	int empty;
 	const char szFileHeader[] = "PXM ";       //file identifier
 
 	tempMovie->movieFilename = szChoice;
@@ -93,16 +94,15 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	}
 	fread(&tempMovie->emuVersion, 1, 4, fd);  //emulator version number
 
-	Movie.movieFlags = 0;
-	fread(&Movie.movieFlags, 1, 1, fd);             //read flags
+	fread(&tempMovie->movieFlags, 1, 1, fd);  //read flags
 	{
-		tempMovie->saveStateIncluded = Movie.movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
-		tempMovie->memoryCardIncluded = Movie.movieFlags&MOVIE_FLAG_MEMORY_CARDS;
-		tempMovie->cheatListIncluded = Movie.movieFlags&MOVIE_FLAG_CHEAT_LIST;
-		tempMovie->irqHacksIncluded = Movie.movieFlags&MOVIE_FLAG_IRQ_HACKS;
-		tempMovie->palTiming = Movie.movieFlags&MOVIE_FLAG_PAL_TIMING;
+		tempMovie->saveStateIncluded = tempMovie->movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
+		tempMovie->memoryCardIncluded = tempMovie->movieFlags&MOVIE_FLAG_MEMORY_CARDS;
+		tempMovie->cheatListIncluded = tempMovie->movieFlags&MOVIE_FLAG_CHEAT_LIST;
+		tempMovie->irqHacksIncluded = tempMovie->movieFlags&MOVIE_FLAG_IRQ_HACKS;
+		tempMovie->palTiming = tempMovie->movieFlags&MOVIE_FLAG_PAL_TIMING;
 	}
-	fread(&Movie.movieFlags, 1, 1, fd);             //reserved for more flags
+	fread(&empty, 1, 1, fd);  //reserved for more flags
 
 	fread(&tempMovie->padType1, 1, 1, fd);
 	fread(&tempMovie->padType2, 1, 1, fd);
@@ -333,7 +333,6 @@ static int StartReplay()
 		ReserveInputBufferSpace(toRead);
 		fread(Movie.inputBufferPtr, 1, toRead, fpMovie);
 	}
-	fclose(fpMovie);
 
 	return 1;
 }
@@ -490,13 +489,10 @@ void MOV_ProcessControlFlags() {
 				//TODO: pause and ask for a new CD?
 			#endif
 		}
-		else
+		else {
 			Movie.CdromCount++;
+		}
 	}
-	if (MovieControl.sioIrq)
-		Config.Sio ^= 1;
-	if (MovieControl.spuIrq)
-		Config.SpuIrq ^= 1;
 	if (MovieControl.cheats)
 		cheatsEnabled ^= 1;
 	if (MovieControl.reset) {
@@ -508,15 +504,15 @@ void MOV_ProcessControlFlags() {
 			SysMessage(_("Could not load Cdrom"));
 		psxCpu->Execute();
 	}
-	if (MovieControl.spuIrq || MovieControl.sioIrq) {
-		if (!Movie.irqHacksIncluded) {
-			Movie.irqHacksIncluded = 1;
-			Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
-		}
-	}
-
-	if ((MovieControl.spuIrq || MovieControl.sioIrq) && !Movie.irqHacksIncluded)
+	if ((MovieControl.spuIrq || MovieControl.sioIrq) &&
+		   !Movie.irqHacksIncluded && Movie.mode == 1) {
 		Movie.irqHacksIncluded = 1;
+		Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
+	}
+	if (MovieControl.sioIrq && Movie.irqHacksIncluded)
+		Config.Sio ^= 1;
+	if (MovieControl.spuIrq && Movie.irqHacksIncluded)
+		Config.SpuIrq ^= 1;
 
 	memset(&MovieControl, 0, sizeof(MovieControl));
 }

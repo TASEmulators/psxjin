@@ -2,6 +2,8 @@
 # PCSX Makefile for Win32-mingw
 #
 
+#DEBUG = 1
+
 MAJ = 1
 MIN = 5
 VERSION = ${MAJ}.${MIN}
@@ -15,7 +17,9 @@ CPUTYPE = i686
 CC = gcc
 NASM = nasm
 RM = rm -f
-STRIP = strip
+ifndef DEBUG
+	STRIP = strip pcsx.exe
+endif
 RC = windres
 
 ifndef CPUTYPE
@@ -35,7 +39,11 @@ endif
 #  pentium and i686 is equivalent to pentiumpro.
 
 OPTIMIZE = -O2 -fomit-frame-pointer -finline-functions -ffast-math
-FLAGS = -D__WIN32__ -D__MINGW32__ -DPCSX_VERSION=\"${VERSION}\"
+ifndef DEBUG
+	FLAGS = -D__WIN32__ -D__MINGW32__ -DPCSX_VERSION=\"${VERSION}\"
+else
+	FLAGS = -D__WIN32__ -D__MINGW32__ -DPCSX_VERSION=\"${VERSION}\" -ggdb
+endif
 RC1FLAGS = -d__MINGW32__
 LIBS = -lz -lcomctl32
 RESOBJ = Win32/pcsxres.o
@@ -49,7 +57,11 @@ OBJS+= Win32/WndMain.o Win32/Plugin.o Win32/ConfigurePlugins.o \
 
 ifeq (${CPU}, ix86)
 	CC = gcc
+ifndef DEBUG
 	OPTIMIZE = -O4 -fomit-frame-pointer -finline-functions -ffast-math -fno-exceptions
+else
+	OPTIMIZE = -O1 -fomit-frame-pointer -finline-functions -ffast-math -fno-exceptions
+endif
 	OPTIMIZE += ${CPUOPT}
 	OBJS+= ix86/iR3000A.o ix86/ix86.o
 	FLAGS+= -D__i386__
@@ -60,7 +72,7 @@ ASMFLAGS = -f elf ${FLAGS} -iWin32 -i.
 
 pcsx: ${OBJS}
 	${CC} ${CFLAGS} ${OBJS} -o pcsx.exe ${LIBS}
-	${STRIP} pcsx.exe
+	${STRIP}
 
 .PHONY: clean pcsx
 
