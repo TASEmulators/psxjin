@@ -155,11 +155,11 @@ int           iTileCheat;
 ////////////////////////////////////////////////////////////////////////
 
 const  unsigned char version  = 1;    // do not touch - library for PSEmu 1.x
-const  unsigned char revision = 1;
-const  unsigned char build    = 18;   // increase that with each version
+const  unsigned char revision = 0;
+const  unsigned char build    = 1;   // increase that with each version
 
 #ifdef _WINDOWS
-static char *libraryName      = "P.E.Op.S. Soft Driver";
+static char *libraryName      = "TAS Graphics Plugin";
 #else
 #ifndef _SDL
 static char *libraryName      = "P.E.Op.S. SoftX Driver";

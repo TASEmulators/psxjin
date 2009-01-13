@@ -132,7 +132,7 @@ END
 
 IDD_CFGSOFT DIALOGEX 0, 0, 291, 292
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Configure the P.E.Op.S. PSX DirectDraw Soft Renderer..."
+CAPTION "Configure the TAS Graphics Plugin..."
 FONT 8, "MS Sans Serif"
 BEGIN
     PUSHBUTTON      "Select device...",IDC_SELDEV,7,3,60,12
@@ -228,20 +228,20 @@ END
 
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 258, 194
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
-CAPTION "About the P.E.Op.S. PSX DirectDraw Soft Renderer..."
+CAPTION "About the TAS Graphics Plugin..."
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,103,176,50,14
     RTEXT           "Version:",IDC_STATIC,17,6,49,10
     RTEXT           "Coded by:",IDC_STATIC,17,29,49,10
     RTEXT           "Pete's EMail:",IDC_STATIC,17,41,49,10
-    LTEXT           "1.18",IDC_STATIC,69,6,159,10
+    LTEXT           "x.x",IDC_STATIC,69,6,159,10
     LTEXT           "Pete Bernert and the P.E.Op.S. team",IDC_STATIC,69,29,
                     159,10
     LTEXT           "---",IDC_STATIC,69,41,159,10
     LTEXT           "http://www.pbernert.com",IDC_STATIC,82,95,142,10
     RTEXT           "Release date:",IDC_STATIC,17,17,49,10
-    LTEXT           "05/2008",IDC_STATIC,69,17,159,10
+    LTEXT           "x/x/20XX",IDC_STATIC,69,17,159,10
     LTEXT           "The P.E.Op.S. SoftGPU team:",IDC_STATIC,9,82,103,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME | SS_SUNKEN,4,76,
                     249,94
