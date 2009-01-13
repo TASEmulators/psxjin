@@ -1,0 +1,284 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Polish resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PLK)
+#ifdef _WIN32
+LANGUAGE LANG_POLISH, SUBLANG_DEFAULT
+#pragma code_page(1250)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\spuPeopsSound.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Polish resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT DIALOGEX 0, 0, 239, 175
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About the TAS Sound Plugin..."
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,98,155,44,14
+    RTEXT           "Version :",IDC_STATIC,5,5,74,9
+    RTEXT           "Release date :",IDC_STATIC,5,16,74,9
+    RTEXT           "Coded by :",IDC_STATIC,5,27,74,9
+    RTEXT           "Pete's EMail :",IDC_STATIC,5,40,74,9
+    RTEXT           "Pete's homepage :",IDC_STATIC,5,51,74,9
+    LTEXT           "x.x",IDC_STATIC,82,5,154,9
+    LTEXT           "xx/xx/20XX",IDC_STATIC,81,16,154,9
+    LTEXT           "Pete Bernert and the P.E.Op.S. team",IDC_STATIC,81,27,
+                    154,9
+    LTEXT           "BlackDove@addcom.de",IDC_STATIC,81,40,154,9
+    LTEXT           "http://www.pbernert.com",IDC_STATIC,81,51,154,9
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,9,107,218,41,
+                    WS_EX_DLGMODALFRAME
+    RTEXT           "Greetings to:",IDC_STATIC,16,116,45,9
+    LTEXT           "_Demo_,  Null2, Iori, Andy, Ben, Bilgerat, linuzappz and everybody else who is trying to create nice psx emu sounds :)",
+                    IDC_STATIC,65,116,153,27
+    RTEXT           "P.E.Op.S. homepage :",IDC_STATIC,5,91,74,9
+    LTEXT           "https://sourceforge.net/projects/peops/",IDC_STATIC,81,
+                    91,154,9
+    RTEXT           "linuzappz :",IDC_STATIC,10,63,69,10
+    LTEXT           "http://www.pcsx.net",IDC_STATIC,81,63,142,10
+    RTEXT           "kode54 :",IDC_STATIC,10,75,69,10
+    LTEXT           "http://home.earthlink.net/~kode54/",IDC_STATIC,81,75,
+                    142,10
+END
+
+IDD_CFGDLG DIALOG DISCARDABLE  0, 0, 253, 229
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configure the TAS Sound Plugin..."
+FONT 8, "MS Sans Serif"
+BEGIN
+    COMBOBOX        IDC_USETIMER,54,14,186,44,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_VOLUME,54,30,186,62,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_USEREVERB,54,46,186,44,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_INTERPOL,54,62,186,62,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Enable XA playing",IDC_ENABXA,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFT | BS_VCENTER | WS_TABSTOP,14,97,72,10
+    CONTROL         "Change XA speed, if it is played too fast (more cpu power needed)",
+                    IDC_XAPITCH,"Button",BS_AUTOCHECKBOX | BS_LEFT | 
+                    BS_VCENTER | WS_TABSTOP,14,109,225,10
+    CONTROL         "SPU IRQ - wait for CPU action (Valkyrie Profile && MGS + SPUasync)",
+                    IDC_IRQWAIT,"Button",BS_AUTOCHECKBOX | BS_LEFT | 
+                    BS_VCENTER | WS_TABSTOP,14,140,231,10
+    CONTROL         "SPU IRQ - handle irqs in decoded sound buffer areas",
+                    IDC_IRQDECODE,"Button",BS_AUTOCHECKBOX | BS_LEFT | 
+                    BS_VCENTER | WS_TABSTOP,14,152,231,10
+    CONTROL         "Mono sound mode (for slower PCs/sound cards)",
+                    IDC_DISSTEREO,"Button",BS_AUTOCHECKBOX | BS_LEFT | 
+                    BS_VCENTER | WS_TABSTOP,14,164,229,10
+    CONTROL         "Enable sound recording window",IDC_RECORDMODE,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFT | BS_VCENTER | WS_TABSTOP,14,
+                    176,229,10
+    CONTROL         "Movie sync mode (prevent known causes of desyncs)",IDC_NODESYNCMODE,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFT | BS_VCENTER | WS_TABSTOP,14,
+                    188,229,10
+    DEFPUSHBUTTON   "OK",IDOK,51,210,45,14
+    PUSHBUTTON      "Cancel",IDCANCEL,157,210,45,14
+    RTEXT           "Volume:",IDC_STATIC,22,32,29,10,SS_CENTERIMAGE
+    GROUPBOX        "General settings",IDC_STATIC,4,2,245,81
+    GROUPBOX        "XA music",IDC_STATIC,4,85,245,41
+    GROUPBOX        "Misc",IDC_STATIC,4,128,245,77
+    RTEXT           "Reverb:",IDC_STATIC,22,48,29,10,SS_CENTERIMAGE
+    RTEXT           "Mode:",IDC_STATIC,20,16,29,10,SS_CENTERIMAGE
+    RTEXT           "Interpolation:",IDC_STATIC,8,64,43,10,SS_CENTERIMAGE
+END
+
+IDD_RECORD DIALOG DISCARDABLE  0, 0, 248, 18
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "P.E.Op.S. sound recording"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Filename:",IDC_STATIC,3,5,33,9
+    EDITTEXT        IDC_WAVFILE,41,3,134,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Start recording",IDC_RECORD,180,3,61,12
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO MOVEABLE PURE 
+BEGIN
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+
+    IDD_CFGDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 246
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 222
+    END
+
+    IDD_RECORD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 241
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 11
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,9,0
+ PRODUCTVERSION 1,0,9,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "P.E.Op.S. DSound PSX SPU Audio driver - coded by Pete Bernert and the P.E.Op.S. team\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "spuPeopsSound\0"
+            VALUE "FileVersion", "1, 0, 9, 0\0"
+            VALUE "InternalName", "spuPeopsSound\0"
+            VALUE "LegalCopyright", "GPL 2002\0"
+            VALUE "LegalTrademarks", "GPL 2002\0"
+            VALUE "OriginalFilename", "spuPeopsSound.DLL\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "spuPeopsSound\0"
+            VALUE "ProductVersion", "1, 0, 9, 0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+//#include "res\spuPeopsSound.rc2"  // non-Microsoft Visual C++ edited resources
+//#include "afxres.rc"         // Standard components
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
