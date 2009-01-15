@@ -241,7 +241,7 @@ BEGIN
     LTEXT           "---",IDC_STATIC,69,41,159,10
     LTEXT           "http://www.pbernert.com",IDC_STATIC,82,95,142,10
     RTEXT           "Release date:",IDC_STATIC,17,17,49,10
-    LTEXT           "x/x/20XX",IDC_STATIC,69,17,159,10
+    LTEXT           "xx/xx/20XX",IDC_STATIC,69,17,159,10
     LTEXT           "The P.E.Op.S. SoftGPU team:",IDC_STATIC,9,82,103,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME | SS_SUNKEN,4,76,
                     249,94

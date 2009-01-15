@@ -501,7 +501,7 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 			Static_SetText(GetDlgItem(hW, IDC_FIRSTCONTROLLER), _("First Controller"));
 			Static_SetText(GetDlgItem(hW, IDC_SECONDCONTROLLER), _("Second Controller"));
 			Static_SetText(GetDlgItem(hW, IDC_SOUND), _("Sound"));
-			Static_SetText(GetDlgItem(hW, IDC_CDROM), _("Cdrom"));
+			Static_SetText(GetDlgItem(hW, IDC_CDROM), _("CD-ROM"));
 			Static_SetText(GetDlgItem(hW, IDC_BIOS), _("Bios"));
 			Button_SetText(GetDlgItem(hW, IDC_BIOSDIR), _("Set Bios Directory"));
 			Button_SetText(GetDlgItem(hW, IDC_PLUGINSDIR), _("Set Plugins Directory"));

@@ -392,7 +392,7 @@ BEGIN
     GROUPBOX        "Misc",IDC_MISCOPT,5,35,220,38
     CONTROL         "Enable Console Output",IDC_PSXOUT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,45,91,10
-    CONTROL         "Black & White Movies",IDC_MDEC,"Button",
+    CONTROL         "Black && White Movies",IDC_MDEC,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,58,85,10
     CONTROL         "Disable Xa Decoding",IDC_XA,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,121,45,87,10
@@ -538,7 +538,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,260,140,50,14
     RTEXT           "Graphics",IDC_GRAPHICS,50,0,41,10,SS_CENTERIMAGE
     RTEXT           "Sound",IDC_SOUND,200,0,43,10,SS_CENTERIMAGE
-    RTEXT           "Cdrom",IDC_CDROM,70,90,20,10,SS_CENTERIMAGE
+    RTEXT           "CD-ROM",IDC_CDROM,63,90,30,10,SS_CENTERIMAGE
     RTEXT           "Bios",IDC_BIOS,225,90,15,10,SS_CENTERIMAGE
     COMBOBOX        IDC_LISTPAD1,10,55,145,74,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP

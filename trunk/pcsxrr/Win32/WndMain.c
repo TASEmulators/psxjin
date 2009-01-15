@@ -1133,21 +1133,21 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Button_SetCheck(GetDlgItem(hW,IDC_MDEC),    Config.Mdec);
 			Button_SetCheck(GetDlgItem(hW,IDC_QKEYS),   Config.QKeys);
 			Button_SetCheck(GetDlgItem(hW,IDC_CDDA),    Config.Cdda);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_PSXAUTO), Config.PsxAuto);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.Pause);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_PSXOUT),  Config.PsxOut);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_SPUIRQ),  Config.SpuIrq);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_RCNTFIX), Config.RCntFix);
-	   		Button_SetCheck(GetDlgItem(hW,IDC_VSYNCWA), Config.VSyncWA);
-	   		ComboBox_AddString(GetDlgItem(hW,IDC_PSXTYPES),"NTSC");
-	   		ComboBox_AddString(GetDlgItem(hW,IDC_PSXTYPES),"PAL");
-	   		ComboBox_SetCurSel(GetDlgItem(hW,IDC_PSXTYPES),Config.PsxType);
+			Button_SetCheck(GetDlgItem(hW,IDC_PSXAUTO), Config.PsxAuto);
+			Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
+			Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.Pause);
+			Button_SetCheck(GetDlgItem(hW,IDC_PSXOUT),  Config.PsxOut);
+			Button_SetCheck(GetDlgItem(hW,IDC_SPUIRQ),  Config.SpuIrq);
+			Button_SetCheck(GetDlgItem(hW,IDC_RCNTFIX), Config.RCntFix);
+			Button_SetCheck(GetDlgItem(hW,IDC_VSYNCWA), Config.VSyncWA);
+			ComboBox_AddString(GetDlgItem(hW,IDC_PSXTYPES),"NTSC");
+			ComboBox_AddString(GetDlgItem(hW,IDC_PSXTYPES),"PAL");
+			ComboBox_SetCurSel(GetDlgItem(hW,IDC_PSXTYPES),Config.PsxType);
 
 		case WM_COMMAND: {
-     		switch (LOWORD(wParam)) {
-       			case IDCANCEL: EndDialog(hW,FALSE); return TRUE;
-        		case IDOK:
+			switch (LOWORD(wParam)) {
+				case IDCANCEL: EndDialog(hW,FALSE); return TRUE;
+				case IDOK:
 					tmp = ComboBox_GetCurSel(GetDlgItem(hW,IDC_PSXTYPES));
 					if (tmp == 0) Config.PsxType = 0;
 					else Config.PsxType = 1;
