@@ -161,6 +161,7 @@ struct MovieType {
 	unsigned long memoryCard1Offset;     //memcard1 chunk location in file
 	unsigned long memoryCard2Offset;     //memcard2 chunk location in file
 	unsigned long cheatListOffset;       //cheat list chunk location in file
+	unsigned long cdIdsOffset;           //cdIds chunk location in file
 	unsigned long inputOffset;           //input chunk location in file
 	unsigned long memoryCard1Size;       //memcard1 file size
 	unsigned long memoryCard2Size;       //memcard2 file size
@@ -171,6 +172,7 @@ struct MovieType {
 	char* movieFilename;                 //full path file name (ex:"c:/pcsx/movies/movie.pxm")
 	char bytesPerFrame;                  //size of each frame in bytes
 	char palTiming;                      //PAL mode (50 FPS instead of 60)
+	char currentCdrom;                   //in which CD number are we at now?
 	char CdromCount;                     //how many different cds are used in the movie
 	char CdromIds[MOVIE_MAX_CDROM_IDS];  //every CD ID used in the movie
 	uint8* inputBuffer;                  //full movie input buffer

@@ -243,9 +243,8 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 		SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_SETCURSEL, i-1, 0);
 		SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
 
-		if (i>1) {
+		if (i>1)
 			DisplayReplayProperties(hDlg, 0);
-		}
 
 		SetFocus(GetDlgItem(hDlg, IDC_CHOOSE_LIST));
 		return FALSE;
@@ -255,17 +254,14 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 		if (HIWORD(wParam) == CBN_SELCHANGE) {
 			LONG lCount = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCOUNT, 0, 0);
 			LONG lIndex = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCURSEL, 0, 0);
-			if (lIndex != CB_ERR) {
+			if (lIndex != CB_ERR)
 				DisplayReplayProperties(hDlg, (lIndex == lCount - 1));		// Selecting "Browse..." will clear the replay properties display
-			}
 		} else if (HIWORD(wParam) == CBN_CLOSEUP) {
 			LONG lCount = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCOUNT, 0, 0);
 			LONG lIndex = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCURSEL, 0, 0);
 			if (lIndex != CB_ERR) {
-				if (lIndex == lCount - 1) {
-					// send an OK notification to open the file browser
+				if (lIndex == lCount - 1) // send an OK notification to open the file browser
 					SendMessage(hDlg, WM_COMMAND, (WPARAM)IDOK, 0);
-				}
 			}
 		} else {
 			int wID = LOWORD(wParam);
@@ -499,6 +495,11 @@ int MOV_W32_StartRecordDialog()
 
 static BOOL CALLBACK CdChangeDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+	if (Msg == WM_INITDIALOG && Movie.mode == 2) {
+		char tempText[25];
+		sprintf(tempText, "Please insert Disc %d.", Movie.currentCdrom);
+		SetDlgItemTextA(hDlg, IDC_FILENAME, tempText);
+	}
 	if (Msg == WM_COMMAND && LOWORD(wParam) == IDOK) {
 		EndDialog(hDlg, 1);
 		return TRUE;
