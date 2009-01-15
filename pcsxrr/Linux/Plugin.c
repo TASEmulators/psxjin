@@ -26,7 +26,6 @@
 #include "Linux.h"
 #include "plugins.h"
 #include "Spu.h"
-#include "NoPic.h"
 
 void OnFile_Exit();
 
@@ -60,9 +59,6 @@ void gpuShowPic() {
 			gzseek(f, 32, SEEK_SET); // skip header
 			gzread(f, pMem, 128*96*3);
 			gzclose(f);
-		} else {
-			memcpy(pMem, NoPic_Image.pixel_data, 128*96*3);
-			DrawNumBorPic(pMem, StatesC+1);
 		}
 		GPU_showScreenPic(pMem);
 
