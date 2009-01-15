@@ -149,6 +149,9 @@ int GetCdromFile(u8 *mdir, u8 *time, s8 *filename) {
 	u8 *buf;
 	int i;
 
+	// only try to scan if a filename is given
+	if(!strlen(filename)) return -1;
+
 	i = 0;
 	while (i < 4096) {
 		dir = (struct iso_directory_record*) &mdir[i];
@@ -183,7 +186,6 @@ int LoadCdrom() {
 	u8 time[4],*buf;
 	u8 mdir[4096];
 	s8 exename[256];
-	int i;
 
 	if (!Config.HLE) {
 		psxRegs.pc = psxRegs.GPR.n.ra;
@@ -214,16 +216,13 @@ int LoadCdrom() {
 			sscanf((char*)buf+12, "BOOT = cdrom:%s", exename);
 			if (GetCdromFile(mdir, time, exename) == -1) {
 				char *ptr = strstr((char*)buf+12, "cdrom:");
-				for (i=0; i<32; i++) {
-					if (ptr[i] == ' ') continue;
-					if (ptr[i] == '\\') continue;
+				if(ptr) {
+					strcpy(exename, ptr);
+					if (GetCdromFile(mdir, time, exename) == -1)
+						return -1;
 				}
-				strcpy(exename, ptr);
-				if (GetCdromFile(mdir, time, exename) == -1)
-					return -1;
 			}
 		}
-
 		READTRACK();
 	}
 

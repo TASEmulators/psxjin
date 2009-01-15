@@ -294,9 +294,17 @@ void mdec1Interrupt() {
 	CDR_LOG("mdec1Interrupt\n");
 #endif
 	if (HW_DMA1_CHCR & 0x01000000) {
-		psxRegs.interrupt|= 0x02000000;
-		psxRegs.intCycle[5+24+1]*= 8;
-		psxRegs.intCycle[5+24] = psxRegs.cycle;
+		// Set a fixed value totaly arbitrarie
+		// another sound value is PSXCLK / 60 or
+		// PSXCLK / 50 since the bug happend
+		// at end of frame. PSXCLK / 1000 seems
+		// good for FF9.
+		// (for FF9 need < ~28000)
+		// CAUTION: commented interrupt-handling may lead to problems, keep an eye ;-)
+		MDECOUTDMA_INT(PSXCLK / 1000);
+//		psxRegs.interrupt|= 0x02000000;
+//		psxRegs.intCycle[5+24+1]*= 8;
+//		psxRegs.intCycle[5+24] = psxRegs.cycle;
 		HW_DMA1_CHCR&= ~0x01000000;
 		DMA_INTERRUPT(1);
 	} else {
