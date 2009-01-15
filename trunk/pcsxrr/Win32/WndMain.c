@@ -1128,27 +1128,6 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 	switch(uMsg) {
 		case WM_INITDIALOG:
-			SetWindowText(hW, _("Cpu Config"));
-
-			Button_SetText(GetDlgItem(hW,IDOK),        _("OK"));
-			Button_SetText(GetDlgItem(hW,IDCANCEL),    _("Cancel"));
-
-			Button_SetText(GetDlgItem(hW,IDC_XA),      _("Disable Xa Decoding"));
-			Button_SetText(GetDlgItem(hW,IDC_SIO),     _("Sio Irq Always Enabled"));
-			Button_SetText(GetDlgItem(hW,IDC_MDEC),    _("Black && White Movies"));
-			Button_SetText(GetDlgItem(hW,IDC_QKEYS),   _("Disable Misc Quick Keys (F5-F8)"));
-			Button_SetText(GetDlgItem(hW,IDC_CDDA),    _("Disable Cd audio"));
-			Button_SetText(GetDlgItem(hW,IDC_PSXAUTO), _("Autodetect"));
-			Button_SetText(GetDlgItem(hW,IDC_CPU),     _("Enable Interpreter Cpu"));
-			Button_SetText(GetDlgItem(hW,IDC_PAUSE),   _("Pause After Playback"));
-			Button_SetText(GetDlgItem(hW,IDC_PSXOUT),  _("Enable Console Output"));
-			Button_SetText(GetDlgItem(hW,IDC_SPUIRQ),  _("Spu Irq Always Enabled"));
-			Button_SetText(GetDlgItem(hW,IDC_RCNTFIX), _("Parasite Eve 2, Vandal Hearts 1/2 Fix"));
-			Button_SetText(GetDlgItem(hW,IDC_VSYNCWA), _("InuYasha Sengoku Battle Fix"));
-
-			Static_SetText(GetDlgItem(hW,IDC_MISCOPT), _("Options"));
-			Static_SetText(GetDlgItem(hW,IDC_SELPSX),  _("Psx System Type"));
-
 			Button_SetCheck(GetDlgItem(hW,IDC_XA),      Config.Xa);
 			Button_SetCheck(GetDlgItem(hW,IDC_SIO),     Config.Sio);
 			Button_SetCheck(GetDlgItem(hW,IDC_MDEC),    Config.Mdec);
@@ -1377,7 +1356,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
 
 	ADDSUBMENU(0, _("&Configuration"));
-	ADDMENUITEM(0, _("C&PU"), ID_CONFIGURATION_CPU);
+	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
 	ADDSEPARATOR(0);
