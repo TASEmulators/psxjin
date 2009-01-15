@@ -64,6 +64,7 @@ int LoadConfig() {
 	QueryKeyV(sizeof(Conf->QKeys),   "QKeys",   &Conf->QKeys);
 	QueryKeyV(sizeof(Conf->Cdda),    "Cdda",    &Conf->Cdda);
 	QueryKeyV(sizeof(Conf->Cpu),     "Cpu",     &Conf->Cpu);
+	QueryKeyV(sizeof(Conf->Pause),   "Pause",   &Conf->Pause);
 	QueryKeyV(sizeof(Conf->PsxOut),  "PsxOut",  &Conf->PsxOut);
 	QueryKeyV(sizeof(Conf->SpuIrq),  "SpuIrq",  &Conf->SpuIrq);
 	QueryKeyV(sizeof(Conf->RCntFix), "RCntFix", &Conf->RCntFix);
@@ -123,6 +124,7 @@ void SaveConfig() {
 	SetKeyV("QKeys",   &Conf->QKeys,   sizeof(Conf->QKeys),   REG_DWORD);
 	SetKeyV("Cdda",    &Conf->Cdda,    sizeof(Conf->Cdda),    REG_DWORD);
 	SetKeyV("Cpu",     &Conf->Cpu,     sizeof(Conf->Cpu),     REG_DWORD);
+	SetKeyV("Pause",   &Conf->Pause,   sizeof(Conf->Pause),   REG_DWORD);
 	SetKeyV("PsxOut",  &Conf->PsxOut,  sizeof(Conf->PsxOut),  REG_DWORD);
 	SetKeyV("SpuIrq",  &Conf->SpuIrq,  sizeof(Conf->SpuIrq),  REG_DWORD);
 	SetKeyV("RCntFix", &Conf->RCntFix, sizeof(Conf->RCntFix), REG_DWORD);

@@ -1140,6 +1140,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Button_SetText(GetDlgItem(hW,IDC_CDDA),    _("Disable Cd audio"));
 			Button_SetText(GetDlgItem(hW,IDC_PSXAUTO), _("Autodetect"));
 			Button_SetText(GetDlgItem(hW,IDC_CPU),     _("Enable Interpreter Cpu"));
+			Button_SetText(GetDlgItem(hW,IDC_PAUSE),   _("Pause After Playback"));
 			Button_SetText(GetDlgItem(hW,IDC_PSXOUT),  _("Enable Console Output"));
 			Button_SetText(GetDlgItem(hW,IDC_SPUIRQ),  _("Spu Irq Always Enabled"));
 			Button_SetText(GetDlgItem(hW,IDC_RCNTFIX), _("Parasite Eve 2, Vandal Hearts 1/2 Fix"));
@@ -1155,6 +1156,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Button_SetCheck(GetDlgItem(hW,IDC_CDDA),    Config.Cdda);
 	   		Button_SetCheck(GetDlgItem(hW,IDC_PSXAUTO), Config.PsxAuto);
 	   		Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
+	   		Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.Pause);
 	   		Button_SetCheck(GetDlgItem(hW,IDC_PSXOUT),  Config.PsxOut);
 	   		Button_SetCheck(GetDlgItem(hW,IDC_SPUIRQ),  Config.SpuIrq);
 	   		Button_SetCheck(GetDlgItem(hW,IDC_RCNTFIX), Config.RCntFix);
@@ -1177,6 +1179,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 					Config.QKeys   = Button_GetCheck(GetDlgItem(hW,IDC_QKEYS));
 					Config.Cdda    = Button_GetCheck(GetDlgItem(hW,IDC_CDDA));
 					Config.PsxAuto = Button_GetCheck(GetDlgItem(hW,IDC_PSXAUTO));
+					Config.Pause   = Button_GetCheck(GetDlgItem(hW,IDC_PAUSE));
 					tmp = Config.Cpu;
 					Config.Cpu     = Button_GetCheck(GetDlgItem(hW,IDC_CPU));
 					if (tmp != Config.Cpu) {

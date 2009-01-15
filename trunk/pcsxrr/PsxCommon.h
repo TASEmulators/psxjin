@@ -120,6 +120,7 @@ typedef struct {
 	long RCntFix;
 	long UseNet;
 	long VSyncWA;
+	long Pause;
 } PcsxConfig;
 
 PcsxConfig Config;

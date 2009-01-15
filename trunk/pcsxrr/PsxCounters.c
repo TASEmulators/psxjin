@@ -146,7 +146,7 @@ if (flagGPUchain == 1) {
 // handle movie end while in replay mode
 if (Movie.mode == 2) {
 	// pause at last movie frame
-	if (Movie.currentFrame==Movie.totalFrames)
+	if (Movie.currentFrame==Movie.totalFrames && Config.Pause)
 		flagDontPause = 0;
 	// stop if we're beyond last frame
 	if (Movie.currentFrame>Movie.totalFrames) {

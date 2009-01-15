@@ -275,6 +275,7 @@
 #define IDC_USECHEATS                   1267
 #define IDC_USEDCDROM                   1268
 #define IDC_CURRENTCDROM                1269
+#define IDC_PAUSE                       1270
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
