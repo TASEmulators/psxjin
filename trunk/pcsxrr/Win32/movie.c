@@ -496,9 +496,11 @@ int MOV_W32_StartRecordDialog()
 static BOOL CALLBACK CdChangeDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	if (Msg == WM_INITDIALOG && Movie.mode == 2) {
-		char tempText[25];
-		sprintf(tempText, "Please insert Disc %d.", Movie.currentCdrom);
-		SetDlgItemTextA(hDlg, IDC_FILENAME, tempText);
+		char tmpText[32];
+		char tmpCdromId[9];
+		memcpy(tmpCdromId,Movie.CdromIds+((Movie.currentCdrom-1)*9),9);
+		sprintf(tmpText, "Please insert Disc %d (%9.9s).", Movie.currentCdrom, tmpCdromId);
+		SetDlgItemTextA(hDlg, IDC_FILENAME, tmpText);
 	}
 	if (Msg == WM_COMMAND && LOWORD(wParam) == IDOK) {
 		EndDialog(hDlg, 1);

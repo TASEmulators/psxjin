@@ -177,14 +177,14 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,219,95,50,14
 END
 
-IDD_CDCHANGE DIALOG DISCARDABLE  0, 0, 107, 46
+IDD_CDCHANGE DIALOG DISCARDABLE  0, 0, 129, 46
 STYLE DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION |
     WS_SYSMENU
 CAPTION "Record input"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "Please, insert the next disc.",IDC_FILENAME,10,10,105,8
-    DEFPUSHBUTTON   "OK",IDOK,29,25,50,14
+    LTEXT           "Please, insert the next disc.",IDC_FILENAME,10,10,127,8
+    DEFPUSHBUTTON   "OK",IDOK,39,25,50,14
 END
 
 MEMWATCH DIALOGEX 0, 0, 262, 247
@@ -400,8 +400,6 @@ BEGIN
     COMBOBOX        IDC_PSXTYPES,105,126,53,50,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Select Psx System Type",IDC_SELPSX,5,110,220,35
-//    CONTROL         "Disable Misc Quick Keys (F5-F8)",IDC_QKEYS,"Button",
-//                    BS_AUTOCHECKBOX | WS_TABSTOP,105,60,118,10
     CONTROL         "Disable Cd Audio",IDC_CDDA,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,105,15,70,10
     CONTROL         "Enable Console Output",IDC_PSXOUT,"Button",
