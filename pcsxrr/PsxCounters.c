@@ -151,7 +151,7 @@ if (Movie.mode == 2) {
 	// stop if we're beyond last frame
 	if (Movie.currentFrame>Movie.totalFrames) {
 		GPU_displayText("*PCSX*: Movie End");
-		Movie.mode = 0;
+		MOV_StopMovie();
 	}
 }
 

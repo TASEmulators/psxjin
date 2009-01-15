@@ -100,6 +100,8 @@ typedef struct {
 	char Net[256];
 	char Mcd1[256];
 	char Mcd2[256];
+	char OldMcd1[256];
+	char OldMcd2[256];
 	char Bios[256];
 	char BiosDir[256];
 	char PluginsDir[256];
