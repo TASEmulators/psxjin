@@ -77,7 +77,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 
 	tempMovie->movieFilename = szChoice;
 
-	FILE* fd = fopen(tempMovie->movieFilename, "r+b");
+	FILE* fd = fopen(tempMovie->movieFilename, "rb");
 	if (!fd)
 		return 0;
 
@@ -113,6 +113,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	fread(&tempMovie->memoryCard1Offset, 1, 4, fd);
 	fread(&tempMovie->memoryCard2Offset, 1, 4, fd);
 	fread(&tempMovie->cheatListOffset, 1, 4, fd);
+	fread(&tempMovie->cdIdsOffset, 1, 4, fd);
 	fread(&tempMovie->inputOffset, 1, 4, fd);
 
 	// read metadata
@@ -131,6 +132,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	}
 	tempMovie->authorInfo[i] = '\0';
 
+	fseek(fd, tempMovie->cdIdsOffset, SEEK_SET);
 	// read CDs IDs information
 	fread(&tempMovie->CdromCount, 1, 1, fd);                 //total CDs used
 	int nCdidsLen = tempMovie->CdromCount*9;                 //CDs IDs
@@ -153,6 +155,22 @@ void MOV_WriteMovieFile()
 	fseek(fpMovie, 16, SEEK_SET);
 	fwrite(&Movie.currentFrame, 1, 4, fpMovie);  //total frames
 	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); //rerecord count
+	fseek(fpMovie, Movie.cdIdsOffset, SEEK_SET);
+	fwrite(&Movie.CdromCount, 1, 1, fpMovie);    //total CDs used
+	int cdidsLen = Movie.CdromCount*9;
+	if (cdidsLen > 0) {
+		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
+		int i;
+		for(i=0; i<cdidsLen; ++i) {
+			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
+			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
+		}
+		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
+		free(cdidsbuf);
+	}
+	fseek(fpMovie, 44, SEEK_SET);
+	Movie.inputOffset = Movie.cdIdsOffset+1+(9*Movie.CdromCount);
+	fwrite(&Movie.inputOffset, 1, 4, fpMovie);   //input offset
 	Movie.totalFrames=Movie.currentFrame; //used when toggling read-only mode
 	fseek(fpMovie, Movie.inputOffset, SEEK_SET);
 	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames+1), fpMovie);
@@ -189,6 +207,7 @@ static void WriteMovieHeader()
 	fwrite(&empty, 1, 4, fpMovie);                 //memory card 1 offset
 	fwrite(&empty, 1, 4, fpMovie);                 //memory card 2 offset
 	fwrite(&empty, 1, 4, fpMovie);                 //cheat list offset
+	fwrite(&empty, 1, 4, fpMovie);                 //cdIds offset
 	fwrite(&empty, 1, 4, fpMovie);                 //input offset
 
 	int authLen = strlen(Movie.authorInfo);
@@ -202,19 +221,6 @@ static void WriteMovieHeader()
 		}
 		fwrite(authbuf, 1, authLen, fpMovie);        //author info
 		free(authbuf);
-	}
-
-	fwrite(&Movie.CdromCount, 1, 1, fpMovie);      //total CDs used
-	int cdidsLen = Movie.CdromCount*9;
-	if (cdidsLen > 0) {
-		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
-		int i;
-		for(i=0; i<cdidsLen; ++i) {
-			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
-			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
-		}
-		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
-		free(cdidsbuf);
 	}
 
 	Movie.saveStateOffset = ftell(fpMovie);        //get savestate offset
@@ -263,6 +269,20 @@ static void WriteMovieHeader()
 		fseek(fpMovie, 0, SEEK_END);
 	}
 
+	Movie.cdIdsOffset = ftell(fpMovie);            //get cdIds offset
+	fwrite(&Movie.CdromCount, 1, 1, fpMovie);      //total CDs used
+	int cdidsLen = Movie.CdromCount*9;
+	if (cdidsLen > 0) {
+		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
+		int i;
+		for(i=0; i<cdidsLen; ++i) {
+			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
+			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
+		}
+		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
+		free(cdidsbuf);
+	}
+
 	Movie.inputOffset = ftell(fpMovie);            //get input offset
 
 	fseek (fpMovie, 24, SEEK_SET);
@@ -270,6 +290,7 @@ static void WriteMovieHeader()
 	fwrite(&Movie.memoryCard1Offset, 1,4,fpMovie); //write memory card 1 offset
 	fwrite(&Movie.memoryCard2Offset, 1,4,fpMovie); //write memory card 2 offset
 	fwrite(&Movie.cheatListOffset, 1, 4, fpMovie); //write cheat list offset
+	fwrite(&Movie.cdIdsOffset, 1, 4, fpMovie);     //write cd ids offset
 	fwrite(&Movie.inputOffset, 1, 4, fpMovie);     //write input offset
 	fseek(fpMovie, 0, SEEK_END);
 }
@@ -342,6 +363,7 @@ void MOV_StartMovie(int mode)
 	Movie.mode = mode;
 	Movie.currentFrame = 0;
 	Movie.lagCounter = 0;
+	Movie.currentCdrom = 1;
 	cdOpenCase = 0;
 	cheatsEnabled = 0;
 	Config.Sio = 0;
@@ -483,6 +505,8 @@ void MOV_ProcessControlFlags() {
 	if (MovieControl.cdCase) {
 		cdOpenCase ^= 1;
 		if (cdOpenCase) {
+			Movie.currentCdrom++;
+			Movie.CdromCount++;
 			#ifdef WIN32
 				MOV_W32_StartCdChangeDialog();
 			#else
@@ -490,7 +514,8 @@ void MOV_ProcessControlFlags() {
 			#endif
 		}
 		else {
-			Movie.CdromCount++;
+			CheckCdrom();
+			sprintf(Movie.CdromIds, "%s%9.9s", Movie.CdromIds,CdromId);
 		}
 	}
 	if (MovieControl.cheats)
@@ -536,6 +561,7 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Config.SpuIrq);
 	gzfreezel(&Movie.lastPad1);
 	gzfreezel(&Movie.lastPad2);
+	gzfreezel(&Movie.currentCdrom);
 	gzfreezel(&Movie.CdromCount);
 	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
 	gzfreezel(&bufSize);
