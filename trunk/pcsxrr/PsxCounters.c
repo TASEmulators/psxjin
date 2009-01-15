@@ -208,8 +208,8 @@ GPU_setcurrentmode(modeFlags);
 
 // update WIN32 tools
 #ifdef WIN32
-	UpdateMemWatch();
 	PCSXApplyCheats();
+	UpdateMemWatch();
 //		UpdateMemSearch();
 #endif
 
