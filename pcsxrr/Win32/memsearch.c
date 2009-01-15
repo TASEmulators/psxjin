@@ -485,10 +485,14 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 							PCSXAddCheat(new_cheat->enabled, new_cheat->saved_val, new_cheat->address +p, (new_cheat->new_val>>(8*p)));
 							strcpy(Cheat.c[Cheat.num_cheats-1].name, new_cheat->name);
 						}
-//						PCSXAddCheat(new_cheat->enabled,new_cheat->saved_val,new_cheat->address,new_cheat->new_val);
-//						strcpy(Cheat.c[Cheat.num_cheats-1].name,new_cheat->name);
 						ret=0;
 					}
+					if (!cheatsEnabled) {
+						cheatsEnabled = 1;
+						GPU_displayText(_("*PCSX*: Cheats Enabled"));
+					}
+					PCSXApplyCheats();
+					UpdateMemWatch();
 				}
 
 			case IDCANCEL:

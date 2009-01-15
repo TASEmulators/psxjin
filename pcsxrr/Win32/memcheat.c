@@ -595,6 +595,11 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 					ListView_SetCheckState(GetDlgItem(hwndDlg,IDC_CHEAT_LIST), curr_idx, Cheat.c[counter].enabled);
 				}
+				if (!cheatsEnabled) {
+					cheatsEnabled = 1;
+					GPU_displayText(_("*PCSX*: Cheats Enabled"));
+				}
+				PCSXApplyCheats();
 				UpdateMemWatch();
 				break;
 			}
@@ -853,11 +858,12 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					}
 				}
 
-				UpdateMemWatch();
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
 					GPU_displayText(_("*PCSX*: Cheats Enabled"));
 				}
+				PCSXApplyCheats();
+				UpdateMemWatch();
 			}
 
 			case IDCANCEL:
