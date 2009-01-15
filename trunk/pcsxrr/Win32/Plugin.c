@@ -181,6 +181,13 @@ void PADhandleKey(int key) {
 		flagDontPause=2;
 	}
 
+	if(key == EmuCommandTable[EMUCMD_VSYNCADVANCE].key
+	&& modifiers == EmuCommandTable[EMUCMD_VSYNCADVANCE].keymod)
+	{
+		flagDontPause=2;
+		flagGPUchain=1;
+	}
+
 	if(key == EmuCommandTable[EMUCMD_RWTOGGLE].key
 	&& modifiers == EmuCommandTable[EMUCMD_RWTOGGLE].keymod)
 	{
@@ -317,6 +324,17 @@ void PADhandleKey(int key) {
 			WIN32_StartMovieReplay("");
 		else
 			GPU_displayText("*PCSX*: error: Movie Already Active");
+	}
+
+	if(key == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].key
+	&& modifiers == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].keymod)
+	{
+		if (Movie.mode) {
+			MOV_StopMovie();
+			WIN32_StartMovieReplay(Movie.movieFilename);
+		}
+		else
+			GPU_displayText("*PCSX*: error: No Movie To Play");
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key

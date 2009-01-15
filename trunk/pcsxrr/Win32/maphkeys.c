@@ -55,6 +55,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ VK_F5,           VK_CONTROL,  "Save Current State", },
 	{ 'N',             VK_CONTROL,  "Start Recording", },
 	{ 'R',             VK_CONTROL,  "Start Playback", },
+	{ 'R',             VK_SHIFT,    "Play Movie From Beginning", },
 	{ 'T',             VK_CONTROL,  "Stop Movie", },
 	{ 'M',             VK_CONTROL,  "Memory Cards", },
 	{ 'C',             VK_CONTROL,  "Cheat Editor", },
@@ -65,11 +66,12 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'D',             VK_CONTROL,  "Configure CD-ROM", },
 	{ 'P',             VK_CONTROL,  "Configure Controllers", },
 	{ 'X',             VK_CONTROL,  "Configure CPU", },
-	{ 0,               0,           "Cheats Enable/Disable", },
+	{ 'C',             VK_SHIFT,    "Cheats Enable/Disable", },
 	{ 'O',             VK_CONTROL,  "CD Case Open/Close", },
 	{ 0,               0,           "SIO IRQ Enable/Disable", },
 	{ 0,               0,           "SPU IRQ Enable/Disable", },
-	{ VK_F3,           VK_CONTROL,  "Reset", }
+	{ VK_F3,           VK_CONTROL,  "Reset", },
+	{ 0,               0,           "VSync Advance", }
 };
 static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;
