@@ -5,6 +5,7 @@
 #include "PsxCommon.h"
 #include "movie.h"
 #include "cheat.h"
+#include "Sio.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -384,6 +385,7 @@ void MOV_StopMovie()
 	}
 	Movie.mode = 0;
 	fpMovie = NULL;
+	SIO_UnsetTempMemoryCards();
 }
 
 static inline uint8 JoyRead8()

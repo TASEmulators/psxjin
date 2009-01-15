@@ -635,6 +635,25 @@ int sioFreeze(gzFile f, int Mode) {
 	return 0;
 }
 
+static void SetTempMemoryCard(char slot) {
+	if (slot == 1) {
+		strcpy(Config.OldMcd1, Config.Mcd1);
+		strcpy(Config.Mcd1, "memcards\\movie001.tmp");
+	}
+	else {
+		strcpy(Config.OldMcd2, Config.Mcd2);
+		strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+	}
+}
+
+void SIO_UnsetTempMemoryCards() {
+	remove("memcards\\movie001.tmp");
+	remove("memcards\\movie002.tmp");
+	strcpy(Config.Mcd1, Config.OldMcd1);
+	strcpy(Config.Mcd2, Config.OldMcd2);
+	LoadMcds(Config.Mcd1, Config.Mcd2);
+}
+
 static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefile) {
 	FILE *infile;
 	gzFile f;
@@ -678,11 +697,11 @@ static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefil
 void SIO_SaveMemoryCardsEmbed(char *file,char slot) {
 	if (slot == 1) {
 		SaveMemoryCardEmbed(Config.Mcd1,"memcards\\movie001.tmp",file);
-		strcpy(Config.Mcd1, "memcards\\movie001.tmp");
+		SetTempMemoryCard(1);
 	}
 	else {
 		SaveMemoryCardEmbed(Config.Mcd2,"memcards\\movie002.tmp",file);
-		strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+		SetTempMemoryCard(2);
 	}
 }
 
@@ -726,15 +745,15 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 void SIO_LoadMemoryCardsEmbed(char *file) {
 	LoadMemoryCardEmbed(file,"memcards\\movie001.tmp",Movie.memoryCard1Offset,Movie.memoryCard2Offset);
 	LoadMemoryCardEmbed(file,"memcards\\movie002.tmp",Movie.memoryCard2Offset,Movie.cheatListOffset);
-	strcpy(Config.Mcd1, "memcards\\movie001.tmp");
-	strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+	SetTempMemoryCard(1);
+	SetTempMemoryCard(2);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 }
 
 void SIO_ClearMemoryCardsEmbed() {
 	remove("memcards\\movie001.tmp");
 	remove("memcards\\movie002.tmp");
-	strcpy(Config.Mcd1, "memcards\\movie001.tmp");
-	strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+	SetTempMemoryCard(1);
+	SetTempMemoryCard(2);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 }
