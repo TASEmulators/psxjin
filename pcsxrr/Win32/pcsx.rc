@@ -406,6 +406,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,105,30,89,10
     CONTROL         "Enable Interpreter Cpu",IDC_CPU,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,105,45,87,10
+    CONTROL         "Pause After Playback",IDC_PAUSE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,105,60,87,10
     CONTROL         "Spu Irq Always Enabled",IDC_SPUIRQ,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,10,45,91,10
     CONTROL         "Parasite Eve 2, Vandal Hearts 1/2 Fix",IDC_RCNTFIX,
