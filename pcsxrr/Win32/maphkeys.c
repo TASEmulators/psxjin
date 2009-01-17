@@ -57,6 +57,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'R',             VK_CONTROL,  "Start Playback", },
 	{ 'R',             VK_SHIFT,    "Play Movie From Beginning", },
 	{ 'T',             VK_CONTROL,  "Stop Movie", },
+	{ 0,               0,           "Start AVI Capture", },
+	{ 0,               0,           "Stop AVI Capture", },
 	{ 'M',             VK_CONTROL,  "Memory Cards", },
 	{ 'C',             VK_CONTROL,  "Cheat Editor", },
 	{ 'F',             VK_CONTROL,  "RAM Search", },

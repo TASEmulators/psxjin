@@ -178,6 +178,7 @@ struct MovieType {
 	char currentCdrom;                   //in which CD number are we at now?
 	char CdromCount;                     //how many different cds are used in the movie
 	char CdromIds[MOVIE_MAX_CDROM_IDS];  //every CD ID used in the movie
+	char capture;                        //0: not capturing an AVI | 1: capturing
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer

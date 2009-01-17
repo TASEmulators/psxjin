@@ -48,6 +48,8 @@
 //*************************************************************************// 
 
 #include "stdafx.h"
+#include <stdio.h>
+#include <direct.h>
 
 #define _IN_KEY
 
@@ -121,15 +123,26 @@ LRESULT CALLBACK KeyWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
       }
      if(wParam==(WPARAM)szGPUKeys[1]) {ShowGpuPic();break;}
 
-     if(wParam==(WPARAM)szGPUKeys[6])
-	  {
-	   if(RECORD_RECORDING==TRUE)
-	    {RECORD_RECORDING=FALSE;RECORD_Stop();}
-	   else
-	    {RECORD_RECORDING=TRUE;RECORD_Start();}
-	   BuildDispMenu(0);
-	   break;
-	  }
+	if(wParam==(WPARAM)szGPUKeys[6])
+	{
+		if(RECORD_RECORDING==TRUE)
+			{RECORD_RECORDING=FALSE;RECORD_Stop();}
+		else {
+			static char filename[MAX_PATH];
+			static FILE *data;
+			mkdir("DEMO");
+			RECORD_INDEX = 0;
+			while(TRUE) {
+				sprintf(filename,"DEMO\\DEMO%04lu.AVI",RECORD_INDEX++);
+				if((data=fopen(filename,"rb"))==NULL) break;
+				fclose(data);
+			}
+			RECORD_RECORDING=TRUE;
+			RECORD_Start(filename);
+		}
+		BuildDispMenu(0);
+		break;
+	}
 
      if(wParam==(WPARAM)szGPUKeys[2]) {SwitchDispMenu(-1); break;}
      if(wParam==(WPARAM)szGPUKeys[3]) {SwitchDispMenu(1);  break;}

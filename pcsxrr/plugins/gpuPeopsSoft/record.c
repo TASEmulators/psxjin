@@ -68,20 +68,10 @@ unsigned long		skip;
 
 //--------------------------------------------------------------------
 
-BOOL RECORD_Start()
+BOOL RECORD_Start(char filename[MAX_PATH])
 {
 static FILE *data;
-static char filename[255];
-RECORD_INDEX = 0;
 if(HIWORD(VideoForWindowsVersion())<0x010a) {MessageBox(NULL,"Video for Windows version is too old !\nAbording Recording.","Error", MB_OK|MB_ICONSTOP);return FALSE;}
-mkdir("DEMO");
-while(TRUE)
-	{
-	sprintf(filename,"DEMO\\DEMO%04lu.AVI",RECORD_INDEX++);
-	if((data=fopen(filename,"rb"))==NULL) break;
-	fclose(data);
-	if(RECORD_INDEX>9999) goto error;
-	}
 if((data=fopen(filename,"wb"))==NULL) goto error;
 if(RECORD_RECORDING_MODE==0)
 	{

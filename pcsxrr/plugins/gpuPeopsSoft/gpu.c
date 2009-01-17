@@ -2721,3 +2721,23 @@ void CALLBACK GPUsetcurrentmode(char newModeFlags)
 	modeFlags = newModeFlags;
 	BuildDispMenu(0);
 }
+void OnRecording(HWND hW);
+void CALLBACK GPUstartAvi(char* filename)
+{
+	if(!RECORD_RECORDING) {
+		HWND hWP=GetActiveWindow();
+		OnRecording(hWP);
+		RECORD_RECORDING=TRUE;
+		RECORD_Start(filename);
+		BuildDispMenu(0);
+	}
+}
+
+void CALLBACK GPUstopAvi()
+{
+	if(RECORD_RECORDING) {
+		RECORD_RECORDING=FALSE;
+		RECORD_Stop();
+		BuildDispMenu(0);
+	}
+}

@@ -483,6 +483,8 @@ __inline static void execute() {
 		flagDontPause = 1;
 		if (Movie.mode == 1)
 			MOV_WriteMovieFile();
+		if (Movie.capture)
+			WIN32_StopAviRecord();
 		ClosePlugins();
 		SysRunGui();
 	}
