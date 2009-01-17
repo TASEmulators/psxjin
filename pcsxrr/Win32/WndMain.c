@@ -1427,7 +1427,7 @@ void CreateMainWindow(int nCmdShow) {
 	RegisterClass(&wc);
 
 	hWnd = CreateWindow("PCSX Main",
-						"PCSX-RR v0.0.5",
+						"PCSX-RR v0.0.6",
 						WS_OVERLAPPED | WS_SYSMENU,
 						20,
 						20,
