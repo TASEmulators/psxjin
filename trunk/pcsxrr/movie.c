@@ -333,6 +333,8 @@ static int StartReplay()
 {
 	SetBytesPerFrame();
 
+	Config.PsxType = Movie.palTiming;
+
 	if (Movie.saveStateIncluded)
 		LoadStateEmbed(Movie.movieFilename);
 
