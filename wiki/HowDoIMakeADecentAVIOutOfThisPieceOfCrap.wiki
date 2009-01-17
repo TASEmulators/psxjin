@@ -1,11 +1,10 @@
 #summary How to record AVIs with PCSX.
-#sidebar TableOfContents
 
 = How to record AVIs with PCSX, an introduction =
 
 Hi! We're now going to see the three main ways in which you can record your PXM movie into an AVI file!
 
-== 1. Easiest/Ugly Way ==
+== 1. Easiest/Ugliest Way ==
 
 ===Steps===
 *1.* Start your emulator and choose File->Movie->Record AVI...
