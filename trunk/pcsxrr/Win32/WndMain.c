@@ -89,25 +89,38 @@ void GetCurrentPath()
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-//	char *file = NULL;
-//	int runcd = 0;
-	int runcd = 0;
+	char runcd=0;
+	char lastArg=0;
+	char loadMovie=0;
 	char* arg;
-//	int loadst = 0;
-//	int i;
 
 	printf ("PCSX\n");
 	strcpy(cfgfile, "Software\\Pcsx");
 
 	for (arg = strtok(lpCmdLine, " "); arg; arg = strtok(0, " ")) {
-		if (runcd == 3)
+		if (lastArg == 1)
 			sprintf(szMovieToLoad,"%s",arg);
+		if (lastArg == 2)
+			sprintf(Movie.aviFilename,"%s",arg);
+		if (lastArg == 3)
+			sprintf(Movie.wavFilename,"%s",arg);
+		lastArg = 0;
 		if (!strcmp(arg, "-runcd"))
 			runcd = 1;
 		else if (!strcmp(arg, "-runcdbios"))
 			runcd = 2;
-		else if (!strcmp(arg, "-play"))
-			runcd = 3;
+		else if (!strcmp(arg, "-play")) {
+			lastArg = 1;
+			loadMovie = 1;
+		}
+		else if (!strcmp(arg, "-dumpavi")) {
+			lastArg = 2;
+			Movie.startAvi = 1;
+		}
+		else if (!strcmp(arg, "-dumpwav")) {
+			lastArg = 3;
+			Movie.startWav = 1;
+		}
 	}
 
 	GetCurrentPath();
@@ -157,7 +170,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUN_CD, 0);
 	else if (runcd == 2)
 		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUNCDBIOS, 0);
-	else if (runcd == 3)
+	else if (loadMovie)
 		WIN32_StartMovieReplay(szMovieToLoad);
 
 	RunGui();
@@ -1618,8 +1631,6 @@ void WIN32_StartAviRecord()
 	if (Movie.capture)
 		return;
 	char nameo[MAX_PATH];
-	char aviFilename[MAX_PATH];
-	char wavFilename[MAX_PATH];
 
 	const char filter[]="AVI Files (*.avi)\0*.avi\0";
 	OPENFILENAME ofn;
@@ -1662,12 +1673,12 @@ void WIN32_StartAviRecord()
 	fszExt[0] = '\0';
 	_splitpath(nameo, fszDrive, fszDirectory, fszFilename, fszExt);
 
-	sprintf(aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
-	sprintf(wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
+	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
+	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
 	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
-	GPU_startAvi(aviFilename);
-	SPU_startWav(wavFilename);
+	GPU_startAvi(Movie.aviFilename);
+	SPU_startWav(Movie.wavFilename);
 	if (NeedReset) { SysReset(); NeedReset = 0; }
 	Running = 1;
 	psxCpu->Execute();

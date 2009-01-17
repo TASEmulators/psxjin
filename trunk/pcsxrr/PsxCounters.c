@@ -129,6 +129,14 @@ void psxRcntUpdate() {
 	#endif
 
 					/* movie stuff start */
+// start capture?
+if (Movie.startAvi)
+	GPU_startAvi(Movie.aviFilename);
+if (Movie.startWav)
+	SPU_startWav(Movie.wavFilename);
+Movie.startAvi = 0;
+Movie.startWav = 0;
+
 Movie.currentFrame++;
 
 // if GPUchain has already been called within this frame
