@@ -45,7 +45,7 @@ int      iDoRecord=0;
 HMMIO    hWaveFile=NULL;
 MMCKINFO mmckMain;
 MMCKINFO mmckData;
-char     szFileName[256];
+char     szRecFileName[MAX_PATH];
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@ void RecordStart()
 	pcmwf.wBitsPerSample  = 16;
 
 	// create file
-	hWaveFile=mmioOpen(szFileName,NULL,MMIO_CREATE|MMIO_WRITE|MMIO_EXCLUSIVE | MMIO_ALLOCBUF);
+	hWaveFile=mmioOpen(szRecFileName,NULL,MMIO_CREATE|MMIO_WRITE|MMIO_EXCLUSIVE | MMIO_ALLOCBUF);
 	if (!hWaveFile) return;
 
 	// setup WAVE, fmt and data chunks
@@ -149,7 +149,7 @@ BOOL CALLBACK RecordDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			if (IsWindowEnabled(GetDlgItem(hW,IDC_WAVFILE))) // not started yet (edit is not disabled):
 			{
-				GetDlgItemText(hW,IDC_WAVFILE,szFileName,255);// get filename
+				GetDlgItemText(hW,IDC_WAVFILE,szRecFileName,255);// get filename
 
 				RecordStart();                                // start recording
 

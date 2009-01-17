@@ -49,7 +49,7 @@ extern unsigned char	RECORD_COMPRESSION_STATE1[4096];
 extern COMPVARS			RECORD_COMPRESSION2;
 extern unsigned char	RECORD_COMPRESSION_STATE2[4096];
 
-BOOL  RECORD_Start();
+BOOL RECORD_Start(char filename[MAX_PATH]);
 void RECORD_Stop();
 BOOL RECORD_WriteFrame();
 BOOL RECORD_GetFrame();

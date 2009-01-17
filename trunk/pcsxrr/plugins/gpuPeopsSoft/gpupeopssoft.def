@@ -78,4 +78,6 @@ EXPORTS
 		GPUsetcurrentmode   @70
 		GPUsetspeedmode     @71
 		GPUshowframecounter @72
+		GPUstartAvi         @73
+		GPUstopAvi          @74
 		;GPUdebugSetPC      @6x

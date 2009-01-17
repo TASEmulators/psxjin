@@ -1271,3 +1271,15 @@ char * SPUgetLibInfos(void)
 
 ////////////////////////////////////////////////////////////////////////
 
+#ifdef _WINDOWS
+void CALLBACK SPUstartWav(char* filename)
+{
+	strcpy (szRecFileName,filename);
+	iDoRecord=1;
+	RecordStart();
+}
+void CALLBACK SPUstopWav()
+{
+	RecordStop();
+}
+#endif

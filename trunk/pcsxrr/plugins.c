@@ -151,6 +151,8 @@ void CALLBACK GPU__updateframe(void) {}
 void CALLBACK GPU__setcurrentmode(char newModeFlags) {}
 void CALLBACK GPU__setspeedmode(unsigned long newSpeedMode) {}
 void CALLBACK GPU__showframecounter(void) {}
+void CALLBACK GPU__startAvi(char* filename) {}
+void CALLBACK GPU__stopAvi(void) {}
 
 #define LoadGpuSym1(dest, name) \
 	LoadSym(GPU_##dest, GPU##dest, name, 1);
@@ -201,6 +203,8 @@ int LoadGPUplugin(char *GPUdll) {
 	LoadGpuSym0(setcurrentmode, "GPUsetcurrentmode");
 	LoadGpuSym0(setspeedmode, "GPUsetspeedmode");
 	LoadGpuSym0(showframecounter, "GPUshowframecounter");
+	LoadGpuSym0(startAvi, "GPUstartAvi");
+	LoadGpuSym0(stopAvi, "GPUstopAvi");
 
 	return 0;
 }
@@ -452,6 +456,8 @@ long CALLBACK SPU__freeze(unsigned long ulFreezeMode, SPUFreeze_t *pF) {
 }
 
 void CALLBACK SPU__registerCallback(void (CALLBACK *callback)(void)) {}
+void CALLBACK SPU__startWav(char* filename) {}
+void CALLBACK SPU__stopWav(void) {}
 
 #define LoadSpuSym1(dest, name) \
 	LoadSym(SPU_##dest, SPU##dest, name, 1);
@@ -507,6 +513,8 @@ int LoadSPUplugin(char *SPUdll) {
 	LoadSpuSym0(freeze, "SPUfreeze");
 	LoadSpuSym0(registerCallback, "SPUregisterCallback");
 	LoadSpuSymN(async, "SPUasync");
+	LoadSpuSymN(startWav, "SPUstartWav");
+	LoadSpuSymN(stopWav, "SPUstopWav");
 
 	return 0;
 }

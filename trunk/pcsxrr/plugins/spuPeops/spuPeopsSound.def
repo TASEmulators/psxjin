@@ -34,12 +34,13 @@ EXPORTS
     SPUstopChannels2	@26
     SPUplaySector		@27
 	
-	SPUwriteDMA		    @28
-	SPUreadDMA		    @29
+	SPUwriteDMA			@28
+	SPUreadDMA			@29
 	SPUregisterCDDAVolume @30
 	SPUwriteDMAMem		@31
 	SPUreadDMAMem		@32
 	SPUfreeze			@33
-	;SPUupdate	 		@34
-	SPUasync	 		@34
+	SPUasync			@34
+	SPUstartWav			@35
+	SPUstopWav			@36
 

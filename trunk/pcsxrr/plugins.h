@@ -83,6 +83,8 @@ typedef void (CALLBACK* GPUupdateframe)(void);
 typedef void (CALLBACK* GPUsetcurrentmode)(char);
 typedef void (CALLBACK* GPUsetspeedmode)(unsigned long);
 typedef void (CALLBACK* GPUshowframecounter)(void);
+typedef void (CALLBACK* GPUstartAvi)(char* filename);
+typedef void (CALLBACK* GPUstopAvi)(void);
 
 //plugin stuff From Shadow
 // *** walking in the valley of your darking soul i realize that i was alone
@@ -117,6 +119,8 @@ GPUupdateframe      GPU_updateframe;
 GPUsetcurrentmode   GPU_setcurrentmode;
 GPUsetspeedmode     GPU_setspeedmode;
 GPUshowframecounter GPU_showframecounter;
+GPUstartAvi         GPU_startAvi;
+GPUstopAvi          GPU_stopAvi;
 
 //cd rom plugin ;)
 typedef long (CALLBACK* CDRinit)(void);
@@ -207,6 +211,8 @@ typedef struct {
 } SPUFreeze_t;
 typedef long (CALLBACK* SPUfreeze)(unsigned long, SPUFreeze_t *);
 typedef void (CALLBACK* SPUasync)(unsigned long);
+typedef void (CALLBACK* SPUstartWav)(char*);
+typedef void (CALLBACK* SPUstopWav)(void);
 
 //SPU POINTERS
 SPUconfigure        SPU_configure;
@@ -237,6 +243,8 @@ SPUplayADPCMchannel SPU_playADPCMchannel;
 SPUfreeze           SPU_freeze;
 SPUregisterCallback SPU_registerCallback;
 SPUasync            SPU_async;
+SPUstartWav         SPU_startWav;
+SPUstopWav          SPU_stopWav;
 // PAD Functions
 
 typedef long (CALLBACK* PADconfigure)(void);

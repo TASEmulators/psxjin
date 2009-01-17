@@ -393,10 +393,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_START_CAPTURE:
-					// do something
+					WIN32_StartAviRecord();
 					break;
 				case ID_END_CAPTURE:
-					// do something
+					WIN32_StopAviRecord();
 					break;
 
 				case ID_FILE_RUN_CD:
@@ -554,17 +554,21 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	
 		case WM_DESTROY:
 			if (!AccBreak) {
+				if (Movie.mode == 1)
+					MOV_WriteMovieFile();
+				if (Movie.capture)
+					WIN32_StopAviRecord();
 				if (Running) ClosePlugins();
 				SysClose();
 				PostQuitMessage(0);
-				if (Movie.mode == 1)
-					MOV_WriteMovieFile();
 				exit(0);
 			}
 			else AccBreak = 0;
 			return TRUE;
 
 		case WM_QUIT:
+			if (Movie.capture)
+				WIN32_StopAviRecord();
 			if (Movie.mode == 1)
 				MOV_WriteMovieFile();
 			exit(0);
@@ -1382,7 +1386,6 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Help"), ID_HELP_HELP);
 
 	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
 	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 }
 
@@ -1429,6 +1432,10 @@ void CreateMainWindow(int nCmdShow) {
 		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_ENABLED);
 	}
+//	if (Movie.capture) {
+//		EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
+//		EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
+//	}
 
 	ShowWindow(hWnd, nCmdShow);
 }
@@ -1604,4 +1611,75 @@ void WIN32_StartMovieRecord()
 		MOV_StartMovie(1);
 		psxCpu->Execute();
 	}
+}
+
+void WIN32_StartAviRecord()
+{
+	if (Movie.capture)
+		return;
+	char nameo[MAX_PATH];
+	char aviFilename[MAX_PATH];
+	char wavFilename[MAX_PATH];
+
+	const char filter[]="AVI Files (*.avi)\0*.avi\0";
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=gApp.hInstance;
+	ofn.lpstrTitle="Save AVI as...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=MAX_PATH;
+	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+	ofn.lpstrInitialDir=".\\";
+	if(GetSaveFileName(&ofn)) {
+		int i;
+		i = strlen(nameo);
+
+		//add .avi if nameo doesn't have it
+		if((i < 4 || nameo[i-4] != '.') && (i < (MAX_PATH-8))) {
+			nameo[i] = '.';
+			nameo[i+1] = 'a';
+			nameo[i+2] = 'v';
+			nameo[i+3] = 'i';
+			nameo[i+4] = 0;
+		}
+	}
+	else
+		return;
+
+	Movie.capture = 1;
+	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
+	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
+	char fszDrive[MAX_PATH];
+	char fszDirectory[MAX_PATH];
+	char fszFilename[MAX_PATH];
+	char fszExt[MAX_PATH];
+	fszDrive[0] = '\0';
+	fszDirectory[0] = '\0';
+	fszFilename[0] = '\0';
+	fszExt[0] = '\0';
+	_splitpath(nameo, fszDrive, fszDirectory, fszFilename, fszExt);
+
+	sprintf(aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
+	sprintf(wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
+	SetMenu(gApp.hWnd, NULL);
+	OpenPlugins(gApp.hWnd);
+	GPU_startAvi(aviFilename);
+	SPU_startWav(wavFilename);
+	if (NeedReset) { SysReset(); NeedReset = 0; }
+	Running = 1;
+	psxCpu->Execute();
+}
+
+void WIN32_StopAviRecord()
+{
+	if (!Movie.capture)
+		return;
+	GPU_stopAvi();
+	SPU_stopWav();
+	Movie.capture = 0;
+	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
+	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_ENABLED);
 }

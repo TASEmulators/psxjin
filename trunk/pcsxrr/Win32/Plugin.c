@@ -115,7 +115,7 @@ void PADhandleKey(int key) {
 	else if(GetAsyncKeyState(VK_SHIFT))
 		modifiers = VK_SHIFT;
 
-	if (Running == 0) return;
+//	if (Running == 0) return;
 
 	for (i = EMUCMD_LOADSTATE1; i <= EMUCMD_LOADSTATE1+8; i++) {
 		if(key == EmuCommandTable[i].key
@@ -250,6 +250,17 @@ void PADhandleKey(int key) {
 		GPU_showframecounter();
 	}
 
+	if(key == EmuCommandTable[EMUCMD_STARTAVI].key
+	&& modifiers == EmuCommandTable[EMUCMD_STARTAVI].keymod)
+	{
+		WIN32_StartAviRecord();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_STOPAVI].key
+	&& modifiers == EmuCommandTable[EMUCMD_STOPAVI].keymod)
+	{
+		WIN32_StopAviRecord();
+	}
 
 	if(key == EmuCommandTable[EMUCMD_CONFCPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFCPU].keymod)
