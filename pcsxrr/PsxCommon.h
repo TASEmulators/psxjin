@@ -183,6 +183,7 @@ struct MovieType {
 	char wavFilename[MAX_PATH];          //filename used in WAV capture
 	char startAvi;                       //start AVI capture at first emulated frame?
 	char startWav;                       //start WAV capture at first emulated frame?
+	unsigned long stopCapture;           //stop AVI/WAV capture at what emulated frame?
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
