@@ -23,7 +23,7 @@
           if "1", movie does contain embedded cheat list
     bit 5:
           if "0", movie does not use hacks
-          if "1", movie does use hacks like SPU/SIO IRQ always enabled
+          if "1", movie does use hacks such as "SPU/SIO IRQ always enabled"
     other: reserved, set to 0
 00D 1-byte flags: reserved, set to 0
 00E 1-byte unsigned char: controller port 1 type
