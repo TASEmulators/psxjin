@@ -382,7 +382,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_REPLAY_MOVIE:
-					WIN32_StartMovieReplay("");
+					WIN32_StartMovieReplay('\0');
 					return TRUE;
 
 				case ID_FILE_STOP_MOVIE:
@@ -1549,7 +1549,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 {
 	int nRet=1;
 	CheckCdrom(); //get CdromId
-	if (szFilename != "") {
+	if (szFilename != '\0') {
 		MOV_ReadMovieFile(szFilename,&Movie);
 		GetMovieFilenameMini(Movie.movieFilename);
 	}
