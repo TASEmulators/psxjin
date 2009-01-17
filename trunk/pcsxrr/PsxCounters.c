@@ -130,12 +130,22 @@ void psxRcntUpdate() {
 
 					/* movie stuff start */
 // start capture?
-if (Movie.startAvi)
-	GPU_startAvi(Movie.aviFilename);
-if (Movie.startWav)
-	SPU_startWav(Movie.wavFilename);
-Movie.startAvi = 0;
-Movie.startWav = 0;
+if ( (Movie.startAvi) || (Movie.startWav) ) {
+	if (Movie.startAvi)
+		GPU_startAvi(Movie.aviFilename);
+	if (Movie.startWav)
+		SPU_startWav(Movie.wavFilename);
+	Movie.startAvi = 0;
+	Movie.startWav = 0;
+	Movie.capture = 1;
+}
+
+// stop capture?
+if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
+	GPU_stopAvi();
+	SPU_stopWav();
+	Movie.capture = 0;
+}
 
 Movie.currentFrame++;
 

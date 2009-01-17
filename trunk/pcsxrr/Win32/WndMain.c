@@ -104,6 +104,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			sprintf(Movie.aviFilename,"%s",arg);
 		if (lastArg == 3)
 			sprintf(Movie.wavFilename,"%s",arg);
+		if (lastArg == 4)
+			sscanf (arg,"%lu",&Movie.stopCapture);
 		lastArg = 0;
 		if (!strcmp(arg, "-runcd"))
 			runcd = 1;
@@ -121,6 +123,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			lastArg = 3;
 			Movie.startWav = 1;
 		}
+		else if (!strcmp(arg, "-stopcapture"))
+			lastArg = 4;
 	}
 
 	GetCurrentPath();
