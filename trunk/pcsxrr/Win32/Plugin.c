@@ -321,7 +321,7 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
 	{
 		if (!Movie.mode)
-			WIN32_StartMovieReplay("");
+			WIN32_StartMovieReplay('\0');
 		else
 			GPU_displayText("*PCSX*: error: Movie Already Active");
 	}
