@@ -1,0 +1,27 @@
+#summary How to record AVIs.
+
+= How to record AVI files with PCSX and .kkapture =
+
+== Step 1: Configure PCSX. ==
+  # Go to "Configuration"->"Options" and make sure "Pause After Playback" is unchecked and then press "OK".
+  # Go to "Configuration"->"Graphics" and select the final resolution the video will have. Also, make sure these 3 checkboxes are unchecked:
+
+http://i43.tinypic.com/3486dfn.png
+
+== Step 2: Using .kkapture. ==
+  # Download [http://www.farbrausch.de/~fg/kkapture/ .kkapture] and run it.
+  # In the "Demo" field click on "Browse..." and select your "pcsx.exe" file.
+  # In the "Arguments" field you can write something like "-play movies/example.pxm" if you want PCSX to load automatically a movie at start.
+  # In the "Encoder" field select ".AVI (VfW, segmented)"
+  # Pick any codec you like and configure it.
+  # Make sure both "Capture Video" and "Capture Audio" boxes are checked.
+  # You can leave everything else as you like; I haven't found any difference with those options enabled/disabled.
+  # You should end with something like this:
+
+http://i40.tinypic.com/k3unb9.png
+
+Press kkapture! and wait until your movie is over. Then press the "Escape" key on PCSX and close it to finalize your .avi file.
+
+== Notes ==
+  * The "Encoder" setting ".AVI (VfW, segmented)" has a 2GB segment limit. You'll need to combine the files afterwards.
+  * If for any strange reason PCSX doesn't correctly shut down at the end while capturing it, the video will most likely be broken. So, try pressing CTRL-BREAK at the end and .kkapture should terminate then and close the avi file properly.
