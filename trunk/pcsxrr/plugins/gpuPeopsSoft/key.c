@@ -128,7 +128,7 @@ LRESULT CALLBACK KeyWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 		if(RECORD_RECORDING==TRUE)
 			{RECORD_RECORDING=FALSE;RECORD_Stop();}
 		else {
-			static char filename[MAX_PATH];
+			static char filename[256];
 			static FILE *data;
 			mkdir("DEMO");
 			RECORD_INDEX = 0;

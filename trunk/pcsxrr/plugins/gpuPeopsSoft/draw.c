@@ -4207,7 +4207,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 				}
 
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
+			if(1)                                // stupid nvidia scanline mode
 				{
 					RECT HelperRect={0,0,iResX,iResY};
 
@@ -4248,7 +4248,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 						}
 				}
 
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
+			if(1)                                // stupid nvidia scanline mode
 				{
 					WaitVBlank();
 
@@ -4471,7 +4471,7 @@ int DXinitialize()
 	//----------------------------------------------------//
 	if(iSysMemory && iUseScanLines==2) iUseScanLines=1;   // pete: nvidia hack not needed on system mem
 
-	if(iUseScanLines==2)                                  // special nvidia hack
+	if(1)                                  // special nvidia hack
 		{
 			memset(&ddsd, 0, sizeof(DDSURFACEDESC));
 			ddsd.dwSize = sizeof(DDSURFACEDESC);

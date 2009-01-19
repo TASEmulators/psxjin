@@ -68,7 +68,7 @@ unsigned long		skip;
 
 //--------------------------------------------------------------------
 
-BOOL RECORD_Start(char filename[MAX_PATH])
+BOOL RECORD_Start(char filename[256])
 {
 static FILE *data;
 if(HIWORD(VideoForWindowsVersion())<0x010a) {MessageBox(NULL,"Video for Windows version is too old !\nAbording Recording.","Error", MB_OK|MB_ICONSTOP);return FALSE;}
