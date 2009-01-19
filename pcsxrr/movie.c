@@ -16,7 +16,7 @@ struct MovieType Movie;
 struct MovieControlType MovieControl;
 
 FILE* fpMovie = 0;
-int flagDontPause = 1;    //1: keep running emulation | 2: frame advance | 3: real pause
+int flagDontPause = 1;    //1: keep running emulation | 2: frame advance | 0: real pause
 int flagFakePause = 0;    //if 1 call pause at next VSync
 int flagGPUchain = 0;     //has the GPUchain function been called already?
 int flagVSync = 0;        //has a VSync while flagGPUchain==1 already occured?
