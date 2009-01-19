@@ -11,7 +11,7 @@
 //------------------------------------------------------
 
 char szFilter[1024];
-char szChoice[MAX_PATH];
+char szChoice[256];
 OPENFILENAME ofn;
 extern AppData gApp;
 
@@ -35,10 +35,10 @@ static void MakeOfn(char* pszFilter)
 
 void GetMovieFilenameMini(char* filenameMini)
 {
-	char fszDrive[MAX_PATH];
-	char fszDirectory[MAX_PATH];
-	char fszFilename[MAX_PATH];
-	char fszExt[MAX_PATH];
+	char fszDrive[256];
+	char fszDirectory[256];
+	char fszFilename[256];
+	char fszExt[256];
 	fszDrive[0] = '\0';
 	fszDirectory[0] = '\0';
 	fszFilename[0] = '\0';
@@ -51,20 +51,20 @@ void GetMovieFilenameMini(char* filenameMini)
 static char* GetRecordingPath(char* szPath)
 {
 	//this function makes sure a relative path has the "movies\" path prepended to it
-	char szDrive[MAX_PATH];
-	char szDirectory[MAX_PATH];
-	char szFilename[MAX_PATH];
-	char szExt[MAX_PATH];
+	char szDrive[256];
+	char szDirectory[256];
+	char szFilename[256];
+	char szExt[256];
 	szDrive[0] = '\0';
 	szDirectory[0] = '\0';
 	szFilename[0] = '\0';
 	szExt[0] = '\0';
 	_splitpath(szPath, szDrive, szDirectory, szFilename, szExt);
 	if (szDrive[0] == '\0' && szDirectory[0] == '\0') {
-		char szTmpPath[MAX_PATH];
+		char szTmpPath[256];
 		sprintf(szTmpPath, "%smovies\\", szCurrentPath);
-		strncpy(szTmpPath + strlen(szTmpPath), szPath, MAX_PATH - strlen(szTmpPath));
-		szTmpPath[MAX_PATH-1] = '\0';
+		strncpy(szTmpPath + strlen(szTmpPath), szPath, 256 - strlen(szTmpPath));
+		szTmpPath[256-1] = '\0';
 		strcpy(szPath, szTmpPath);
 	}
 
@@ -103,7 +103,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	}
 
 	long lStringLength = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
-	if(lStringLength + 1 > MAX_PATH)
+	if(lStringLength + 1 > 256)
 		return;
 
 	// save movie filename in szChoice
@@ -333,8 +333,8 @@ static int VerifyRecordingAccessMode(char* szFilename, int mode)
 
 static void VerifyRecordingFilename(HWND hDlg)
 {
-	char szFilename[MAX_PATH];
-	GetDlgItemText(hDlg, IDC_FILENAME, szFilename, MAX_PATH);
+	char szFilename[256];
+	GetDlgItemText(hDlg, IDC_FILENAME, szFilename, 256);
 
 	// if filename null, or, file exists and is not writeable
 	// then disable the dialog controls
@@ -353,8 +353,8 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 	char* defaultFilename = "movie";
 	if (Msg == WM_INITDIALOG) {
 		// come up with a unique name
-		char szPath[MAX_PATH];
-		char szFilename[MAX_PATH];
+		char szPath[256];
+		char szFilename[256];
 		int i = 0;
 //		sprintf(szFilename, "%.8s.pxm", BurnDrvGetText(DRV_NAME));
 		//TODO: make it use the CD label name?
@@ -412,7 +412,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 				case IDOK:
 				{
 					//save movie filename stuff
-					GetDlgItemText(hDlg, IDC_FILENAME, szChoice, MAX_PATH);
+					GetDlgItemText(hDlg, IDC_FILENAME, szChoice, 256);
 					Movie.movieFilename = GetRecordingPath(szChoice);
 					GetMovieFilenameMini(Movie.movieFilename);
 

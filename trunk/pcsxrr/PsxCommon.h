@@ -171,7 +171,7 @@ struct MovieType {
 	char authorInfo[MOVIE_MAX_METADATA]; //author info
 	unsigned long formatVersion;         //movie file format version number
 	unsigned long emuVersion;            //emulator version used in recording
-	char movieFilenameMini[MAX_PATH];    //short movie filename (ex: "movie") used for savestates
+	char movieFilenameMini[256];         //short movie filename (ex: "movie") used for savestates
 	char* movieFilename;                 //full path file name (ex:"c:/pcsx/movies/movie.pxm")
 	char bytesPerFrame;                  //size of each frame in bytes
 	char palTiming;                      //PAL mode (50 FPS instead of 60)
@@ -179,8 +179,8 @@ struct MovieType {
 	char CdromCount;                     //how many different cds are used in the movie
 	char CdromIds[MOVIE_MAX_CDROM_IDS];  //every CD ID used in the movie
 	char capture;                        //0: not capturing an AVI | 1: capturing
-	char aviFilename[MAX_PATH];          //filename used in AVI capture
-	char wavFilename[MAX_PATH];          //filename used in WAV capture
+	char aviFilename[256];               //filename used in AVI capture
+	char wavFilename[256];               //filename used in WAV capture
 	char startAvi;                       //start AVI capture at first emulated frame?
 	char startWav;                       //start WAV capture at first emulated frame?
 	unsigned long stopCapture;           //stop AVI/WAV capture at what emulated frame?

@@ -38,8 +38,8 @@
 int flagSaveState;
 int flagLoadState;
 int flagEscPressed;
-char szCurrentPath[MAX_PATH];
-char szMovieToLoad[MAX_PATH];
+char szCurrentPath[256];
+char szMovieToLoad[256];
 
 #ifdef __MINGW32__
 #ifndef LVM_GETSELECTIONMARK
@@ -73,16 +73,16 @@ void strcatz(char *dst, char *src) {
 
 void GetCurrentPath()
 {
-	char szPath[MAX_PATH];
-	char szDrive[MAX_PATH];
-	char szDirectory[MAX_PATH];
-	char szFilename[MAX_PATH];
-	char szExt[MAX_PATH];
+	char szPath[256];
+	char szDrive[256];
+	char szDirectory[256];
+	char szFilename[256];
+	char szExt[256];
 	szDrive[0] = '\0';
 	szDirectory[0] = '\0';
 	szFilename[0] = '\0';
 	szExt[0] = '\0';
-	GetModuleFileName(NULL, szPath, MAX_PATH);
+	GetModuleFileName(NULL, szPath, 256);
 	_splitpath(szPath, szDrive, szDirectory, szFilename, szExt);
 
 	sprintf(szCurrentPath,"%s%s" + '\0',szDrive, szDirectory);
@@ -1634,7 +1634,7 @@ void WIN32_StartAviRecord()
 {
 	if (Movie.capture)
 		return;
-	char nameo[MAX_PATH];
+	char nameo[256];
 
 	const char filter[]="AVI Files (*.avi)\0*.avi\0";
 	OPENFILENAME ofn;
@@ -1645,7 +1645,7 @@ void WIN32_StartAviRecord()
 	ofn.lpstrFilter=filter;
 	nameo[0]=0;
 	ofn.lpstrFile=nameo;
-	ofn.nMaxFile=MAX_PATH;
+	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	ofn.lpstrInitialDir=".\\";
 	if(GetSaveFileName(&ofn)) {
@@ -1653,7 +1653,7 @@ void WIN32_StartAviRecord()
 		i = strlen(nameo);
 
 		//add .avi if nameo doesn't have it
-		if((i < 4 || nameo[i-4] != '.') && (i < (MAX_PATH-8))) {
+		if((i < 4 || nameo[i-4] != '.') && (i < (256-8))) {
 			nameo[i] = '.';
 			nameo[i+1] = 'a';
 			nameo[i+2] = 'v';
@@ -1667,10 +1667,10 @@ void WIN32_StartAviRecord()
 	Movie.capture = 1;
 	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
-	char fszDrive[MAX_PATH];
-	char fszDirectory[MAX_PATH];
-	char fszFilename[MAX_PATH];
-	char fszExt[MAX_PATH];
+	char fszDrive[256];
+	char fszDirectory[256];
+	char fszFilename[256];
+	char fszExt[256];
 	fszDrive[0] = '\0';
 	fszDirectory[0] = '\0';
 	fszFilename[0] = '\0';
