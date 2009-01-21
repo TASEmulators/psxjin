@@ -401,7 +401,7 @@ BEGIN
     GROUPBOX        "CPU",IDC_MISCOPT,5,78,220,51
     CONTROL         "Enable Interpreter Cpu",IDC_CPU,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,88,98,10
-    CONTROL         "InuYasha Sengoku Battle Fix",IDC_VSYNCWA,"Button",
+    CONTROL         "Resident Evil 2/3 Fix",IDC_VSYNCWA,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,101,104,10
     CONTROL         "Parasite Eve 2, Vandal Hearts 1/2 Fix",IDC_RCNTFIX,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,114,135,10

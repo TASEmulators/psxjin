@@ -195,6 +195,8 @@ struct MovieControlType {
 	char sioIrq;
 	char spuIrq;
 	char cheats;
+	char RCntFix;
+	char VSyncWA;
 };
 
 #define EMU_VERSION 6
@@ -211,6 +213,8 @@ struct MovieControlType {
 #define MOVIE_CONTROL_SIOIRQ      (1<<3)
 #define MOVIE_CONTROL_SPUIRQ      (1<<4)
 #define MOVIE_CONTROL_CHEATS      (1<<5)
+#define MOVIE_CONTROL_RCNTFIX     (1<<6)
+#define MOVIE_CONTROL_VSYNCWA     (1<<7)
 
 #define MODE_FLAG_RECORD (1<<1)
 #define MODE_FLAG_REPLAY (1<<2)

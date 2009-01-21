@@ -172,11 +172,11 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	//cheats? hacks?
 	char szExtras[128];
 	if (dataMovie.cheatListIncluded && dataMovie.irqHacksIncluded)
-		sprintf(szExtras, "Cheats + IRQ Hacks");
+		sprintf(szExtras, "Cheats + Emulation Hacks");
 	else if (dataMovie.cheatListIncluded)
 		sprintf(szExtras, "Cheats");
 	else if (dataMovie.irqHacksIncluded)
-		sprintf(szExtras, "IRQ Hacks");
+		sprintf(szExtras, "Emulation Hacks");
 	else
 		sprintf(szExtras, "None");
 	SetDlgItemTextA(hDlg, IDC_USECHEATS, szExtras);

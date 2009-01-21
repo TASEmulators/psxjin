@@ -149,6 +149,9 @@ if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
 
 Movie.currentFrame++;
 
+// update OSD information
+GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
+
 // if GPUchain has already been called within this frame
 if (flagGPUchain == 1) {
 	// raise VSync flag
@@ -206,9 +209,6 @@ MOV_ProcessControlFlags();
 // write file once in a while to prevent data loss
 if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
 	MOV_WriteMovieFile();
-
-// update OSD information
-GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
 
 unsigned long buttonToSend = 0;
 buttonToSend = Movie.lastPad1.buttonStatus;
