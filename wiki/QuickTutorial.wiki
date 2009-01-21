@@ -1,0 +1,17 @@
+#summary PCSX quick tutorial for first-time users.
+
+= PCSX Quick Tutorial =
+
+1. Go into "Configuration"->"Plugins & Bios" and select these plugins and BIOS, then press "OK".
+
+http://i41.tinypic.com/6p7nr6.png
+
+2. Go into "Configuration"->"Sound" and make sure "Movie Sync Mode" is selected.
+
+http://i43.tinypic.com/nxom0i.png
+
+3. Go into "Configuration"->"CD-ROM" and click on the "Select Iso" button. After you've selected your CD image from your HDD, press OK.
+
+http://i40.tinypic.com/scvw95.png
+
+4. Finally, if you want to see a movie select "Movie"->"Start Playback" or select "Run CD" if you just want to play.
