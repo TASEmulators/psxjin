@@ -410,10 +410,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_START_CAPTURE:
-					WIN32_StartAviRecord();
-					break;
-				case ID_END_CAPTURE:
-					WIN32_StopAviRecord();
+					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/AviHelp", NULL, NULL, SW_SHOWNORMAL);
+//					WIN32_StartAviRecord();
 					break;
 
 				case ID_FILE_RUN_CD:
@@ -1363,10 +1361,9 @@ void CreateMainMenu() {
 	ADDSUBMENUS(0, 1, _("&Movie"));
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
-	ADDMENUITEM(0, _("Run CD Though &Bios"), ID_FILE_RUNCDBIOS);
+	ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
 	ADDMENUITEM(0, _("Run &CD"), ID_FILE_RUN_CD);
-	ADDMENUITEM(1, _("Sto&p AVI"), ID_END_CAPTURE);
-	ADDMENUITEM(1, _("Record &AVI..."), ID_START_CAPTURE);
+	ADDMENUITEM(1, _("Record &AVI Help..."), ID_START_CAPTURE);
 	ADDSEPARATOR(1);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
@@ -1402,7 +1399,6 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Help"), ID_HELP_HELP);
 
-	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
 	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 }
 
@@ -1427,7 +1423,7 @@ void CreateMainWindow(int nCmdShow) {
 	RegisterClass(&wc);
 
 	hWnd = CreateWindow("PCSX Main",
-						"PCSX-RR v0.0.6",
+						"PCSX-RR v0.0.7",
 						WS_OVERLAPPED | WS_SYSMENU,
 						20,
 						20,
@@ -1665,7 +1661,6 @@ void WIN32_StartAviRecord()
 		return;
 
 	Movie.capture = 1;
-	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
 	char fszDrive[256];
 	char fszDirectory[256];
@@ -1695,6 +1690,5 @@ void WIN32_StopAviRecord()
 	GPU_stopAvi();
 	SPU_stopWav();
 	Movie.capture = 0;
-	EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_GRAYED);
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_ENABLED);
 }

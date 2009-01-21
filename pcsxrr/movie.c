@@ -371,6 +371,8 @@ void MOV_StartMovie(int mode)
 	cheatsEnabled = 0;
 	Config.Sio = 0;
 	Config.SpuIrq = 0;
+	Config.RCntFix = 0;
+	Config.VSyncWA = 0;
 	memset(&MovieControl, 0, sizeof(MovieControl));
 	if (Movie.mode == 1)
 		StartRecord();
@@ -485,6 +487,8 @@ void MOV_ReadControl() {
 	MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
 	MovieControl.spuIrq = controlFlags&MOVIE_CONTROL_SPUIRQ;
 	MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
+	MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
+	MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA;
 }
 
 void MOV_WriteControl() {
@@ -500,6 +504,10 @@ void MOV_WriteControl() {
 		controlFlags |= MOVIE_CONTROL_SPUIRQ;
 	if (MovieControl.cheats)
 		controlFlags |= MOVIE_CONTROL_CHEATS;
+	if (MovieControl.RCntFix)
+		controlFlags |= MOVIE_CONTROL_RCNTFIX;
+	if (MovieControl.VSyncWA)
+		controlFlags |= MOVIE_CONTROL_VSYNCWA;
 
 	ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+1)-Movie.inputBuffer));
 	JoyWrite8(controlFlags);
@@ -533,7 +541,8 @@ void MOV_ProcessControlFlags() {
 			SysMessage(_("Could not load Cdrom"));
 		psxCpu->Execute();
 	}
-	if ((MovieControl.spuIrq || MovieControl.sioIrq) &&
+	if ((MovieControl.spuIrq || MovieControl.sioIrq ||
+		   MovieControl.RCntFix || MovieControl.VSyncWA) &&
 		   !Movie.irqHacksIncluded && Movie.mode == 1) {
 		Movie.irqHacksIncluded = 1;
 		Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
@@ -542,6 +551,10 @@ void MOV_ProcessControlFlags() {
 		Config.Sio ^= 1;
 	if (MovieControl.spuIrq && Movie.irqHacksIncluded)
 		Config.SpuIrq ^= 1;
+	if (MovieControl.RCntFix && Movie.irqHacksIncluded)
+		Config.RCntFix ^= 1;
+	if (MovieControl.VSyncWA && Movie.irqHacksIncluded)
+		Config.VSyncWA ^= 1;
 
 	memset(&MovieControl, 0, sizeof(MovieControl));
 }
@@ -563,14 +576,17 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Movie.irqHacksIncluded);
 	gzfreezel(&Config.Sio);
 	gzfreezel(&Config.SpuIrq);
+	gzfreezel(&Config.RCntFix);
+	gzfreezel(&Config.VSyncWA);
 	gzfreezel(&Movie.lastPad1);
 	gzfreezel(&Movie.lastPad2);
 	gzfreezel(&Movie.currentCdrom);
 	gzfreezel(&Movie.CdromCount);
 	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
 	gzfreezel(&bufSize);
-	if (!(Movie.mode == 2 && Mode == 0))
+	if (!(Movie.mode == 2 && Mode == 0)) {
 		gzfreeze(Movie.inputBuffer, bufSize);
+	}
 
 	//loading state
 	if (Mode == 0) {

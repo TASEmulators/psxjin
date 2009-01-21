@@ -496,6 +496,60 @@ void PADhandleKey(int key) {
 		}
 	}
 
+	if(key == EmuCommandTable[EMUCMD_RCNTFIX].key
+	&& modifiers == EmuCommandTable[EMUCMD_RCNTFIX].keymod)
+	{
+		if (Movie.mode == 1) {
+			MovieControl.RCntFix ^= 1;
+			if (!Config.RCntFix) {
+				if (MovieControl.RCntFix)
+					GPU_displayText("*PCSX*: PE2 Fix Will Activate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: PE2 Fix Won't Activate On Next Frame");
+			}
+			else {
+				if (MovieControl.RCntFix)
+					GPU_displayText("*PCSX*: PE2 Fix Will Deactivate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: PE2 Fix Won't Deactivate On Next Frame");
+			}
+		}
+		else {
+			Config.RCntFix ^= 0x1;
+			if (Config.RCntFix)
+				GPU_displayText(_("*PCSX*: Parasite Eve 2 Fix Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Parasite Eve 2 Fix Disabled"));
+		}
+	}
+
+	if(key == EmuCommandTable[EMUCMD_VSYNCWA].key
+	&& modifiers == EmuCommandTable[EMUCMD_VSYNCWA].keymod)
+	{
+		if (Movie.mode == 1) {
+			MovieControl.VSyncWA ^= 1;
+			if (!Config.VSyncWA) {
+				if (MovieControl.VSyncWA)
+					GPU_displayText("*PCSX*: RE 2/3 Fix Will Activate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: RE 2/3 Fix Won't Activate On Next Frame");
+			}
+			else {
+				if (MovieControl.VSyncWA)
+					GPU_displayText("*PCSX*: RE 2/3 Fix Will Deactivate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: RE 2/3 Fix Won't Deactivate On Next Frame");
+			}
+		}
+		else {
+			Config.VSyncWA ^= 0x1;
+			if (Config.VSyncWA)
+				GPU_displayText(_("*PCSX*: Resident Evil 2/3 Fix Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Resident Evil 2/3 Fix Disabled"));
+		}
+	}
+
 //		case VK_F6:
 //			if (Config.QKeys) break;
 //			Config.Mdec ^= 0x1;
