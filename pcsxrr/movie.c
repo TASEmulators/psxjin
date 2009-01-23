@@ -76,7 +76,9 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	int empty;
 	const char szFileHeader[] = "PXM ";       //file identifier
 
-	tempMovie->movieFilename = szChoice;
+	tempMovie->movieFilename = (char*)malloc((strlen(szChoice)+1)*sizeof(char));
+	strcpy(tempMovie->movieFilename,szChoice);
+//	tempMovie->movieFilename = szChoice;
 
 	FILE* fd = fopen(tempMovie->movieFilename, "rb");
 	if (!fd)

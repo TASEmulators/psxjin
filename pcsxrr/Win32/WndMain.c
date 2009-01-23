@@ -399,7 +399,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_REPLAY_MOVIE:
-					WIN32_StartMovieReplay('\0');
+					WIN32_StartMovieReplay(0);
 					return TRUE;
 
 				case ID_FILE_STOP_MOVIE:
@@ -1570,7 +1570,12 @@ void WIN32_StartMovieReplay(char* szFilename)
 	int nRet=1;
 	CheckCdrom(); //get CdromId
 	if (szFilename != '\0') {
-		MOV_ReadMovieFile(szFilename,&Movie);
+		if (! MOV_ReadMovieFile(szFilename,&Movie) ) {
+			char errorMessage[300];
+			sprintf(errorMessage, "Movie file \"%s\" doesn't exist.",szFilename);
+			MessageBox(NULL, errorMessage, NULL, NULL);
+			return;
+		}
 		GetMovieFilenameMini(Movie.movieFilename);
 	}
 	else
