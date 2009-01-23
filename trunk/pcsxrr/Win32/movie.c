@@ -112,8 +112,12 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	// ensure a relative path has the "movies\" path in prepended to it
 	GetRecordingPath(szChoice);
 
-	if (! MOV_ReadMovieFile(szChoice,&dataMovie) )
+	if (! MOV_ReadMovieFile(szChoice,&dataMovie) ) {
 		return;
+	}
+
+//	EnableWindow(GetDlgItem(hDlg, IDOK), TRUE);
+//	return;
 
 	GetMovieFilenameMini(dataMovie.movieFilename);
 
@@ -156,29 +160,33 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	//start from?
 	char szStartFrom[128];
 	if (!dataMovie.saveStateIncluded)
-		sprintf(szStartFrom, "Power-On");
+		snprintf(szStartFrom, 128, "Power-On");
 	else
-		sprintf(szStartFrom, "Savestate");
+		snprintf(szStartFrom, 128, "Savestate");
 	if (dataMovie.memoryCardIncluded)
-		sprintf(szStartFrom, "%s + Memory Cards",szStartFrom);
+		snprintf(szStartFrom, 128, "%s + Memory Cards",szStartFrom);
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, szStartFrom);
 
 	//cd-rom ids
-	char szUsedCdrom[9];
-	sprintf(szUsedCdrom, "%9.9s", dataMovie.CdromIds);
+	char szUsedCdrom[10];
+	char szCurrentCdrom[10];
+
+	snprintf(szUsedCdrom, 10, "%s", dataMovie.CdromIds);
+	snprintf(szCurrentCdrom, 10, "%s", CdromId);
+
 	SetDlgItemTextA(hDlg, IDC_USEDCDROM, szUsedCdrom);
-	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, CdromId);
+	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, szCurrentCdrom);
 
 	//cheats? hacks?
 	char szExtras[128];
 	if (dataMovie.cheatListIncluded && dataMovie.irqHacksIncluded)
-		sprintf(szExtras, "Cheats + Emulation Hacks");
+		snprintf(szExtras, 128, "Cheats + Emulation Hacks");
 	else if (dataMovie.cheatListIncluded)
-		sprintf(szExtras, "Cheats");
+		snprintf(szExtras, 128, "Cheats");
 	else if (dataMovie.irqHacksIncluded)
-		sprintf(szExtras, "Emulation Hacks");
+		snprintf(szExtras, 128, "Emulation Hacks");
 	else
-		sprintf(szExtras, "None");
+		snprintf(szExtras, 128, "None");
 	SetDlgItemTextA(hDlg, IDC_USECHEATS, szExtras);
 
 	switch (dataMovie.padType1) {
@@ -214,7 +222,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	if (Msg == WM_INITDIALOG) {
-		char szFindPath[32];
+		char szFindPath[256];
 		WIN32_FIND_DATA wfd;
 		HANDLE hFind;
 		int i = 0;
@@ -413,7 +421,9 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 				{
 					//save movie filename stuff
 					GetDlgItemText(hDlg, IDC_FILENAME, szChoice, 256);
-					Movie.movieFilename = GetRecordingPath(szChoice);
+					Movie.movieFilename = (char*)malloc((strlen(GetRecordingPath(szChoice))+1)*sizeof(char));
+					strcpy(Movie.movieFilename,GetRecordingPath(szChoice));
+//					Movie.movieFilename = GetRecordingPath(szChoice);
 					GetMovieFilenameMini(Movie.movieFilename);
 
 					//save author info
