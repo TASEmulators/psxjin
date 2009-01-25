@@ -70,9 +70,9 @@ void PCSXEnableCheat (uint32 which1)
 
 void PCSXApplyCheats()
 {
+	uint32 i;
 	if (!cheatsEnabled)
 		return;
-	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++)
 		if (Cheat.c[i].enabled)
 			PCSXApplyCheat(i);
@@ -80,9 +80,9 @@ void PCSXApplyCheats()
 
 void PCSXRemoveCheats()
 {
+	uint32 i;
 	if (!cheatsEnabled)
 		return;
-	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++)
 	if (Cheat.c[i].enabled)
 		PCSXRemoveCheat(i);
@@ -90,10 +90,10 @@ void PCSXRemoveCheats()
 
 BOOL PCSXLoadCheatFile (const char *filename)
 {
-	Cheat.num_cheats = 0;
-
 	FILE *fs = fopen (filename, "rb");
 	uint8 data [28];
+
+	Cheat.num_cheats = 0;
 
 	if (!fs)
 		return (FALSE);
@@ -114,18 +114,18 @@ BOOL PCSXLoadCheatFile (const char *filename)
 
 BOOL PCSXSaveCheatFile (const char *filename)
 {
+	FILE *fs = fopen (filename, "wb");
+	uint8 data [28];
+	uint32 i;
+
 	if (Cheat.num_cheats == 0) {
 		(void) remove (filename);
 		return (TRUE);
 	}
 
-	FILE *fs = fopen (filename, "wb");
-	uint8 data [28];
-
 	if (!fs)
-	return (FALSE);
+		return (FALSE);
 
-	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++) {
 		memset (data, 0, 28);
 		if (i == 0) {
@@ -171,16 +171,16 @@ void ScanAddress(const char* str, uint32 *value)
 
 BOOL CHT_SaveCheatFileEmbed(const char *filename)
 {
-	if (Cheat.num_cheats == 0)
-		return (FALSE);
-
 	gzFile fs = gzopen(filename, "ab");
 	uint8 data [28];
+	uint32 i;
+
+	if (Cheat.num_cheats == 0)
+		return (FALSE);
 
 	if (!fs)
 		return (FALSE);
 
-	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++) {
 		memset (data, 0, 28);
 		if (i == 0) {
@@ -214,7 +214,9 @@ BOOL CHT_LoadCheatFileEmbed(const char *filename)
 	gzFile fs;
 	FILE* fp;
 	FILE* fp2;
-	char embCheatTmp[Movie.inputOffset-Movie.cheatListOffset];
+	char * embCheatTmp=(char *)malloc(Movie.inputOffset-Movie.cheatListOffset);
+	uint8 data [28];
+
 	fp = fopen(filename,"rb");
 	fp2 = fopen("embcheat.tmp","wb");
 	fseek(fp, Movie.cheatListOffset, SEEK_SET);
@@ -226,7 +228,6 @@ BOOL CHT_LoadCheatFileEmbed(const char *filename)
 	Cheat.num_cheats = 0;
 
 	fs = gzopen("embcheat.tmp", "rb");
-	uint8 data [28];
 
 	if (!fs)
 		return (FALSE);

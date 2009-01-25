@@ -39,6 +39,10 @@ int LoadConfig() {
 	DWORD type,size;
 	PcsxConfig *Conf = &Config;
 	int err;
+	int i;
+	char HotkeysKeys[EMUCMDMAX+1];
+	char HotkeysKeymods[EMUCMDMAX+1];
+	DWORD stupidSize;
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,cfgfile,0,KEY_ALL_ACCESS,&myKey)!=ERROR_SUCCESS) return -1;
 
@@ -70,9 +74,7 @@ int LoadConfig() {
 	QueryKeyV(sizeof(Conf->RCntFix), "RCntFix", &Conf->RCntFix);
 	QueryKeyV(sizeof(Conf->VSyncWA), "VSyncWA", &Conf->VSyncWA);
 
-	int i;
-	char HotkeysKeys[EMUCMDMAX];
-	DWORD stupidSize = sizeof(HotkeysKeys);
+	stupidSize = sizeof(HotkeysKeys);
 	if (RegQueryValueEx(myKey, "HotkeysKeys", 0, &type, (LPBYTE) &HotkeysKeys, &stupidSize) == ERROR_SUCCESS) {
 		for (i = 0; i <= EMUCMDMAX-1; i++) {
 			if (HotkeysKeys[i] < 0)
@@ -82,7 +84,6 @@ int LoadConfig() {
 		}
 	}
 
-	char HotkeysKeymods[EMUCMDMAX];
 	stupidSize = sizeof(HotkeysKeymods);
 	if (RegQueryValueEx(myKey, "HotkeysKeymods", 0, &type, (LPBYTE) &HotkeysKeymods, &stupidSize) == ERROR_SUCCESS) {
 		for (i = 0; i <= EMUCMDMAX-1; i++) {
@@ -101,6 +102,9 @@ void SaveConfig() {
 	HKEY myKey;
 	DWORD myDisp;
 	PcsxConfig *Conf = &Config;
+	int i;
+	char HotkeysKeys[EMUCMDMAX+1];
+	char HotkeysKeymods[EMUCMDMAX+1];
 
 	RegCreateKeyEx(HKEY_CURRENT_USER, cfgfile, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &myKey, &myDisp);
 
@@ -130,14 +134,11 @@ void SaveConfig() {
 	SetKeyV("RCntFix", &Conf->RCntFix, sizeof(Conf->RCntFix), REG_DWORD);
 	SetKeyV("VSyncWA", &Conf->VSyncWA, sizeof(Conf->VSyncWA), REG_DWORD);
 
-	int i;
-	char HotkeysKeys[EMUCMDMAX];
 	for (i = 0; i <= EMUCMDMAX; i++) {
 		HotkeysKeys[i] = EmuCommandTable[i].key;
 	}
 	SetKeyV("HotkeysKeys", &HotkeysKeys,sizeof(HotkeysKeys), REG_BINARY);
 
-	char HotkeysKeymods[EMUCMDMAX];
 	for (i = 0; i <= EMUCMDMAX; i++) {
 		HotkeysKeymods[i] = EmuCommandTable[i].keymod;
 	}
@@ -153,7 +154,7 @@ void SaveConfig() {
 	sprintf(lp, "%s", FindData.cFileName); \
 	i = ComboBox_AddString(hw, tmpStr); \
 	tempDest = ComboBox_SetItemData(hw, i, lp); \
-	if (stricmp(str, lp)==0) \
+	if (_stricmp(str, lp)==0) \
 		tempDest = ComboBox_SetCurSel(hw, i); \
 }
 
@@ -230,7 +231,7 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 	sprintf(lp, "HLE");
 	i=ComboBox_AddString(hWC_BIOS, "Internal HLE Bios");
 	tempDest = ComboBox_SetItemData(hWC_BIOS, i, lp);
-	if (stricmp(Config.Bios, lp)==0)
+	if (_stricmp(Config.Bios, lp)==0)
 		tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
 
 	strcpy(tmpStr, Config.BiosDir);
@@ -246,7 +247,7 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 		sprintf(lp, "%s", (char *)FindData.cFileName);
 		i = ComboBox_AddString(hWC_BIOS, FindData.cFileName);
 		tempDest = ComboBox_SetItemData(hWC_BIOS, i, lp);
-		if (stricmp(Config.Bios, FindData.cFileName)==0)
+		if (_stricmp(Config.Bios, FindData.cFileName)==0)
 			tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
 	} while (FindNextFile(Find,&FindData));
 

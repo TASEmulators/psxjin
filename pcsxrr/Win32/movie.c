@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <windows.h>
-#include "PsxCommon.h"
+#include "../PsxCommon.h"
 #include "resource.h"
 #include "Win32.h"
 #include "../movie.h"
@@ -74,6 +74,20 @@ static char* GetRecordingPath(char* szPath)
 static void DisplayReplayProperties(HWND hDlg, int bClear)
 {
 	struct MovieType dataMovie;
+	long lCount;
+	long lIndex;
+	long lStringLength;
+	int nFPS;
+	int nSeconds;
+	int nMinutes;
+	int nHours;
+	char szFramesString[32];
+	char szLengthString[32];
+	char szUndoCountString[32];
+	char szStartFrom[128];
+	char szUsedCdrom[10];
+	char szCurrentCdrom[10];
+	char szExtras[128];
 
 	// set default values
 	SetDlgItemTextA(hDlg, IDC_LENGTH, "");
@@ -92,8 +106,8 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	if(bClear)
 		return;
 
-	long lCount = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCOUNT, 0, 0);
-	long lIndex = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCURSEL, 0, 0);
+	lCount = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCOUNT, 0, 0);
+	lIndex = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETCURSEL, 0, 0);
 	if (lIndex == CB_ERR)
 		return;
 
@@ -102,7 +116,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 		return;
 	}
 
-	long lStringLength = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
+	lStringLength = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
 	if(lStringLength + 1 > 256)
 		return;
 
@@ -134,19 +148,15 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	EnableWindow(GetDlgItem(hDlg, IDOK), TRUE);
 
 	// turn totalFrames into a length string
-	int nFPS;
 	if (dataMovie.palTiming)
 		nFPS = 50;
 	else
 		nFPS = 60;
-	int nSeconds = dataMovie.totalFrames / nFPS;
-	int nMinutes = nSeconds / 60;
-	int nHours = nSeconds / 3600;
+	nSeconds = dataMovie.totalFrames / nFPS;
+	nMinutes = nSeconds / 60;
+	nHours = nSeconds / 3600;
 
 	//format strings
-	char szFramesString[32];
-	char szLengthString[32];
-	char szUndoCountString[32];
 	sprintf(szFramesString, "%lu", dataMovie.totalFrames);
 	sprintf(szLengthString, "%02d:%02d:%02d", nHours, nMinutes % 60, nSeconds % 60);
 	sprintf(szUndoCountString, "%lu", dataMovie.rerecordCount);
@@ -158,35 +168,30 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	SetDlgItemTextA(hDlg, IDC_METADATA, dataMovie.authorInfo);
 
 	//start from?
-	char szStartFrom[128];
 	if (!dataMovie.saveStateIncluded)
-		snprintf(szStartFrom, 128, "Power-On");
+		_snprintf(szStartFrom, 128, "Power-On");
 	else
-		snprintf(szStartFrom, 128, "Savestate");
+		_snprintf(szStartFrom, 128, "Savestate");
 	if (dataMovie.memoryCardIncluded)
-		snprintf(szStartFrom, 128, "%s + Memory Cards",szStartFrom);
+		_snprintf(szStartFrom, 128, "%s + Memory Cards",szStartFrom);
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, szStartFrom);
 
 	//cd-rom ids
-	char szUsedCdrom[10];
-	char szCurrentCdrom[10];
-
-	snprintf(szUsedCdrom, 10, "%s", dataMovie.CdromIds);
-	snprintf(szCurrentCdrom, 10, "%s", CdromId);
+	_snprintf(szUsedCdrom, 10, "%s", dataMovie.CdromIds);
+	_snprintf(szCurrentCdrom, 10, "%s", CdromId);
 
 	SetDlgItemTextA(hDlg, IDC_USEDCDROM, szUsedCdrom);
 	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, szCurrentCdrom);
 
 	//cheats? hacks?
-	char szExtras[128];
 	if (dataMovie.cheatListIncluded && dataMovie.irqHacksIncluded)
-		snprintf(szExtras, 128, "Cheats + Emulation Hacks");
+		_snprintf(szExtras, 128, "Cheats + Emulation Hacks");
 	else if (dataMovie.cheatListIncluded)
-		snprintf(szExtras, 128, "Cheats");
+		_snprintf(szExtras, 128, "Cheats");
 	else if (dataMovie.irqHacksIncluded)
-		snprintf(szExtras, 128, "Emulation Hacks");
+		_snprintf(szExtras, 128, "Emulation Hacks");
 	else
-		snprintf(szExtras, 128, "None");
+		_snprintf(szExtras, 128, "None");
 	SetDlgItemTextA(hDlg, IDC_USECHEATS, szExtras);
 
 	switch (dataMovie.padType1) {
@@ -221,6 +226,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 
 static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+	int nRet;
 	if (Msg == WM_INITDIALOG) {
 		char szFindPath[256];
 		WIN32_FIND_DATA wfd;
@@ -284,7 +290,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 								ofn.lpstrTitle = "Replay Input from File";
 								ofn.Flags &= ~OFN_HIDEREADONLY;
 
-								int nRet = GetOpenFileName(&ofn);
+								nRet = GetOpenFileName(&ofn);
 								if (nRet != 0) {
 									LONG lOtherIndex = SendDlgItemMessage(hDlg, IDC_CHOOSE_LIST, CB_FINDSTRING, (WPARAM)-1, (LPARAM)szChoice);
 									if (lOtherIndex != CB_ERR) {
@@ -358,6 +364,8 @@ static void VerifyRecordingFilename(HWND hDlg)
 
 static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+	int nRet;
+	LONG lIndex;
 	char* defaultFilename = "movie";
 	if (Msg == WM_INITDIALOG) {
 		// come up with a unique name
@@ -412,7 +420,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 					MakeOfn(szFilter);
 					ofn.lpstrTitle = "Record Input to File";
 					ofn.Flags |= OFN_OVERWRITEPROMPT;
-					int nRet = GetSaveFileName(&ofn);
+					nRet = GetSaveFileName(&ofn);
 					if (nRet != 0) //this triggers an EN_CHANGE message
 						SetDlgItemText(hDlg, IDC_FILENAME, szChoice);
 					return TRUE;
@@ -436,7 +444,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 						Movie.cheatListIncluded = 1;
 
 					//save "start from" option list
-					LONG lIndex = SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_GETCURSEL, 0, 0);
+					lIndex = SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_GETCURSEL, 0, 0);
 					switch (lIndex) {
 						case 3:
 							Movie.saveStateIncluded = 1;

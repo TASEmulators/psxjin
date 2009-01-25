@@ -3,6 +3,7 @@
 // Used by pcsx.rc
 //
 #define IDS_TITLE                       1
+#define W_OK                            2
 #define IDR_MENU1                       101
 #define IDI_APP_ICON                    102
 #define IDD_MCDCONF                     102

@@ -82,6 +82,9 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 	case WM_INITDIALOG:
 	{
+		LVCOLUMN col;
+		char temp[32];
+		uint32 counter;
 		hBmp=(HBITMAP)LoadImage(NULL, TEXT("funkyass.bmp"), IMAGE_BITMAP, 0,0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 		ListView_SetExtendedListViewStyle(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), LVS_EX_FULLROWSELECT|LVS_EX_CHECKBOXES);
 
@@ -90,8 +93,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 		SendDlgItemMessage(hwndDlg, IDC_CHEAT_ADDRESS, EM_LIMITTEXT, 8, 0);
 		SendDlgItemMessage(hwndDlg, IDC_CHEAT_BYTE, EM_LIMITTEXT, 3, 0);
 
-		LVCOLUMN col;
-		char temp[32];
 		strcpy(temp,"Address");
 		ZeroMemory(&col, sizeof(LVCOLUMN));
 		col.mask=LVCF_FMT|LVCF_ORDER|LVCF_TEXT|LVCF_WIDTH;
@@ -130,13 +131,14 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 		ct.index=malloc(sizeof(int)*Cheat.num_cheats);
 		ct.state=malloc(sizeof(DWORD)*Cheat.num_cheats);
 
-		uint32 counter;
 		for(counter=0; counter<Cheat.num_cheats; counter++)
 		{
 			char buffer[7];
 			int curr_idx=-1;
-			sprintf(buffer, "%06X", Cheat.c[counter].address);
 			LVITEM lvi;
+			unsigned int k;
+
+			sprintf(buffer, "%06X", Cheat.c[counter].address);
 			ZeroMemory(&lvi, sizeof(LVITEM));
 			lvi.mask=LVIF_TEXT;
 			lvi.pszText=buffer;
@@ -144,7 +146,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			lvi.iItem=counter;
 			curr_idx=ListView_InsertItem(GetDlgItem(hwndDlg,IDC_CHEAT_LIST), &lvi);
 
-			unsigned int k;
 			for(k=0;k<counter;k++)
 			{
 				if(ct.index[k]>=curr_idx)
@@ -182,13 +183,15 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 		if(hBmp)
 		{
 			BITMAP bmp;
-			ZeroMemory(&bmp, sizeof(BITMAP));
 			RECT r;
+			HDC hdc, hDCbmp;
+			HBITMAP hOldBmp;
+			ZeroMemory(&bmp, sizeof(BITMAP));
 			GetClientRect(hwndDlg, &r);
-			HDC hdc=GetDC(hwndDlg);
-			HDC hDCbmp=CreateCompatibleDC(hdc);
+			hdc=GetDC(hwndDlg);
+			hDCbmp=CreateCompatibleDC(hdc);
 			GetObject(hBmp, sizeof(BITMAP), &bmp);
-			HBITMAP hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
+			hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
 			StretchBlt(hdc, 0,0,r.right,r.bottom,hDCbmp,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
 			SelectObject(hDCbmp, hOldBmp);
 			DeleteDC(hDCbmp);
@@ -216,10 +219,13 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				EnableWindow(GetDlgItem(hwndDlg, IDC_DELETE_CHEAT), 1);
 				if(!has_sel||sel_idx!=ListView_GetSelectionMark(GetDlgItem(hwndDlg, IDC_CHEAT_LIST)))
 				{
-					new_sel=3;
 					//change
 					char buf[25];
 					LV_ITEM lvi;
+					char temp[4];
+					int q;
+
+					new_sel=3;
 
 					ITEM_QUERY (lvi, IDC_CHEAT_LIST, 0, buf, 7);
 
@@ -228,8 +234,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					ITEM_QUERY (lvi, IDC_CHEAT_LIST, 1, &buf[strlen(buf)], 3);
 
 //					SetDlgItemText(hwndDlg, IDC_CHEAT_CODE, buf);
-					char temp[4];
-					int q;
 					sscanf(lvi.pszText, "%02X", &q);
 					sprintf(temp, "%d", q);
 					SetDlgItemText(hwndDlg, IDC_CHEAT_BYTE, temp);
@@ -276,12 +280,15 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				uint8 byte;
 				char buffer[7];
 				char buffer2[7];
+				LVITEM lvi;
+				int curr_idx;
+				int scanres;
+				int j;
 				
 				GetDlgItemText(hwndDlg, IDC_CHEAT_ADDRESS, buffer, 7);
 				GetDlgItemText(hwndDlg, IDC_CHEAT_BYTE, buffer2, 7);
 				
-				int curr_idx=-1;
-				LVITEM lvi;
+				curr_idx=-1;
 				ZeroMemory(&lvi, sizeof(LVITEM));
 				lvi.mask=LVIF_TEXT;
 				lvi.pszText=buffer;
@@ -289,7 +296,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				lvi.iItem=0;
 				curr_idx=ListView_InsertItem(GetDlgItem(hwndDlg,IDC_CHEAT_LIST), &lvi);
 				
-				int scanres;
 				if(buffer2[0]=='$')
 					sscanf(buffer2,"$%2X", (unsigned int*)&scanres);
 				else sscanf(buffer2,"%d", &scanres);
@@ -314,7 +320,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				lvi.pszText=temp;
 				lvi.cchTextMax=23;
 				SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST, LVM_SETITEM, 0, (LPARAM)&lvi);
-				int j;
 				for(j=0;j<(int)Cheat.num_cheats;j++)
 				{
 					ct.index[j]++;
@@ -327,16 +332,17 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				char temp[24];
 				uint8 byte;
 				char buffer[7];
+				int j;
+				LVITEM lvi;
+				int scanres;
 				
 				GetDlgItemText(hwndDlg, IDC_CHEAT_ADDRESS, buffer, 7);
-				int j;
 				for(j=0;j<(int)Cheat.num_cheats;j++)
 				{
 					if(ct.index[j]==sel_idx)
 						ct.state[j]=Modified;
 				}
 
-				LVITEM lvi;
 				ZeroMemory(&lvi, sizeof(LVITEM));
 				lvi.mask=LVIF_TEXT;
 				lvi.pszText=buffer;
@@ -346,7 +352,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				
 				GetDlgItemText(hwndDlg, IDC_CHEAT_BYTE, buffer, 7);
 				
-				int scanres;
 				if(buffer[0]=='$')
 					sscanf(buffer,"$%2X", (unsigned int*)&scanres);
 				else sscanf(buffer,"%d", &scanres);
@@ -538,13 +543,14 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			case IDC_LOAD_CHEATS:
 			{
 				char nameo[2048];
+				int k=0, totalk;
+				uint32 counter;
 				LoadCheatFile(nameo);
 				if (!nameo[0]) return 1;
 
 				free(ct.index);
 				free(ct.state);
-				int k=0;
-				int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST));
+				totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST));
 				for(k=0;k<totalk; k++) {
 					ListView_DeleteItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), 0);
 				}
@@ -553,13 +559,13 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				ct.index=malloc(sizeof(int)*Cheat.num_cheats);
 				ct.state=malloc(sizeof(DWORD)*Cheat.num_cheats);
 
-				uint32 counter;
 				for(counter=0; counter<Cheat.num_cheats; counter++)
 				{
 					char buffer[7];
+					LVITEM lvi;
+					unsigned int k;
 					int curr_idx=-1;
 					sprintf(buffer, "%06X", Cheat.c[counter].address);
-					LVITEM lvi;
 					ZeroMemory(&lvi, sizeof(LVITEM));
 					lvi.mask=LVIF_TEXT;
 					lvi.pszText=buffer;
@@ -567,7 +573,6 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					lvi.iItem=counter;
 					curr_idx=ListView_InsertItem(GetDlgItem(hwndDlg,IDC_CHEAT_LIST), &lvi);
 
-					unsigned int k;
 					for(k=0;k<counter;k++)
 					{
 						if(ct.index[k]>=curr_idx)
@@ -615,8 +620,9 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					int k,l,fakeNumCheats;
 					BOOL hit;
 					unsigned int scanned;
+					int totalk;
 					fakeNumCheats = (int)Cheat.num_cheats;
-					int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
+					totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
 					for(k=totalk;k>=0; k--)
 					{
 						hit=FALSE;
@@ -631,11 +637,12 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 										l=Cheat.num_cheats;
 									else if(ct.state[l]==(unsigned long)Modified)
 									{
+										char buf[25];
+										LV_ITEM lvi;
+										
 										if(Cheat.c[l].enabled)
 											PCSXDisableCheat(l);
 										
-										char buf[25];
-										LV_ITEM lvi;
 										ZeroMemory(&lvi, sizeof(LV_ITEM));
 										lvi.iItem= k;
 										lvi.mask=LVIF_TEXT;
@@ -741,8 +748,9 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				int k,l,fakeNumCheats;
 				BOOL hit;
 				unsigned int scanned;
+				int totalk;
 				fakeNumCheats = (int)Cheat.num_cheats;
-				int totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
+				totalk = ListView_GetItemCount(GetDlgItem(hwndDlg, IDC_CHEAT_LIST))-1;
 				for(k=totalk;k>=0; k--)
 				{
 					hit=FALSE;
@@ -757,11 +765,12 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 									l=Cheat.num_cheats;
 								else if(ct.state[l]==(unsigned long)Modified)
 								{
+									char buf[25];
+									LV_ITEM lvi;
+
 									if(Cheat.c[l].enabled)
 										PCSXDisableCheat(l);
 									
-									char buf[25];
-									LV_ITEM lvi;
 									ZeroMemory(&lvi, sizeof(LV_ITEM));
 									lvi.iItem= k;
 									lvi.mask=LVIF_TEXT;

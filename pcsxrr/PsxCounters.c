@@ -117,6 +117,10 @@ void psxUpdateVSyncRateEnd() {
 }
 
 void psxRcntUpdate() {
+	PadDataS paddtemp;
+	unsigned long buttonToSend;
+	char modeFlags;
+
 	if ((psxRegs.cycle - psxCounters[3].sCycle) >= psxCounters[3].Cycle) {
 		if (psxCounters[3].mode & 0x10000) { // VSync End (22 hsyncs)
 				psxCounters[3].mode&=~0x10000;
@@ -177,7 +181,6 @@ if (Movie.mode == 2) {
 }
 
 // write/read joypad information for this frame
-PadDataS paddtemp;
 if (HasEmulatedFrame == 2) {
 	if (Movie.mode == 1) {
 		MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
@@ -210,12 +213,12 @@ MOV_ProcessControlFlags();
 if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
 	MOV_WriteMovieFile();
 
-unsigned long buttonToSend = 0;
+buttonToSend = 0;
 buttonToSend = Movie.lastPad1.buttonStatus;
 buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
-char modeFlags = 0;
+modeFlags = 0;
 if (!flagDontPause)
 	modeFlags |= MODE_FLAG_PAUSED;
 if (Movie.mode == 1)

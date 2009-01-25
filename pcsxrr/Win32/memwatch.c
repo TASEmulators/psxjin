@@ -133,6 +133,10 @@ void MWRec_parse(WORD ctl,int changed)
 void UpdateMemWatch()
 {
 	int i;
+	char* text;
+	int len;
+	int j;
+
 	if(hwndMemWatch)
 	{
 		SetTextColor(hdc,RGB(0,0,0));
@@ -143,7 +147,6 @@ void UpdateMemWatch()
 			struct MWRec mwrec;
 			memcpy(&mwrec,&mwrecs[i],sizeof(mwrecs[i]));
 
-			char* text;
 			if(mwrec.valid)
 			{
 				if(mwrec.hex)
@@ -168,8 +171,7 @@ void UpdateMemWatch()
 						text = U8ToStr(psxMs8(mwrec.addr));
 					}
 				}
-				int len = strlen(text);
-				int j;
+				len = strlen(text);
 				for(j=len;j<5;j++)
 					text[j] = ' ';
 				text[5] = 0;
@@ -230,6 +232,7 @@ static void PutInSpaces(int i)
 //Saves all the addresses and labels to disk
 static void SaveMemWatch()
 {
+	FILE *fp;
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
@@ -276,7 +279,7 @@ static void SaveMemWatch()
 		}
 
 		SaveStrings();
-		FILE *fp=fopen(nameo,"w");
+		fp=fopen(nameo,"w");
 		for(i=0;i<24;i++)
 		{
 			//Use dummy strings to fill empty slots
@@ -302,6 +305,7 @@ static void SaveMemWatch()
 //Loads a previously saved file
 static void LoadMemWatch()
 {
+	FILE *fp;
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
@@ -329,7 +333,7 @@ static void LoadMemWatch()
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
 		
-		FILE *fp=fopen(nameo,"r");
+		fp=fopen(nameo,"r");
 		for(i=0;i<24;i++)
 		{
 			fscanf(fp, "%s ", nameo); //re-using nameo--bady style :P
@@ -365,6 +369,10 @@ static void LoadMemWatch()
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	const int kLabelControls[] = {MW_ValueLabel1,MW_ValueLabel2};
+	int i;
+	int col;
+	RECT r;
+	uint8* rPtr;
 
 	switch(uMsg)
 	{
@@ -377,13 +385,11 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		SelectObject (hdc, hFixedFont);
 		SetTextAlign(hdc,TA_UPDATECP | TA_TOP | TA_LEFT);
 		//find the positions where we should draw string values
-		int i;
 		for(i=0;i<MWNUM;i++) {
-			int col=0;
+			col=0;
 			if(i>=MWNUM/2)
 				col=1;
-			RECT r;
-			uint8* rPtr = (uint8*)&r;
+			rPtr = (uint8*)&r;
 			GetWindowRect(GetDlgItem(hwndDlg,MW_ADDR_Lookup[i]),&r);
 			ScreenToClient(hwndDlg,(LPPOINT)rPtr);
 			ScreenToClient(hwndDlg,(LPPOINT)&r.right);
@@ -475,10 +481,10 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 //Open the Memory Watch dialog
 void CreateMemWatch()
 {
+	int i,j;
 	if(NeedsInit) //Clear the strings
 	{
 		NeedsInit = 0;
-		int i,j;
 		for(i=0;i<24;i++)
 		{
 			for(j=0;j<24;j++)

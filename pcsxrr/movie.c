@@ -75,12 +75,16 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	char readHeader[4];
 	int empty;
 	const char szFileHeader[] = "PXM ";       //file identifier
+	FILE* fd;
+	int nMetaLen;
+	int i;
+	int nCdidsLen;
 
 	tempMovie->movieFilename = (char*)malloc((strlen(szChoice)+1)*sizeof(char));
 	strcpy(tempMovie->movieFilename,szChoice);
 //	tempMovie->movieFilename = szChoice;
 
-	FILE* fd = fopen(tempMovie->movieFilename, "rb");
+	fd = fopen(tempMovie->movieFilename, "rb");
 	if (!fd)
 		return 0;
 
@@ -120,14 +124,12 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	fread(&tempMovie->inputOffset, 1, 4, fd);
 
 	// read metadata
-	int nMetaLen;
 	fread(&nMetaLen, 1, 4, fd);
 
 	if (nMetaLen >= MOVIE_MAX_METADATA)
 		nMetaLen = MOVIE_MAX_METADATA-1;
 
 //	tempMovie->authorInfo = (char*)malloc((nMetaLen+1)*sizeof(char));
-	int i;
 	for(i=0; i<nMetaLen; ++i) {
 		char c = 0;
 		c |= fgetc(fd) & 0xff;
@@ -138,7 +140,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	fseek(fd, tempMovie->cdIdsOffset, SEEK_SET);
 	// read CDs IDs information
 	fread(&tempMovie->CdromCount, 1, 1, fd);                 //total CDs used
-	int nCdidsLen = tempMovie->CdromCount*9;                 //CDs IDs
+	nCdidsLen = tempMovie->CdromCount*9;                 //CDs IDs
 	for(i=0; i<nCdidsLen; ++i) {
 		char c = 0;
 		c |= fgetc(fd) & 0xff;
@@ -153,6 +155,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 
 void MOV_WriteMovieFile()
 {
+	int cdidsLen;
 	fseek(fpMovie, 12, SEEK_SET);
 	fwrite(&Movie.movieFlags, 1, 1, fpMovie);    //flags
 	fseek(fpMovie, 16, SEEK_SET);
@@ -160,7 +163,7 @@ void MOV_WriteMovieFile()
 	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); //rerecord count
 	fseek(fpMovie, Movie.cdIdsOffset, SEEK_SET);
 	fwrite(&Movie.CdromCount, 1, 1, fpMovie);    //total CDs used
-	int cdidsLen = Movie.CdromCount*9;
+	cdidsLen = Movie.CdromCount*9;
 	if (cdidsLen > 0) {
 		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
 		int i;
@@ -184,6 +187,10 @@ static void WriteMovieHeader()
 	int empty=0;
 	unsigned long emuVersion = EMU_VERSION;
 	unsigned long movieVersion = MOVIE_VERSION;
+	int authLen;
+	unsigned char* authbuf;
+	int i;
+	int cdidsLen;
 
 	Movie.movieFlags=0;
 	if (Movie.saveStateIncluded)
@@ -213,11 +220,10 @@ static void WriteMovieHeader()
 	fwrite(&empty, 1, 4, fpMovie);                 //cdIds offset
 	fwrite(&empty, 1, 4, fpMovie);                 //input offset
 
-	int authLen = strlen(Movie.authorInfo);
+	authLen = strlen(Movie.authorInfo);
 	if (authLen > 0) {
 		fwrite(&authLen, 1, 4, fpMovie);             //author info size
-		unsigned char* authbuf = (unsigned char*)malloc(authLen);
-		int i;
+		authbuf = (unsigned char*)malloc(authLen);
 		for(i=0; i<authLen; ++i) {
 			authbuf[i + 0] = Movie.authorInfo[i] & 0xff;
 			authbuf[i + 1] = (Movie.authorInfo[i] >> 8) & 0xff;
@@ -274,7 +280,7 @@ static void WriteMovieHeader()
 
 	Movie.cdIdsOffset = ftell(fpMovie);            //get cdIds offset
 	fwrite(&Movie.CdromCount, 1, 1, fpMovie);      //total CDs used
-	int cdidsLen = Movie.CdromCount*9;
+	cdidsLen = Movie.CdromCount*9;
 	if (cdidsLen > 0) {
 		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
 		int i;
@@ -333,6 +339,7 @@ static int StartRecord()
 
 static int StartReplay()
 {
+	uint32 toRead;
 	SetBytesPerFrame();
 
 	Config.PsxType = Movie.palTiming;
@@ -355,7 +362,7 @@ static int StartReplay()
 	{
 		fseek(fpMovie, Movie.inputOffset, SEEK_SET);
 		Movie.inputBufferPtr = Movie.inputBuffer;
-		uint32 toRead = Movie.bytesPerFrame * (Movie.totalFrames+1);
+		toRead = Movie.bytesPerFrame * (Movie.totalFrames+1);
 		ReserveInputBufferSpace(toRead);
 		fread(Movie.inputBufferPtr, 1, toRead, fpMovie);
 	}
@@ -394,13 +401,17 @@ void MOV_StopMovie()
 	SIO_UnsetTempMemoryCards();
 }
 
-static inline uint8 JoyRead8()
+#ifdef _MSC_VER_
+#define inline __inline
+#endif
+
+inline static uint8 JoyRead8()
 {
 	uint8 v=Movie.inputBufferPtr[0];
 	Movie.inputBufferPtr++;
 	return v;
 }
-static inline uint16 JoyRead16()
+inline static uint16 JoyRead16()
 {
 	uint16 v=(Movie.inputBufferPtr[0] | (Movie.inputBufferPtr[1]<<8));
 	Movie.inputBufferPtr += 2;

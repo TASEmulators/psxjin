@@ -1,5 +1,5 @@
 #include "resource.h"
-#include "PsxCommon.h"
+#include "../PsxCommon.h"
 #include "../cheat.h"
 
 #ifdef WIN32
@@ -137,6 +137,7 @@ BOOL TestRange(int val_type, PCSXCheatDataSize bytes,  uint32 value)
 void PCSXSearchForChange (PCSXCheatComparisonType cmp,PCSXCheatDataSize size, uint8 is_signed, uint8 update)
 {
 	int l;
+	int i;
 
 	switch (size)
 	{
@@ -147,7 +148,6 @@ void PCSXSearchForChange (PCSXCheatComparisonType cmp,PCSXCheatDataSize size, ui
 	case PCSX_32_BITS: l = 3; break;
 	}
 
-	int i;
 	if (is_signed)
 	{
 		for (i = 0; i < 0x200000 - l; i++)
@@ -187,6 +187,7 @@ void PCSXSearchForValue (PCSXCheatComparisonType cmp,
                         uint8 is_signed, uint8 update)
 {
 	int l;
+	int i;
 
 	switch (size)
 	{
@@ -196,8 +197,6 @@ void PCSXSearchForValue (PCSXCheatComparisonType cmp,
 	default:
 	case PCSX_32_BITS: l = 3; break;
 	}
-
-	int i;
 
 	if (is_signed)
 	{
@@ -237,6 +236,7 @@ void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
                           PCSXCheatDataSize size, uint32 value, uint8 update)
 {
 	int l;
+	int i;
 
 	switch (size)
 	{
@@ -246,8 +246,6 @@ void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
 	default:
 	case PCSX_32_BITS: l = 3; break;
 	}
-
-	int i;
 
 	{
 
@@ -269,7 +267,11 @@ void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
 //		BIT_CLEAR (Cheat.SRAM_BITS, i);
 }
 
-static inline int CheatCount(int byteSub)
+#ifdef _MSC_VER_
+#define inline __inline
+#endif
+
+inline static int CheatCount(int byteSub)
 {
 	int a, b=0;
 	for(a=0;a<0x200000-byteSub;a++)
@@ -285,6 +287,10 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 	static struct ICheat* new_cheat;
 	int ret=-1;
 	static HBITMAP hBmp;
+	HDC hdc;
+	HDC hDCbmp;
+	HBITMAP hOldBmp;
+
 	switch(msg)
 	{
 	case WM_INITDIALOG:
@@ -394,17 +400,17 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 		case WM_PAINT:
 		{
 		PAINTSTRUCT ps;
+		RECT r;
 		BeginPaint (hDlg, &ps);
 		if(hBmp)
 		{
 			BITMAP bmp;
 			ZeroMemory(&bmp, sizeof(BITMAP));
-			RECT r;
 			GetClientRect(hDlg, &r);
-			HDC hdc=GetDC(hDlg);
-			HDC hDCbmp=CreateCompatibleDC(hdc);
+			hdc=GetDC(hDlg);
+			hDCbmp=CreateCompatibleDC(hdc);
 			GetObject(hBmp, sizeof(BITMAP), &bmp);
-			HBITMAP hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
+			hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
 			StretchBlt(hdc, 0,0,r.right,r.bottom,hDCbmp,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
 			SelectObject(hDCbmp, hOldBmp);
 			DeleteDC(hDCbmp);
@@ -420,6 +426,7 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 			{
 			case IDOK:
 				{
+					int p;
 					int ret = 0;
 					char buf[23];
 					int temp=new_cheat->size;
@@ -479,7 +486,6 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 						GetDlgItemText(hDlg, IDC_NC_DESC, new_cheat->name, 23);
 
 						new_cheat->enabled=TRUE;
-						int p;
 						for(p=0; p<new_cheat->size; p++)
 						{
 							PCSXAddCheat(new_cheat->enabled, new_cheat->saved_val, new_cheat->address +p, (new_cheat->new_val>>(8*p)));
@@ -517,10 +523,18 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 	static int val_type;
 	static int use_entered;
 	static PCSXCheatComparisonType comp_type;
+	static RECT r;
+	static HDC hdc;
+	static HDC hDCbmp;
+	static HBITMAP hOldBmp;
+
 	switch(msg)
 	{
 		case WM_INITDIALOG:
 		{
+			LVCOLUMN col;
+			char temp[32];
+			int l;
 			if(val_type==0)
 				val_type=1;
 			hBmp=(HBITMAP)LoadImage(NULL, TEXT("Raptor.bmp"), IMAGE_BITMAP, 0,0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
@@ -586,8 +600,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				SendDlgItemMessage(hwndDlg, IDC_4_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
 
-			LVCOLUMN col;
-			char temp[32];
 			strcpy(temp,"Address");
 			ZeroMemory(&col, sizeof(LVCOLUMN));
 			col.mask=LVCF_FMT|LVCF_ORDER|LVCF_TEXT|LVCF_WIDTH;
@@ -623,7 +635,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 
 			ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_ADDYS), 2, &col);
 
-			int l = CheatCount(bytes);
+			l = CheatCount(bytes);
 			ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 
 		}
@@ -644,12 +656,11 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 		{
 			BITMAP bmp;
 			ZeroMemory(&bmp, sizeof(BITMAP));
-			RECT r;
 			GetClientRect(hwndDlg, &r);
-			HDC hdc=GetDC(hwndDlg);
-			HDC hDCbmp=CreateCompatibleDC(hdc);
+			hdc=GetDC(hwndDlg);
+			hDCbmp=CreateCompatibleDC(hdc);
 			GetObject(hBmp, sizeof(BITMAP), &bmp);
-			HBITMAP hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
+			hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
 			StretchBlt(hdc, 0,0,r.right,r.bottom,hDCbmp,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
 			SelectObject(hDCbmp, hOldBmp);
 			DeleteDC(hDCbmp);
@@ -807,6 +818,10 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					else if(nmh->hwndFrom == GetDlgItem(hwndDlg, IDC_ADDYS) && nmh->code == (UINT)LVN_ODFINDITEM)
 					{
 						LRESULT pResult;
+						LPCSTR searchstr;
+						int startPos,currentPos, addrPos;
+						uint32 searchNum;
+						BOOL looped;
 	
 						// pNMHDR has information about the item we should find
 						// In pResult we should save which item that should be selected
@@ -829,14 +844,13 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						}
 	
 						//This is the string we search for
-						LPCSTR searchstr = pFindInfo->lvfi.psz;
-	
-						int startPos = pFindInfo->iStart;
+						searchstr = pFindInfo->lvfi.psz;
+
+						startPos = pFindInfo->iStart;
 						//Is startPos outside the list (happens if last item is selected)
 						if(startPos >= ListView_GetItemCount(GetDlgItem(hwndDlg,IDC_ADDYS)))
 							startPos = 0;
 	
-						int currentPos, addrPos;
 						for(addrPos=0,currentPos=0;addrPos<(0x200000-bytes)&&currentPos<startPos;addrPos++)
 						{
 							if(TEST_BIT(Cheat.ALL_BITS, addrPos))
@@ -852,14 +866,14 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						while(searchstr[0] == '0' && searchstr[1] != '\0')
 							searchstr++;
 	
-						uint32 searchNum = 0;
+						searchNum = 0;
 	
 						ScanAddress(searchstr,&searchNum);
 	
 //						if (searchstr[0] != '7')
 //							break; // all searchable addresses begin with a 7
 	
-						BOOL looped = FALSE;
+						looped = FALSE;
 	
 						// perform search
 						do
@@ -1111,7 +1125,8 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 
 
 			case IDC_C_SEARCH:
-				{
+			{
+				int l;
 				val_type=0;
 
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN))
@@ -1144,9 +1159,9 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				   BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTEREDADDRESS))
 				{
 					char buf[20];
-					GetDlgItemText(hwndDlg, IDC_VALUE_ENTER, buf, 20);
 					uint32 value;
 					int ret;
+					GetDlgItemText(hwndDlg, IDC_VALUE_ENTER, buf, 20);
 					if(use_entered==2)
 					{
 //						ScanAddress(buf, &value);
@@ -1175,7 +1190,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				{
 					PCSXSearchForChange (comp_type,bytes, (val_type==2), FALSE);
 				}
-				int l = CheatCount(bytes);
+				l = CheatCount(bytes);
 				ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 				}
 
