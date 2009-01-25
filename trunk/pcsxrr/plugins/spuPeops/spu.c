@@ -1274,7 +1274,7 @@ char * SPUgetLibInfos(void)
 #ifdef _WINDOWS
 void CALLBACK SPUstartWav(char* filename)
 {
-	strcpy (szRecFileName,filename);
+	strncpy(szRecFileName,filename,260);
 	iDoRecord=1;
 	RecordStart();
 }

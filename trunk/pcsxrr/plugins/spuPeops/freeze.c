@@ -90,7 +90,7 @@ long CALLBACK SPUfreeze(unsigned long ulFreezeMode,SPUFreeze_t * pF)
 		if (ulFreezeMode==1)
 			memset(pF,0,sizeof(SPUFreeze_t)+sizeof(SPUOSSFreeze_t));
 
-		strcpy(pF->szSPUName,"PBOSS");
+		strncpy(pF->szSPUName,"PBOSS",8);
 		pF->ulFreezeVersion=5;
 		pF->ulFreezeSize=sizeof(SPUFreeze_t)+sizeof(SPUOSSFreeze_t);
 

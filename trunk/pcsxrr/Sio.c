@@ -710,8 +710,9 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 	unsigned long embMcdSize;
 	FILE* fp;
 	FILE* fp2;
-
-	char embMcdTmp[fileOffsetEnd-fileOffsetBegin];
+	gzFile fs;
+	uint8 * data;
+	char * embMcdTmp=(char *)malloc(fileOffsetEnd-fileOffsetBegin);
 
 	//read embedded mcd size and full compressed mcd file
 	fp = fopen(moviefile,"rb");
@@ -726,10 +727,11 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 	fclose(fp2);
 
 	//open temp compressed mcd file and uncompress it
-	gzFile fs = gzopen("movie_mcd.tmp", "rb");
+	fs = gzopen("movie_mcd.tmp", "rb");
 	if (!fs)
 		return 1;
-	uint8 data[embMcdSize];
+
+	data=(uint8 *)malloc(embMcdSize);
 	gzread(fs, (void *) data, embMcdSize);
 	gzclose(fs);
 	remove("movie_mcd.tmp");

@@ -430,6 +430,9 @@ static void recError() {
 }
 
 __inline static void execute() {
+	void (**recFunc)();
+	char *p;
+
 	if (flagDontPause) { // emulate
 		if (flagVSync) {
 			#ifdef WIN32
@@ -440,9 +443,6 @@ __inline static void execute() {
 			#endif
 		}
 		flagVSync = 0;
-
-		void (**recFunc)();
-		char *p;
 
 		p =	(char*)PC_REC(psxRegs.pc);
 		if (p != NULL) recFunc = (void (**)()) (u32)p;

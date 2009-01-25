@@ -40,19 +40,22 @@
 // defines/libs, therefore I've decided to use the mingw headers and 
 // the d3dx.lib (old libs: d3dim.lib dxguid.lib)
 
+#ifdef __MINGW32__
 #include <ddraw.h>
 #include <d3d.h>
-
-//#include "mingw_ddraw.h"                       
-//#include "mingw_d3dtypes.h"
-//#include "mingw_d3d.h"
-                                                       
+#else
+#include "mingw_ddraw.h"                       
+#include "mingw_d3dtypes.h"
+#include "mingw_d3d.h"
+#endif
 
 // stupid intel compiler warning on extern __inline funcs
 //#pragma warning (disable:864)
 // disable stupid MSVC2005 warnings as well...
-//#pragma warning (disable:4996)
-//#pragma warning (disable:4244)
+#ifndef __MINGW32__
+#pragma warning (disable:4996)
+#pragma warning (disable:4244)
+#endif
 
 // enable that for auxprintf();
 //#define SMALLDEBUG

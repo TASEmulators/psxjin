@@ -440,20 +440,21 @@ void CALLBACK GPUmakeSnapshot(void)
 
 void makeCleanSnapshot(void)                    // snapshot of current screen
 {
+	char sendThisText[50];
 	FILE *bmpfile;
 	char filename[256];     
 	unsigned char header[0x36];
 	long size,height,width,start_x,start_y;
-	width=PSXDisplay.DisplayModeNew.x;
-	height=PSXDisplay.DisplayModeNew.y;
-	unsigned char line[width*3];
+	unsigned char * line;
 	short i,j;
 	unsigned char empty[2]={0,0};
 	unsigned short color;
 	unsigned long snapshotnr = 0;
 	start_x = PSXDisplay.DisplayPosition.x;
 	start_y = PSXDisplay.DisplayPosition.y;
-
+	width=PSXDisplay.DisplayModeNew.x;
+	height=PSXDisplay.DisplayModeNew.y;
+	line = (unsigned char*) malloc(width*3);
 	size=height*width*3+0x38;
 	
 	// fill in proper values for BMP
@@ -514,7 +515,6 @@ void makeCleanSnapshot(void)                    // snapshot of current screen
 	fwrite(empty,0x2,1,bmpfile);
 	fclose(bmpfile);  
 
-	char sendThisText[50];
 	sprintf(sendThisText,"Snap saved as \"snap_%03lu.bmp\".",snapshotnr);
 	GPUdisplayText(sendThisText);
 }

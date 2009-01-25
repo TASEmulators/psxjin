@@ -176,11 +176,12 @@ static char* RealKeyName(int c)
 // Update which command is using which key
 static int MHkeysUseUpdate()
 {
+	char tempTxt[256];
+	unsigned int i;
+
 	if (hMHkeysList == NULL) {
 		return 1;
 	}
-	char tempTxt[256];
-	unsigned int i;
 
 	// Update the values of all the inputs
 	for (i = 0; i < EMUCMDMAX; i++) {
@@ -238,6 +239,8 @@ static int MHkeysListBegin()
 // Make a list view of the game inputs
 int MHkeysListMake(int bBuild)
 {
+	unsigned int i;
+
 	if (hMHkeysList == NULL) {
 		return 1;
 	}
@@ -247,7 +250,6 @@ int MHkeysListMake(int bBuild)
 		SendMessage(hMHkeysList, LVM_DELETEALLITEMS, 0, 0);
 	}
 
-	unsigned int i;
 	// Add all the input names to the list
 	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
@@ -300,6 +302,7 @@ static int MHkeysExit()
 }
 
 static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
+	static HWND statusText;
 	if (code < 0) {
 		return CallNextHookEx(hook, code, wParam, lParam);
 	}
@@ -316,7 +319,6 @@ static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
 	else
 		EmuCommandTable[receivingKmap].keymod = 0;
 
-	static HWND statusText;
 	statusText = GetDlgItem(hMHkeysDlg, IDC_HKEYSS_STATIC);
 	EmuCommandTable[receivingKmap].key = wParam;
 	MHkeysUseUpdate();

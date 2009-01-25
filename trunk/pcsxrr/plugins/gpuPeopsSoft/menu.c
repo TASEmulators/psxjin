@@ -258,6 +258,8 @@ void DisplayInput(void)
 
 void BuildDispMenu(int iInc)
 {
+ unsigned char nStatusSymbols[3] = {0x3D, 0x34, 0x3B};
+ int j = 0;int i = 0;
  if(!(ulKeybits&KEY_SHOWFPS)) return;                  // mmm, cheater ;)
 
  iMPos+=iInc;                                          // up or down
@@ -289,9 +291,7 @@ if (modeFlags&MODE_FLAG_REPLAY)
 else
 	sprintf( cCurrentFrame,"%d", currentFrame);
 
-unsigned char nStatusSymbols[3] = {0x3D, 0x34, 0x3B};
 memset(cCurrentMode, 0, sizeof(cCurrentMode));
-int j = 0;int i = 0;
 for (i = 0; i < 3; i++) {
 	if (modeFlags & (1 << (i+1))) {
 		cCurrentMode[j] = nStatusSymbols[i];

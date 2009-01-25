@@ -161,7 +161,7 @@ int GetCdromFile(u8 *mdir, u8 *time, s8 *filename) {
 		i += dir->length[0];
 
 		if (dir->flags[0] & 0x2) { // it's a dir
-			if (!strnicmp((char*)&dir->name[0], filename, dir->name_len[0])) {
+			if (!_strnicmp((char*)&dir->name[0], filename, dir->name_len[0])) {
 				if (filename[dir->name_len[0]] != '\\') continue;
 				
 				filename+= dir->name_len[0] + 1;
@@ -171,7 +171,7 @@ int GetCdromFile(u8 *mdir, u8 *time, s8 *filename) {
 				i = 0;
 			}
 		} else {
-			if (!strnicmp((char*)&dir->name[0], filename, strlen(filename))) {
+			if (!_strnicmp((char*)&dir->name[0], filename, strlen(filename))) {
 				mmssdd(dir->extent, (char*)time);
 				break;
 			}
@@ -257,6 +257,7 @@ int LoadCdromFile(char *filename, EXE_HEADER *head) {
 	u8 time[4],*buf;
 	u8 mdir[4096], exename[256];
 	u32 size, addr;
+	void *addrMem;
 
 	sscanf(filename, "cdrom:\\%s", exename);
 
@@ -283,7 +284,7 @@ int LoadCdromFile(char *filename, EXE_HEADER *head) {
 		incTime();
 		READTRACK();
 
-		void *addrMem = (void *)PSXM(addr);
+		addrMem = (void *)PSXM(addr);
 		memcpy(addrMem, buf+12, 2048);
 
 		size -= 2048;
@@ -608,7 +609,7 @@ int LoadStateEmbed(char *file) {
 
 	FILE* fp;
 	FILE* fp2;
-	char embSaveTmp[Movie.memoryCard1Offset-Movie.saveStateOffset];
+	char * embSaveTmp=(char *)malloc(Movie.memoryCard1Offset-Movie.saveStateOffset);
 	fp = fopen(file,"rb");
 	fp2 = fopen("embsave.tmp","wb");
 	fseek(fp, Movie.saveStateOffset, SEEK_SET);

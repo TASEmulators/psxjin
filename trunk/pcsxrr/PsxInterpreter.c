@@ -44,6 +44,7 @@ static u32 branchPC;
 #include "Win32.h"
 #define execI() \
 { \
+	u32 *code; \
 	if (flagDontPause) \
 	{ \
 		if (flagVSync) { \
@@ -54,7 +55,7 @@ static u32 branchPC;
 		} \
 		flagVSync = 0; \
  \
-		u32 *code = PSXM(psxRegs.pc); \
+		code = PSXM(psxRegs.pc); \
 		psxRegs.code = code == NULL ? 0 : *code; \
 		debugI(); \
 		psxRegs.pc+= 4; psxRegs.cycle++; \

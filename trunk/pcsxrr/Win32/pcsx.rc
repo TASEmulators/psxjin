@@ -362,7 +362,13 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+
+#ifdef __MINGW32__
 IDI_APP_ICON            ICON    DISCARDABLE     ".\\win32\\Cdrom02.ico"
+#else
+IDI_APP_ICON            ICON    DISCARDABLE     "Cdrom02.ico"
+#endif
+
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 

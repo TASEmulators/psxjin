@@ -1573,7 +1573,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 		if (! MOV_ReadMovieFile(szFilename,&Movie) ) {
 			char errorMessage[300];
 			sprintf(errorMessage, "Movie file \"%s\" doesn't exist.",szFilename);
-			MessageBox(NULL, errorMessage, NULL, NULL);
+			MessageBox(NULL, errorMessage, NULL, MB_ICONERROR);
 			return;
 		}
 		GetMovieFilenameMini(Movie.movieFilename);
@@ -1633,12 +1633,17 @@ void WIN32_StartMovieRecord()
 
 void WIN32_StartAviRecord()
 {
-	if (Movie.capture)
-		return;
 	char nameo[256];
-
 	const char filter[]="AVI Files (*.avi)\0*.avi\0";
 	OPENFILENAME ofn;
+	char fszDrive[256];
+	char fszDirectory[256];
+	char fszFilename[256];
+	char fszExt[256];
+
+	if (Movie.capture)
+		return;
+
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=gApp.hInstance;
@@ -1667,10 +1672,6 @@ void WIN32_StartAviRecord()
 
 	Movie.capture = 1;
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
-	char fszDrive[256];
-	char fszDirectory[256];
-	char fszFilename[256];
-	char fszExt[256];
 	fszDrive[0] = '\0';
 	fszDirectory[0] = '\0';
 	fszFilename[0] = '\0';
