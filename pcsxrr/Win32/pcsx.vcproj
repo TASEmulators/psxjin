@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="pcsx"
 	ProjectGUID="{66893A12-B867-4F74-B698-38DB297CDDA5}"
 	>
@@ -147,7 +147,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../;./"
+				AdditionalIncludeDirectories="../;./;../ExtraLibs"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -178,6 +178,7 @@
 				OutputFile=".\Release/pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="../ExtraLibs"
 				ProgramDatabaseFile=".\Release/pcsx.pdb"
 				SubSystem="2"
 				TargetMachine="1"
