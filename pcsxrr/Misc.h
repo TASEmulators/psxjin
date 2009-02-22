@@ -42,8 +42,8 @@ typedef struct {
     unsigned long SavedS0;
 } EXE_HEADER;
 
-char CdromId[9];
-char CdromLabel[11];
+char CdromId[10];
+char CdromLabel[33];
 
 int LoadCdrom();
 int LoadCdromFile(char *filename, EXE_HEADER *head);

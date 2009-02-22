@@ -83,8 +83,8 @@ typedef void (CALLBACK* GPUupdateframe)(void);
 typedef void (CALLBACK* GPUsetcurrentmode)(char);
 typedef void (CALLBACK* GPUsetspeedmode)(unsigned long);
 typedef void (CALLBACK* GPUshowframecounter)(void);
-typedef void (CALLBACK* GPUstartAvi)(char* filename);
-typedef void (CALLBACK* GPUstopAvi)(void);
+typedef long (CALLBACK* GPUstartAvi)(char* filename);
+typedef long (CALLBACK* GPUstopAvi)(void);
 
 //plugin stuff From Shadow
 // *** walking in the valley of your darking soul i realize that i was alone
@@ -211,8 +211,8 @@ typedef struct {
 } SPUFreeze_t;
 typedef long (CALLBACK* SPUfreeze)(unsigned long, SPUFreeze_t *);
 typedef void (CALLBACK* SPUasync)(unsigned long);
-typedef void (CALLBACK* SPUstartWav)(char*);
-typedef void (CALLBACK* SPUstopWav)(void);
+typedef long (CALLBACK* SPUstartWav)(char*);
+typedef long (CALLBACK* SPUstopWav)(void);
 
 //SPU POINTERS
 SPUconfigure        SPU_configure;
@@ -308,8 +308,8 @@ typedef long (CALLBACK* NETrecvPadData)(void *, int);
 
 typedef struct {
 	char EmuName[32];
-	char CdromID[9];	// ie. 'SCPH12345', no \0 trailing character
-	char CdromLabel[11];
+	char CdromID[10];	// ie. 'SCPH12345', no \0 trailing character
+	char CdromLabel[33];
 	void *psxMem;
 	GPUshowScreenPic GPU_showScreenPic;
 	GPUdisplayText GPU_displayText;

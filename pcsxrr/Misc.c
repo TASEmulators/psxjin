@@ -305,7 +305,10 @@ int CheckCdrom() {
 
 	READTRACK();
 
-	strncpy(CdromLabel, (char*)buf+52, 11);
+	CdromLabel[32]=0;
+	CdromId[9]=0;
+
+	strncpy(CdromLabel, (char*)buf+52, 32);
 
 	// skip head and sub, and go to the root directory record
 	dir = (struct iso_directory_record*) &buf[12+156]; 
@@ -350,10 +353,10 @@ int CheckCdrom() {
 	}
 	psxUpdateVSyncRate();
 	if (CdromLabel[0] == ' ') {
-		strcpy(CdromLabel, CdromId);
+		strncpy(CdromLabel, CdromId, 9);
 	}
-	SysPrintf("*PCSX*: CdromLabel: %s\n", CdromLabel);
-	SysPrintf("*PCSX*: CdromId: %s\n", CdromId);
+	SysPrintf("CD-ROM Label: %.32s\n", CdromLabel);
+	SysPrintf("CD-ROM ID: %.9s\n", CdromId);
 
 	return 0;
 }
@@ -451,6 +454,9 @@ int SaveState(char *file) {
 	gzwrite(f, psxH, 0x00010000);
 	gzwrite(f, (void*)&psxRegs, sizeof(psxRegs));
 
+	if (Config.HLE)
+		psxBiosFreeze(1);
+
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
@@ -505,6 +511,9 @@ int LoadState(char *file) {
 	gzread(f, psxH, 0x00010000);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
 
+	if (Config.HLE)
+		psxBiosFreeze(0);
+
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
@@ -549,6 +558,7 @@ int CheckState(char *file) {
 
 	return 0;
 }
+
 int SaveStateEmbed(char *file) {
 	gzFile f;
 	GPUFreeze_t *gpufP;
@@ -571,6 +581,9 @@ int SaveStateEmbed(char *file) {
 	gzwrite(f, psxR, 0x00080000);
 	gzwrite(f, psxH, 0x00010000);
 	gzwrite(f, (void*)&psxRegs, sizeof(psxRegs));
+
+	if (Config.HLE)
+		psxBiosFreeze(1);
 
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
@@ -633,6 +646,9 @@ int LoadStateEmbed(char *file) {
 	gzread(f, psxR, 0x00080000);
 	gzread(f, psxH, 0x00010000);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
+
+	if (Config.HLE)
+		psxBiosFreeze(0);
 
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
