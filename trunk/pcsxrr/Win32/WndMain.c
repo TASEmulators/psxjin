@@ -531,6 +531,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					ConfigurePlugins(hWnd);
 					return TRUE;
 
+				case ID_HELP_TUTORIAL:
+					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
+					break;
+
 				case ID_HELP_HELP:
 					ShellExecute(NULL, "open", "pcsx-rr-instructions.txt", NULL, NULL, SW_SHOWNORMAL);
 					return TRUE;
@@ -1346,7 +1350,7 @@ int Open_File_Proc(char *file) {
 
 void CreateMainMenu() {
 	MENUITEMINFO item;
-	HMENU submenu[3];
+	HMENU submenu[256];
 	char buf[256];
 
 	item.cbSize = sizeof(MENUITEMINFO);
@@ -1397,7 +1401,8 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Help"));
 	ADDMENUITEM(0, _("&About..."), ID_HELP_ABOUT);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&Help"), ID_HELP_HELP);
+	ADDMENUITEM(0, _("&TAS Help"), ID_HELP_HELP);
+	ADDMENUITEM(0, _("&Quick Tutorial"), ID_HELP_TUTORIAL);
 
 	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 }
@@ -1424,7 +1429,7 @@ void CreateMainWindow(int nCmdShow) {
 
 	hWnd = CreateWindow("PCSX Main",
 						"PCSX-RR v0.0.7",
-						WS_OVERLAPPED | WS_SYSMENU,
+						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						20,
 						20,
 						320,

@@ -80,9 +80,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	int i;
 	int nCdidsLen;
 
-	tempMovie->movieFilename = (char*)malloc((strlen(szChoice)+1)*sizeof(char));
-	strcpy(tempMovie->movieFilename,szChoice);
-//	tempMovie->movieFilename = szChoice;
+	strncpy(tempMovie->movieFilename,szChoice,256);
 
 	fd = fopen(tempMovie->movieFilename, "rb");
 	if (!fd)

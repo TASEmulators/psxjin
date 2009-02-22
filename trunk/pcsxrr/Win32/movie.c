@@ -45,7 +45,7 @@ void GetMovieFilenameMini(char* filenameMini)
 	fszExt[0] = '\0';
 	_splitpath(filenameMini, fszDrive, fszDirectory, fszFilename, fszExt);
 
-	strcpy(Movie.movieFilenameMini, fszFilename);
+	strncpy(Movie.movieFilenameMini, fszFilename, 256);
 }
 
 static char* GetRecordingPath(char* szPath)
@@ -64,8 +64,8 @@ static char* GetRecordingPath(char* szPath)
 		char szTmpPath[256];
 		sprintf(szTmpPath, "%smovies\\", szCurrentPath);
 		strncpy(szTmpPath + strlen(szTmpPath), szPath, 256 - strlen(szTmpPath));
-		szTmpPath[256-1] = '\0';
-		strcpy(szPath, szTmpPath);
+		szTmpPath[255] = '\0';
+		strncpy(szPath, szTmpPath, 256);
 	}
 
 	return szPath;
@@ -86,7 +86,6 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	char szUndoCountString[32];
 	char szStartFrom[128];
 	char szUsedCdrom[10];
-	char szCurrentCdrom[10];
 	char szExtras[128];
 
 	// set default values
@@ -177,11 +176,10 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	SetDlgItemTextA(hDlg, IDC_REPLAYRESET, szStartFrom);
 
 	//cd-rom ids
-	_snprintf(szUsedCdrom, 10, "%s", dataMovie.CdromIds);
-	_snprintf(szCurrentCdrom, 10, "%s", CdromId);
-
+	sprintf(szUsedCdrom, "%9.9s", dataMovie.CdromIds);
 	SetDlgItemTextA(hDlg, IDC_USEDCDROM, szUsedCdrom);
-	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, szCurrentCdrom);
+
+	SetDlgItemTextA(hDlg, IDC_CURRENTCDROM, CdromId);
 
 	//cheats? hacks?
 	if (dataMovie.cheatListIncluded && dataMovie.irqHacksIncluded)
@@ -375,11 +373,11 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 //		sprintf(szFilename, "%.8s.pxm", BurnDrvGetText(DRV_NAME));
 		//TODO: make it use the CD label name?
 		sprintf(szFilename, "%.8s.pxm", defaultFilename);
-		strcpy(szPath, szFilename);
+		strncpy(szPath, szFilename, 256);
 		while(VerifyRecordingAccessMode(szPath, 0) == 1) {
 //			sprintf(szFilename, _T("%.8s-%d.pxm"), BurnDrvGetText(DRV_NAME), ++i);
 			sprintf(szFilename, "%.8s-%d.pxm", defaultFilename, ++i);
-			strcpy(szPath, szFilename);
+			strncpy(szPath, szFilename, 256);
 		}
 
 		SetDlgItemText(hDlg, IDC_FILENAME, szFilename);
@@ -429,9 +427,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 				{
 					//save movie filename stuff
 					GetDlgItemText(hDlg, IDC_FILENAME, szChoice, 256);
-					Movie.movieFilename = (char*)malloc((strlen(GetRecordingPath(szChoice))+1)*sizeof(char));
-					strcpy(Movie.movieFilename,GetRecordingPath(szChoice));
-//					Movie.movieFilename = GetRecordingPath(szChoice);
+					strncpy(Movie.movieFilename,GetRecordingPath(szChoice),256);
 					GetMovieFilenameMini(Movie.movieFilename);
 
 					//save author info
@@ -515,7 +511,7 @@ static BOOL CALLBACK CdChangeDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPAR
 {
 	if (Msg == WM_INITDIALOG && Movie.mode == 2) {
 		char tmpText[32];
-		char tmpCdromId[9];
+		char tmpCdromId[10];
 		memcpy(tmpCdromId,Movie.CdromIds+((Movie.currentCdrom-1)*9),9);
 		sprintf(tmpText, "Please insert Disc %d (%9.9s).", Movie.currentCdrom, tmpCdromId);
 		SetDlgItemTextA(hDlg, IDC_FILENAME, tmpText);

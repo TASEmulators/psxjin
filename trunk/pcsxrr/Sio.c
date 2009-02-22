@@ -612,7 +612,7 @@ void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
 	strncpy(Info->ID, ptr, 12);
 	Info->ID[12] = 0;
 	ptr+= 12;
-	strcpy(Info->Name, ptr);
+	strncpy(Info->Name, ptr, 16);
 }
 
 int sioFreeze(gzFile f, int Mode) {
@@ -637,20 +637,20 @@ int sioFreeze(gzFile f, int Mode) {
 
 static void SetTempMemoryCard(char slot) {
 	if (slot == 1) {
-		strcpy(Config.OldMcd1, Config.Mcd1);
-		strcpy(Config.Mcd1, "memcards\\movie001.tmp");
+		strncpy(Config.OldMcd1, Config.Mcd1, 256);
+		strncpy(Config.Mcd1, "memcards\\movie001.tmp", 256);
 	}
 	else {
-		strcpy(Config.OldMcd2, Config.Mcd2);
-		strcpy(Config.Mcd2, "memcards\\movie002.tmp");
+		strncpy(Config.OldMcd2, Config.Mcd2, 256);
+		strncpy(Config.Mcd2, "memcards\\movie002.tmp", 256);
 	}
 }
 
 void SIO_UnsetTempMemoryCards() {
 	remove("memcards\\movie001.tmp");
 	remove("memcards\\movie002.tmp");
-	strcpy(Config.Mcd1, Config.OldMcd1);
-	strcpy(Config.Mcd2, Config.OldMcd2);
+	strncpy(Config.Mcd1, Config.OldMcd1, 256);
+	strncpy(Config.Mcd2, Config.OldMcd2, 256);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 }
 
