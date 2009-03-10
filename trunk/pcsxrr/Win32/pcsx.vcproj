@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="pcsx"
 	ProjectGUID="{66893A12-B867-4F74-B698-38DB297CDDA5}"
+	RootNamespace="pcsx"
 	>
 	<Platforms>
 		<Platform
@@ -47,8 +48,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../;./"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
+				AdditionalIncludeDirectories="../;./;../ExtraLibs"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\Debug/pcsx.pch"
@@ -76,6 +77,7 @@
 				OutputFile=".\Debug/pcsx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="../ExtraLibs"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/pcsx.pdb"
 				SubSystem="2"
