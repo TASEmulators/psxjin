@@ -885,7 +885,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								pResult = currentPos;
 								break;
 							}
-							else if(addrPos > searchNum)
+							else if(addrPos > (int)searchNum)
 							{
 								if(looped)
 								{
