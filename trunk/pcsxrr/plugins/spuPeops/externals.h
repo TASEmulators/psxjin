@@ -227,6 +227,7 @@ extern unsigned char * pSpuBuffer;
 extern int        iUseXA;
 extern int        iVolume;
 extern int        iXAPitch;
+extern int        iUseTimer;
 extern int        iSPUIRQWait;
 extern int        iNoDesyncMode;
 extern int        iRecordMode;

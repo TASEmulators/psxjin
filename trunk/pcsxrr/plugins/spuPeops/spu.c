@@ -109,7 +109,7 @@
 
 const unsigned char version  = 1;
 const unsigned char revision = 0;
-const unsigned char build    = 1;
+const unsigned char build    = 2;
 #ifdef _WINDOWS
 static char * libraryName     = "TAS Sound Plugin";
 #else
@@ -140,6 +140,7 @@ unsigned char * pMixIrq=0;
 int             iUseXA=1;
 int             iVolume=3;
 int             iXAPitch=0;
+int             iUseTimer=0;
 int             iSPUIRQWait=1;
 int             iNoDesyncMode=1;
 int             iRecordMode=0;
@@ -167,6 +168,7 @@ int             bSPUIsOpen=0;
 #ifdef _WINDOWS
 HWND    hWMain=0;                                      // window handle
 HWND    hWRecord=0;
+static HANDLE   hMainThread;                           
 #else
 // 2003/06/07 - Pete
 #ifndef NOTHREADLIB
@@ -577,9 +579,17 @@ static void *MAINThread(void *arg)
 			iSecureStart=0;                                   // reset secure
 
 #ifdef _WINDOWS
-			return;                                          // and done this time (timer mode 2)
+     if(iUseTimer)                                     // no-thread mode?
+      {
+       if(iUseTimer==1)                                // -> ok, timer mode 1: setup a oneshot timer of x ms to wait
+        timeSetEvent(PAUSE_W,1,MAINProc,0,TIME_ONESHOT);
+       return;                                         // -> and done this time (timer mode 1 or 2)
+      }
+                                                       // win thread mode:
+     Sleep(PAUSE_W);                                   // sleep for x ms (win)
 #else
-			return 0;                                         // linux no-thread mode? bye
+     if(iUseTimer) return 0;                           // linux no-thread mode? bye
+     usleep(PAUSE_L);                                  // else sleep for x ms (linux)
 #endif
 
 			if (dwNewChannel) iSecureStart=1;                 // if a new channel kicks in (or, of course, sound buffer runs low), we will leave the loop
@@ -723,6 +733,19 @@ static void *MAINThread(void *arg)
 							if (bIRQReturn)                           // special return for "spu irq - wait for cpu action"
 							{
 								bIRQReturn=0;
+               if(iUseTimer!=2)
+                { 
+                 DWORD dwWatchTime=timeGetTime()+2500;
+                 while(iSpuAsyncWait && !bEndThread && 
+                       timeGetTime()<dwWatchTime)
+#ifdef _WINDOWS
+                     Sleep(1);
+#else
+                     usleep(1000L);
+#endif
+                }
+               else
+                {
 								lastch=ch;
 								lastns=ns;
 
@@ -732,11 +755,11 @@ static void *MAINThread(void *arg)
 								return 0;
 #endif
 							}
+              }
 
 							////////////////////////////////////////////
 
-GOON:
-							;
+GOON: ;
 
 						}
 
@@ -783,8 +806,7 @@ GOON:
 					pChannel->spos += pChannel->sinc;
 
 				}
-ENDX:
-				;
+ENDX:   ;                                                      
 			}
 		}
 
@@ -917,6 +939,18 @@ ENDX:
 }
 
 ////////////////////////////////////////////////////////////////////////
+// WINDOWS THREAD... simply calls the timer func and stays forever :)
+////////////////////////////////////////////////////////////////////////
+#ifdef _WINDOWS
+DWORD WINAPI MAINThreadEx(LPVOID lpParameter)
+{
+ MAINProc(0,0,0,0,0);
+ return 0;
+}
+#endif
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 // SPU ASYNC... even newer epsxe func
 //  1 time every 'cycle' cycles... harhar
 ////////////////////////////////////////////////////////////////////////
@@ -939,6 +973,8 @@ void CALLBACK SPUasync(unsigned long cycle)
 	}
 #endif
 
+ if(iUseTimer==2)                                      // special mode, only used in Linux by this spu (or if you enable the experimental Windows mode)
+  {
 	if (!bSpuInit) return;                              // -> no init, no call
 
 #ifdef _WINDOWS
@@ -946,6 +982,7 @@ void CALLBACK SPUasync(unsigned long cycle)
 #else
 	MAINThread(0);                                      // -> linux high-compat mode
 #endif
+}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1013,6 +1050,30 @@ void SetupTimer(void)
 	bEndThread=0;                                         // init thread vars
 	bThreadEnded=0;
 	bSpuInit=1;                                           // flag: we are inited
+#ifdef _WINDOWS
+ if(iUseTimer==1)                                      // windows: use timer
+  {
+   timeBeginPeriod(1);
+   timeSetEvent(1,1,MAINProc,0,TIME_ONESHOT);
+  }
+ else 
+ if(iUseTimer==0)                                      // windows: use thread
+  {
+   //_beginthread(MAINThread,0,NULL);
+   DWORD dw;
+   hMainThread=CreateThread(NULL,0,MAINThreadEx,0,0,&dw);
+   SetThreadPriority(hMainThread,
+                     //THREAD_PRIORITY_TIME_CRITICAL);
+                     THREAD_PRIORITY_HIGHEST);
+  }
+#else
+#ifndef NOTHREADLIB
+ if(!iUseTimer)                                        // linux: use thread
+  {
+   pthread_create(&thread, NULL, MAINThread, NULL);
+  }
+#endif
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1023,6 +1084,23 @@ void RemoveTimer(void)
 {
 	bEndThread=1;                                         // raise flag to end thread
 
+#ifdef _WINDOWS
+ if(iUseTimer!=2)                                      // windows thread?
+  {
+   while(!bThreadEnded) {Sleep(5L);}                   // -> wait till thread has ended
+   Sleep(5L);
+  }
+ if(iUseTimer==1) timeEndPeriod(1);                    // windows timer? stop it
+#else
+#ifndef NOTHREADLIB
+ if(!iUseTimer)                                        // linux tread?
+  {
+   int i=0;
+   while(!bThreadEnded && i<2000) {usleep(1000L);i++;} // -> wait until thread has ended
+   if(thread!=-1) {pthread_cancel(thread);thread=-1;}  // -> cancel thread anyway
+  }
+#endif
+#endif
 	bThreadEnded=0;                                       // no more spu is running
 	bSpuInit=0;
 }
