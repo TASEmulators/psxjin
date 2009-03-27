@@ -619,15 +619,17 @@ int LoadStateEmbed(char *file) {
 	SPUFreeze_t *spufP;
 	int Size;
 	char header[32];
-
 	FILE* fp;
 	FILE* fp2;
-	char * embSaveTmp=(char *)malloc(Movie.memoryCard1Offset-Movie.saveStateOffset);
+	uint8 * embSaveTmp;
+	size_t blockSize = Movie.memoryCard1Offset-Movie.saveStateOffset;
+
+	embSaveTmp = (uint8*)malloc(blockSize);
 	fp = fopen(file,"rb");
 	fp2 = fopen("embsave.tmp","wb");
 	fseek(fp, Movie.saveStateOffset, SEEK_SET);
-	fread(embSaveTmp, 1, sizeof(embSaveTmp), fp);
-	fwrite(embSaveTmp, 1, sizeof(embSaveTmp), fp2);
+	fread(embSaveTmp, 1, blockSize, fp);
+	fwrite(embSaveTmp, 1, blockSize, fp2);
 	fclose(fp);
 	fclose(fp2);
 
