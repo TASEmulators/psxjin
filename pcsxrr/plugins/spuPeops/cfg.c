@@ -98,7 +98,8 @@ void ReadConfig(void)
 
 	iUseXA=1;                                             // init vars
 	iVolume=3;
-	iXAPitch=1;
+	iXAPitch=0;
+	iUseTimer=0;
 	iSPUIRQWait=0;
 	iNoDesyncMode=1;
 	iRecordMode=0;
@@ -107,7 +108,7 @@ void ReadConfig(void)
 	iDisStereo=0;
 	iUseDBufIrq=0;
 
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\Vision Thing\\PSEmu Pro\\SPU\\PeopsSound",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\SPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
 	{
 		size = 4;
 		if (RegQueryValueEx(myKey,"UseXA",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
@@ -118,6 +119,9 @@ void ReadConfig(void)
 		size = 4;
 		if (RegQueryValueEx(myKey,"XAPitch",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iXAPitch=(int)temp;
+		size = 4;
+		if(RegQueryValueEx(myKey,"UseTimer",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
+			iUseTimer=(int)temp;
 		size = 4;
 		if (RegQueryValueEx(myKey,"SPUIRQWait",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iSPUIRQWait=(int)temp;
@@ -143,6 +147,7 @@ void ReadConfig(void)
 		RegCloseKey(myKey);
 	}
 
+ if(iUseTimer>MAXMODE) iUseTimer=MAXMODE;              // some checks
 	if (iVolume<1) iVolume=1;
 	if (iVolume>5) iVolume=5;
 }
@@ -157,13 +162,15 @@ void WriteConfig(void)
 	DWORD myDisp;
 	DWORD temp;
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Vision Thing\\PSEmu Pro\\SPU\\PeopsSound",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\SPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
 	temp=iUseXA;
 	RegSetValueEx(myKey,"UseXA",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iVolume;
 	RegSetValueEx(myKey,"Volume",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iXAPitch;
 	RegSetValueEx(myKey,"XAPitch",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
+ temp=iUseTimer;
+ RegSetValueEx(myKey,"UseTimer",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iSPUIRQWait;
 	RegSetValueEx(myKey,"SPUIRQWait",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iNoDesyncMode;
@@ -198,8 +205,10 @@ BOOL OnInitDSoundDialog(HWND hW)
 	if (iXAPitch)    CheckDlgButton(hW,IDC_XAPITCH,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USETIMER);
-	tempDest=ComboBox_AddString(hWC, "0: Use SPUasync");
-	tempDest=ComboBox_SetCurSel(hWC,0);
+	tempDest=ComboBox_AddString(hWC, "0: Fast mode (thread, recommended for PCSX-RR)");
+	tempDest=ComboBox_AddString(hWC, "1: Timer event mode (doesn't work with .kkapture)");
+	tempDest=ComboBox_AddString(hWC, "2: SPUasync (*NOT* recommended for PCSX-RR)");
+	tempDest=ComboBox_SetCurSel(hWC,iUseTimer);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
 	tempDest=ComboBox_AddString(hWC, "0: mute");
@@ -246,6 +255,9 @@ void OnDSoundOK(HWND hW)
 	if (IsDlgButtonChecked(hW,IDC_XAPITCH))
 		iXAPitch=1;
 	else iXAPitch=0;
+
+	hWC=GetDlgItem(hW,IDC_USETIMER);
+	iUseTimer=ComboBox_GetCurSel(hWC);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
 	iVolume=5-ComboBox_GetCurSel(hWC);
@@ -520,6 +532,7 @@ void ReadConfig(void)
 	iUseXA=1;
 	iXAPitch=0;
 	iSPUIRQWait=1;
+	iUseTimer=0;
 	iUseReverb=2;
 	iUseInterpolation=2;
 	iDisStereo=0;
