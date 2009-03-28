@@ -64,7 +64,7 @@ void ReadConfig(void)
 
  // read values
  
- if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\Vision Thing\\PSEmu Pro\\CDR\\PeopsCDRASPI",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
+ if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\CDR",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
   {
    size = 4;
    if(RegQueryValueEx(myKey,"Adapter",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
@@ -121,7 +121,7 @@ void WriteConfig(void)
 {
  HKEY myKey;DWORD myDisp,temp;
 
- RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Vision Thing\\PSEmu Pro\\CDR\\PeopsCDRASPI",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
+ RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\CDR",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
  temp=iInterfaceMode;
  RegSetValueEx(myKey,"InterfaceMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
  temp=iCD_AD;

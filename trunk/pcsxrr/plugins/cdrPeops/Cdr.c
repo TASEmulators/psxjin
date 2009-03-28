@@ -39,7 +39,7 @@
 
 const unsigned char version  =  PLUGIN_VERSION;
 const unsigned char revision =  0;
-const unsigned char build    =  1;
+const unsigned char build    =  2;
 char *libraryName            =  "TAS CD-ROM Plugin";
 
 /////////////////////////////////////////////////////////
