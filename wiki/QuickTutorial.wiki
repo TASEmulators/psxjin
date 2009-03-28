@@ -4,11 +4,11 @@
 
 1. Go into "Configuration"->"Plugins & Bios" and select these plugins and BIOS, then press "OK".
 
-http://i41.tinypic.com/6p7nr6.png
+http://i44.tinypic.com/mvp79u.png
 
 2. Go into "Configuration"->"Sound" and make sure "Movie Sync Mode" is selected.
 
-http://i43.tinypic.com/nxom0i.png
+http://i44.tinypic.com/qn4hmu.png
 
 3. Go into "Configuration"->"CD-ROM" and click on the "Select Iso" button. After you've selected your CD image from your HDD, press "OK".
 
