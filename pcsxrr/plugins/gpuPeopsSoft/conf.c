@@ -170,20 +170,20 @@ GList *DModes;
 
 void OnCfgFixes_Ok()
 {
- int i;
+	int i;
 
- for (i=0; i<32; i++)
-  if (FixesBtns[i] != NULL)
-  {
-   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FixesBtns[i]))) dwCfgFixes |= 1<<i;
-   else dwCfgFixes &= ~(1<<i);
-  }
- gtk_widget_hide(FixesDlg);
+	for (i=0; i<32; i++)
+		if (FixesBtns[i] != NULL)
+		{
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FixesBtns[i]))) dwCfgFixes |= 1<<i;
+			else dwCfgFixes &= ~(1<<i);
+		}
+	gtk_widget_hide(FixesDlg);
 }
 
 void OnCfgFixes_Cancel()
 {
- gtk_widget_hide(FixesDlg);
+	gtk_widget_hide(FixesDlg);
 }
 
 #define AddCfgFixBtn(name, desc) \
@@ -205,64 +205,64 @@ void OnCfgFixes_Cancel()
 
 void OnCfgFixes(GtkButton *button, gpointer user_data)
 {
- GtkWidget *DlgPacker;
- GtkWidget *Label;
- GtkWidget *Ok,*Cancel;
- GtkWidget *Box,*BBox;
- int i;
- char Text[32];
+	GtkWidget *DlgPacker;
+	GtkWidget *Label;
+	GtkWidget *Ok,*Cancel;
+	GtkWidget *Box,*BBox;
+	int i;
+	char Text[32];
 
- FixesDlg = gtk_window_new(GTK_WINDOW_DIALOG);
+	FixesDlg = gtk_window_new(GTK_WINDOW_DIALOG);
 // gtk_widget_set_usize(FixesDlg, 500, 400);
- gtk_window_set_title(GTK_WINDOW(FixesDlg), "Special game fixes...");
- gtk_window_set_position(GTK_WINDOW(FixesDlg), GTK_WIN_POS_CENTER);
- gtk_container_set_border_width(GTK_CONTAINER(FixesDlg), 5);
+	gtk_window_set_title(GTK_WINDOW(FixesDlg), "Special game fixes...");
+	gtk_window_set_position(GTK_WINDOW(FixesDlg), GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width(GTK_CONTAINER(FixesDlg), 5);
 
- DlgPacker = gtk_packer_new();
- gtk_container_add(GTK_CONTAINER(FixesDlg), DlgPacker);
+	DlgPacker = gtk_packer_new();
+	gtk_container_add(GTK_CONTAINER(FixesDlg), DlgPacker);
 
- Box = gtk_vbox_new(0, 5);
- gtk_container_set_border_width(GTK_CONTAINER(Box), 5);
- gtk_packer_add(GTK_PACKER(DlgPacker), Box, GTK_SIDE_TOP, GTK_ANCHOR_CENTER,
-                GTK_FILL_X, 0, 8, 8, 0, 0);
+	Box = gtk_vbox_new(0, 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Box), 5);
+	gtk_packer_add(GTK_PACKER(DlgPacker), Box, GTK_SIDE_TOP, GTK_ANCHOR_CENTER,
+	               GTK_FILL_X, 0, 8, 8, 0, 0);
 
- Label = gtk_label_new("Activate the following options only if you want to play one of the listed games\n(or if your game is showing similar glitches)!");
- gtk_box_pack_start(GTK_BOX(Box), Label, FALSE, FALSE, 0);
+	Label = gtk_label_new("Activate the following options only if you want to play one of the listed games\n(or if your game is showing similar glitches)!");
+	gtk_box_pack_start(GTK_BOX(Box), Label, FALSE, FALSE, 0);
 
- for (i=0; i<32; i++) FixesBtns[i] = NULL;
+	for (i=0; i<32; i++) FixesBtns[i] = NULL;
 
- i = 0;
- AddCfgFixBtn("Odd/even bit hack"        , "epsxe 1.5.2 - ChronoCross");
- AddCfgFixBtn("Expand screen width"      , "2D Capcom fighters");
- AddCfgFixBtn("Ignore brightness color"  , "Black screens in Lunar");
- AddCfgFixBtn("Disable coord check"      , "Old compatibility mode");
- AddCfgFixBtn("Unused"                   , "");
- AddCfgFixBtn("Use PC fps calculation"   , "Better fps limitation with some games");
- AddCfgFixBtn("Lazy screen updates"      , "Maybe faster, needed for Pandemonium2");
- AddCfgFixBtn("Use old frame skipping"   , "Skips only every second frame");
- AddCfgFixBtn("Repeated flat tex triangles"   , "Needed by Dark Forces");
- AddCfgFixBtn("Draw quads with triangles"   , "Better g-colors, worse textures");
- AddCfgFixBtn("Fake 'gpu busy' states"   , "Prevents lockups in some games ");
+	i = 0;
+	AddCfgFixBtn("Odd/even bit hack"        , "epsxe 1.5.2 - ChronoCross");
+	AddCfgFixBtn("Expand screen width"      , "2D Capcom fighters");
+	AddCfgFixBtn("Ignore brightness color"  , "Black screens in Lunar");
+	AddCfgFixBtn("Disable coord check"      , "Old compatibility mode");
+	AddCfgFixBtn("Unused"                   , "");
+	AddCfgFixBtn("Use PC fps calculation"   , "Better fps limitation with some games");
+	AddCfgFixBtn("Lazy screen updates"      , "Maybe faster, needed for Pandemonium2");
+	AddCfgFixBtn("Use old frame skipping"   , "Skips only every second frame");
+	AddCfgFixBtn("Repeated flat tex triangles"   , "Needed by Dark Forces");
+	AddCfgFixBtn("Draw quads with triangles"   , "Better g-colors, worse textures");
+	AddCfgFixBtn("Fake 'gpu busy' states"   , "Prevents lockups in some games ");
 
- for (i=0; i<32; i++)
-  if (FixesBtns[i] != NULL)
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FixesBtns[i]), dwCfgFixes & (1<<i));
+	for (i=0; i<32; i++)
+		if (FixesBtns[i] != NULL)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FixesBtns[i]), dwCfgFixes & (1<<i));
 
- BBox = gtk_hbutton_box_new();
- gtk_packer_add(GTK_PACKER(DlgPacker), BBox, GTK_SIDE_BOTTOM, GTK_ANCHOR_S,
-                GTK_FILL_X | GTK_FILL_Y | GTK_EXPAND, 0, 8, 8, 0, 0);
+	BBox = gtk_hbutton_box_new();
+	gtk_packer_add(GTK_PACKER(DlgPacker), BBox, GTK_SIDE_BOTTOM, GTK_ANCHOR_S,
+	               GTK_FILL_X | GTK_FILL_Y | GTK_EXPAND, 0, 8, 8, 0, 0);
 
- Ok = gtk_button_new_with_label("Ok");
- gtk_signal_connect(GTK_OBJECT(Ok), "clicked", GTK_SIGNAL_FUNC(OnCfgFixes_Ok), NULL);
- gtk_box_pack_start(GTK_BOX(BBox), Ok, FALSE, FALSE, 0);
- GTK_WIDGET_SET_FLAGS(Ok, GTK_CAN_DEFAULT);
+	Ok = gtk_button_new_with_label("Ok");
+	gtk_signal_connect(GTK_OBJECT(Ok), "clicked", GTK_SIGNAL_FUNC(OnCfgFixes_Ok), NULL);
+	gtk_box_pack_start(GTK_BOX(BBox), Ok, FALSE, FALSE, 0);
+	GTK_WIDGET_SET_FLAGS(Ok, GTK_CAN_DEFAULT);
 
- Cancel = gtk_button_new_with_label("Cancel");
- gtk_signal_connect(GTK_OBJECT(Cancel), "clicked", GTK_SIGNAL_FUNC(OnCfgFixes_Cancel), NULL);
- gtk_box_pack_start(GTK_BOX(BBox), Cancel, FALSE, FALSE, 0);
- GTK_WIDGET_SET_FLAGS(Cancel, GTK_CAN_DEFAULT);
+	Cancel = gtk_button_new_with_label("Cancel");
+	gtk_signal_connect(GTK_OBJECT(Cancel), "clicked", GTK_SIGNAL_FUNC(OnCfgFixes_Cancel), NULL);
+	gtk_box_pack_start(GTK_BOX(BBox), Cancel, FALSE, FALSE, 0);
+	GTK_WIDGET_SET_FLAGS(Cancel, GTK_CAN_DEFAULT);
 
- gtk_widget_show_all(FixesDlg);
+	gtk_widget_show_all(FixesDlg);
 }
 
 
@@ -274,230 +274,232 @@ char szDitherModes[3][32]={"0: No dithering (fastest)","1: Game dependend","2: A
 
 void OnDefFast(GtkButton *button, gpointer user_data)
 {
- char Text[32];
+	char Text[32];
 
- iResX = 320; iResY = 240;
- if (!iWindowMode)
- {
-  sprintf (Text, "%dx%d", iResX, iResY);
-  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry), Text);
- }
- sprintf(Text,"%d", iResX);
- gtk_entry_set_text(GTK_ENTRY(EditW), Text);
- sprintf(Text,"%d", iResY);
- gtk_entry_set_text(GTK_ENTRY(EditH), Text);
- sprintf(Text,"%d", 200);
- gtk_entry_set_text(GTK_ENTRY(EditF), Text);
+	iResX = 320;
+	iResY = 240;
+	if (!iWindowMode)
+	{
+		sprintf (Text, "%dx%d", iResX, iResY);
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry), Text);
+	}
+	sprintf(Text,"%d", iResX);
+	gtk_entry_set_text(GTK_ENTRY(EditW), Text);
+	sprintf(Text,"%d", iResY);
+	gtk_entry_set_text(GTK_ENTRY(EditH), Text);
+	sprintf(Text,"%d", 200);
+	gtk_entry_set_text(GTK_ENTRY(EditF), Text);
 
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FullBtn), 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(WinBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FullBtn), 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(WinBtn), 0);
 // gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(StretchBtn), 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ShowFpsBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FpsLimitBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FrameSkipBtn), 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(AutoFpsBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ScanLinesBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ShowFpsBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FpsLimitBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FrameSkipBtn), 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(AutoFpsBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ScanLinesBtn), 0);
 
- gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry),(char *)&szStretchModes[1][0]);
- gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry),(char *)&szDitherModes[0][0]);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry),(char *)&szStretchModes[1][0]);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry),(char *)&szDitherModes[0][0]);
 }
 
 void OnDefNice(GtkButton *button, gpointer user_data)
 {
- char Text[32];
+	char Text[32];
 
- iResX = 640; iResY = 480;
- if (!iWindowMode)
- {
-  sprintf (Text, "%dx%d", iResX, iResY);
-  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry), Text);
- }
- sprintf(Text,"%d", iResX);
- gtk_entry_set_text(GTK_ENTRY(EditW), Text);
- sprintf(Text,"%d", iResY);
- gtk_entry_set_text(GTK_ENTRY(EditH), Text);
- sprintf(Text,"%d", 200);
- gtk_entry_set_text(GTK_ENTRY(EditF), Text);
+	iResX = 640;
+	iResY = 480;
+	if (!iWindowMode)
+	{
+		sprintf (Text, "%dx%d", iResX, iResY);
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry), Text);
+	}
+	sprintf(Text,"%d", iResX);
+	gtk_entry_set_text(GTK_ENTRY(EditW), Text);
+	sprintf(Text,"%d", iResY);
+	gtk_entry_set_text(GTK_ENTRY(EditH), Text);
+	sprintf(Text,"%d", 200);
+	gtk_entry_set_text(GTK_ENTRY(EditF), Text);
 
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FullBtn), 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(WinBtn), 0);
- //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(StretchBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ShowFpsBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FpsLimitBtn), 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FrameSkipBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn), 0);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(AutoFpsBtn), 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ScanLinesBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FullBtn), 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(WinBtn), 0);
+//gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(StretchBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ShowFpsBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FpsLimitBtn), 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FrameSkipBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn), 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(AutoFpsBtn), 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ScanLinesBtn), 0);
 
- gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry),(char *)&szStretchModes);
- gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry),(char *)&szDitherModes[1][0]);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry),(char *)&szStretchModes);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry),(char *)&szDitherModes[1][0]);
 }
 
 void OnOk(GtkButton *button, gpointer user_data)
 {
- char *tmp;
+	char *tmp;
 
- iWindowMode     = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FullBtn));
+	iWindowMode     = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FullBtn));
 // iUseNoStretchBlt = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(StretchBtn));
- iShowFPS        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ShowFpsBtn));
- UseFrameLimit   = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FpsLimitBtn));
- UseFrameSkip    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FrameSkipBtn));
- bSSSPSXLimit    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn)); 
- iFrameLimit     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AutoFpsBtn))+1;
- iUseScanLines   = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ScanLinesBtn));
- iUseFixes       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FixesBtn));
+	iShowFPS        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ShowFpsBtn));
+	UseFrameLimit   = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FpsLimitBtn));
+	UseFrameSkip    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FrameSkipBtn));
+	bSSSPSXLimit    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn));
+	iFrameLimit     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AutoFpsBtn))+1;
+	iUseScanLines   = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ScanLinesBtn));
+	iUseFixes       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FixesBtn));
 
- iUseNoStretchBlt =atoi(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry)));
+	iUseNoStretchBlt =atoi(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry)));
 
- iUseDither =atoi(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry)));
+	iUseDither =atoi(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry)));
 
- tmp = gtk_entry_get_text(GTK_ENTRY(EditW));
- iResX = atoi(tmp);
- tmp = gtk_entry_get_text(GTK_ENTRY(EditH));
- iResY = atoi(tmp);
- if (!iWindowMode)
- {
-  tmp = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry));
-  sscanf(tmp, "%dx%d", &iResX, &iResY);
- }
- tmp = gtk_entry_get_text(GTK_ENTRY(EditF));
- fFrameRate = (float)atof(tmp);
- gtk_widget_destroy(ConfDlg);
-/* moved by lu_zero
- gtk_main_quit();
- */
- WriteConfig();
+	tmp = gtk_entry_get_text(GTK_ENTRY(EditW));
+	iResX = atoi(tmp);
+	tmp = gtk_entry_get_text(GTK_ENTRY(EditH));
+	iResY = atoi(tmp);
+	if (!iWindowMode)
+	{
+		tmp = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry));
+		sscanf(tmp, "%dx%d", &iResX, &iResY);
+	}
+	tmp = gtk_entry_get_text(GTK_ENTRY(EditF));
+	fFrameRate = (float)atof(tmp);
+	gtk_widget_destroy(ConfDlg);
+	/* moved by lu_zero
+	 gtk_main_quit();
+	 */
+	WriteConfig();
 }
 
 void OnCancel(GtkButton *button, gpointer user_data)
 {
- gtk_widget_destroy(ConfDlg);
-/* moved by lu_zero
- gtk_main_quit();
- */
+	gtk_widget_destroy(ConfDlg);
+	/* moved by lu_zero
+	 gtk_main_quit();
+	 */
 }
 
 void SoftDlgProc(void)
 {
- char Text[32];
+	char Text[32];
 
- ReadConfig();
+	ReadConfig();
 
- ConfDlg = create_Config();
+	ConfDlg = create_Config();
 #ifdef _SDL
- gtk_window_set_title(GTK_WINDOW(ConfDlg), "Configure the P.E.Op.S. PSX SDL Soft Renderer...");
+	gtk_window_set_title(GTK_WINDOW(ConfDlg), "Configure the P.E.Op.S. PSX SDL Soft Renderer...");
 #endif
 
- FullBtn = lookup_widget(ConfDlg, "GtkRadioButton_Fullscreen");
- WinBtn  = lookup_widget(ConfDlg, "GtkRadioButton_Windowed");
- EditW   = lookup_widget(ConfDlg, "GtkEntry_Width");
- EditH   = lookup_widget(ConfDlg, "GtkEntry_Height");
- EditF   = lookup_widget(ConfDlg, "GtkEntry_FPS");
- StretchComboModes = lookup_widget(ConfDlg, "GtkCombo_Stretching");
- DitherComboModes  = lookup_widget(ConfDlg, "GtkCombo_Dithering");
- ShowFpsBtn   = lookup_widget(ConfDlg, "GtkCheckButton_FPSdisplay");
- FpsLimitBtn  = lookup_widget(ConfDlg, "GtkCheckButton_FPSlimit");
- FrameSkipBtn = lookup_widget(ConfDlg, "GtkCheckButton_FPSskip");
- SSSPSXLimitBtn = lookup_widget(ConfDlg, "GtkCheckButton_SSSPSXLimit");
- AutoFpsBtn   = lookup_widget(ConfDlg, "GtkCheckButton_FPSauto");
- ScanLinesBtn = lookup_widget(ConfDlg, "GtkCheckButton_Scanlines");
- FixesBtn     = lookup_widget(ConfDlg, "GtkCheckButton_Fixes");
+	FullBtn = lookup_widget(ConfDlg, "GtkRadioButton_Fullscreen");
+	WinBtn  = lookup_widget(ConfDlg, "GtkRadioButton_Windowed");
+	EditW   = lookup_widget(ConfDlg, "GtkEntry_Width");
+	EditH   = lookup_widget(ConfDlg, "GtkEntry_Height");
+	EditF   = lookup_widget(ConfDlg, "GtkEntry_FPS");
+	StretchComboModes = lookup_widget(ConfDlg, "GtkCombo_Stretching");
+	DitherComboModes  = lookup_widget(ConfDlg, "GtkCombo_Dithering");
+	ShowFpsBtn   = lookup_widget(ConfDlg, "GtkCheckButton_FPSdisplay");
+	FpsLimitBtn  = lookup_widget(ConfDlg, "GtkCheckButton_FPSlimit");
+	FrameSkipBtn = lookup_widget(ConfDlg, "GtkCheckButton_FPSskip");
+	SSSPSXLimitBtn = lookup_widget(ConfDlg, "GtkCheckButton_SSSPSXLimit");
+	AutoFpsBtn   = lookup_widget(ConfDlg, "GtkCheckButton_FPSauto");
+	ScanLinesBtn = lookup_widget(ConfDlg, "GtkCheckButton_Scanlines");
+	FixesBtn     = lookup_widget(ConfDlg, "GtkCheckButton_Fixes");
 
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FullBtn), iWindowMode != 1);
- gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(WinBtn),  iWindowMode != 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FullBtn), iWindowMode != 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(WinBtn),  iWindowMode != 0);
 
- Modes = NULL;
+	Modes = NULL;
 
 #if !defined(_SDL) && defined(USE_XF86VM)
- {
-  Display *display;
-  int myscreen;
+	{
+		Display *display;
+		int myscreen;
 
-  // Open display
-  display=XOpenDisplay(NULL);
+		// Open display
+		display=XOpenDisplay(NULL);
 
-  if(display)
-   {
-    int nmodes,iC;
+		if (display)
+		{
+			int nmodes,iC;
 
-    myscreen=DefaultScreen(display);
-    XF86VidModeGetAllModeLines(display,myscreen,      // -> enum all mode infos
-                                &nmodes,&modes);
-    if(modes)                                         // -> infos got?
-     {
-      for(iC=0;iC<nmodes;++iC)                        // -> loop modes
-       {
-	    sprintf(modesl[iC], "%dx%d", modes[iC]->hdisplay, modes[iC]->vdisplay);
-        Modes = g_list_append(Modes, modesl[iC]);
-       }
-     }
-   }
- }
+			myscreen=DefaultScreen(display);
+			XF86VidModeGetAllModeLines(display,myscreen,      // -> enum all mode infos
+			                           &nmodes,&modes);
+			if (modes)                                        // -> infos got?
+			{
+				for (iC=0;iC<nmodes;++iC)                       // -> loop modes
+				{
+					sprintf(modesl[iC], "%dx%d", modes[iC]->hdisplay, modes[iC]->vdisplay);
+					Modes = g_list_append(Modes, modesl[iC]);
+				}
+			}
+		}
+	}
 #else
- Modes = g_list_append(Modes, "320x240");
- Modes = g_list_append(Modes, "640x480");
- Modes = g_list_append(Modes, "800x600");
- Modes = g_list_append(Modes, "1024x768");
+	Modes = g_list_append(Modes, "320x240");
+	Modes = g_list_append(Modes, "640x480");
+	Modes = g_list_append(Modes, "800x600");
+	Modes = g_list_append(Modes, "1024x768");
 #endif
 
- ComboModes = lookup_widget(ConfDlg, "GtkCombo_Modes");
- gtk_combo_set_popdown_strings(GTK_COMBO(ComboModes), Modes);
- if (!iWindowMode)
- {
-  sprintf (Text, "%dx%d", iResX, iResY);
-  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry), Text);
- }
+	ComboModes = lookup_widget(ConfDlg, "GtkCombo_Modes");
+	gtk_combo_set_popdown_strings(GTK_COMBO(ComboModes), Modes);
+	if (!iWindowMode)
+	{
+		sprintf (Text, "%dx%d", iResX, iResY);
+		gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(ComboModes)->entry), Text);
+	}
 
- sprintf(Text,"%d", iResX);
- gtk_entry_set_text(GTK_ENTRY(EditW), Text);
+	sprintf(Text,"%d", iResX);
+	gtk_entry_set_text(GTK_ENTRY(EditW), Text);
 
- sprintf(Text,"%d", iResY);
- gtk_entry_set_text(GTK_ENTRY(EditH), Text);
+	sprintf(Text,"%d", iResY);
+	gtk_entry_set_text(GTK_ENTRY(EditH), Text);
 
- /////////
- SModes = NULL;
- SModes = g_list_append(SModes, (char *)&szStretchModes[0][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[1][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[2][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[3][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[4][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[5][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[6][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[7][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[8][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[9][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[10][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[11][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[12][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[13][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[14][0]);
- SModes = g_list_append(SModes, (char *)&szStretchModes[15][0]);
+/////////
+	SModes = NULL;
+	SModes = g_list_append(SModes, (char *)&szStretchModes[0][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[1][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[2][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[3][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[4][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[5][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[6][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[7][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[8][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[9][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[10][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[11][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[12][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[13][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[14][0]);
+	SModes = g_list_append(SModes, (char *)&szStretchModes[15][0]);
 
- gtk_combo_set_popdown_strings(GTK_COMBO(StretchComboModes), SModes);
- gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry), (char *)&szStretchModes[iUseNoStretchBlt][0]);
+	gtk_combo_set_popdown_strings(GTK_COMBO(StretchComboModes), SModes);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(StretchComboModes)->entry), (char *)&szStretchModes[iUseNoStretchBlt][0]);
 
- DModes = NULL;
- DModes = g_list_append(DModes, (char *)&szDitherModes[0][0]);
- DModes = g_list_append(DModes, (char *)&szDitherModes[1][0]);
- DModes = g_list_append(DModes, (char *)&szDitherModes[2][0]);
+	DModes = NULL;
+	DModes = g_list_append(DModes, (char *)&szDitherModes[0][0]);
+	DModes = g_list_append(DModes, (char *)&szDitherModes[1][0]);
+	DModes = g_list_append(DModes, (char *)&szDitherModes[2][0]);
 
- gtk_combo_set_popdown_strings(GTK_COMBO(DitherComboModes), DModes);
- gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry), (char *)&szDitherModes[iUseDither][0]);
+	gtk_combo_set_popdown_strings(GTK_COMBO(DitherComboModes), DModes);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(DitherComboModes)->entry), (char *)&szDitherModes[iUseDither][0]);
 
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(ShowFpsBtn),   iShowFPS);
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(FpsLimitBtn),  UseFrameLimit);
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn),  bSSSPSXLimit);
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(FrameSkipBtn), UseFrameSkip);
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(AutoFpsBtn),   iFrameLimit-1);
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(ScanLinesBtn), iUseScanLines);
- gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(FixesBtn),     iUseFixes);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(ShowFpsBtn),   iShowFPS);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(FpsLimitBtn),  UseFrameLimit);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(SSSPSXLimitBtn),  bSSSPSXLimit);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(FrameSkipBtn), UseFrameSkip);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(AutoFpsBtn),   iFrameLimit-1);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(ScanLinesBtn), iUseScanLines);
+	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(FixesBtn),     iUseFixes);
 
- sprintf(Text,"%.1f", fFrameRate);
- gtk_entry_set_text(GTK_ENTRY(EditF), Text);
+	sprintf(Text,"%.1f", fFrameRate);
+	gtk_entry_set_text(GTK_ENTRY(EditF), Text);
 
- gtk_widget_show_all(ConfDlg);
- gtk_main ();
+	gtk_widget_show_all(ConfDlg);
+	gtk_main ();
 }
 #ifndef _FPSE
 
@@ -505,7 +507,7 @@ GtkWidget *AboutDlg;
 
 void OnAbout_Ok(GtkButton *button, gpointer user_data)
 {
- gtk_widget_destroy(AboutDlg);
+	gtk_widget_destroy(AboutDlg);
 }
 
 unsigned char revision;
@@ -514,20 +516,20 @@ char RELEASE_DATE[256];
 
 void AboutDlgProc(void)
 {
- GtkWidget *Label;
- char Version[256];
+	GtkWidget *Label;
+	char Version[256];
 
- AboutDlg = create_About();
+	AboutDlg = create_About();
 
- sprintf(Version, "%d.%d", revision, build);
+	sprintf(Version, "%d.%d", revision, build);
 
- Label = lookup_widget(AboutDlg, "GtkLabel_Version");
- gtk_label_set_text(GTK_LABEL(Label), Version);
- Label = lookup_widget(AboutDlg, "GtkLabel_Date");
- gtk_label_set_text(GTK_LABEL(Label), RELEASE_DATE);
+	Label = lookup_widget(AboutDlg, "GtkLabel_Version");
+	gtk_label_set_text(GTK_LABEL(Label), Version);
+	Label = lookup_widget(AboutDlg, "GtkLabel_Date");
+	gtk_label_set_text(GTK_LABEL(Label), RELEASE_DATE);
 
- gtk_widget_show_all(AboutDlg);
- gtk_main ();
+	gtk_widget_show_all(AboutDlg);
+	gtk_main ();
 }
 
 
@@ -586,90 +588,92 @@ void AboutDlgProc(void)
 void ReadConfigFile()
 {
 
- struct stat buf;
- FILE *in;char t[256];int len, size;
- char * pB, * p;
+	struct stat buf;
+	FILE *in;
+	char t[256];
+	int len, size;
+	char * pB, * p;
 
- if(pConfigFile) 
-      strcpy(t,pConfigFile);
- else 
-  {
-   strcpy(t,"cfg/gpuPeopsSoftX.cfg");
-   in = fopen(t,"rb");
-   if (!in)
-    {
-     strcpy(t,"gpuPeopsSoftX.cfg");
-     in = fopen(t,"rb");
-     if(!in) sprintf(t,"%s/gpuPeopsSoftX.cfg",getenv("HOME"));
-     else    fclose(in);
-    }
-   else     fclose(in);
-  }
+	if (pConfigFile)
+		strcpy(t,pConfigFile);
+	else
+	{
+		strcpy(t,"cfg/gpuPeopsSoftX.cfg");
+		in = fopen(t,"rb");
+		if (!in)
+		{
+			strcpy(t,"gpuPeopsSoftX.cfg");
+			in = fopen(t,"rb");
+			if (!in) sprintf(t,"%s/gpuPeopsSoftX.cfg",getenv("HOME"));
+			else    fclose(in);
+		}
+		else     fclose(in);
+	}
 
- if (stat(t, &buf) == -1) return;
- size = buf.st_size;
+	if (stat(t, &buf) == -1) return;
+	size = buf.st_size;
 
- in = fopen(t,"rb");
- if (!in) return;
+	in = fopen(t,"rb");
+	if (!in) return;
 
- pB=(char *)malloc(size);
- memset(pB,0,size);
+	pB=(char *)malloc(size);
+	memset(pB,0,size);
 
- len = fread(pB, 1, size, in);
- fclose(in);
+	len = fread(pB, 1, size, in);
+	fclose(in);
 
- GetValue("ResX", iResX);
- if(iResX<20) iResX=20;
- //iResX=(iResX/4)*4;
+	GetValue("ResX", iResX);
+	if (iResX<20) iResX=20;
+//iResX=(iResX/4)*4;
 
- GetValue("ResY", iResY);
- if(iResY<20) iResY=20;
- //iResY=(iResY/4)*4;
+	GetValue("ResY", iResY);
+	if (iResY<20) iResY=20;
+//iResY=(iResY/4)*4;
 
- GetValue("NoStretch", iUseNoStretchBlt);
+	GetValue("NoStretch", iUseNoStretchBlt);
 
- GetValue("FullScreen", iWindowMode);
- if(iWindowMode!=0) iWindowMode=0;
- else               iWindowMode=1;
+	GetValue("FullScreen", iWindowMode);
+	if (iWindowMode!=0) iWindowMode=0;
+	else               iWindowMode=1;
 
- GetValue("ShowFPS", iShowFPS);
- if(iShowFPS<0) iShowFPS=0;
- if(iShowFPS>1) iShowFPS=1;
+	GetValue("ShowFPS", iShowFPS);
+	if (iShowFPS<0) iShowFPS=0;
+	if (iShowFPS>1) iShowFPS=1;
 
- GetValue("ScanLines", iUseScanLines);
- if(iUseScanLines<0) iUseScanLines=0;
- if(iUseScanLines>1) iUseScanLines=1;
+	GetValue("ScanLines", iUseScanLines);
+	if (iUseScanLines<0) iUseScanLines=0;
+	if (iUseScanLines>1) iUseScanLines=1;
 
- GetValue("UseDither", iUseDither);
- if(iUseDither<0) iUseDither=0;
- if(iUseDither>2) iUseDither=2;
+	GetValue("UseDither", iUseDither);
+	if (iUseDither<0) iUseDither=0;
+	if (iUseDither>2) iUseDither=2;
 
- GetValue("UseFrameLimit", UseFrameLimit);
- if(UseFrameLimit<0) UseFrameLimit=0;
- if(UseFrameLimit>1) UseFrameLimit=1;
+	GetValue("UseFrameLimit", UseFrameLimit);
+	if (UseFrameLimit<0) UseFrameLimit=0;
+	if (UseFrameLimit>1) UseFrameLimit=1;
 
- GetValue("UseFrameSkip", UseFrameSkip);
- if(UseFrameSkip<0) UseFrameSkip=0;
- if(UseFrameSkip>1) UseFrameSkip=1;
+	GetValue("UseFrameSkip", UseFrameSkip);
+	if (UseFrameSkip<0) UseFrameSkip=0;
+	if (UseFrameSkip>1) UseFrameSkip=1;
 
- GetValue("SSSPSXLimit", bSSSPSXLimit);
- if(bSSSPSXLimit>1) bSSSPSXLimit=1;
+	GetValue("SSSPSXLimit", bSSSPSXLimit);
+	if (bSSSPSXLimit>1) bSSSPSXLimit=1;
 
- GetValue("FPSDetection", iFrameLimit);
- if(iFrameLimit<1) iFrameLimit=1;
- if(iFrameLimit>2) iFrameLimit=2;
+	GetValue("FPSDetection", iFrameLimit);
+	if (iFrameLimit<1) iFrameLimit=1;
+	if (iFrameLimit>2) iFrameLimit=2;
 
- GetFloatValue("FrameRate", fFrameRate);
- if(fFrameRate<1.0f)   fFrameRate=1.0f;
- if(fFrameRate>1000.0f) fFrameRate=1000.0f;
+	GetFloatValue("FrameRate", fFrameRate);
+	if (fFrameRate<1.0f)   fFrameRate=1.0f;
+	if (fFrameRate>1000.0f) fFrameRate=1000.0f;
 
- GetValue("CfgFixes", dwCfgFixes);
+	GetValue("CfgFixes", dwCfgFixes);
 
- GetValue("UseFixes", iUseFixes);
- if(iUseFixes<0) iUseFixes=0;
- if(iUseFixes>1) iUseFixes=1;
+	GetValue("UseFixes", iUseFixes);
+	if (iUseFixes<0) iUseFixes=0;
+	if (iUseFixes>1) iUseFixes=1;
 
- free(pB);
+	free(pB);
 
 }
 
@@ -678,119 +682,131 @@ void ReadConfigFile()
 void ReadConfig(void)
 {
 
- // defaults
- iResX=640;iResY=480;
- iColDepth=16;
- iWindowMode=1;
- iUseScanLines=0;
- iUseDither=0;
- UseFrameLimit=0;
- UseFrameSkip=0;
- iFrameLimit=2;
- fFrameRate=200.0f;
- dwCfgFixes=0;
- iUseFixes=0;
- iUseNoStretchBlt=1;
- iShowFPS=0;
- bSSSPSXLimit=FALSE;
+// defaults
+	iResX=640;
+	iResY=480;
+	iColDepth=16;
+	iWindowMode=1;
+	iUseScanLines=0;
+	iUseDither=0;
+	UseFrameLimit=0;
+	UseFrameSkip=0;
+	iFrameLimit=2;
+	fFrameRate=200.0f;
+	dwCfgFixes=0;
+	iUseFixes=0;
+	iUseNoStretchBlt=1;
+	iShowFPS=0;
+	bSSSPSXLimit=FALSE;
 
- // read sets
- ReadConfigFile();
+// read sets
+	ReadConfigFile();
 
- // additional checks
- if(!iColDepth)       iColDepth=32;
- if(iUseFixes)        dwActFixes=dwCfgFixes;
+// additional checks
+	if (!iColDepth)       iColDepth=32;
+	if (iUseFixes)        dwActFixes=dwCfgFixes;
 }
 
-void WriteConfig(void) {
+void WriteConfig(void)
+{
 
- struct stat buf;
- FILE *out;char t[256];int len, size;
- char * pB, * p; char t1[8];
+	struct stat buf;
+	FILE *out;
+	char t[256];
+	int len, size;
+	char * pB, * p;
+	char t1[8];
 
- if(pConfigFile) 
-      strcpy(t,pConfigFile);
- else 
-  {
-   strcpy(t,"cfg/gpuPeopsSoftX.cfg");
-   out = fopen(t,"rb");
-   if (!out) 
-    {
-     strcpy(t,"gpuPeopsSoftX.cfg");
-     out = fopen(t,"rb");
-     if(!out) sprintf(t,"%s/gpuPeopsSoftX.cfg",getenv("HOME"));
-     else     fclose(out);
-    }
-   else     fclose(out);
-  }
+	if (pConfigFile)
+		strcpy(t,pConfigFile);
+	else
+	{
+		strcpy(t,"cfg/gpuPeopsSoftX.cfg");
+		out = fopen(t,"rb");
+		if (!out)
+		{
+			strcpy(t,"gpuPeopsSoftX.cfg");
+			out = fopen(t,"rb");
+			if (!out) sprintf(t,"%s/gpuPeopsSoftX.cfg",getenv("HOME"));
+			else     fclose(out);
+		}
+		else     fclose(out);
+	}
 
- if (stat(t, &buf) != -1) size = buf.st_size;
- else size = 0;
+	if (stat(t, &buf) != -1) size = buf.st_size;
+	else size = 0;
 
- out = fopen(t,"rb");
- if (!out) {
-  // defaults
-  iResX=640;iResY=480;
-  iColDepth=16;
-  iWindowMode=1;
-  iUseScanLines=0;
-  iUseDither=0;
-  UseFrameLimit=0;
-  UseFrameSkip=0;
-  iFrameLimit=2;
-  fFrameRate=200.0f;
-  dwCfgFixes=0;
-  iUseFixes=0;
-  iUseNoStretchBlt=1;
-  iShowFPS=0;
-  bSSSPSXLimit=FALSE;
+	out = fopen(t,"rb");
+	if (!out)
+	{
+		// defaults
+		iResX=640;
+		iResY=480;
+		iColDepth=16;
+		iWindowMode=1;
+		iUseScanLines=0;
+		iUseDither=0;
+		UseFrameLimit=0;
+		UseFrameSkip=0;
+		iFrameLimit=2;
+		fFrameRate=200.0f;
+		dwCfgFixes=0;
+		iUseFixes=0;
+		iUseNoStretchBlt=1;
+		iShowFPS=0;
+		bSSSPSXLimit=FALSE;
 
-  size = 0;
-  pB=(char *)malloc(4096);
-  memset(pB,0,4096);
- }
- else {
-  pB=(char *)malloc(size+4096);
-  memset(pB,0,size+4096);
+		size = 0;
+		pB=(char *)malloc(4096);
+		memset(pB,0,4096);
+	}
+	else
+	{
+		pB=(char *)malloc(size+4096);
+		memset(pB,0,size+4096);
 
-  len = fread(pB, 1, size, out);
-  fclose(out);
- }
+		len = fread(pB, 1, size, out);
+		fclose(out);
+	}
 
- SetValue("ResX", iResX);
- SetValue("ResY", iResY);
- SetValue("NoStretch", iUseNoStretchBlt);
- SetValue("UseDither", iUseDither);
- SetValue("FullScreen", !iWindowMode);
- SetValue("ShowFPS", iShowFPS);
- SetValue("ScanLines", iUseScanLines);
- SetValue("UseFrameLimit", UseFrameLimit);
- SetValue("UseFrameSkip", UseFrameSkip);
- SetValue("SSSPSXLimit", bSSSPSXLimit);
- SetValue("FPSDetection", iFrameLimit);
- SetFloatValue("FrameRate", fFrameRate);
- SetValue("CfgFixes", (unsigned int)dwCfgFixes);
- SetValue("UseFixes", iUseFixes);
+	SetValue("ResX", iResX);
+	SetValue("ResY", iResY);
+	SetValue("NoStretch", iUseNoStretchBlt);
+	SetValue("UseDither", iUseDither);
+	SetValue("FullScreen", !iWindowMode);
+	SetValue("ShowFPS", iShowFPS);
+	SetValue("ScanLines", iUseScanLines);
+	SetValue("UseFrameLimit", UseFrameLimit);
+	SetValue("UseFrameSkip", UseFrameSkip);
+	SetValue("SSSPSXLimit", bSSSPSXLimit);
+	SetValue("FPSDetection", iFrameLimit);
+	SetFloatValue("FrameRate", fFrameRate);
+	SetValue("CfgFixes", (unsigned int)dwCfgFixes);
+	SetValue("UseFixes", iUseFixes);
 
- out = fopen(t,"wb");
- if (!out) return;
+	out = fopen(t,"wb");
+	if (!out) return;
 
- len = fwrite(pB, 1, size, out);
- fclose(out);
+	len = fwrite(pB, 1, size, out);
+	fclose(out);
 
- free(pB);
+	free(pB);
 
 }
 #endif
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	if (argc < 2) return 0;
 
 	gtk_init(NULL, NULL);
 
-	if (!strcmp(argv[1], "configure")) {
+	if (!strcmp(argv[1], "configure"))
+	{
 		SoftDlgProc();
-	} else {
+	}
+	else
+	{
 		revision = atol(argv[2]);
 		build = atol(argv[3]);
 		strcpy(RELEASE_DATE, argv[4]);

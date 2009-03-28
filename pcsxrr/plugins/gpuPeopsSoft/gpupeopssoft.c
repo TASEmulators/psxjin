@@ -16,13 +16,13 @@
  *                                                                         *
  ***************************************************************************/
 
-//*************************************************************************// 
+//*************************************************************************//
 // History of changes:
 //
-// 2001/10/28 - Pete  
+// 2001/10/28 - Pete
 // - generic cleanup (well... not much in this file) for the Peops release
 //
-//*************************************************************************// 
+//*************************************************************************//
 
 #include "stdafx.h"
 
@@ -33,10 +33,10 @@
 HINSTANCE hInst=NULL;
 
 BOOL APIENTRY DllMain(HANDLE hModule,                  // DLL INIT
-                      DWORD  dwReason, 
+                      DWORD  dwReason,
                       LPVOID lpReserved)
 {
- hInst=(HINSTANCE)hModule;
- return TRUE;                                          // very quick :)
+	hInst=(HINSTANCE)hModule;
+	return TRUE;                                          // very quick :)
 }
 

@@ -1,6 +1,7 @@
 // based on the fixed font made by Tony Saveski
 
-int font_tc[] = {
+int font_tc[] =
+{
 	0,		0, 		1, 		1,		// 000 -
 	0,		0, 		1, 		1,		// 001 -
 	0,		0, 		1, 		1,		// 002 -
@@ -139,7 +140,8 @@ int font_tc[] = {
 
 
 
-static unsigned char font[] = {
+static unsigned char font[] =
+{
 	// row 0
 	0,
 	0,

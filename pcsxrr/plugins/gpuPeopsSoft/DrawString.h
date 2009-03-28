@@ -6,5 +6,5 @@
 
 // draws a string over buff
 void DrawString(char *buff, int lPitch, int bpp,
-				int x, int y, int w, int h,
-				char *str, int len, int mode);
+                int x, int y, int w, int h,
+                char *str, int len, int mode);

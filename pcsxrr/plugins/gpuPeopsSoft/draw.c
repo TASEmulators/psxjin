@@ -19,7 +19,7 @@
 //*************************************************************************//
 // History of changes:
 //
-// 2008/05/17 - Pete  
+// 2008/05/17 - Pete
 // - added "visual rumble" stuff to buffer swap func
 //
 // 2007/10/27 - MxC
@@ -127,6 +127,7 @@ int            iDebugMode=0;
 int            iFVDisplay=0;
 PSXPoint_t     ptCursorPoint[8];
 unsigned short usCursorActive=0;
+BOOL           bKkaptureMode=FALSE;
 
 unsigned int   LUT16to32[65536];
 unsigned int   RGBtoYUV[65536];
@@ -149,15 +150,15 @@ void StretchedBlit3x(void);
 
 int InitLUTs(void)
 {
-		int i, j, k, r, g, b, Y, u, v;
-		int nMMXsupport = 0;
-		for (i=0; i<65536; i++)
-				LUT16to32[i] = ((i & 0xF800) << 8) + ((i & 0x07E0) << 5) + ((i & 0x001F) << 3);
+	int i, j, k, r, g, b, Y, u, v;
+	int nMMXsupport = 0;
+	for (i=0; i<65536; i++)
+		LUT16to32[i] = ((i & 0xF800) << 8) + ((i & 0x07E0) << 5) + ((i & 0x001F) << 3);
 
-		for (i=0; i<32; i++)
+	for (i=0; i<32; i++)
 		for (j=0; j<64; j++)
-		for (k=0; k<32; k++)
-		{
+			for (k=0; k<32; k++)
+			{
 				r = i << 3;
 				g = j << 2;
 				b = k << 3;
@@ -165,27 +166,27 @@ int InitLUTs(void)
 				u = 128 + ((r - b) >> 2);
 				v = 128 + ((-r + 2*g -b)>>3);
 				RGBtoYUV[ (i << 11) + (j << 5) + k ] = (Y<<16) + (u<<8) + v;
-		}
+			}
 
 // This part of the function isn't really needed
 // Could just snip this and make it return void
 // and make MMX detection it's own function
 
 #ifdef __GNUC__
-	__asm__ __volatile__ ("movl $1, %%eax":::"eax");
+__asm__ __volatile__ ("movl $1, %%eax":::"eax");
 	__asm__ __volatile__ ("cpuid");
-	__asm__ __volatile__ ( "and $0x00800000, %%edx":::"edx");
-	__asm__ __volatile__ ( "movl %%edx, %0": "=g" (nMMXsupport));
+__asm__ __volatile__ ( "and $0x00800000, %%edx":::"edx");
+__asm__ __volatile__ ( "movl %%edx, %0": "=g" (nMMXsupport));
 #else
-		__asm
-		{
-				mov  eax, 1
-				cpuid
-				and  edx, 0x00800000
-				mov  nMMXsupport, edx
-		}
+	__asm
+	{
+		mov  eax, 1
+		cpuid
+		and  edx, 0x00800000
+		mov  nMMXsupport, edx
+	}
 #endif
-		return nMMXsupport;
+	return nMMXsupport;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -202,8 +203,10 @@ static __inline int GetResult1(DWORD A, DWORD B, DWORD C, DWORD D, DWORD E)
 	int x = 0;
 	int y = 0;
 	int r = 0;
-	if (A == C) x+=1; else if (B == C) y+=1;
-	if (A == D) x+=1; else if (B == D) y+=1;
+	if (A == C) x+=1;
+	else if (B == C) y+=1;
+	if (A == D) x+=1;
+	else if (B == D) y+=1;
 	if (x <= 1) r+=1;
 	if (y <= 1) r-=1;
 	return r;
@@ -214,8 +217,10 @@ static __inline int GetResult2(DWORD A, DWORD B, DWORD C, DWORD D, DWORD E)
 	int x = 0;
 	int y = 0;
 	int r = 0;
-	if (A == C) x+=1; else if (B == C) y+=1;
-	if (A == D) x+=1; else if (B == D) y+=1;
+	if (A == C) x+=1;
+	else if (B == C) y+=1;
+	if (A == D) x+=1;
+	else if (B == D) y+=1;
 	if (x <= 1) r-=1;
 	if (y <= 1) r+=1;
 	return r;
@@ -232,7 +237,7 @@ static __inline int GetResult2(DWORD A, DWORD B, DWORD C, DWORD D, DWORD E)
 
 
 void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
-													unsigned char  *dstBitmap, int width, int height)
+                    unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	DWORD srcPitchHalf    = srcPitch>>1;
@@ -244,140 +249,171 @@ void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	DWORD color4, color5, color6;
 	DWORD color1, color2, color3;
 	DWORD colorA0, colorA1, colorA2, colorA3,
-							colorB0, colorB1, colorB2, colorB3,
-							colorS1, colorS2;
+	colorB0, colorB1, colorB2, colorB3,
+	colorS1, colorS2;
 	DWORD product1a, product1b,
-							product2a, product2b;
+	product2a, product2b;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (DWORD *)srcPtr;
-		dP = (DWORD *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
-						{
+		for (; height; height-=1)
+		{
+			bP = (DWORD *)srcPtr;
+			dP = (DWORD *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
 //---------------------------------------    B1 B2
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                           A1 A2
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0)
+				{
+					iYA=0;
+				}
+				else
+				{
+					iYA=finWidth;
+				}
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitchHalf;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorB0 = *(bP- iYA - iXA);
+				colorB1 = *(bP- iYA);
+				colorB2 = *(bP- iYA + iXB);
+				colorB3 = *(bP- iYA + iXC);
+
+				color4 = *(bP  - iXA);
+				color5 = *(bP);
+				color6 = *(bP  + iXB);
+				colorS2 = *(bP + iXC);
+
+				color1 = *(bP  + iYB  - iXA);
+				color2 = *(bP  + iYB);
+				color3 = *(bP  + iYB  + iXB);
+				colorS1= *(bP  + iYB  + iXC);
+
+				colorA0 = *(bP + iYC - iXA);
+				colorA1 = *(bP + iYC);
+				colorA2 = *(bP + iYC + iXB);
+				colorA3 = *(bP + iYC + iXC);
+
+				if (color2 == color6 && color5 != color3)
+				{
+					product2b = product1b = color2;
+				}
+				else
+					if (color5 == color3 && color2 != color6)
+					{
+						product2b = product1b = color5;
+					}
+					else
+						if (color5 == color3 && color2 == color6)
+						{
+							register int r = 0;
+
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color1&0x00ffffff),  (colorA1&0x00ffffff));
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color4&0x00ffffff),  (colorB1&0x00ffffff));
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorA2&0x00ffffff), (colorS1&0x00ffffff));
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorB2&0x00ffffff), (colorS2&0x00ffffff));
+
+							if (r > 0)
+								product2b = product1b = color6;
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0)  {iYA=0;}
-							else         {iYA=finWidth;}
-							if(height>4) {iYB=finWidth;iYC=srcPitchHalf;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
-
-							colorB0 = *(bP- iYA - iXA);
-							colorB1 = *(bP- iYA);
-							colorB2 = *(bP- iYA + iXB);
-							colorB3 = *(bP- iYA + iXC);
-
-							color4 = *(bP  - iXA);
-							color5 = *(bP);
-							color6 = *(bP  + iXB);
-							colorS2 = *(bP + iXC);
-
-							color1 = *(bP  + iYB  - iXA);
-							color2 = *(bP  + iYB);
-							color3 = *(bP  + iYB  + iXB);
-							colorS1= *(bP  + iYB  + iXC);
-
-							colorA0 = *(bP + iYC - iXA);
-							colorA1 = *(bP + iYC);
-							colorA2 = *(bP + iYC + iXB);
-							colorA3 = *(bP + iYC + iXC);
-
-							if (color2 == color6 && color5 != color3)
-								{
-									product2b = product1b = color2;
-								}
-							else
-							if (color5 == color3 && color2 != color6)
-								{
+								if (r < 0)
 									product2b = product1b = color5;
-								}
-							else
-							if (color5 == color3 && color2 == color6)
+								else
 								{
-									register int r = 0;
-
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color1&0x00ffffff),  (colorA1&0x00ffffff));
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color4&0x00ffffff),  (colorB1&0x00ffffff));
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorA2&0x00ffffff), (colorS1&0x00ffffff));
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorB2&0x00ffffff), (colorS2&0x00ffffff));
-
-									if (r > 0)
-										product2b = product1b = color6;
-									else
-									if (r < 0)
-										product2b = product1b = color5;
-									else
-										{
-											product2b = product1b = INTERPOLATE8(color5, color6);
-										}
+									product2b = product1b = INTERPOLATE8(color5, color6);
 								}
+						}
+						else
+						{
+							if (color6 == color3 && color3 == colorA1 && color2 != colorA2 && color3 != colorA0)
+								product2b = Q_INTERPOLATE8 (color3, color3, color3, color2);
 							else
-								{
-									if (color6 == color3 && color3 == colorA1 && color2 != colorA2 && color3 != colorA0)
-													product2b = Q_INTERPOLATE8 (color3, color3, color3, color2);
-									else
-									if (color5 == color2 && color2 == colorA2 && colorA1 != color3 && color2 != colorA3)
-													product2b = Q_INTERPOLATE8 (color2, color2, color2, color3);
-									else
-													product2b = INTERPOLATE8 (color2, color3);
+								if (color5 == color2 && color2 == colorA2 && colorA1 != color3 && color2 != colorA3)
+									product2b = Q_INTERPOLATE8 (color2, color2, color2, color3);
+								else
+									product2b = INTERPOLATE8 (color2, color3);
 
-									if (color6 == color3 && color6 == colorB1 && color5 != colorB2 && color6 != colorB0)
-													product1b = Q_INTERPOLATE8 (color6, color6, color6, color5);
-									else
-									if (color5 == color2 && color5 == colorB2 && colorB1 != color6 && color5 != colorB3)
-													product1b = Q_INTERPOLATE8 (color6, color5, color5, color5);
-									else
-													product1b = INTERPOLATE8 (color5, color6);
-								}
-
-							if (color5 == color3 && color2 != color6 && color4 == color5 && color5 != colorA2)
-								product2a = INTERPOLATE8(color2, color5);
+							if (color6 == color3 && color6 == colorB1 && color5 != colorB2 && color6 != colorB0)
+								product1b = Q_INTERPOLATE8 (color6, color6, color6, color5);
 							else
-							if (color5 == color1 && color6 == color5 && color4 != color2 && color5 != colorA0)
-								product2a = INTERPOLATE8(color2, color5);
-							else
-								product2a = color2;
+								if (color5 == color2 && color5 == colorB2 && colorB1 != color6 && color5 != colorB3)
+									product1b = Q_INTERPOLATE8 (color6, color5, color5, color5);
+								else
+									product1b = INTERPOLATE8 (color5, color6);
+						}
 
-							if (color2 == color6 && color5 != color3 && color1 == color2 && color2 != colorB2)
-								product1a = INTERPOLATE8(color2, color5);
-							else
-							if (color4 == color2 && color3 == color2 && color1 != color5 && color2 != colorB0)
-								product1a = INTERPOLATE8(color2, color5);
-							else
-								product1a = color5;
+				if (color5 == color3 && color2 != color6 && color4 == color5 && color5 != colorA2)
+					product2a = INTERPOLATE8(color2, color5);
+				else
+					if (color5 == color1 && color6 == color5 && color4 != color2 && color5 != colorA0)
+						product2a = INTERPOLATE8(color2, color5);
+					else
+						product2a = color2;
 
-							*dP=product1a;
-							*(dP+1)=product1b;
-							*(dP+(srcPitchHalf))=product2a;
-							*(dP+1+(srcPitchHalf))=product2b;
+				if (color2 == color6 && color5 != color3 && color1 == color2 && color2 != colorB2)
+					product1a = INTERPOLATE8(color2, color5);
+				else
+					if (color4 == color2 && color3 == color2 && color1 != color5 && color2 != colorB0)
+						product1a = INTERPOLATE8(color2, color5);
+					else
+						product1a = color5;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				*dP=product1a;
+				*(dP+1)=product1b;
+				*(dP+(srcPitchHalf))=product2a;
+				*(dP+1+(srcPitchHalf))=product2b;
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
+
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void Std2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
-																		unsigned char *dstBitmap, int width, int height)
+                  unsigned char *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	DWORD srcPitchHalf    = srcPitch>>1;
@@ -389,198 +425,229 @@ void Std2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 	DWORD colorA, colorB;
 	DWORD colorC, colorD,
-							colorE, colorF, colorG, colorH,
-							colorI, colorJ, colorK, colorL,
-							colorM, colorN, colorO, colorP;
+	colorE, colorF, colorG, colorH,
+	colorI, colorJ, colorK, colorL,
+	colorM, colorN, colorO, colorP;
 	DWORD product, product1, product2;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (DWORD *)srcPtr;
-		dP = (DWORD *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
-						{
+		for (; height; height-=1)
+		{
+			bP = (DWORD *)srcPtr;
+			dP = (DWORD *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
 //---------------------------------------
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
 //                                       M|N O|P
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0)
+				{
+					iYA=0;
+				}
+				else
+				{
+					iYA=finWidth;
+				}
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitchHalf;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorI = *(bP- iYA - iXA);
+				colorE = *(bP- iYA);
+				colorF = *(bP- iYA + iXB);
+				colorJ = *(bP- iYA + iXC);
+
+				colorG = *(bP  - iXA);
+				colorA = *(bP);
+				colorB = *(bP  + iXB);
+				colorK = *(bP + iXC);
+
+				colorH = *(bP  + iYB  - iXA);
+				colorC = *(bP  + iYB);
+				colorD = *(bP  + iYB  + iXB);
+				colorL = *(bP  + iYB  + iXC);
+
+				colorM = *(bP + iYC - iXA);
+				colorN = *(bP + iYC);
+				colorO = *(bP + iYC + iXB);
+				colorP = *(bP + iYC + iXC);
+
+
+				if ((colorA == colorD) && (colorB != colorC))
+				{
+					if (((colorA == colorE) && (colorB == colorL)) ||
+					    ((colorA == colorC) && (colorA == colorF) &&
+					     (colorB != colorE) && (colorB == colorJ)))
+					{
+						product = colorA;
+					}
+					else
+					{
+						product = INTERPOLATE8(colorA, colorB);
+					}
+
+					if (((colorA == colorG) && (colorC == colorO)) ||
+					    ((colorA == colorB) && (colorA == colorH) &&
+					     (colorG != colorC) && (colorC == colorM)))
+					{
+						product1 = colorA;
+					}
+					else
+					{
+						product1 = INTERPOLATE8(colorA, colorC);
+					}
+					product2 = colorA;
+				}
+				else
+					if ((colorB == colorC) && (colorA != colorD))
+					{
+						if (((colorB == colorF) && (colorA == colorH)) ||
+						    ((colorB == colorE) && (colorB == colorD) &&
+						     (colorA != colorF) && (colorA == colorI)))
+						{
+							product = colorB;
+						}
+						else
+						{
+							product = INTERPOLATE8(colorA, colorB);
+						}
+
+						if (((colorC == colorH) && (colorA == colorF)) ||
+						    ((colorC == colorG) && (colorC == colorD) &&
+						     (colorA != colorH) && (colorA == colorI)))
+						{
+							product1 = colorC;
+						}
+						else
+						{
+							product1=INTERPOLATE8(colorA, colorC);
+						}
+						product2 = colorB;
+					}
+					else
+						if ((colorA == colorD) && (colorB == colorC))
+						{
+							if (colorA == colorB)
+							{
+								product = colorA;
+								product1 = colorA;
+								product2 = colorA;
+							}
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0)  {iYA=0;}
-							else         {iYA=finWidth;}
-							if(height>4) {iYB=finWidth;iYC=srcPitchHalf;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
+							{
+								register int r = 0;
+								product1 = INTERPOLATE8(colorA, colorC);
+								product = INTERPOLATE8(colorA, colorB);
 
-							colorI = *(bP- iYA - iXA);
-							colorE = *(bP- iYA);
-							colorF = *(bP- iYA + iXB);
-							colorJ = *(bP- iYA + iXC);
+								r += GetResult1 (colorA&0x00FFFFFF, colorB&0x00FFFFFF, colorG&0x00FFFFFF, colorE&0x00FFFFFF, colorI&0x00FFFFFF);
+								r += GetResult2 (colorB&0x00FFFFFF, colorA&0x00FFFFFF, colorK&0x00FFFFFF, colorF&0x00FFFFFF, colorJ&0x00FFFFFF);
+								r += GetResult2 (colorB&0x00FFFFFF, colorA&0x00FFFFFF, colorH&0x00FFFFFF, colorN&0x00FFFFFF, colorM&0x00FFFFFF);
+								r += GetResult1 (colorA&0x00FFFFFF, colorB&0x00FFFFFF, colorL&0x00FFFFFF, colorO&0x00FFFFFF, colorP&0x00FFFFFF);
 
-							colorG = *(bP  - iXA);
-							colorA = *(bP);
-							colorB = *(bP  + iXB);
-							colorK = *(bP + iXC);
-
-							colorH = *(bP  + iYB  - iXA);
-							colorC = *(bP  + iYB);
-							colorD = *(bP  + iYB  + iXB);
-							colorL = *(bP  + iYB  + iXC);
-
-							colorM = *(bP + iYC - iXA);
-							colorN = *(bP + iYC);
-							colorO = *(bP + iYC + iXB);
-							colorP = *(bP + iYC + iXC);
-
-
-							if((colorA == colorD) && (colorB != colorC))
-								{
-									if(((colorA == colorE) && (colorB == colorL)) ||
-												((colorA == colorC) && (colorA == colorF) &&
-													(colorB != colorE) && (colorB == colorJ)))
-										{
-											product = colorA;
-										}
-									else
-										{
-											product = INTERPOLATE8(colorA, colorB);
-										}
-
-									if(((colorA == colorG) && (colorC == colorO)) ||
-												((colorA == colorB) && (colorA == colorH) &&
-													(colorG != colorC) && (colorC == colorM)))
-										{
-											product1 = colorA;
-										}
-									else
-										{
-											product1 = INTERPOLATE8(colorA, colorC);
-										}
+								if (r > 0)
 									product2 = colorA;
-								}
+								else
+									if (r < 0)
+										product2 = colorB;
+									else
+									{
+										product2 = Q_INTERPOLATE8(colorA, colorB, colorC, colorD);
+									}
+							}
+						}
+						else
+						{
+							product2 = Q_INTERPOLATE8(colorA, colorB, colorC, colorD);
+
+							if ((colorA == colorC) && (colorA == colorF) &&
+							    (colorB != colorE) && (colorB == colorJ))
+							{
+								product = colorA;
+							}
 							else
-							if((colorB == colorC) && (colorA != colorD))
+								if ((colorB == colorE) && (colorB == colorD) && (colorA != colorF) && (colorA == colorI))
 								{
-									if(((colorB == colorF) && (colorA == colorH)) ||
-												((colorB == colorE) && (colorB == colorD) &&
-													(colorA != colorF) && (colorA == colorI)))
-										{
-											product = colorB;
-										}
-									else
-										{
-											product = INTERPOLATE8(colorA, colorB);
-										}
-
-									if(((colorC == colorH) && (colorA == colorF)) ||
-												((colorC == colorG) && (colorC == colorD) &&
-													(colorA != colorH) && (colorA == colorI)))
-										{
-											product1 = colorC;
-										}
-									else
-										{
-											product1=INTERPOLATE8(colorA, colorC);
-										}
-									product2 = colorB;
+									product = colorB;
 								}
+								else
+								{
+									product = INTERPOLATE8(colorA, colorB);
+								}
+
+							if ((colorA == colorB) && (colorA == colorH) &&
+							    (colorG != colorC) && (colorC == colorM))
+							{
+								product1 = colorA;
+							}
 							else
-							if((colorA == colorD) && (colorB == colorC))
+								if ((colorC == colorG) && (colorC == colorD) &&
+								    (colorA != colorH) && (colorA == colorI))
 								{
-									if (colorA == colorB)
-										{
-											product = colorA;
-											product1 = colorA;
-											product2 = colorA;
-										}
-									else
-										{
-											register int r = 0;
-											product1 = INTERPOLATE8(colorA, colorC);
-											product = INTERPOLATE8(colorA, colorB);
-
-											r += GetResult1 (colorA&0x00FFFFFF, colorB&0x00FFFFFF, colorG&0x00FFFFFF, colorE&0x00FFFFFF, colorI&0x00FFFFFF);
-											r += GetResult2 (colorB&0x00FFFFFF, colorA&0x00FFFFFF, colorK&0x00FFFFFF, colorF&0x00FFFFFF, colorJ&0x00FFFFFF);
-											r += GetResult2 (colorB&0x00FFFFFF, colorA&0x00FFFFFF, colorH&0x00FFFFFF, colorN&0x00FFFFFF, colorM&0x00FFFFFF);
-											r += GetResult1 (colorA&0x00FFFFFF, colorB&0x00FFFFFF, colorL&0x00FFFFFF, colorO&0x00FFFFFF, colorP&0x00FFFFFF);
-
-											if (r > 0)
-												product2 = colorA;
-											else
-											if (r < 0)
-												product2 = colorB;
-											else
-												{
-													product2 = Q_INTERPOLATE8(colorA, colorB, colorC, colorD);
-												}
-										}
+									product1 = colorC;
 								}
-							else
+								else
 								{
-									product2 = Q_INTERPOLATE8(colorA, colorB, colorC, colorD);
-
-									if ((colorA == colorC) && (colorA == colorF) &&
-													(colorB != colorE) && (colorB == colorJ))
-										{
-											product = colorA;
-										}
-									else
-									if ((colorB == colorE) && (colorB == colorD) && (colorA != colorF) && (colorA == colorI))
-										{
-											product = colorB;
-										}
-									else
-										{
-											product = INTERPOLATE8(colorA, colorB);
-										}
-
-									if ((colorA == colorB) && (colorA == colorH) &&
-													(colorG != colorC) && (colorC == colorM))
-										{
-											product1 = colorA;
-										}
-									else
-									if ((colorC == colorG) && (colorC == colorD) &&
-													(colorA != colorH) && (colorA == colorI))
-										{
-											product1 = colorC;
-										}
-									else
-										{
-											product1 = INTERPOLATE8(colorA, colorC);
-										}
+									product1 = INTERPOLATE8(colorA, colorC);
 								}
+						}
 
 //////////////////////////
 
-							*dP=colorA;
-							*(dP+1)=product;
-							*(dP+(srcPitchHalf))=product1;
-							*(dP+1+(srcPitchHalf))=product2;
+				*dP=colorA;
+				*(dP+1)=product;
+				*(dP+(srcPitchHalf))=product1;
+				*(dP+1+(srcPitchHalf))=product2;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void SuperEagle_ex8(unsigned char *srcPtr, DWORD srcPitch,
-																	unsigned char  *dstBitmap, int width, int height)
+                    unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	DWORD srcPitchHalf    = srcPitch>>1;
@@ -592,154 +659,185 @@ void SuperEagle_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	DWORD color4, color5, color6;
 	DWORD color1, color2, color3;
 	DWORD colorA1, colorA2,
-							colorB1, colorB2,
-							colorS1, colorS2;
+	colorB1, colorB2,
+	colorS1, colorS2;
 	DWORD product1a, product1b,
-							product2a, product2b;
+	product2a, product2b;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (DWORD *)srcPtr;
-		dP = (DWORD *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
+		for (; height; height-=1)
+		{
+			bP = (DWORD *)srcPtr;
+			dP = (DWORD *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0)
+				{
+					iYA=0;
+				}
+				else
+				{
+					iYA=finWidth;
+				}
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitchHalf;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorB1 = *(bP- iYA);
+				colorB2 = *(bP- iYA + iXB);
+
+				color4 = *(bP  - iXA);
+				color5 = *(bP);
+				color6 = *(bP  + iXB);
+				colorS2 = *(bP + iXC);
+
+				color1 = *(bP  + iYB  - iXA);
+				color2 = *(bP  + iYB);
+				color3 = *(bP  + iYB  + iXB);
+				colorS1= *(bP  + iYB  + iXC);
+
+				colorA1 = *(bP + iYC);
+				colorA2 = *(bP + iYC + iXB);
+
+				if (color2 == color6 && color5 != color3)
+				{
+					product1b = product2a = color2;
+					if ((color1 == color2) ||
+					    (color6 == colorB2))
+					{
+						product1a = INTERPOLATE8(color2, color5);
+						product1a = INTERPOLATE8(color2, product1a);
+					}
+					else
+					{
+						product1a = INTERPOLATE8(color5, color6);
+					}
+
+					if ((color6 == colorS2) ||
+					    (color2 == colorA1))
+					{
+						product2b = INTERPOLATE8(color2, color3);
+						product2b = INTERPOLATE8(color2, product2b);
+					}
+					else
+					{
+						product2b = INTERPOLATE8(color2, color3);
+					}
+				}
+				else
+					if (color5 == color3 && color2 != color6)
+					{
+						product2b = product1a = color5;
+
+						if ((colorB1 == color5) ||
+						    (color3 == colorS1))
 						{
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+							product1b = INTERPOLATE8(color5, color6);
+							product1b = INTERPOLATE8(color5, product1b);
+						}
+						else
+						{
+							product1b = INTERPOLATE8(color5, color6);
+						}
+
+						if ((color3 == colorA2) ||
+						    (color4 == color5))
+						{
+							product2a = INTERPOLATE8(color5, color2);
+							product2a = INTERPOLATE8(color5, product2a);
+						}
+						else
+						{
+							product2a = INTERPOLATE8(color2, color3);
+						}
+					}
+					else
+						if (color5 == color3 && color2 == color6)
+						{
+							register int r = 0;
+
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color1&0x00ffffff),  (colorA1&0x00ffffff));
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color4&0x00ffffff),  (colorB1&0x00ffffff));
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorA2&0x00ffffff), (colorS1&0x00ffffff));
+							r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorB2&0x00ffffff), (colorS2&0x00ffffff));
+
+							if (r > 0)
+							{
+								product1b = product2a = color2;
+								product1a = product2b = INTERPOLATE8(color5, color6);
+							}
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0)  {iYA=0;}
-							else         {iYA=finWidth;}
-							if(height>4) {iYB=finWidth;iYC=srcPitchHalf;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
-
-							colorB1 = *(bP- iYA);
-							colorB2 = *(bP- iYA + iXB);
-
-							color4 = *(bP  - iXA);
-							color5 = *(bP);
-							color6 = *(bP  + iXB);
-							colorS2 = *(bP + iXC);
-
-							color1 = *(bP  + iYB  - iXA);
-							color2 = *(bP  + iYB);
-							color3 = *(bP  + iYB  + iXB);
-							colorS1= *(bP  + iYB  + iXC);
-
-							colorA1 = *(bP + iYC);
-							colorA2 = *(bP + iYC + iXB);
-
-							if(color2 == color6 && color5 != color3)
-								{
-									product1b = product2a = color2;
-									if((color1 == color2) ||
-												(color6 == colorB2))
-										{
-											product1a = INTERPOLATE8(color2, color5);
-											product1a = INTERPOLATE8(color2, product1a);
-										}
-									else
-										{
-											product1a = INTERPOLATE8(color5, color6);
-										}
-
-									if((color6 == colorS2) ||
-												(color2 == colorA1))
-										{
-											product2b = INTERPOLATE8(color2, color3);
-											product2b = INTERPOLATE8(color2, product2b);
-										}
-									else
-										{
-											product2b = INTERPOLATE8(color2, color3);
-										}
-								}
-							else
-							if (color5 == color3 && color2 != color6)
+								if (r < 0)
 								{
 									product2b = product1a = color5;
-
-									if ((colorB1 == color5) ||
-													(color3 == colorS1))
-										{
-											product1b = INTERPOLATE8(color5, color6);
-											product1b = INTERPOLATE8(color5, product1b);
-										}
-									else
-										{
-											product1b = INTERPOLATE8(color5, color6);
-										}
-
-									if ((color3 == colorA2) ||
-													(color4 == color5))
-										{
-											product2a = INTERPOLATE8(color5, color2);
-											product2a = INTERPOLATE8(color5, product2a);
-										}
-									else
-										{
-											product2a = INTERPOLATE8(color2, color3);
-										}
+									product1b = product2a = INTERPOLATE8(color5, color6);
 								}
-							else
-							if (color5 == color3 && color2 == color6)
+								else
 								{
-									register int r = 0;
-
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color1&0x00ffffff),  (colorA1&0x00ffffff));
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (color4&0x00ffffff),  (colorB1&0x00ffffff));
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorA2&0x00ffffff), (colorS1&0x00ffffff));
-									r += GET_RESULT ((color6&0x00ffffff), (color5&0x00ffffff), (colorB2&0x00ffffff), (colorS2&0x00ffffff));
-
-									if (r > 0)
-										{
-											product1b = product2a = color2;
-											product1a = product2b = INTERPOLATE8(color5, color6);
-										}
-									else
-									if (r < 0)
-										{
-											product2b = product1a = color5;
-											product1b = product2a = INTERPOLATE8(color5, color6);
-										}
-									else
-										{
-											product2b = product1a = color5;
-											product1b = product2a = color2;
-										}
+									product2b = product1a = color5;
+									product1b = product2a = color2;
 								}
-							else
-								{
-									product2b = product1a = INTERPOLATE8(color2, color6);
-									product2b = Q_INTERPOLATE8(color3, color3, color3, product2b);
-									product1a = Q_INTERPOLATE8(color5, color5, color5, product1a);
+						}
+						else
+						{
+							product2b = product1a = INTERPOLATE8(color2, color6);
+							product2b = Q_INTERPOLATE8(color3, color3, color3, product2b);
+							product1a = Q_INTERPOLATE8(color5, color5, color5, product1a);
 
-									product2a = product1b = INTERPOLATE8(color5, color3);
-									product2a = Q_INTERPOLATE8(color2, color2, color2, product2a);
-									product1b = Q_INTERPOLATE8(color6, color6, color6, product1b);
-								}
+							product2a = product1b = INTERPOLATE8(color5, color3);
+							product2a = Q_INTERPOLATE8(color2, color2, color2, product2a);
+							product1b = Q_INTERPOLATE8(color6, color6, color6, product1b);
+						}
 
 ////////////////////////////////
 
-							*dP=product1a;
-							*(dP+1)=product1b;
-							*(dP+(srcPitchHalf))=product2a;
-							*(dP+1+(srcPitchHalf))=product2b;
+				*dP=product1a;
+				*(dP+1)=product1b;
+				*(dP+(srcPitchHalf))=product2a;
+				*(dP+1+(srcPitchHalf))=product2b;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 /////////////////////////
@@ -748,12 +846,15 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 {
 
 	// first pixel
-	if (src0[0] != src2[0] && src1[0] != src1[1]) {
+	if (src0[0] != src2[0] && src1[0] != src1[1])
+	{
 		dst0[0] = src1[0] == src0[0] ? src0[0] : src1[0];
 		dst0[1] = src1[1] == src0[0] ? src0[0] : src1[0];
 		dst1[0] = src1[0] == src2[0] ? src2[0] : src1[0];
 		dst1[1] = src1[1] == src2[0] ? src2[0] : src1[0];
-	} else {
+	}
+	else
+	{
 		dst0[0] = src1[0];
 		dst0[1] = src1[0];
 		dst1[0] = src1[0];
@@ -767,13 +868,17 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 
 	// central pixels
 	count -= 2;
-	while (count) {
-		if (src0[0] != src2[0] && src1[-1] != src1[1]) {
+	while (count)
+	{
+		if (src0[0] != src2[0] && src1[-1] != src1[1])
+		{
 			dst0[0] = src1[-1] == src0[0] ? src0[0] : src1[0];
 			dst0[1] = src1[1] == src0[0] ? src0[0] : src1[0];
 			dst1[0] = src1[-1] == src2[0] ? src2[0] : src1[0];
 			dst1[1] = src1[1] == src2[0] ? src2[0] : src1[0];
-		} else {
+		}
+		else
+		{
 			dst0[0] = src1[0];
 			dst0[1] = src1[0];
 			dst1[0] = src1[0];
@@ -789,12 +894,15 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 	}
 
 	// last pixel
-	if (src0[0] != src2[0] && src1[-1] != src1[0]) {
+	if (src0[0] != src2[0] && src1[-1] != src1[0])
+	{
 		dst0[0] = src1[-1] == src0[0] ? src0[0] : src1[0];
 		dst0[1] = src1[0] == src0[0] ? src0[0] : src1[0];
 		dst1[0] = src1[-1] == src2[0] ? src2[0] : src1[0];
 		dst1[1] = src1[0] == src2[0] ? src2[0] : src1[0];
-	} else {
+	}
+	else
+	{
 		dst0[0] = src1[0];
 		dst0[1] = src1[0];
 		dst1[0] = src1[0];
@@ -810,7 +918,7 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 #endif
 
 void Scale2x_ex8(unsigned char *srcPtr, DWORD srcPitch,
-					unsigned char  *dstPtr, int width, int height)
+                 unsigned char  *dstPtr, int width, int height)
 {
 #ifdef _WINDOWS
 
@@ -826,7 +934,8 @@ void Scale2x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	unsigned long  *src2 = src1 + srcpitch;
 	scale2x_32_def_whole(dst0, dst1, src0, src0, src1, width);
 	count -= 2;
-	while(count) {
+	while (count)
+	{
 		dst0 += dstPitch;
 		dst1 += dstPitch;
 		scale2x_32_def_whole(dst0, dst1, src0, src1, src2, width);
@@ -840,7 +949,7 @@ void Scale2x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	scale2x_32_def_whole(dst0, dst1, src0, src1, src1, width);
 #else
 
-		int looph, loopw;
+	int looph, loopw;
 
 	unsigned char * srcpix = srcPtr;
 	unsigned char * dstpix = dstPtr;
@@ -849,22 +958,25 @@ void Scale2x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	const int dstpitch = srcPitch<<1;
 
 	unsigned long E0, E1, E2, E3, B, D, E, F, H;
-	for(looph = 0; looph < height; ++looph)
+	for (looph = 0; looph < height; ++looph)
+	{
+		for (loopw = 0; loopw < width; ++ loopw)
 		{
-			for(loopw = 0; loopw < width; ++ loopw)
-				{
-					B = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*loopw));
-					D = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MAX(0,loopw-1)));
-					E = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*loopw));
-					F = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MIN(width-1,loopw+1)));
-					H = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*loopw));
+			B = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*loopw));
+			D = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MAX(0,loopw-1)));
+			E = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*loopw));
+			F = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MIN(width-1,loopw+1)));
+			H = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*loopw));
 
-						if (B != H && D != F) {
+			if (B != H && D != F)
+			{
 				E0 = D == B ? D : E;
 				E1 = B == F ? F : E;
 				E2 = D == H ? D : E;
 				E3 = H == F ? F : E;
-			} else {
+			}
+			else
+			{
 				E0 = E;
 				E1 = E;
 				E2 = E;
@@ -872,19 +984,20 @@ void Scale2x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 			}
 
 
-					*(unsigned long*)(dstpix + looph*2*dstpitch + loopw*2*4) = E0;
-					*(unsigned long*)(dstpix + looph*2*dstpitch + (loopw*2+1)*4) = E1;
-					*(unsigned long*)(dstpix + (looph*2+1)*dstpitch + loopw*2*4) = E2;
-					*(unsigned long*)(dstpix + (looph*2+1)*dstpitch + (loopw*2+1)*4) = E3;
-				}
+			*(unsigned long*)(dstpix + looph*2*dstpitch + loopw*2*4) = E0;
+			*(unsigned long*)(dstpix + looph*2*dstpitch + (loopw*2+1)*4) = E1;
+			*(unsigned long*)(dstpix + (looph*2+1)*dstpitch + loopw*2*4) = E2;
+			*(unsigned long*)(dstpix + (looph*2+1)*dstpitch + (loopw*2+1)*4) = E3;
 		}
+	}
 #endif
 }
 
 static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* dst1, unsigned short* dst2, const unsigned short* src0, const unsigned short* src1, const unsigned short* src2, unsigned count)
 {
 	// first pixel
-	if (src0[0] != src2[0] && src1[0] != src1[1]) {
+	if (src0[0] != src2[0] && src1[0] != src1[1])
+	{
 		dst0[0] = src1[0];
 		dst0[1] = (src1[0] == src0[0] && src1[0] != src0[1]) || (src1[1] == src0[0] && src1[0] != src0[0]) ? src0[0] : src1[0];
 		dst0[2] = src1[1] == src0[0] ? src1[1] : src1[0];
@@ -894,7 +1007,9 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 		dst2[0] = src1[0];
 		dst2[1] = (src1[0] == src2[0] && src1[0] != src2[1]) || (src1[1] == src2[0] && src1[0] != src2[0]) ? src2[0] : src1[0];
 		dst2[2] = src1[1] == src2[0] ? src1[1] : src1[0];
-	} else {
+	}
+	else
+	{
 		dst0[0] = src1[0];
 		dst0[1] = src1[0];
 		dst0[2] = src1[0];
@@ -914,8 +1029,10 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 
 	// central pixels
 	count -= 2;
-	while (count) {
-		if (src0[0] != src2[0] && src1[-1] != src1[1]) {
+	while (count)
+	{
+		if (src0[0] != src2[0] && src1[-1] != src1[1])
+		{
 			dst0[0] = src1[-1] == src0[0] ? src1[-1] : src1[0];
 			dst0[1] = (src1[-1] == src0[0] && src1[0] != src0[1]) || (src1[1] == src0[0] && src1[0] != src0[-1]) ? src0[0] : src1[0];
 			dst0[2] = src1[1] == src0[0] ? src1[1] : src1[0];
@@ -925,7 +1042,9 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 			dst2[0] = src1[-1] == src2[0] ? src1[-1] : src1[0];
 			dst2[1] = (src1[-1] == src2[0] && src1[0] != src2[1]) || (src1[1] == src2[0] && src1[0] != src2[-1]) ? src2[0] : src1[0];
 			dst2[2] = src1[1] == src2[0] ? src1[1] : src1[0];
-		} else {
+		}
+		else
+		{
 			dst0[0] = src1[0];
 			dst0[1] = src1[0];
 			dst0[2] = src1[0];
@@ -947,7 +1066,8 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 	}
 
 	// last pixel
-	if (src0[0] != src2[0] && src1[-1] != src1[0]) {
+	if (src0[0] != src2[0] && src1[-1] != src1[0])
+	{
 		dst0[0] = src1[-1] == src0[0] ? src1[-1] : src1[0];
 		dst0[1] = (src1[-1] == src0[0] && src1[0] != src0[0]) || (src1[0] == src0[0] && src1[0] != src0[-1]) ? src0[0] : src1[0];
 		dst0[2] = src1[0];
@@ -957,7 +1077,9 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 		dst2[0] = src1[-1] == src2[0] ? src1[-1] : src1[0];
 		dst2[1] = (src1[-1] == src2[0] && src1[0] != src2[0]) || (src1[0] == src2[0] && src1[0] != src2[-1]) ? src2[0] : src1[0];
 		dst2[2] = src1[0];
-	} else {
+	}
+	else
+	{
 		dst0[0] = src1[0];
 		dst0[1] = src1[0];
 		dst0[2] = src1[0];
@@ -975,7 +1097,8 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 {
 
 	// first pixel
-	if (src0[0] != src2[0] && src1[0] != src1[1]) {
+	if (src0[0] != src2[0] && src1[0] != src1[1])
+	{
 		dst0[0] = src1[0];
 		dst0[1] = (src1[0] == src0[0] && src1[0] != src0[1]) || (src1[1] == src0[0] && src1[0] != src0[0]) ? src0[0] : src1[0];
 		dst0[2] = src1[1] == src0[0] ? src1[1] : src1[0];
@@ -985,7 +1108,9 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 		dst2[0] = src1[0];
 		dst2[1] = (src1[0] == src2[0] && src1[0] != src2[1]) || (src1[1] == src2[0] && src1[0] != src2[0]) ? src2[0] : src1[0];
 		dst2[2] = src1[1] == src2[0] ? src1[1] : src1[0];
-	} else {
+	}
+	else
+	{
 		dst0[0] = src1[0];
 		dst0[1] = src1[0];
 		dst0[2] = src1[0];
@@ -1005,8 +1130,10 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 
 	// central pixels
 	count -= 2;
-	while (count) {
-		if (src0[0] != src2[0] && src1[-1] != src1[1]) {
+	while (count)
+	{
+		if (src0[0] != src2[0] && src1[-1] != src1[1])
+		{
 			dst0[0] = src1[-1] == src0[0] ? src1[-1] : src1[0];
 			dst0[1] = (src1[-1] == src0[0] && src1[0] != src0[1]) || (src1[1] == src0[0] && src1[0] != src0[-1]) ? src0[0] : src1[0];
 			dst0[2] = src1[1] == src0[0] ? src1[1] : src1[0];
@@ -1016,7 +1143,9 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 			dst2[0] = src1[-1] == src2[0] ? src1[-1] : src1[0];
 			dst2[1] = (src1[-1] == src2[0] && src1[0] != src2[1]) || (src1[1] == src2[0] && src1[0] != src2[-1]) ? src2[0] : src1[0];
 			dst2[2] = src1[1] == src2[0] ? src1[1] : src1[0];
-		} else {
+		}
+		else
+		{
 			dst0[0] = src1[0];
 			dst0[1] = src1[0];
 			dst0[2] = src1[0];
@@ -1038,7 +1167,8 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 	}
 
 	// last pixel
-	if (src0[0] != src2[0] && src1[-1] != src1[0]) {
+	if (src0[0] != src2[0] && src1[-1] != src1[0])
+	{
 		dst0[0] = src1[-1] == src0[0] ? src1[-1] : src1[0];
 		dst0[1] = (src1[-1] == src0[0] && src1[0] != src0[0]) || (src1[0] == src0[0] && src1[0] != src0[-1]) ? src0[0] : src1[0];
 		dst0[2] = src1[0];
@@ -1048,7 +1178,9 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 		dst2[0] = src1[-1] == src2[0] ? src1[-1] : src1[0];
 		dst2[1] = (src1[-1] == src2[0] && src1[0] != src2[0]) || (src1[0] == src2[0] && src1[0] != src2[-1]) ? src2[0] : src1[0];
 		dst2[2] = src1[0];
-	} else {
+	}
+	else
+	{
 		dst0[0] = src1[0];
 		dst0[1] = src1[0];
 		dst0[2] = src1[0];
@@ -1062,7 +1194,7 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 }
 
 void Scale3x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
-							unsigned char  *dstPtr, int width, int height)
+                   unsigned char  *dstPtr, int width, int height)
 {
 #ifdef _WINDOWS
 	int count = height;
@@ -1079,7 +1211,8 @@ void Scale3x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 	scale3x_16_def_whole(dst0, dst1, dst2, src0, src0, src1, count);
 	dstPitch *= 3;
 	count -= 2;
-	while(count) {
+	while (count)
+	{
 
 		dst0 += dstPitch;
 		dst1 += dstPitch;
@@ -1098,7 +1231,7 @@ void Scale3x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 	scale3x_16_def_whole(dst0, dst1, dst2, src0, src1, src1, width);
 #else
 
-		int looph, loopw;
+	int looph, loopw;
 
 	unsigned char * srcpix = srcPtr;
 	unsigned char * dstpix = dstPtr;
@@ -1108,59 +1241,62 @@ void Scale3x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 
 	unsigned short E0, E1, E2, E3, E4, E5, E6, E7, E8;
 	unsigned short A, B, C, D, E, F, G, H, I;
-	for(looph = 0; looph < height; ++looph)
+	for (looph = 0; looph < height; ++looph)
+	{
+		for (loopw = 0; loopw < width; ++ loopw)
 		{
-			for(loopw = 0; loopw < width; ++ loopw)
-				{
-					A = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*MAX(0,loopw-1)));
-					B = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*loopw));
-					C = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*MIN(width-1,loopw+1)));
-					D = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MAX(0,loopw-1)));
-					E = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*loopw));
-					F = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MIN(width-1,loopw+1)));
-					G = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*MAX(0,loopw-1)));
-					H = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*loopw));
-					I = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*MIN(width-1,loopw+1)));
+			A = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*MAX(0,loopw-1)));
+			B = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*loopw));
+			C = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*MIN(width-1,loopw+1)));
+			D = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MAX(0,loopw-1)));
+			E = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*loopw));
+			F = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MIN(width-1,loopw+1)));
+			G = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*MAX(0,loopw-1)));
+			H = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*loopw));
+			I = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*MIN(width-1,loopw+1)));
 
-	if (B != H && D != F) {
-					E0 = D == B ? D : E;
+			if (B != H && D != F)
+			{
+				E0 = D == B ? D : E;
 				E1 = (D == B && E != C) || (B == F && E != A) ? B : E;
 				E2 = B == F ? F : E;
-								E3 = (D == B && E != G) || (D == H && E != A) ? D : E;
+				E3 = (D == B && E != G) || (D == H && E != A) ? D : E;
 				E4 = E;
-								E5 = (B == F && E != I) || (H == F && E != C) ? F : E;
-								E6 = D == H ? D : E;
-											E7 = (D == H && E != I) || (H == F && E != G) ? H : E;
-											E8 = H == F ? F : E;
-	} else {
-								E0 = E;
-								E1 = E;
-								E2 = E;
-								E3 = E;
-								E4 = E;
-								E5 = E;
-								E6 = E;
-								E7 = E;
-								E8 = E;
-}
+				E5 = (B == F && E != I) || (H == F && E != C) ? F : E;
+				E6 = D == H ? D : E;
+				E7 = (D == H && E != I) || (H == F && E != G) ? H : E;
+				E8 = H == F ? F : E;
+			}
+			else
+			{
+				E0 = E;
+				E1 = E;
+				E2 = E;
+				E3 = E;
+				E4 = E;
+				E5 = E;
+				E6 = E;
+				E7 = E;
+				E8 = E;
+			}
 
 
-					*(unsigned long*)(dstpix + looph*3*dstpitch + loopw*3*2) = E0;
-					*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+1)*2) = E1;
-					*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+2)*2) = E2;
-					*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + loopw*3*2) = E3;
-					*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+1)*2) = E4;
-					*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+2)*2) = E5;
-					*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + loopw*3*2) = E6;
-					*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+1)*2) = E7;
-					*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+2)*2) = E8;
-				}
+			*(unsigned long*)(dstpix + looph*3*dstpitch + loopw*3*2) = E0;
+			*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+1)*2) = E1;
+			*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+2)*2) = E2;
+			*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + loopw*3*2) = E3;
+			*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+1)*2) = E4;
+			*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+2)*2) = E5;
+			*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + loopw*3*2) = E6;
+			*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+1)*2) = E7;
+			*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+2)*2) = E8;
 		}
+	}
 #endif
 }
 
 void Scale3x_ex8(unsigned char *srcPtr, DWORD srcPitch,
-					unsigned char  *dstPtr, int width, int height)
+                 unsigned char  *dstPtr, int width, int height)
 {
 #ifdef _WINDOWS
 	int count = height;
@@ -1178,7 +1314,8 @@ void Scale3x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	scale3x_32_def_whole(dst0, dst1, dst2, src0, src0, src1, width);
 	dstPitch *= 3;
 	count -= 2;
-	while(count) {
+	while (count)
+	{
 		dst0 += dstPitch;
 		dst1 += dstPitch;
 		dst2 += dstPitch;
@@ -1197,7 +1334,7 @@ void Scale3x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 #else
 
-		int looph, loopw;
+	int looph, loopw;
 
 	unsigned char * srcpix = srcPtr;
 	unsigned char * dstpix = dstPtr;
@@ -1207,54 +1344,57 @@ void Scale3x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 	unsigned long E0, E1, E2, E3, E4, E5, E6, E7, E8;
 	unsigned long A, B, C, D, E, F, G, H, I;
-	for(looph = 0; looph < height; ++looph)
+	for (looph = 0; looph < height; ++looph)
+	{
+		for (loopw = 0; loopw < width; ++ loopw)
 		{
-			for(loopw = 0; loopw < width; ++ loopw)
-				{
-					A = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*MAX(0,loopw-1)));
-					B = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*loopw));
-					C = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*MIN(width-1,loopw+1)));
-					D = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MAX(0,loopw-1)));
-					E = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*loopw));
-					F = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MIN(width-1,loopw+1)));
-					G = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*MAX(0,loopw-1)));
-					H = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*loopw));
-					I = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*MIN(width-1,loopw+1)));
+			A = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*MAX(0,loopw-1)));
+			B = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*loopw));
+			C = *(unsigned long*)(srcpix + (MAX(0,looph-1)*srcpitch) + (4*MIN(width-1,loopw+1)));
+			D = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MAX(0,loopw-1)));
+			E = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*loopw));
+			F = *(unsigned long*)(srcpix + (looph*srcpitch) + (4*MIN(width-1,loopw+1)));
+			G = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*MAX(0,loopw-1)));
+			H = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*loopw));
+			I = *(unsigned long*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (4*MIN(width-1,loopw+1)));
 
-	if (B != H && D != F) {
-					E0 = D == B ? D : E;
+			if (B != H && D != F)
+			{
+				E0 = D == B ? D : E;
 				E1 = (D == B && E != C) || (B == F && E != A) ? B : E;
 				E2 = B == F ? F : E;
-								E3 = (D == B && E != G) || (D == H && E != A) ? D : E;
+				E3 = (D == B && E != G) || (D == H && E != A) ? D : E;
 				E4 = E;
-								E5 = (B == F && E != I) || (H == F && E != C) ? F : E;
-								E6 = D == H ? D : E;
-											E7 = (D == H && E != I) || (H == F && E != G) ? H : E;
-											E8 = H == F ? F : E;
-	} else {
-								E0 = E;
-								E1 = E;
-								E2 = E;
-								E3 = E;
-								E4 = E;
-								E5 = E;
-								E6 = E;
-								E7 = E;
-								E8 = E;
-}
+				E5 = (B == F && E != I) || (H == F && E != C) ? F : E;
+				E6 = D == H ? D : E;
+				E7 = (D == H && E != I) || (H == F && E != G) ? H : E;
+				E8 = H == F ? F : E;
+			}
+			else
+			{
+				E0 = E;
+				E1 = E;
+				E2 = E;
+				E3 = E;
+				E4 = E;
+				E5 = E;
+				E6 = E;
+				E7 = E;
+				E8 = E;
+			}
 
 
-					*(unsigned long*)(dstpix + looph*3*dstpitch + loopw*3*4) = E0;
-					*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+1)*4) = E1;
-					*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+2)*4) = E2;
-					*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + loopw*3*4) = E3;
-					*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+1)*4) = E4;
-					*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+2)*4) = E5;
-					*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + loopw*3*4) = E6;
-					*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+1)*4) = E7;
-					*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+2)*4) = E8;
-				}
+			*(unsigned long*)(dstpix + looph*3*dstpitch + loopw*3*4) = E0;
+			*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+1)*4) = E1;
+			*(unsigned long*)(dstpix + looph*3*dstpitch + (loopw*3+2)*4) = E2;
+			*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + loopw*3*4) = E3;
+			*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+1)*4) = E4;
+			*(unsigned long*)(dstpix + (looph*3+1)*dstpitch + (loopw*3+2)*4) = E5;
+			*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + loopw*3*4) = E6;
+			*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+1)*4) = E7;
+			*(unsigned long*)(dstpix + (looph*3+2)*dstpitch + (loopw*3+2)*4) = E8;
 		}
+	}
 #endif
 }
 
@@ -1271,7 +1411,7 @@ void Scale3x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	+ ((((A & qlowpixelMask6) + (B & qlowpixelMask6) + (C & qlowpixelMask6) + (D & qlowpixelMask6)) >> 2) & qlowpixelMask6))))
 
 void Super2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
-													unsigned char  *dstBitmap, int width, int height)
+                    unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	int   finWidth        = srcPitch>>1;
@@ -1282,142 +1422,167 @@ void Super2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 	DWORD color4, color5, color6;
 	DWORD color1, color2, color3;
 	DWORD colorA0, colorA1, colorA2, colorA3,
-							colorB0, colorB1, colorB2, colorB3,
-							colorS1, colorS2;
+	colorB0, colorB1, colorB2, colorB3,
+	colorS1, colorS2;
 	DWORD product1a, product1b,
-							product2a, product2b;
+	product2a, product2b;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (unsigned short *)srcPtr;
-		dP = (unsigned short *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
-						{
+		for (; height; height-=1)
+		{
+			bP = (unsigned short *)srcPtr;
+			dP = (unsigned short *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
 //---------------------------------------    B1 B2
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                           A1 A2
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
-							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0) iYA=0;
-							else        iYA=finWidth;
-							if(height>4) {iYB=finWidth;iYC=srcPitch;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0) iYA=0;
+				else        iYA=finWidth;
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitch;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
 
 
-							colorB0 = *(bP- iYA - iXA);
-							colorB1 = *(bP- iYA);
-							colorB2 = *(bP- iYA + iXB);
-							colorB3 = *(bP- iYA + iXC);
+				colorB0 = *(bP- iYA - iXA);
+				colorB1 = *(bP- iYA);
+				colorB2 = *(bP- iYA + iXB);
+				colorB3 = *(bP- iYA + iXC);
 
-							color4 = *(bP  - iXA);
-							color5 = *(bP);
-							color6 = *(bP  + iXB);
-							colorS2 = *(bP + iXC);
+				color4 = *(bP  - iXA);
+				color5 = *(bP);
+				color6 = *(bP  + iXB);
+				colorS2 = *(bP + iXC);
 
-							color1 = *(bP  + iYB  - iXA);
-							color2 = *(bP  + iYB);
-							color3 = *(bP  + iYB  + iXB);
-							colorS1= *(bP  + iYB  + iXC);
+				color1 = *(bP  + iYB  - iXA);
+				color2 = *(bP  + iYB);
+				color3 = *(bP  + iYB  + iXB);
+				colorS1= *(bP  + iYB  + iXC);
 
-							colorA0 = *(bP + iYC - iXA);
-							colorA1 = *(bP + iYC);
-							colorA2 = *(bP + iYC + iXB);
-							colorA3 = *(bP + iYC + iXC);
+				colorA0 = *(bP + iYC - iXA);
+				colorA1 = *(bP + iYC);
+				colorA2 = *(bP + iYC + iXB);
+				colorA3 = *(bP + iYC + iXC);
 
 //--------------------------------------
-							if (color2 == color6 && color5 != color3)
-								{
-									product2b = product1b = color2;
-								}
+				if (color2 == color6 && color5 != color3)
+				{
+					product2b = product1b = color2;
+				}
+				else
+					if (color5 == color3 && color2 != color6)
+					{
+						product2b = product1b = color5;
+					}
+					else
+						if (color5 == color3 && color2 == color6)
+						{
+							register int r = 0;
+
+							r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
+							r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
+							r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
+							r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
+
+							if (r > 0)
+								product2b = product1b = color6;
 							else
-							if (color5 == color3 && color2 != color6)
-								{
+								if (r < 0)
 									product2b = product1b = color5;
-								}
-							else
-							if (color5 == color3 && color2 == color6)
+								else
 								{
-									register int r = 0;
-
-									r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
-									r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
-									r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
-									r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
-
-									if (r > 0)
-										product2b = product1b = color6;
-									else
-									if (r < 0)
-										product2b = product1b = color5;
-									else
-										{
-											product2b = product1b = INTERPOLATE6 (color5, color6);
-										}
+									product2b = product1b = INTERPOLATE6 (color5, color6);
 								}
+						}
+						else
+						{
+							if (color6 == color3 && color3 == colorA1 && color2 != colorA2 && color3 != colorA0)
+								product2b = Q_INTERPOLATE6 (color3, color3, color3, color2);
 							else
-								{
-									if (color6 == color3 && color3 == colorA1 && color2 != colorA2 && color3 != colorA0)
-													product2b = Q_INTERPOLATE6 (color3, color3, color3, color2);
-									else
-									if (color5 == color2 && color2 == colorA2 && colorA1 != color3 && color2 != colorA3)
-													product2b = Q_INTERPOLATE6 (color2, color2, color2, color3);
-									else
-													product2b = INTERPOLATE6 (color2, color3);
+								if (color5 == color2 && color2 == colorA2 && colorA1 != color3 && color2 != colorA3)
+									product2b = Q_INTERPOLATE6 (color2, color2, color2, color3);
+								else
+									product2b = INTERPOLATE6 (color2, color3);
 
-									if (color6 == color3 && color6 == colorB1 && color5 != colorB2 && color6 != colorB0)
-													product1b = Q_INTERPOLATE6 (color6, color6, color6, color5);
-									else
-									if (color5 == color2 && color5 == colorB2 && colorB1 != color6 && color5 != colorB3)
-													product1b = Q_INTERPOLATE6 (color6, color5, color5, color5);
-									else
-													product1b = INTERPOLATE6 (color5, color6);
-								}
-
-							if (color5 == color3 && color2 != color6 && color4 == color5 && color5 != colorA2)
-								product2a = INTERPOLATE6 (color2, color5);
+							if (color6 == color3 && color6 == colorB1 && color5 != colorB2 && color6 != colorB0)
+								product1b = Q_INTERPOLATE6 (color6, color6, color6, color5);
 							else
-							if (color5 == color1 && color6 == color5 && color4 != color2 && color5 != colorA0)
-								product2a = INTERPOLATE6(color2, color5);
-							else
-								product2a = color2;
+								if (color5 == color2 && color5 == colorB2 && colorB1 != color6 && color5 != colorB3)
+									product1b = Q_INTERPOLATE6 (color6, color5, color5, color5);
+								else
+									product1b = INTERPOLATE6 (color5, color6);
+						}
 
-							if (color2 == color6 && color5 != color3 && color1 == color2 && color2 != colorB2)
-								product1a = INTERPOLATE6(color2, color5);
-							else
-							if (color4 == color2 && color3 == color2 && color1 != color5 && color2 != colorB0)
-								product1a = INTERPOLATE6(color2, color5);
-							else
-								product1a = color5;
+				if (color5 == color3 && color2 != color6 && color4 == color5 && color5 != colorA2)
+					product2a = INTERPOLATE6 (color2, color5);
+				else
+					if (color5 == color1 && color6 == color5 && color4 != color2 && color5 != colorA0)
+						product2a = INTERPOLATE6(color2, color5);
+					else
+						product2a = color2;
 
-							*dP=(unsigned short)product1a;
-							*(dP+1)=(unsigned short)product1b;
-							*(dP+(srcPitch))=(unsigned short)product2a;
-							*(dP+1+(srcPitch))=(unsigned short)product2b;
+				if (color2 == color6 && color5 != color3 && color1 == color2 && color2 != colorB2)
+					product1a = INTERPOLATE6(color2, color5);
+				else
+					if (color4 == color2 && color3 == color2 && color1 != color5 && color2 != colorB0)
+						product1a = INTERPOLATE6(color2, color5);
+					else
+						product1a = color5;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				*dP=(unsigned short)product1a;
+				*(dP+1)=(unsigned short)product1b;
+				*(dP+(srcPitch))=(unsigned short)product2a;
+				*(dP+1+(srcPitch))=(unsigned short)product2b;
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
+
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void Std2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
-													unsigned char  *dstBitmap, int width, int height)
+                  unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	int   finWidth        = srcPitch>>1;
@@ -1428,195 +1593,220 @@ void Std2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 
 	DWORD colorA, colorB;
 	DWORD colorC, colorD,
-							colorE, colorF, colorG, colorH,
-							colorI, colorJ, colorK, colorL,
-							colorM, colorN, colorO, colorP;
+	colorE, colorF, colorG, colorH,
+	colorI, colorJ, colorK, colorL,
+	colorM, colorN, colorO, colorP;
 	DWORD product, product1, product2;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (unsigned short *)srcPtr;
-		dP = (unsigned short *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
-						{
+		for (; height; height-=1)
+		{
+			bP = (unsigned short *)srcPtr;
+			dP = (unsigned short *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
 //---------------------------------------
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
 //                                       M|N O|P
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0) iYA=0;
+				else        iYA=finWidth;
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitch;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorI = *(bP- iYA - iXA);
+				colorE = *(bP- iYA);
+				colorF = *(bP- iYA + iXB);
+				colorJ = *(bP- iYA + iXC);
+
+				colorG = *(bP  - iXA);
+				colorA = *(bP);
+				colorB = *(bP  + iXB);
+				colorK = *(bP + iXC);
+
+				colorH = *(bP  + iYB  - iXA);
+				colorC = *(bP  + iYB);
+				colorD = *(bP  + iYB  + iXB);
+				colorL = *(bP  + iYB  + iXC);
+
+				colorM = *(bP + iYC - iXA);
+				colorN = *(bP + iYC);
+				colorO = *(bP + iYC + iXB);
+				colorP = *(bP + iYC + iXC);
+
+				if ((colorA == colorD) && (colorB != colorC))
+				{
+					if (((colorA == colorE) && (colorB == colorL)) ||
+					    ((colorA == colorC) && (colorA == colorF) &&
+					     (colorB != colorE) && (colorB == colorJ)))
+					{
+						product = colorA;
+					}
+					else
+					{
+						product = INTERPOLATE6(colorA, colorB);
+					}
+
+					if (((colorA == colorG) && (colorC == colorO)) ||
+					    ((colorA == colorB) && (colorA == colorH) &&
+					     (colorG != colorC) && (colorC == colorM)))
+					{
+						product1 = colorA;
+					}
+					else
+					{
+						product1 = INTERPOLATE6(colorA, colorC);
+					}
+					product2 = colorA;
+				}
+				else
+					if ((colorB == colorC) && (colorA != colorD))
+					{
+						if (((colorB == colorF) && (colorA == colorH)) ||
+						    ((colorB == colorE) && (colorB == colorD) &&
+						     (colorA != colorF) && (colorA == colorI)))
+						{
+							product = colorB;
+						}
+						else
+						{
+							product = INTERPOLATE6(colorA, colorB);
+						}
+
+						if (((colorC == colorH) && (colorA == colorF)) ||
+						    ((colorC == colorG) && (colorC == colorD) &&
+						     (colorA != colorH) && (colorA == colorI)))
+						{
+							product1 = colorC;
+						}
+						else
+						{
+							product1=INTERPOLATE6(colorA, colorC);
+						}
+						product2 = colorB;
+					}
+					else
+						if ((colorA == colorD) && (colorB == colorC))
+						{
+							if (colorA == colorB)
+							{
+								product = colorA;
+								product1 = colorA;
+								product2 = colorA;
+							}
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0) iYA=0;
-							else        iYA=finWidth;
-							if(height>4) {iYB=finWidth;iYC=srcPitch;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
+							{
+								register int r = 0;
+								product1 = INTERPOLATE6(colorA, colorC);
+								product = INTERPOLATE6(colorA, colorB);
 
-							colorI = *(bP- iYA - iXA);
-							colorE = *(bP- iYA);
-							colorF = *(bP- iYA + iXB);
-							colorJ = *(bP- iYA + iXC);
+								r += GetResult1 (colorA, colorB, colorG, colorE, colorI);
+								r += GetResult2 (colorB, colorA, colorK, colorF, colorJ);
+								r += GetResult2 (colorB, colorA, colorH, colorN, colorM);
+								r += GetResult1 (colorA, colorB, colorL, colorO, colorP);
 
-							colorG = *(bP  - iXA);
-							colorA = *(bP);
-							colorB = *(bP  + iXB);
-							colorK = *(bP + iXC);
-
-							colorH = *(bP  + iYB  - iXA);
-							colorC = *(bP  + iYB);
-							colorD = *(bP  + iYB  + iXB);
-							colorL = *(bP  + iYB  + iXC);
-
-							colorM = *(bP + iYC - iXA);
-							colorN = *(bP + iYC);
-							colorO = *(bP + iYC + iXB);
-							colorP = *(bP + iYC + iXC);
-
-							if((colorA == colorD) && (colorB != colorC))
-								{
-									if(((colorA == colorE) && (colorB == colorL)) ||
-												((colorA == colorC) && (colorA == colorF) &&
-													(colorB != colorE) && (colorB == colorJ)))
-										{
-											product = colorA;
-										}
-									else
-										{
-											product = INTERPOLATE6(colorA, colorB);
-										}
-
-									if(((colorA == colorG) && (colorC == colorO)) ||
-												((colorA == colorB) && (colorA == colorH) &&
-													(colorG != colorC) && (colorC == colorM)))
-										{
-											product1 = colorA;
-										}
-									else
-										{
-											product1 = INTERPOLATE6(colorA, colorC);
-										}
+								if (r > 0)
 									product2 = colorA;
-								}
+								else
+									if (r < 0)
+										product2 = colorB;
+									else
+									{
+										product2 = Q_INTERPOLATE6(colorA, colorB, colorC, colorD);
+									}
+							}
+						}
+						else
+						{
+							product2 = Q_INTERPOLATE6(colorA, colorB, colorC, colorD);
+
+							if ((colorA == colorC) && (colorA == colorF) &&
+							    (colorB != colorE) && (colorB == colorJ))
+							{
+								product = colorA;
+							}
 							else
-							if((colorB == colorC) && (colorA != colorD))
+								if ((colorB == colorE) && (colorB == colorD) && (colorA != colorF) && (colorA == colorI))
 								{
-									if(((colorB == colorF) && (colorA == colorH)) ||
-												((colorB == colorE) && (colorB == colorD) &&
-													(colorA != colorF) && (colorA == colorI)))
-										{
-											product = colorB;
-										}
-									else
-										{
-											product = INTERPOLATE6(colorA, colorB);
-										}
-
-									if(((colorC == colorH) && (colorA == colorF)) ||
-												((colorC == colorG) && (colorC == colorD) &&
-													(colorA != colorH) && (colorA == colorI)))
-										{
-											product1 = colorC;
-										}
-									else
-										{
-											product1=INTERPOLATE6(colorA, colorC);
-										}
-									product2 = colorB;
+									product = colorB;
 								}
+								else
+								{
+									product = INTERPOLATE6(colorA, colorB);
+								}
+
+							if ((colorA == colorB) && (colorA == colorH) &&
+							    (colorG != colorC) && (colorC == colorM))
+							{
+								product1 = colorA;
+							}
 							else
-							if((colorA == colorD) && (colorB == colorC))
+								if ((colorC == colorG) && (colorC == colorD) &&
+								    (colorA != colorH) && (colorA == colorI))
 								{
-									if (colorA == colorB)
-										{
-											product = colorA;
-											product1 = colorA;
-											product2 = colorA;
-										}
-									else
-										{
-											register int r = 0;
-											product1 = INTERPOLATE6(colorA, colorC);
-											product = INTERPOLATE6(colorA, colorB);
-
-											r += GetResult1 (colorA, colorB, colorG, colorE, colorI);
-											r += GetResult2 (colorB, colorA, colorK, colorF, colorJ);
-											r += GetResult2 (colorB, colorA, colorH, colorN, colorM);
-											r += GetResult1 (colorA, colorB, colorL, colorO, colorP);
-
-											if (r > 0)
-												product2 = colorA;
-											else
-											if (r < 0)
-												product2 = colorB;
-											else
-												{
-													product2 = Q_INTERPOLATE6(colorA, colorB, colorC, colorD);
-												}
-										}
+									product1 = colorC;
 								}
-							else
+								else
 								{
-									product2 = Q_INTERPOLATE6(colorA, colorB, colorC, colorD);
-
-									if ((colorA == colorC) && (colorA == colorF) &&
-													(colorB != colorE) && (colorB == colorJ))
-										{
-											product = colorA;
-										}
-									else
-									if ((colorB == colorE) && (colorB == colorD) && (colorA != colorF) && (colorA == colorI))
-										{
-											product = colorB;
-										}
-									else
-										{
-											product = INTERPOLATE6(colorA, colorB);
-										}
-
-									if ((colorA == colorB) && (colorA == colorH) &&
-													(colorG != colorC) && (colorC == colorM))
-										{
-											product1 = colorA;
-										}
-									else
-									if ((colorC == colorG) && (colorC == colorD) &&
-													(colorA != colorH) && (colorA == colorI))
-										{
-											product1 = colorC;
-										}
-									else
-										{
-											product1 = INTERPOLATE6(colorA, colorC);
-										}
+									product1 = INTERPOLATE6(colorA, colorC);
 								}
+						}
 
-							*dP=(unsigned short)colorA;
-							*(dP+1)=(unsigned short)product;
-							*(dP+(srcPitch))=(unsigned short)product1;
-							*(dP+1+(srcPitch))=(unsigned short)product2;
+				*dP=(unsigned short)colorA;
+				*(dP+1)=(unsigned short)product;
+				*(dP+(srcPitch))=(unsigned short)product1;
+				*(dP+1+(srcPitch))=(unsigned short)product2;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
 	}
+}
 
 ////////////////////////////////////////////////////////////////////////
 
 void SuperEagle_ex6(unsigned char *srcPtr, DWORD srcPitch,
-													unsigned char  *dstBitmap, int width, int height)
+                    unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	int   finWidth        = srcPitch>>1;
@@ -1627,152 +1817,177 @@ void SuperEagle_ex6(unsigned char *srcPtr, DWORD srcPitch,
 	DWORD color4, color5, color6;
 	DWORD color1, color2, color3;
 	DWORD colorA1, colorA2,
-							colorB1, colorB2,
-							colorS1, colorS2;
+	colorB1, colorB2,
+	colorS1, colorS2;
 	DWORD product1a, product1b,
-							product2a, product2b;
+	product2a, product2b;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (unsigned short *)srcPtr;
-		dP = (unsigned short *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
+		for (; height; height-=1)
+		{
+			bP = (unsigned short *)srcPtr;
+			dP = (unsigned short *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0) iYA=0;
+				else        iYA=finWidth;
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitch;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorB1 = *(bP- iYA);
+				colorB2 = *(bP- iYA + iXB);
+
+				color4 = *(bP  - iXA);
+				color5 = *(bP);
+				color6 = *(bP  + iXB);
+				colorS2 = *(bP + iXC);
+
+				color1 = *(bP  + iYB  - iXA);
+				color2 = *(bP  + iYB);
+				color3 = *(bP  + iYB  + iXB);
+				colorS1= *(bP  + iYB  + iXC);
+
+				colorA1 = *(bP + iYC);
+				colorA2 = *(bP + iYC + iXB);
+
+				if (color2 == color6 && color5 != color3)
+				{
+					product1b = product2a = color2;
+					if ((color1 == color2) ||
+					    (color6 == colorB2))
+					{
+						product1a = INTERPOLATE6(color2, color5);
+						product1a = INTERPOLATE6(color2, product1a);
+					}
+					else
+					{
+						product1a = INTERPOLATE6(color5, color6);
+					}
+
+					if ((color6 == colorS2) ||
+					    (color2 == colorA1))
+					{
+						product2b = INTERPOLATE6(color2, color3);
+						product2b = INTERPOLATE6(color2, product2b);
+					}
+					else
+					{
+						product2b = INTERPOLATE6(color2, color3);
+					}
+				}
+				else
+					if (color5 == color3 && color2 != color6)
+					{
+						product2b = product1a = color5;
+
+						if ((colorB1 == color5) ||
+						    (color3 == colorS1))
 						{
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+							product1b = INTERPOLATE6(color5, color6);
+							product1b = INTERPOLATE6(color5, product1b);
+						}
+						else
+						{
+							product1b = INTERPOLATE6(color5, color6);
+						}
+
+						if ((color3 == colorA2) ||
+						    (color4 == color5))
+						{
+							product2a = INTERPOLATE6(color5, color2);
+							product2a = INTERPOLATE6(color5, product2a);
+						}
+						else
+						{
+							product2a = INTERPOLATE6(color2, color3);
+						}
+					}
+					else
+						if (color5 == color3 && color2 == color6)
+						{
+							register int r = 0;
+
+							r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
+							r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
+							r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
+							r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
+
+							if (r > 0)
+							{
+								product1b = product2a = color2;
+								product1a = product2b = INTERPOLATE6(color5, color6);
+							}
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0) iYA=0;
-							else        iYA=finWidth;
-							if(height>4) {iYB=finWidth;iYC=srcPitch;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
-
-							colorB1 = *(bP- iYA);
-							colorB2 = *(bP- iYA + iXB);
-
-							color4 = *(bP  - iXA);
-							color5 = *(bP);
-							color6 = *(bP  + iXB);
-							colorS2 = *(bP + iXC);
-
-							color1 = *(bP  + iYB  - iXA);
-							color2 = *(bP  + iYB);
-							color3 = *(bP  + iYB  + iXB);
-							colorS1= *(bP  + iYB  + iXC);
-
-							colorA1 = *(bP + iYC);
-							colorA2 = *(bP + iYC + iXB);
-
-							if(color2 == color6 && color5 != color3)
-								{
-									product1b = product2a = color2;
-									if((color1 == color2) ||
-												(color6 == colorB2))
-										{
-											product1a = INTERPOLATE6(color2, color5);
-											product1a = INTERPOLATE6(color2, product1a);
-										}
-									else
-										{
-											product1a = INTERPOLATE6(color5, color6);
-										}
-
-									if((color6 == colorS2) ||
-												(color2 == colorA1))
-										{
-											product2b = INTERPOLATE6(color2, color3);
-											product2b = INTERPOLATE6(color2, product2b);
-										}
-									else
-										{
-											product2b = INTERPOLATE6(color2, color3);
-										}
-								}
-							else
-							if (color5 == color3 && color2 != color6)
+								if (r < 0)
 								{
 									product2b = product1a = color5;
-
-									if ((colorB1 == color5) ||
-													(color3 == colorS1))
-										{
-											product1b = INTERPOLATE6(color5, color6);
-											product1b = INTERPOLATE6(color5, product1b);
-										}
-									else
-										{
-											product1b = INTERPOLATE6(color5, color6);
-										}
-
-									if ((color3 == colorA2) ||
-													(color4 == color5))
-										{
-											product2a = INTERPOLATE6(color5, color2);
-											product2a = INTERPOLATE6(color5, product2a);
-										}
-									else
-										{
-											product2a = INTERPOLATE6(color2, color3);
-										}
+									product1b = product2a = INTERPOLATE6(color5, color6);
 								}
-							else
-							if (color5 == color3 && color2 == color6)
+								else
 								{
-									register int r = 0;
-
-									r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
-									r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
-									r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
-									r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
-
-									if (r > 0)
-										{
-											product1b = product2a = color2;
-											product1a = product2b = INTERPOLATE6(color5, color6);
-										}
-									else
-									if (r < 0)
-										{
-											product2b = product1a = color5;
-											product1b = product2a = INTERPOLATE6(color5, color6);
-										}
-									else
-										{
-											product2b = product1a = color5;
-											product1b = product2a = color2;
-										}
+									product2b = product1a = color5;
+									product1b = product2a = color2;
 								}
-							else
-								{
-									product2b = product1a = INTERPOLATE6(color2, color6);
-									product2b = Q_INTERPOLATE6(color3, color3, color3, product2b);
-									product1a = Q_INTERPOLATE6(color5, color5, color5, product1a);
+						}
+						else
+						{
+							product2b = product1a = INTERPOLATE6(color2, color6);
+							product2b = Q_INTERPOLATE6(color3, color3, color3, product2b);
+							product1a = Q_INTERPOLATE6(color5, color5, color5, product1a);
 
-									product2a = product1b = INTERPOLATE6(color5, color3);
-									product2a = Q_INTERPOLATE6(color2, color2, color2, product2a);
-									product1b = Q_INTERPOLATE6(color6, color6, color6, product1b);
-								}
+							product2a = product1b = INTERPOLATE6(color5, color3);
+							product2a = Q_INTERPOLATE6(color2, color2, color2, product2a);
+							product1b = Q_INTERPOLATE6(color6, color6, color6, product1b);
+						}
 
-							*dP=(unsigned short)product1a;
-							*(dP+1)=(unsigned short)product1b;
-							*(dP+(srcPitch))=(unsigned short)product2a;
-							*(dP+1+(srcPitch))=(unsigned short)product2b;
+				*dP=(unsigned short)product1a;
+				*(dP+1)=(unsigned short)product1b;
+				*(dP+(srcPitch))=(unsigned short)product2a;
+				*(dP+1+(srcPitch))=(unsigned short)product2b;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1783,7 +1998,7 @@ void SuperEagle_ex6(unsigned char *srcPtr, DWORD srcPitch,
 #endif
 
 void Scale2x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
-																unsigned char  *dstBitmap, int width, int height)
+                   unsigned char  *dstBitmap, int width, int height)
 {
 	int looph, loopw;
 
@@ -1794,22 +2009,25 @@ void Scale2x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 	const int dstpitch = srcPitch<<1;
 
 	unsigned short E0, E1, E2, E3, B, D, E, F, H;
-	for(looph = 0; looph < height; ++looph)
+	for (looph = 0; looph < height; ++looph)
+	{
+		for (loopw = 0; loopw < width; ++ loopw)
 		{
-			for(loopw = 0; loopw < width; ++ loopw)
-				{
-					B = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*loopw));
-					D = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MAX(0,loopw-1)));
-					E = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*loopw));
-					F = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MIN(width-1,loopw+1)));
-					H = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*loopw));
+			B = *(unsigned short*)(srcpix + (MAX(0,looph-1)*srcpitch) + (2*loopw));
+			D = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MAX(0,loopw-1)));
+			E = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*loopw));
+			F = *(unsigned short*)(srcpix + (looph*srcpitch) + (2*MIN(width-1,loopw+1)));
+			H = *(unsigned short*)(srcpix + (MIN(height-1,looph+1)*srcpitch) + (2*loopw));
 
-						if (B != H && D != F) {
+			if (B != H && D != F)
+			{
 				E0 = D == B ? D : E;
 				E1 = B == F ? F : E;
 				E2 = D == H ? D : E;
 				E3 = H == F ? F : E;
-			} else {
+			}
+			else
+			{
 				E0 = E;
 				E1 = E;
 				E2 = E;
@@ -1817,12 +2035,12 @@ void Scale2x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 			}
 
 
-					*(unsigned short*)(dstpix + looph*2*dstpitch + loopw*2*2) = E0;
-					*(unsigned short*)(dstpix + looph*2*dstpitch + (loopw*2+1)*2) = E1;
-					*(unsigned short*)(dstpix + (looph*2+1)*dstpitch + loopw*2*2) = E2;
-					*(unsigned short*)(dstpix + (looph*2+1)*dstpitch + (loopw*2+1)*2) = E3;
-				}
+			*(unsigned short*)(dstpix + looph*2*dstpitch + loopw*2*2) = E0;
+			*(unsigned short*)(dstpix + looph*2*dstpitch + (loopw*2+1)*2) = E1;
+			*(unsigned short*)(dstpix + (looph*2+1)*dstpitch + loopw*2*2) = E2;
+			*(unsigned short*)(dstpix + (looph*2+1)*dstpitch + (loopw*2+1)*2) = E3;
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1850,7 +2068,7 @@ void Scale2x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 	+ ((((A & qlowpixelMask5) + (B & qlowpixelMask5) + (C & qlowpixelMask5) + (D & qlowpixelMask5)) >> 2) & qlowpixelMask5))))
 
 void Super2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
-													unsigned char  *dstBitmap, int width, int height)
+                    unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	int   finWidth        = srcPitch>>1;
@@ -1861,142 +2079,167 @@ void Super2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 	DWORD color4, color5, color6;
 	DWORD color1, color2, color3;
 	DWORD colorA0, colorA1, colorA2, colorA3,
-							colorB0, colorB1, colorB2, colorB3,
-							colorS1, colorS2;
+	colorB0, colorB1, colorB2, colorB3,
+	colorS1, colorS2;
 	DWORD product1a, product1b,
-							product2a, product2b;
+	product2a, product2b;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (unsigned short *)srcPtr;
-		dP = (unsigned short *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
-						{
+		for (; height; height-=1)
+		{
+			bP = (unsigned short *)srcPtr;
+			dP = (unsigned short *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
 //---------------------------------------    B1 B2
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                           A1 A2
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
-							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0) iYA=0;
-							else        iYA=finWidth;
-							if(height>4) {iYB=finWidth;iYC=srcPitch;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0) iYA=0;
+				else        iYA=finWidth;
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitch;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
 
 
-							colorB0 = *(bP- iYA - iXA);
-							colorB1 = *(bP- iYA);
-							colorB2 = *(bP- iYA + iXB);
-							colorB3 = *(bP- iYA + iXC);
+				colorB0 = *(bP- iYA - iXA);
+				colorB1 = *(bP- iYA);
+				colorB2 = *(bP- iYA + iXB);
+				colorB3 = *(bP- iYA + iXC);
 
-							color4 = *(bP  - iXA);
-							color5 = *(bP);
-							color6 = *(bP  + iXB);
-							colorS2 = *(bP + iXC);
+				color4 = *(bP  - iXA);
+				color5 = *(bP);
+				color6 = *(bP  + iXB);
+				colorS2 = *(bP + iXC);
 
-							color1 = *(bP  + iYB  - iXA);
-							color2 = *(bP  + iYB);
-							color3 = *(bP  + iYB  + iXB);
-							colorS1= *(bP  + iYB  + iXC);
+				color1 = *(bP  + iYB  - iXA);
+				color2 = *(bP  + iYB);
+				color3 = *(bP  + iYB  + iXB);
+				colorS1= *(bP  + iYB  + iXC);
 
-							colorA0 = *(bP + iYC - iXA);
-							colorA1 = *(bP + iYC);
-							colorA2 = *(bP + iYC + iXB);
-							colorA3 = *(bP + iYC + iXC);
+				colorA0 = *(bP + iYC - iXA);
+				colorA1 = *(bP + iYC);
+				colorA2 = *(bP + iYC + iXB);
+				colorA3 = *(bP + iYC + iXC);
 
 //--------------------------------------
-							if (color2 == color6 && color5 != color3)
-								{
-									product2b = product1b = color2;
-								}
+				if (color2 == color6 && color5 != color3)
+				{
+					product2b = product1b = color2;
+				}
+				else
+					if (color5 == color3 && color2 != color6)
+					{
+						product2b = product1b = color5;
+					}
+					else
+						if (color5 == color3 && color2 == color6)
+						{
+							register int r = 0;
+
+							r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
+							r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
+							r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
+							r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
+
+							if (r > 0)
+								product2b = product1b = color6;
 							else
-							if (color5 == color3 && color2 != color6)
-								{
+								if (r < 0)
 									product2b = product1b = color5;
-								}
-							else
-							if (color5 == color3 && color2 == color6)
+								else
 								{
-									register int r = 0;
-
-									r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
-									r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
-									r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
-									r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
-
-									if (r > 0)
-										product2b = product1b = color6;
-									else
-									if (r < 0)
-										product2b = product1b = color5;
-									else
-										{
-											product2b = product1b = INTERPOLATE5 (color5, color6);
-										}
+									product2b = product1b = INTERPOLATE5 (color5, color6);
 								}
+						}
+						else
+						{
+							if (color6 == color3 && color3 == colorA1 && color2 != colorA2 && color3 != colorA0)
+								product2b = Q_INTERPOLATE5 (color3, color3, color3, color2);
 							else
-								{
-									if (color6 == color3 && color3 == colorA1 && color2 != colorA2 && color3 != colorA0)
-													product2b = Q_INTERPOLATE5 (color3, color3, color3, color2);
-									else
-									if (color5 == color2 && color2 == colorA2 && colorA1 != color3 && color2 != colorA3)
-													product2b = Q_INTERPOLATE5 (color2, color2, color2, color3);
-									else
-													product2b = INTERPOLATE5 (color2, color3);
+								if (color5 == color2 && color2 == colorA2 && colorA1 != color3 && color2 != colorA3)
+									product2b = Q_INTERPOLATE5 (color2, color2, color2, color3);
+								else
+									product2b = INTERPOLATE5 (color2, color3);
 
-									if (color6 == color3 && color6 == colorB1 && color5 != colorB2 && color6 != colorB0)
-													product1b = Q_INTERPOLATE5 (color6, color6, color6, color5);
-									else
-									if (color5 == color2 && color5 == colorB2 && colorB1 != color6 && color5 != colorB3)
-													product1b = Q_INTERPOLATE5 (color6, color5, color5, color5);
-									else
-													product1b = INTERPOLATE5 (color5, color6);
-								}
-
-							if (color5 == color3 && color2 != color6 && color4 == color5 && color5 != colorA2)
-								product2a = INTERPOLATE5 (color2, color5);
+							if (color6 == color3 && color6 == colorB1 && color5 != colorB2 && color6 != colorB0)
+								product1b = Q_INTERPOLATE5 (color6, color6, color6, color5);
 							else
-							if (color5 == color1 && color6 == color5 && color4 != color2 && color5 != colorA0)
-								product2a = INTERPOLATE5(color2, color5);
-							else
-								product2a = color2;
+								if (color5 == color2 && color5 == colorB2 && colorB1 != color6 && color5 != colorB3)
+									product1b = Q_INTERPOLATE5 (color6, color5, color5, color5);
+								else
+									product1b = INTERPOLATE5 (color5, color6);
+						}
 
-							if (color2 == color6 && color5 != color3 && color1 == color2 && color2 != colorB2)
-								product1a = INTERPOLATE5(color2, color5);
-							else
-							if (color4 == color2 && color3 == color2 && color1 != color5 && color2 != colorB0)
-								product1a = INTERPOLATE5(color2, color5);
-							else
-								product1a = color5;
+				if (color5 == color3 && color2 != color6 && color4 == color5 && color5 != colorA2)
+					product2a = INTERPOLATE5 (color2, color5);
+				else
+					if (color5 == color1 && color6 == color5 && color4 != color2 && color5 != colorA0)
+						product2a = INTERPOLATE5(color2, color5);
+					else
+						product2a = color2;
 
-							*dP=(unsigned short)product1a;
-							*(dP+1)=(unsigned short)product1b;
-							*(dP+(srcPitch))=(unsigned short)product2a;
-							*(dP+1+(srcPitch))=(unsigned short)product2b;
+				if (color2 == color6 && color5 != color3 && color1 == color2 && color2 != colorB2)
+					product1a = INTERPOLATE5(color2, color5);
+				else
+					if (color4 == color2 && color3 == color2 && color1 != color5 && color2 != colorB0)
+						product1a = INTERPOLATE5(color2, color5);
+					else
+						product1a = color5;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				*dP=(unsigned short)product1a;
+				*(dP+1)=(unsigned short)product1b;
+				*(dP+(srcPitch))=(unsigned short)product2a;
+				*(dP+1+(srcPitch))=(unsigned short)product2b;
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
+
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void Std2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
-															unsigned char  *dstBitmap, int width, int height)
+                  unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	int   finWidth        = srcPitch>>1;
@@ -2006,195 +2249,220 @@ void Std2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 	int iXA,iXB,iXC,iYA,iYB,iYC,finish;
 	DWORD colorA, colorB;
 	DWORD colorC, colorD,
-							colorE, colorF, colorG, colorH,
-							colorI, colorJ, colorK, colorL,
-							colorM, colorN, colorO, colorP;
+	colorE, colorF, colorG, colorH,
+	colorI, colorJ, colorK, colorL,
+	colorM, colorN, colorO, colorP;
 	DWORD product, product1, product2;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (unsigned short *)srcPtr;
-		dP = (unsigned short *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
-						{
+		for (; height; height-=1)
+		{
+			bP = (unsigned short *)srcPtr;
+			dP = (unsigned short *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
 //---------------------------------------
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
 //                                       M|N O|P
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0) iYA=0;
+				else        iYA=finWidth;
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitch;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorI = *(bP- iYA - iXA);
+				colorE = *(bP- iYA);
+				colorF = *(bP- iYA + iXB);
+				colorJ = *(bP- iYA + iXC);
+
+				colorG = *(bP  - iXA);
+				colorA = *(bP);
+				colorB = *(bP  + iXB);
+				colorK = *(bP + iXC);
+
+				colorH = *(bP  + iYB  - iXA);
+				colorC = *(bP  + iYB);
+				colorD = *(bP  + iYB  + iXB);
+				colorL = *(bP  + iYB  + iXC);
+
+				colorM = *(bP + iYC - iXA);
+				colorN = *(bP + iYC);
+				colorO = *(bP + iYC + iXB);
+				colorP = *(bP + iYC + iXC);
+
+				if ((colorA == colorD) && (colorB != colorC))
+				{
+					if (((colorA == colorE) && (colorB == colorL)) ||
+					    ((colorA == colorC) && (colorA == colorF) &&
+					     (colorB != colorE) && (colorB == colorJ)))
+					{
+						product = colorA;
+					}
+					else
+					{
+						product = INTERPOLATE5(colorA, colorB);
+					}
+
+					if (((colorA == colorG) && (colorC == colorO)) ||
+					    ((colorA == colorB) && (colorA == colorH) &&
+					     (colorG != colorC) && (colorC == colorM)))
+					{
+						product1 = colorA;
+					}
+					else
+					{
+						product1 = INTERPOLATE5(colorA, colorC);
+					}
+					product2 = colorA;
+				}
+				else
+					if ((colorB == colorC) && (colorA != colorD))
+					{
+						if (((colorB == colorF) && (colorA == colorH)) ||
+						    ((colorB == colorE) && (colorB == colorD) &&
+						     (colorA != colorF) && (colorA == colorI)))
+						{
+							product = colorB;
+						}
+						else
+						{
+							product = INTERPOLATE5(colorA, colorB);
+						}
+
+						if (((colorC == colorH) && (colorA == colorF)) ||
+						    ((colorC == colorG) && (colorC == colorD) &&
+						     (colorA != colorH) && (colorA == colorI)))
+						{
+							product1 = colorC;
+						}
+						else
+						{
+							product1=INTERPOLATE5(colorA, colorC);
+						}
+						product2 = colorB;
+					}
+					else
+						if ((colorA == colorD) && (colorB == colorC))
+						{
+							if (colorA == colorB)
+							{
+								product = colorA;
+								product1 = colorA;
+								product2 = colorA;
+							}
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0) iYA=0;
-							else        iYA=finWidth;
-							if(height>4) {iYB=finWidth;iYC=srcPitch;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
+							{
+								register int r = 0;
+								product1 = INTERPOLATE5(colorA, colorC);
+								product = INTERPOLATE5(colorA, colorB);
 
-							colorI = *(bP- iYA - iXA);
-							colorE = *(bP- iYA);
-							colorF = *(bP- iYA + iXB);
-							colorJ = *(bP- iYA + iXC);
+								r += GetResult1 (colorA, colorB, colorG, colorE, colorI);
+								r += GetResult2 (colorB, colorA, colorK, colorF, colorJ);
+								r += GetResult2 (colorB, colorA, colorH, colorN, colorM);
+								r += GetResult1 (colorA, colorB, colorL, colorO, colorP);
 
-							colorG = *(bP  - iXA);
-							colorA = *(bP);
-							colorB = *(bP  + iXB);
-							colorK = *(bP + iXC);
-
-							colorH = *(bP  + iYB  - iXA);
-							colorC = *(bP  + iYB);
-							colorD = *(bP  + iYB  + iXB);
-							colorL = *(bP  + iYB  + iXC);
-
-							colorM = *(bP + iYC - iXA);
-							colorN = *(bP + iYC);
-							colorO = *(bP + iYC + iXB);
-							colorP = *(bP + iYC + iXC);
-
-							if((colorA == colorD) && (colorB != colorC))
-								{
-									if(((colorA == colorE) && (colorB == colorL)) ||
-												((colorA == colorC) && (colorA == colorF) &&
-													(colorB != colorE) && (colorB == colorJ)))
-										{
-											product = colorA;
-										}
-									else
-										{
-											product = INTERPOLATE5(colorA, colorB);
-										}
-
-									if(((colorA == colorG) && (colorC == colorO)) ||
-												((colorA == colorB) && (colorA == colorH) &&
-													(colorG != colorC) && (colorC == colorM)))
-										{
-											product1 = colorA;
-										}
-									else
-										{
-											product1 = INTERPOLATE5(colorA, colorC);
-										}
+								if (r > 0)
 									product2 = colorA;
-								}
+								else
+									if (r < 0)
+										product2 = colorB;
+									else
+									{
+										product2 = Q_INTERPOLATE5(colorA, colorB, colorC, colorD);
+									}
+							}
+						}
+						else
+						{
+							product2 = Q_INTERPOLATE5(colorA, colorB, colorC, colorD);
+
+							if ((colorA == colorC) && (colorA == colorF) &&
+							    (colorB != colorE) && (colorB == colorJ))
+							{
+								product = colorA;
+							}
 							else
-							if((colorB == colorC) && (colorA != colorD))
+								if ((colorB == colorE) && (colorB == colorD) && (colorA != colorF) && (colorA == colorI))
 								{
-									if(((colorB == colorF) && (colorA == colorH)) ||
-												((colorB == colorE) && (colorB == colorD) &&
-													(colorA != colorF) && (colorA == colorI)))
-										{
-											product = colorB;
-										}
-									else
-										{
-											product = INTERPOLATE5(colorA, colorB);
-										}
-
-									if(((colorC == colorH) && (colorA == colorF)) ||
-												((colorC == colorG) && (colorC == colorD) &&
-													(colorA != colorH) && (colorA == colorI)))
-										{
-											product1 = colorC;
-										}
-									else
-										{
-											product1=INTERPOLATE5(colorA, colorC);
-										}
-									product2 = colorB;
+									product = colorB;
 								}
+								else
+								{
+									product = INTERPOLATE5(colorA, colorB);
+								}
+
+							if ((colorA == colorB) && (colorA == colorH) &&
+							    (colorG != colorC) && (colorC == colorM))
+							{
+								product1 = colorA;
+							}
 							else
-							if((colorA == colorD) && (colorB == colorC))
+								if ((colorC == colorG) && (colorC == colorD) &&
+								    (colorA != colorH) && (colorA == colorI))
 								{
-									if (colorA == colorB)
-										{
-											product = colorA;
-											product1 = colorA;
-											product2 = colorA;
-										}
-									else
-										{
-											register int r = 0;
-											product1 = INTERPOLATE5(colorA, colorC);
-											product = INTERPOLATE5(colorA, colorB);
-
-											r += GetResult1 (colorA, colorB, colorG, colorE, colorI);
-											r += GetResult2 (colorB, colorA, colorK, colorF, colorJ);
-											r += GetResult2 (colorB, colorA, colorH, colorN, colorM);
-											r += GetResult1 (colorA, colorB, colorL, colorO, colorP);
-
-											if (r > 0)
-												product2 = colorA;
-											else
-											if (r < 0)
-												product2 = colorB;
-											else
-												{
-													product2 = Q_INTERPOLATE5(colorA, colorB, colorC, colorD);
-												}
-										}
+									product1 = colorC;
 								}
-							else
+								else
 								{
-									product2 = Q_INTERPOLATE5(colorA, colorB, colorC, colorD);
-
-									if ((colorA == colorC) && (colorA == colorF) &&
-													(colorB != colorE) && (colorB == colorJ))
-										{
-											product = colorA;
-										}
-									else
-									if ((colorB == colorE) && (colorB == colorD) && (colorA != colorF) && (colorA == colorI))
-										{
-											product = colorB;
-										}
-									else
-										{
-											product = INTERPOLATE5(colorA, colorB);
-										}
-
-									if ((colorA == colorB) && (colorA == colorH) &&
-													(colorG != colorC) && (colorC == colorM))
-										{
-											product1 = colorA;
-										}
-									else
-									if ((colorC == colorG) && (colorC == colorD) &&
-													(colorA != colorH) && (colorA == colorI))
-										{
-											product1 = colorC;
-										}
-									else
-										{
-											product1 = INTERPOLATE5(colorA, colorC);
-										}
+									product1 = INTERPOLATE5(colorA, colorC);
 								}
+						}
 
-							*dP=(unsigned short)colorA;
-							*(dP+1)=(unsigned short)product;
-							*(dP+(srcPitch))=(unsigned short)product1;
-							*(dP+1+(srcPitch))=(unsigned short)product2;
+				*dP=(unsigned short)colorA;
+				*(dP+1)=(unsigned short)product;
+				*(dP+(srcPitch))=(unsigned short)product1;
+				*(dP+1+(srcPitch))=(unsigned short)product2;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void SuperEagle_ex5(unsigned char *srcPtr, DWORD srcPitch,
-													unsigned char  *dstBitmap, int width, int height)
+                    unsigned char  *dstBitmap, int width, int height)
 {
 	DWORD dstPitch        = srcPitch<<1;
 	int   finWidth        = srcPitch>>1;
@@ -2205,152 +2473,177 @@ void SuperEagle_ex5(unsigned char *srcPtr, DWORD srcPitch,
 	DWORD color4, color5, color6;
 	DWORD color1, color2, color3;
 	DWORD colorA1, colorA2,
-							colorB1, colorB2,
-							colorS1, colorS2;
+	colorB1, colorB2,
+	colorS1, colorS2;
 	DWORD product1a, product1b,
-							product2a, product2b;
+	product2a, product2b;
 
 	line = 0;
 
-		{
-			for (; height; height-=1)
 	{
-					bP = (unsigned short *)srcPtr;
-		dP = (unsigned short *)(dstBitmap + line*dstPitch);
-					for (finish = width; finish; finish -= 1 )
+		for (; height; height-=1)
+		{
+			bP = (unsigned short *)srcPtr;
+			dP = (unsigned short *)(dstBitmap + line*dstPitch);
+			for (finish = width; finish; finish -= 1 )
+			{
+				if (finish==finWidth) iXA=0;
+				else                 iXA=1;
+				if (finish>4)
+				{
+					iXB=1;
+					iXC=2;
+				}
+				else
+					if (finish>3)
+					{
+						iXB=1;
+						iXC=1;
+					}
+					else
+					{
+						iXB=0;
+						iXC=0;
+					}
+				if (line==0) iYA=0;
+				else        iYA=finWidth;
+				if (height>4)
+				{
+					iYB=finWidth;
+					iYC=srcPitch;
+				}
+				else
+					if (height>3)
+					{
+						iYB=finWidth;
+						iYC=finWidth;
+					}
+					else
+					{
+						iYB=0;
+						iYC=0;
+					}
+
+				colorB1 = *(bP- iYA);
+				colorB2 = *(bP- iYA + iXB);
+
+				color4 = *(bP  - iXA);
+				color5 = *(bP);
+				color6 = *(bP  + iXB);
+				colorS2 = *(bP + iXC);
+
+				color1 = *(bP  + iYB  - iXA);
+				color2 = *(bP  + iYB);
+				color3 = *(bP  + iYB  + iXB);
+				colorS1= *(bP  + iYB  + iXC);
+
+				colorA1 = *(bP + iYC);
+				colorA2 = *(bP + iYC + iXB);
+
+				if (color2 == color6 && color5 != color3)
+				{
+					product1b = product2a = color2;
+					if ((color1 == color2) ||
+					    (color6 == colorB2))
+					{
+						product1a = INTERPOLATE5(color2, color5);
+						product1a = INTERPOLATE5(color2, product1a);
+					}
+					else
+					{
+						product1a = INTERPOLATE5(color5, color6);
+					}
+
+					if ((color6 == colorS2) ||
+					    (color2 == colorA1))
+					{
+						product2b = INTERPOLATE5(color2, color3);
+						product2b = INTERPOLATE5(color2, product2b);
+					}
+					else
+					{
+						product2b = INTERPOLATE5(color2, color3);
+					}
+				}
+				else
+					if (color5 == color3 && color2 != color6)
+					{
+						product2b = product1a = color5;
+
+						if ((colorB1 == color5) ||
+						    (color3 == colorS1))
 						{
-							if(finish==finWidth) iXA=0;
-							else                 iXA=1;
-							if(finish>4) {iXB=1;iXC=2;}
+							product1b = INTERPOLATE5(color5, color6);
+							product1b = INTERPOLATE5(color5, product1b);
+						}
+						else
+						{
+							product1b = INTERPOLATE5(color5, color6);
+						}
+
+						if ((color3 == colorA2) ||
+						    (color4 == color5))
+						{
+							product2a = INTERPOLATE5(color5, color2);
+							product2a = INTERPOLATE5(color5, product2a);
+						}
+						else
+						{
+							product2a = INTERPOLATE5(color2, color3);
+						}
+					}
+					else
+						if (color5 == color3 && color2 == color6)
+						{
+							register int r = 0;
+
+							r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
+							r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
+							r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
+							r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
+
+							if (r > 0)
+							{
+								product1b = product2a = color2;
+								product1a = product2b = INTERPOLATE5(color5, color6);
+							}
 							else
-							if(finish>3) {iXB=1;iXC=1;}
-							else         {iXB=0;iXC=0;}
-							if(line==0) iYA=0;
-							else        iYA=finWidth;
-							if(height>4) {iYB=finWidth;iYC=srcPitch;}
-							else
-							if(height>3) {iYB=finWidth;iYC=finWidth;}
-							else         {iYB=0;iYC=0;}
-
-							colorB1 = *(bP- iYA);
-							colorB2 = *(bP- iYA + iXB);
-
-							color4 = *(bP  - iXA);
-							color5 = *(bP);
-							color6 = *(bP  + iXB);
-							colorS2 = *(bP + iXC);
-
-							color1 = *(bP  + iYB  - iXA);
-							color2 = *(bP  + iYB);
-							color3 = *(bP  + iYB  + iXB);
-							colorS1= *(bP  + iYB  + iXC);
-
-							colorA1 = *(bP + iYC);
-							colorA2 = *(bP + iYC + iXB);
-
-							if(color2 == color6 && color5 != color3)
-								{
-									product1b = product2a = color2;
-									if((color1 == color2) ||
-												(color6 == colorB2))
-										{
-											product1a = INTERPOLATE5(color2, color5);
-											product1a = INTERPOLATE5(color2, product1a);
-										}
-									else
-										{
-											product1a = INTERPOLATE5(color5, color6);
-										}
-
-									if((color6 == colorS2) ||
-												(color2 == colorA1))
-										{
-											product2b = INTERPOLATE5(color2, color3);
-											product2b = INTERPOLATE5(color2, product2b);
-										}
-									else
-										{
-											product2b = INTERPOLATE5(color2, color3);
-										}
-								}
-							else
-							if (color5 == color3 && color2 != color6)
+								if (r < 0)
 								{
 									product2b = product1a = color5;
-
-									if ((colorB1 == color5) ||
-													(color3 == colorS1))
-										{
-											product1b = INTERPOLATE5(color5, color6);
-											product1b = INTERPOLATE5(color5, product1b);
-										}
-									else
-										{
-											product1b = INTERPOLATE5(color5, color6);
-										}
-
-									if ((color3 == colorA2) ||
-													(color4 == color5))
-										{
-											product2a = INTERPOLATE5(color5, color2);
-											product2a = INTERPOLATE5(color5, product2a);
-										}
-									else
-										{
-											product2a = INTERPOLATE5(color2, color3);
-										}
+									product1b = product2a = INTERPOLATE5(color5, color6);
 								}
-							else
-							if (color5 == color3 && color2 == color6)
+								else
 								{
-									register int r = 0;
-
-									r += GET_RESULT ((color6), (color5), (color1),  (colorA1));
-									r += GET_RESULT ((color6), (color5), (color4),  (colorB1));
-									r += GET_RESULT ((color6), (color5), (colorA2), (colorS1));
-									r += GET_RESULT ((color6), (color5), (colorB2), (colorS2));
-
-									if (r > 0)
-										{
-											product1b = product2a = color2;
-											product1a = product2b = INTERPOLATE5(color5, color6);
-										}
-									else
-									if (r < 0)
-										{
-											product2b = product1a = color5;
-											product1b = product2a = INTERPOLATE5(color5, color6);
-										}
-									else
-										{
-											product2b = product1a = color5;
-											product1b = product2a = color2;
-										}
+									product2b = product1a = color5;
+									product1b = product2a = color2;
 								}
-							else
-								{
-									product2b = product1a = INTERPOLATE5(color2, color6);
-									product2b = Q_INTERPOLATE5(color3, color3, color3, product2b);
-									product1a = Q_INTERPOLATE5(color5, color5, color5, product1a);
+						}
+						else
+						{
+							product2b = product1a = INTERPOLATE5(color2, color6);
+							product2b = Q_INTERPOLATE5(color3, color3, color3, product2b);
+							product1a = Q_INTERPOLATE5(color5, color5, color5, product1a);
 
-									product2a = product1b = INTERPOLATE5(color5, color3);
-									product2a = Q_INTERPOLATE5(color2, color2, color2, product2a);
-									product1b = Q_INTERPOLATE5(color6, color6, color6, product1b);
-								}
+							product2a = product1b = INTERPOLATE5(color5, color3);
+							product2a = Q_INTERPOLATE5(color2, color2, color2, product2a);
+							product1b = Q_INTERPOLATE5(color6, color6, color6, product1b);
+						}
 
-							*dP=(unsigned short)product1a;
-							*(dP+1)=(unsigned short)product1b;
-							*(dP+(srcPitch))=(unsigned short)product2a;
-							*(dP+1+(srcPitch))=(unsigned short)product2b;
+				*dP=(unsigned short)product1a;
+				*(dP+1)=(unsigned short)product1b;
+				*(dP+(srcPitch))=(unsigned short)product2a;
+				*(dP+1+(srcPitch))=(unsigned short)product2b;
 
-							bP += 1;
-							dP += 2;
-						}//end of for ( finish= width etc..)
+				bP += 1;
+				dP += 2;
+			}//end of for ( finish= width etc..)
 
-					line += 2;
-					srcPtr += srcPitch;
-	}; //endof: for (; height; height--)
+			line += 2;
+			srcPtr += srcPitch;
 		}
+		; //endof: for (; height; height--)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -2382,105 +2675,110 @@ void (*p2XSaIFunc) (unsigned char *,DWORD,unsigned char *,int,int);
 
 static __inline void WaitVBlank(void)
 {
-	if(bVsync_Key)
-		{
-			IDirectDraw2_WaitForVerticalBlank(DX.DD,DDWAITVB_BLOCKBEGIN,0);
-		}
+	if (bVsync_Key)
+	{
+		IDirectDraw2_WaitForVerticalBlank(DX.DD,DDWAITVB_BLOCKBEGIN,0);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void BlitScreen32(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
 {
-	unsigned char * pD;unsigned long lu;unsigned short s;
+	unsigned char * pD;
+	unsigned long lu;
+	unsigned short s;
 	unsigned int startxy;
 	short row,column;
 	short dx=(short)PreviousPSXDisplay.Range.x1;
 	short dy=(short)PreviousPSXDisplay.DisplayMode.y;
 
-	if(iDebugMode && iFVDisplay)
+	if (iDebugMode && iFVDisplay)
+	{
+		dx=1024;
+		dy=iGPUHeight;
+		x=0;
+		y=0;
+
+		for (column=0;column<dy;column++)
 		{
-			dx=1024;
-			dy=iGPUHeight;
-			x=0;y=0;
-
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					for(row=0;row<dx;row++)
-						{
-							s=psxVuw[startxy++];
-							*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
-								((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
-						}
-				}
-			return;
+			startxy=((1024)*(column+y))+x;
+			for (row=0;row<dx;row++)
+			{
+				s=psxVuw[startxy++];
+				*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
+				  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
+			}
 		}
+		return;
+	}
 
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
 	surf+=PreviousPSXDisplay.Range.x0<<2;
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		if (iFPSEInterface)
 		{
-			if(iFPSEInterface)
-				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-							pD=(unsigned char *)&psxVuw[startxy];
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
+				pD=(unsigned char *)&psxVuw[startxy];
 
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
-												0xff000000|(BLUE(lu)<<16)|(GREEN(lu)<<8)|(RED(lu));
-									pD+=3;
-								}
-						}
-				}
-			else
+				for (row=0;row<dx;row++)
 				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
-												0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
-									pD+=3;
-								}
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
+					  0xff000000|(BLUE(lu)<<16)|(GREEN(lu)<<8)|(RED(lu));
+					pD+=3;
 				}
+			}
 		}
+		else
+		{
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
+				pD=(unsigned char *)&psxVuw[startxy];
+
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
+					  0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
+					pD+=3;
+				}
+			}
+		}
+	}
 	else
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					for(row=0;row<dx;row++)
-						{
-							s=psxVuw[startxy++];
-							*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
-								((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
-						}
-				}
+			startxy=((1024)*(column+y))+x;
+			for (row=0;row<dx;row++)
+			{
+				s=psxVuw[startxy++];
+				*((unsigned long *)((surf)+(column*ddsd.lPitch)+row*4))=
+				  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
 {
-	unsigned char * pD;unsigned long lu;unsigned short s;
+	unsigned char * pD;
+	unsigned long lu;
+	unsigned short s;
 	unsigned int startxy,off1,off2;
 	short row,column;
 	short dx=(short)PreviousPSXDisplay.Range.x1;
@@ -2488,74 +2786,77 @@ void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit CO
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-		{BlitScreen32(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen32(surf,x,y);
+		return;
+	}
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			pS+=PreviousPSXDisplay.Range.y0*2048;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		pS+=PreviousPSXDisplay.Range.y0*2048;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
 	pS+=PreviousPSXDisplay.Range.x0<<2;
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		if (iFPSEInterface)
 		{
-			if(iFPSEInterface)
-				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-							pD=(unsigned char *)&psxVuw[startxy];
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
+				pD=(unsigned char *)&psxVuw[startxy];
 
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned long *)((pS)+(column*2048)+row*4))=
-												0xff000000|(BLUE(lu)<<16)|(GREEN(lu)<<8)|(RED(lu));
-									pD+=3;
-								}
-						}
-				}
-			else
+				for (row=0;row<dx;row++)
 				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned long *)((pS)+(column*2048)+row*4))=
-												0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
-									pD+=3;
-								}
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned long *)((pS)+(column*2048)+row*4))=
+					  0xff000000|(BLUE(lu)<<16)|(GREEN(lu)<<8)|(RED(lu));
+					pD+=3;
 				}
+			}
 		}
+		else
+		{
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
+				pD=(unsigned char *)&psxVuw[startxy];
+
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned long *)((pS)+(column*2048)+row*4))=
+					  0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
+					pD+=3;
+				}
+			}
+		}
+	}
 	else
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					for(row=0;row<dx;row++)
-						{
-							s=psxVuw[startxy++];
-							*((unsigned long *)((pS)+(column*2048)+row*4))=
-								((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
-						}
-				}
+			startxy=((1024)*(column+y))+x;
+			for (row=0;row<dx;row++)
+			{
+				s=psxVuw[startxy++];
+				*((unsigned long *)((pS)+(column*2048)+row*4))=
+				  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
+			}
 		}
+	}
 
 	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
 	// now do a 2xSai blit to pSaIBigBuff
 
 
 	p2XSaIFunc((unsigned char *)pSaISmallBuff, 2048,
-									(unsigned char *)pSaIBigBuff,
-												PreviousPSXDisplay.DisplayMode.x,
-												PreviousPSXDisplay.DisplayMode.y);
+	           (unsigned char *)pSaIBigBuff,
+	           PreviousPSXDisplay.DisplayMode.x,
+	           PreviousPSXDisplay.DisplayMode.y);
 
 	// ok, here we have pSaIBigBuff filled with the 2xSai image...
 	// now transfer it to the surface
@@ -2568,15 +2869,15 @@ void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit CO
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
+	{
+		for (row=0;row<dx;row++)
 		{
-			for(row=0;row<dx;row++)
-				{
-					*(pS1++)=*(pS2++);
-				}
-			pS1+=off1;
-			pS2+=off2;
+			*(pS1++)=*(pS2++);
 		}
+		pS1+=off1;
+		pS2+=off2;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -2590,51 +2891,55 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-	{BlitScreen32(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen32(surf,x,y);
+		return;
+	}
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
 	}
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
 	{
-		unsigned char * pD;unsigned int startxy;
+		unsigned char * pD;
+		unsigned int startxy;
 
 		pS+=PreviousPSXDisplay.Range.x0<<1;
 
-		if(iFPSEInterface)
+		if (iFPSEInterface)
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-						(unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
+					  (unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
 					pD+=3;
 				}
 			}
 		}
 		else
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-						(unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
+					  (unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
 					pD+=3;
 				}
 			}
@@ -2644,23 +2949,23 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	{
 		unsigned short LineOffset,SurfOffset;
 		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-			(y<<10) + x);
+		                         (y<<10) + x);
 		unsigned long * DSTPtr =
-			((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+		  ((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
 
 		dx>>=1;
 
 		LineOffset = 512 - dx;
 		SurfOffset = 256 - dx;
 
-		for(column=0;column<dy;column++)
+		for (column=0;column<dy;column++)
 		{
-			for(row=0;row<dx;row++)
+			for (row=0;row<dx;row++)
 			{
 				lu=*SRCPtr++;
 
 				*DSTPtr++=
-					((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
 			}
 			SRCPtr += LineOffset;
 			DSTPtr += SurfOffset;
@@ -2672,9 +2977,9 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 
 
 	hq2x_32((unsigned char *)pSaISmallBuff, ddsd.lPitch,
-		(unsigned char *)pSaIBigBuff,
-		PreviousPSXDisplay.DisplayMode.x,
-		PreviousPSXDisplay.DisplayMode.y);
+	        (unsigned char *)pSaIBigBuff,
+	        PreviousPSXDisplay.DisplayMode.x,
+	        PreviousPSXDisplay.DisplayMode.y);
 
 	// ok, here we have pSaIBigBuff filled with the hq2x 32 bit image...
 	// now transfer it to the surface
@@ -2687,9 +2992,9 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
 	{
-		for(row=0;row<dx;row++)
+		for (row=0;row<dx;row++)
 		{
 			*(pS1++)=*(pS2++);
 		}
@@ -2700,7 +3005,9 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 ///////////////////////////////////////////////////////////////////////
 void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
 {
-	unsigned char * pD;unsigned long lu;unsigned short s;
+	unsigned char * pD;
+	unsigned long lu;
+	unsigned short s;
 	unsigned int startxy,off1,off2;
 	short row,column;
 	short dx=(short)PreviousPSXDisplay.Range.x1;
@@ -2708,28 +3015,31 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-	{BlitScreen32(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen32(surf,x,y);
+		return;
+	}
 
 	// This should keep games from crashing when 3x is too much
 
 
-	if(PreviousPSXDisplay.DisplayMode.x>341)
+	if (PreviousPSXDisplay.DisplayMode.x>341)
 	{
-		if(pExtraBltFunc==StretchedBlit3x)
+		if (pExtraBltFunc==StretchedBlit3x)
 			pExtraBltFunc=StretchedBlit2x;
-		if(pExtraBltFunc==NoStretchedBlit3x)
+		if (pExtraBltFunc==NoStretchedBlit3x)
 			pExtraBltFunc=NoStretchedBlit2x;
 		p2XSaIFunc=Scale2x_ex8;
 		BlitScreen32_2xSaI(surf,x,y);
 		return;
 	}
 
-	if(pExtraBltFunc==StretchedBlit2x)
+	if (pExtraBltFunc==StretchedBlit2x)
 		pExtraBltFunc=StretchedBlit3x;
-	if(pExtraBltFunc==NoStretchedBlit2x)
+	if (pExtraBltFunc==NoStretchedBlit2x)
 		pExtraBltFunc=NoStretchedBlit3x;
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*2048;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -2737,36 +3047,36 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 
 	pS+=PreviousPSXDisplay.Range.x0<<2;
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
 	{
-		if(iFPSEInterface)
+		if (iFPSEInterface)
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned long *)((pS)+(column*2048)+row*4))=
-						0xff000000|(BLUE(lu)<<16)|(GREEN(lu)<<8)|(RED(lu));
+					  0xff000000|(BLUE(lu)<<16)|(GREEN(lu)<<8)|(RED(lu));
 					pD+=3;
 				}
 			}
 		}
 		else
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned long *)((pS)+(column*2048)+row*4))=
-						0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
+					  0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
 					pD+=3;
 				}
 			}
@@ -2774,14 +3084,14 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 	}
 	else
 	{
-		for(column=0;column<dy;column++)
+		for (column=0;column<dy;column++)
 		{
 			startxy=((1024)*(column+y))+x;
-			for(row=0;row<dx;row++)
+			for (row=0;row<dx;row++)
 			{
 				s=psxVuw[startxy++];
 				*((unsigned long *)((pS)+(column*2048)+row*4))=
-					((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
+				  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
 			}
 		}
 	}
@@ -2790,9 +3100,9 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 	// now do a 2xSai blit to pSaIBigBuff
 
 	Scale3x_ex8((unsigned char *)pSaISmallBuff,2048,
-		(unsigned char *)pSaIBigBuff,
-		PreviousPSXDisplay.DisplayMode.x,
-		PreviousPSXDisplay.DisplayMode.y);
+	            (unsigned char *)pSaIBigBuff,
+	            PreviousPSXDisplay.DisplayMode.x,
+	            PreviousPSXDisplay.DisplayMode.y);
 
 	// ok, here we have pSaIBigBuff filled with the 2xSai image...
 	// now transfer it to the surface
@@ -2807,9 +3117,9 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
 	{
-		for(row=0;row<dx;row++)
+		for (row=0;row<dx;row++)
 		{
 			*(pS1++)=*(pS2++);
 		}
@@ -2831,67 +3141,71 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-	{BlitScreen32(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen32(surf,x,y);
+		return;
+	}
 
 	// This should keep games from crashing when 3x is too much
-	if(PreviousPSXDisplay.DisplayMode.x>341)
+	if (PreviousPSXDisplay.DisplayMode.x>341)
 	{
-		if(pExtraBltFunc==StretchedBlit3x)
+		if (pExtraBltFunc==StretchedBlit3x)
 			pExtraBltFunc=StretchedBlit2x;
-		if(pExtraBltFunc==NoStretchedBlit3x)
+		if (pExtraBltFunc==NoStretchedBlit3x)
 			pExtraBltFunc=NoStretchedBlit2x;
 		BlitScreen32_hq2x(surf,x,y);
 		return;
 	}
 
-	if(pExtraBltFunc==StretchedBlit2x)
+	if (pExtraBltFunc==StretchedBlit2x)
 		pExtraBltFunc=StretchedBlit3x;
-	if(pExtraBltFunc==NoStretchedBlit2x)
+	if (pExtraBltFunc==NoStretchedBlit2x)
 		pExtraBltFunc=NoStretchedBlit3x;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
 	}
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
 	{
-		unsigned char * pD;unsigned int startxy;
+		unsigned char * pD;
+		unsigned int startxy;
 
 		pS+=PreviousPSXDisplay.Range.x0<<1;
 
-		if(iFPSEInterface)
+		if (iFPSEInterface)
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-						(unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
+					  (unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
 					pD+=3;
 				}
 			}
 		}
 		else
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-						(unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
+					  (unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
 					pD+=3;
 				}
 			}
@@ -2901,23 +3215,23 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	{
 		unsigned short LineOffset,SurfOffset;
 		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-			(y<<10) + x);
+		                         (y<<10) + x);
 		unsigned long * DSTPtr =
-			((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+		  ((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
 
 		dx>>=1;
 
 		LineOffset = 512 - dx;
 		SurfOffset = 256 - dx;
 
-		for(column=0;column<dy;column++)
+		for (column=0;column<dy;column++)
 		{
-			for(row=0;row<dx;row++)
+			for (row=0;row<dx;row++)
 			{
 				lu=*SRCPtr++;
 
 				*DSTPtr++=
-					((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
 			}
 			SRCPtr += LineOffset;
 			DSTPtr += SurfOffset;
@@ -2928,9 +3242,9 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	// 32 bit conversion done in asm function and written to pSaIBigBuff
 
 	p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch ,
-		(unsigned char *)pSaIBigBuff,
-		PreviousPSXDisplay.DisplayMode.x,
-		PreviousPSXDisplay.DisplayMode.y);
+	           (unsigned char *)pSaIBigBuff,
+	           PreviousPSXDisplay.DisplayMode.x,
+	           PreviousPSXDisplay.DisplayMode.y);
 
 	// ok, here we have pSaIBigBuff filled with the hq3x 32 bit image...
 	// now transfer it to the surface
@@ -2944,9 +3258,9 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
 	{
-		for(row=0;row<dx;row++)
+		for (row=0;row<dx;row++)
 		{
 			*(pS1++)=*(pS2++);
 		}
@@ -2965,112 +3279,114 @@ void BlitScreen16(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MO
 	unsigned short dx=(unsigned short)PreviousPSXDisplay.Range.x1;
 	unsigned short dy=(unsigned short)PreviousPSXDisplay.DisplayMode.y;
 
-	if(iDebugMode && iFVDisplay)
+	if (iDebugMode && iFVDisplay)
+	{
+		unsigned short LineOffset,SurfOffset;
+		unsigned long * SRCPtr;
+		unsigned long * DSTPtr;
+
+		dx=1024;
+		dy=iGPUHeight;
+		x=0;
+		y=0;
+
+		SRCPtr = (unsigned long *)(psxVuw);
+		DSTPtr = ((unsigned long *)surf);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (ddsd.lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned short LineOffset,SurfOffset;
-			unsigned long * SRCPtr;
-			unsigned long * DSTPtr;
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			dx=1024;
-			dy=iGPUHeight;
-			x=0;y=0;
-
-			SRCPtr = (unsigned long *)(psxVuw);
-			DSTPtr = ((unsigned long *)surf);
-
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (ddsd.lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
-			return;
+				*DSTPtr++=
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+		return;
+	}
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
+
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
+
+		surf+=PreviousPSXDisplay.Range.x0<<1;
+
+		if (iFPSEInterface)
 		{
-			surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-	if(PSXDisplay.RGB24)
+				pD=(unsigned char *)&psxVuw[startxy];
+
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
+					  (unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
+					pD+=3;
+				}
+			}
+		}
+		else
 		{
-			unsigned char * pD;unsigned int startxy;
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-			surf+=PreviousPSXDisplay.Range.x0<<1;
+				pD=(unsigned char *)&psxVuw[startxy];
 
-			if(iFPSEInterface)
+				for (row=0;row<dx;row++)
 				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
-											(unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
-										pD+=3;
-								}
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
+					  (unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
+					pD+=3;
 				}
-			else
-				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
-											(unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
-										pD+=3;
-								}
-						}
-				}
+			}
 		}
+	}
 	else
+	{
+		unsigned short LineOffset,SurfOffset;
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+		unsigned long * DSTPtr =
+		  ((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (ddsd.lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned short LineOffset,SurfOffset;
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-			unsigned long * DSTPtr =
-				((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (ddsd.lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
+				*DSTPtr++=
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -3084,95 +3400,99 @@ void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-		{BlitScreen16(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen16(surf,x,y);
+		return;
+	}
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		pS+=PreviousPSXDisplay.Range.y0*1024;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
+
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
+
+		pS+=PreviousPSXDisplay.Range.x0<<1;
+
+		if (iFPSEInterface)
 		{
-			pS+=PreviousPSXDisplay.Range.y0*1024;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-	if(PSXDisplay.RGB24)
+				pD=(unsigned char *)&psxVuw[startxy];
+
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
+					  (unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
+					pD+=3;
+				}
+			}
+		}
+		else
 		{
-			unsigned char * pD;unsigned int startxy;
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-			pS+=PreviousPSXDisplay.Range.x0<<1;
+				pD=(unsigned char *)&psxVuw[startxy];
 
-			if(iFPSEInterface)
+				for (row=0;row<dx;row++)
 				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-											(unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
-										pD+=3;
-								}
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
+					  (unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
+					pD+=3;
 				}
-			else
-				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-											(unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
-										pD+=3;
-								}
-						}
-				}
+			}
 		}
+	}
 	else
+	{
+		unsigned short LineOffset,SurfOffset;
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+		unsigned long * DSTPtr =
+		  ((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = 256 - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned short LineOffset,SurfOffset;
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-			unsigned long * DSTPtr =
-				((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = 256 - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
+				*DSTPtr++=
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+	}
 
 	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
 	// now do a 2xSai blit to pSaIBigBuff
-if(p2XSaIFunc == hq2x_16)
-	p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch,
-									(unsigned char *)pSaIBigBuff,
-												PreviousPSXDisplay.DisplayMode.x,
-												PreviousPSXDisplay.DisplayMode.y);
-else
+	if (p2XSaIFunc == hq2x_16)
+		p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch,
+		           (unsigned char *)pSaIBigBuff,
+		           PreviousPSXDisplay.DisplayMode.x,
+		           PreviousPSXDisplay.DisplayMode.y);
+	else
 		p2XSaIFunc((unsigned char *)pSaISmallBuff, 1024,
-									(unsigned char *)pSaIBigBuff,
-												PreviousPSXDisplay.DisplayMode.x,
-												PreviousPSXDisplay.DisplayMode.y);
+		           (unsigned char *)pSaIBigBuff,
+		           PreviousPSXDisplay.DisplayMode.x,
+		           PreviousPSXDisplay.DisplayMode.y);
 	// ok, here we have pSaIBigBuff filled with the 2xSai image...
 	// now transfer it to the surface
 
@@ -3185,15 +3505,15 @@ else
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
+	{
+		for (row=0;row<dx;row++)
 		{
-			for(row=0;row<dx;row++)
-				{
-					*(pS1++)=*(pS2++);
-				}
-			pS1+=off1;
-			pS2+=off2;
+			*(pS1++)=*(pS2++);
 		}
+		pS1+=off1;
+		pS2+=off2;
+	}
 
 }
 
@@ -3206,77 +3526,81 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-	{BlitScreen16(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen16(surf,x,y);
+		return;
+	}
 
 	// This should keep games from crashing when 3x is too much
 
-	if(PreviousPSXDisplay.DisplayMode.x>341)
+	if (PreviousPSXDisplay.DisplayMode.x>341)
 	{
-		if(pExtraBltFunc==StretchedBlit3x)
+		if (pExtraBltFunc==StretchedBlit3x)
 			pExtraBltFunc=StretchedBlit2x;
-		if(pExtraBltFunc==NoStretchedBlit3x)
+		if (pExtraBltFunc==NoStretchedBlit3x)
 			pExtraBltFunc=NoStretchedBlit2x;
-		if(p2XSaIFunc==hq3x_16)
+		if (p2XSaIFunc==hq3x_16)
 			p2XSaIFunc=hq2x_16;
-		else if(p2XSaIFunc==Scale3x_ex6_5)
+		else if (p2XSaIFunc==Scale3x_ex6_5)
 			p2XSaIFunc=Scale2x_ex6_5;
 		BlitScreen16_2xSaI(surf,x,y);
 		return;
 	}
 
-	if(pExtraBltFunc==StretchedBlit2x)
+	if (pExtraBltFunc==StretchedBlit2x)
 		pExtraBltFunc=StretchedBlit3x;
-	if(pExtraBltFunc==NoStretchedBlit2x)
+	if (pExtraBltFunc==NoStretchedBlit2x)
 		pExtraBltFunc=NoStretchedBlit3x;
 
-	if(p2XSaIFunc==hq2x_16)
+	if (p2XSaIFunc==hq2x_16)
 		p2XSaIFunc=hq3x_16;
-	else if(p2XSaIFunc==Scale2x_ex6_5)
+	else if (p2XSaIFunc==Scale2x_ex6_5)
 		p2XSaIFunc=Scale3x_ex6_5;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
 	}
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
 	{
-		unsigned char * pD;unsigned int startxy;
+		unsigned char * pD;
+		unsigned int startxy;
 
 		pS+=PreviousPSXDisplay.Range.x0<<1;
 
-		if(iFPSEInterface)
+		if (iFPSEInterface)
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-						(unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
+					  (unsigned short)(((BLUE(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(RED(lu)>>3));
 					pD+=3;
 				}
 			}
 		}
 		else
 		{
-			for(column=0;column<dy;column++)
+			for (column=0;column<dy;column++)
 			{
 				startxy=((1024)*(column+y))+x;
 
 				pD=(unsigned char *)&psxVuw[startxy];
 
-				for(row=0;row<dx;row++)
+				for (row=0;row<dx;row++)
 				{
 					lu=*((unsigned long *)pD);
 					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-						(unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
+					  (unsigned short)(((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3));
 					pD+=3;
 				}
 			}
@@ -3286,23 +3610,23 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 	{
 		unsigned short LineOffset,SurfOffset;
 		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-			(y<<10) + x);
+		                         (y<<10) + x);
 		unsigned long * DSTPtr =
-			((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+		  ((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
 
 		dx>>=1;
 
 		LineOffset = 512 - dx;
 		SurfOffset = 256 - dx;
 
-		for(column=0;column<dy;column++)
+		for (column=0;column<dy;column++)
 		{
-			for(row=0;row<dx;row++)
+			for (row=0;row<dx;row++)
 			{
 				lu=*SRCPtr++;
 
 				*DSTPtr++=
-					((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
 			}
 			SRCPtr += LineOffset;
 			DSTPtr += SurfOffset;
@@ -3311,16 +3635,16 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 
 	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
 	// now do a 2xSai blit to pSaIBigBuff
-	if(p2XSaIFunc == hq3x_16)
+	if (p2XSaIFunc == hq3x_16)
 		p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch,
-		(unsigned char *)pSaIBigBuff,
-		PreviousPSXDisplay.DisplayMode.x,
-		PreviousPSXDisplay.DisplayMode.y);
+		           (unsigned char *)pSaIBigBuff,
+		           PreviousPSXDisplay.DisplayMode.x,
+		           PreviousPSXDisplay.DisplayMode.y);
 	else
 		p2XSaIFunc((unsigned char *)pSaISmallBuff, 1024,
-		(unsigned char *)pSaIBigBuff,
-		PreviousPSXDisplay.DisplayMode.x,
-		PreviousPSXDisplay.DisplayMode.y);
+		           (unsigned char *)pSaIBigBuff,
+		           PreviousPSXDisplay.DisplayMode.x,
+		           PreviousPSXDisplay.DisplayMode.y);
 
 	// ok, here we have pSaIBigBuff filled with the 2xSai image...
 	// now transfer it to the surface
@@ -3334,9 +3658,9 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
 	{
-		for(row=0;row<dx;row++)
+		for (row=0;row<dx;row++)
 		{
 			*(pS1++)=*(pS2++);
 		}
@@ -3353,88 +3677,89 @@ void BlitScreen15(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MO
 	unsigned short dx=(unsigned short)PreviousPSXDisplay.Range.x1;
 	unsigned short dy=(unsigned short)PreviousPSXDisplay.DisplayMode.y;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
+
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
+
+		surf+=PreviousPSXDisplay.Range.x0<<1;
+
+		if (iFPSEInterface)
 		{
-			surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-	if(PSXDisplay.RGB24)
+				pD=(unsigned char *)&psxVuw[startxy];
+
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
+					  (unsigned short)
+					  (((BLUE(lu)<<7)&0x7c00)|
+					   ((GREEN(lu)<<2)&0x3e0)|
+					   (RED(lu)>>3));
+					pD+=3;
+				}
+			}
+		}
+		else
 		{
-			unsigned char * pD;unsigned int startxy;
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-			surf+=PreviousPSXDisplay.Range.x0<<1;
+				pD=(unsigned char *)&psxVuw[startxy];
 
-			if(iFPSEInterface)
+				for (row=0;row<dx;row++)
 				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
-										(unsigned short)
-											(((BLUE(lu)<<7)&0x7c00)|
-												((GREEN(lu)<<2)&0x3e0)|
-												(RED(lu)>>3));
-									pD+=3;
-								}
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
+					  (unsigned short)
+					  (((RED(lu)<<7)&0x7c00)|
+					   ((GREEN(lu)<<2)&0x3e0)|
+					   (BLUE(lu)>>3));
+					pD+=3;
 				}
-			else
-				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((surf)+(column*ddsd.lPitch)+(row<<1)))=
-										(unsigned short)
-											(((RED(lu)<<7)&0x7c00)|
-												((GREEN(lu)<<2)&0x3e0)|
-												(BLUE(lu)>>3));
-									pD+=3;
-								}
-						}
-				}
+			}
 		}
+	}
 	else
+	{
+		unsigned short LineOffset,SurfOffset;
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+
+		unsigned long * DSTPtr =
+		  ((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (ddsd.lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned short LineOffset,SurfOffset;
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			unsigned long * DSTPtr =
-				((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
-
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (ddsd.lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<10)&0x7c007c00)|
-								((lu)&0x3e003e0)|
-								((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
+				*DSTPtr++=
+				  ((lu<<10)&0x7c007c00)|
+				  ((lu)&0x3e003e0)|
+				  ((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -3448,98 +3773,102 @@ void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 	unsigned char * pS=(unsigned char *)pSaISmallBuff;
 	unsigned long * pS1, * pS2;
 
-	if(PreviousPSXDisplay.DisplayMode.x>512)
-		{BlitScreen15(surf,x,y);return;}
+	if (PreviousPSXDisplay.DisplayMode.x>512)
+	{
+		BlitScreen15(surf,x,y);
+		return;
+	}
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		pS+=PreviousPSXDisplay.Range.y0*1024;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
+
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
+
+		pS+=PreviousPSXDisplay.Range.x0<<1;
+
+		if (iFPSEInterface)
 		{
-			pS+=PreviousPSXDisplay.Range.y0*1024;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-	if(PSXDisplay.RGB24)
+				pD=(unsigned char *)&psxVuw[startxy];
+
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
+					  (unsigned short)
+					  (((BLUE(lu)<<7)&0x7c00)|
+					   ((GREEN(lu)<<2)&0x3e0)|
+					   (RED(lu)>>3));
+					pD+=3;
+				}
+			}
+		}
+		else
 		{
-			unsigned char * pD;unsigned int startxy;
+			for (column=0;column<dy;column++)
+			{
+				startxy=((1024)*(column+y))+x;
 
-			pS+=PreviousPSXDisplay.Range.x0<<1;
+				pD=(unsigned char *)&psxVuw[startxy];
 
-			if(iFPSEInterface)
+				for (row=0;row<dx;row++)
 				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-										(unsigned short)
-											(((BLUE(lu)<<7)&0x7c00)|
-												((GREEN(lu)<<2)&0x3e0)|
-												(RED(lu)>>3));
-									pD+=3;
-								}
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
+					  (unsigned short)
+					  (((RED(lu)<<7)&0x7c00)|
+					   ((GREEN(lu)<<2)&0x3e0)|
+					   (BLUE(lu)>>3));
+					pD+=3;
 				}
-			else
-				{
-					for(column=0;column<dy;column++)
-						{
-							startxy=((1024)*(column+y))+x;
-
-							pD=(unsigned char *)&psxVuw[startxy];
-
-							for(row=0;row<dx;row++)
-								{
-									lu=*((unsigned long *)pD);
-									*((unsigned short *)((pS)+(column*1024)+(row<<1)))=
-										(unsigned short)
-											(((RED(lu)<<7)&0x7c00)|
-												((GREEN(lu)<<2)&0x3e0)|
-												(BLUE(lu)>>3));
-									pD+=3;
-								}
-						}
-				}
+			}
 		}
+	}
 	else
+	{
+		unsigned short LineOffset,SurfOffset;
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+		unsigned long * DSTPtr =
+		  ((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = 256 - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned short LineOffset,SurfOffset;
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-			unsigned long * DSTPtr =
-				((unsigned long *)pS)+(PreviousPSXDisplay.Range.x0>>1);
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = 256 - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<10)&0x7c007c00)|
-								((lu)&0x3e003e0)|
-								((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
+				*DSTPtr++=
+				  ((lu<<10)&0x7c007c00)|
+				  ((lu)&0x3e003e0)|
+				  ((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+	}
 
 	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
 	// now do a 2xSai blit to pSaIBigBuff
 
 	p2XSaIFunc((unsigned char *)pSaISmallBuff, 1024,
-									(unsigned char *)pSaIBigBuff,
-												PreviousPSXDisplay.DisplayMode.x,
-												PreviousPSXDisplay.DisplayMode.y);
+	           (unsigned char *)pSaIBigBuff,
+	           PreviousPSXDisplay.DisplayMode.x,
+	           PreviousPSXDisplay.DisplayMode.y);
 
 	// ok, here we have pSaIBigBuff filled with the 2xSai image...
 	// now transfer it to the surface
@@ -3552,15 +3881,15 @@ void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 	pS1=(unsigned long *)surf;
 	pS2=(unsigned long *)pSaIBigBuff;
 
-	for(column=0;column<dy;column++)
+	for (column=0;column<dy;column++)
+	{
+		for (row=0;row<dx;row++)
 		{
-			for(row=0;row<dx;row++)
-				{
-					*(pS1++)=*(pS2++);
-				}
-			pS1+=off1;
-			pS2+=off2;
+			*(pS1++)=*(pS2++);
 		}
+		pS1+=off1;
+		pS2+=off2;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -3574,10 +3903,10 @@ void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
 
 	IDirectDrawSurface_Blt(DX.DDSRender,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
 
-	if(iUseNoStretchBlt>=3)
-		{
-			if(pSaISmallBuff) memset(pSaISmallBuff,0,512*512*4);
-		}
+	if (iUseNoStretchBlt>=3)
+	{
+		if (pSaISmallBuff) memset(pSaISmallBuff,0,512*512*4);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -3603,421 +3932,52 @@ void NoStretchedBlit(void)
 	int iX=iResX-PreviousPSXDisplay.DisplayMode.x;
 	int iY=iResY-PreviousPSXDisplay.DisplayMode.y;
 
-/*
-float fXS,fYS,fS;
-fXS=(float)iResX/(float)PreviousPSXDisplay.DisplayMode.x;
-fYS=(float)iResY/(float)PreviousPSXDisplay.DisplayMode.y;
-if(fXS<fYS) fS=fXS; else fS=fYS;
-*/
-
-	if(iX<0) {iX=0;iDX=iResX;}
-	else     {iX=iX/2;iDX=PreviousPSXDisplay.DisplayMode.x;}
-
-	if(iY<0) {iY=0;iDY=iResY;}
-	else     {iY=iY/2;iDY=PreviousPSXDisplay.DisplayMode.y;}
-
-	if(iOldDX!=iDX || iOldDY!=iDY)
-		{
-			DDBLTFX     ddbltfx;
-			ddbltfx.dwSize = sizeof(ddbltfx);
-			ddbltfx.dwFillColor = 0x00000000;
-			IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
-			iOldDX=iDX;iOldDY=iDY;
-		}
-
-	if(iWindowMode)
-		{
-			RECT ScreenRect,ViewportRect;
-			POINT Point={0,0};
-			ClientToScreen(DX.hWnd,&Point);
-			Point.x+=iX;Point.y+=iY;
-
-			ScreenRect.left     = Point.x;
-			ScreenRect.top      = Point.y;
-			ScreenRect.right    = iDX+Point.x;
-			ScreenRect.bottom   = iDY+Point.y;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = iDX;
-			ViewportRect.bottom = iDY;
-
-			WaitVBlank();
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																										DDBLT_WAIT,NULL);
-		}
-	else
-		{
-			RECT ScreenRect,ViewportRect;
-
-			ScreenRect.left     = iX;
-			ScreenRect.top      = iY;
-			ScreenRect.right    = iDX+iX;
-			ScreenRect.bottom   = iDY+iY;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = iDX;
-			ViewportRect.bottom = iDY;
-
-			WaitVBlank();
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																										DDBLT_WAIT,NULL);
-		}
-	if(DX.DDSScreenPic) DisplayPic();
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void NoStretchedBlitEx(void)
-{
-	static int iOldDX=0;
-	static int iOldDY=0;
-
-	int iDX,iDY,iX,iY;float fXS,fYS,fS;
-
-	if(!PreviousPSXDisplay.DisplayMode.x) return;
-	if(!PreviousPSXDisplay.DisplayMode.y) return;
-
+	/*
+	float fXS,fYS,fS;
 	fXS=(float)iResX/(float)PreviousPSXDisplay.DisplayMode.x;
 	fYS=(float)iResY/(float)PreviousPSXDisplay.DisplayMode.y;
 	if(fXS<fYS) fS=fXS; else fS=fYS;
+	*/
 
-	iDX=(int)(PreviousPSXDisplay.DisplayMode.x*fS);
-	iDY=(int)(PreviousPSXDisplay.DisplayMode.y*fS);
-
-	iX=iResX-iDX;
-	iY=iResY-iDY;
-
-	if(iX<0) iX=0;
-	else     iX=iX/2;
-
-	if(iY<0) iY=0;
-	else     iY=iY/2;
-
-	if(iOldDX!=iDX || iOldDY!=iDY)
-		{
-			DDBLTFX     ddbltfx;
-			ddbltfx.dwSize = sizeof(ddbltfx);
-			ddbltfx.dwFillColor = 0x00000000;
-			IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
-			iOldDX=iDX;iOldDY=iDY;
-		}
-
-	if(iWindowMode)
-		{
-			RECT ScreenRect,ViewportRect;
-			POINT Point={0,0};
-			ClientToScreen(DX.hWnd,&Point);
-			Point.x+=iX;Point.y+=iY;
-
-			ScreenRect.left     = Point.x;
-			ScreenRect.top      = Point.y;
-			ScreenRect.right    = iDX+Point.x;
-			ScreenRect.bottom   = iDY+Point.y;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
-			ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
-
-			WaitVBlank();
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																										DDBLT_WAIT,NULL);
-		}
-	else
-		{
-			RECT ScreenRect,ViewportRect;
-
-			ScreenRect.left     = iX;
-			ScreenRect.top      = iY;
-			ScreenRect.right    = iDX+iX;
-			ScreenRect.bottom   = iDY+iY;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
-			ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
-
-			WaitVBlank();
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																										DDBLT_WAIT,NULL);
-		}
-	if(DX.DDSScreenPic) DisplayPic();
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void StretchedBlit2x(void)
-{
-	if(iWindowMode)
-		{
-			RECT ScreenRect,ViewportRect;
-			POINT Point={0,0};
-			ClientToScreen(DX.hWnd,&Point);
-
-			ScreenRect.left     = Point.x;
-			ScreenRect.top      = Point.y;
-			ScreenRect.right    = iResX+Point.x;
-			ScreenRect.bottom   = iResY+Point.y;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
-			ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
-
-			if(ViewportRect.right<=512)
-				{
-					ViewportRect.right+=ViewportRect.right;
-					ViewportRect.bottom+=ViewportRect.bottom;
-				}
-
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
-				{
-					RECT HelperRect={0,0,iResX,iResY};
-
-					WaitVBlank();
-
-					IDirectDrawSurface_Blt(DX.DDSHelper,&HelperRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL);
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&HelperRect,
-																												DDBLT_WAIT,NULL);
-				}
-			else
-				{
-					WaitVBlank();
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																											DDBLT_WAIT,NULL);
-				}
-		}
-	else
-		{
-			RECT ScreenRect={0,0,iResX,iResY},
-								ViewportRect={0,0,PreviousPSXDisplay.DisplayMode.x,
-																										PreviousPSXDisplay.DisplayMode.y};
-
-			if(ViewportRect.right<=512)
-				{
-				ViewportRect.right+=ViewportRect.right;
-				ViewportRect.bottom+=ViewportRect.bottom;
-				}
-
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
-				{
-					WaitVBlank();
-
-					IDirectDrawSurface_Blt(DX.DDSHelper,&ScreenRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL);
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&ScreenRect,
-																												DDBLT_WAIT,NULL);
-				}
-			else
-				{
-					WaitVBlank();
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL );
-				}
-		}
-
-	if(DX.DDSScreenPic) DisplayPic();
-
-}
-
-////////////////////////////////////////////////////////////////////////
-void StretchedBlit3x(void)
-{
-	if(iWindowMode)
-		{
-			RECT ScreenRect,ViewportRect;
-			POINT Point={0,0};
-			ClientToScreen(DX.hWnd,&Point);
-
-			ScreenRect.left     = Point.x;
-			ScreenRect.top      = Point.y;
-			ScreenRect.right    = iResX+Point.x;
-			ScreenRect.bottom   = iResY+Point.y;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
-			ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
-
-			if(ViewportRect.right<=512)
-				{
-				// ViewportRect.right+=ViewportRect.right;
-				// ViewportRect.bottom+=ViewportRect.bottom;
-		ViewportRect.right*=3;
-		ViewportRect.bottom*=3;
-			}
-
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
-				{
-					RECT HelperRect={0,0,iResX,iResY};
-
-					WaitVBlank();
-
-					IDirectDrawSurface_Blt(DX.DDSHelper,&HelperRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL);
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&HelperRect,
-																												DDBLT_WAIT,NULL);
-				}
-			else
-				{
-					WaitVBlank();
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																											DDBLT_WAIT,NULL);
-				}
-		}
-	else
-		{
-			RECT ScreenRect={0,0,iResX,iResY},
-				ViewportRect={0,0,PreviousPSXDisplay.DisplayMode.x,
-																												PreviousPSXDisplay.DisplayMode.y};
-
-			if(ViewportRect.right<=512)
-				{
-			// ViewportRect.right+=ViewportRect.right;
-			//ViewportRect.bottom+=ViewportRect.bottom;
-		ViewportRect.right*=3;
-		ViewportRect.bottom*=3;
-		}
-
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
-				{
-					WaitVBlank();
-
-					IDirectDrawSurface_Blt(DX.DDSHelper,&ScreenRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL);
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&ScreenRect,
-																												DDBLT_WAIT,NULL);
-				}
-			else
-				{
-					WaitVBlank();
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL );
-				}
-		}
-
-	if(DX.DDSScreenPic) DisplayPic();
-
-}
-
-////////////////////////////////////////////////////////////////////////
-void NoStretchedBlit2x(void)
-{
-	static int iOldDX=0;
-	static int iOldDY=0;
-
-	int iX,iY,iDX,iDY;
-	int iDX2=PreviousPSXDisplay.DisplayMode.x;
-	int iDY2=PreviousPSXDisplay.DisplayMode.y;
-	if(PreviousPSXDisplay.DisplayMode.x<=512)
-		{
-			iDX2<<=1;
-			iDY2<<=1;
-		}
-
-	iX=iResX-iDX2;
-	iY=iResY-iDY2;
-
-	if(iX<0) {iX=0;iDX=iResX;}
-	else     {iX=iX/2;iDX=iDX2;}
-
-	if(iY<0) {iY=0;iDY=iResY;}
-	else     {iY=iY/2;iDY=iDY2;}
-
-	if(iOldDX!=iDX || iOldDY!=iDY)
-		{
-			DDBLTFX     ddbltfx;
-			ddbltfx.dwSize = sizeof(ddbltfx);
-			ddbltfx.dwFillColor = 0x00000000;
-			IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
-			iOldDX=iDX;iOldDY=iDY;
-		}
-
-	if(iWindowMode)
-		{
-			RECT ScreenRect,ViewportRect;
-			POINT Point={0,0};
-			ClientToScreen(DX.hWnd,&Point);
-			Point.x+=iX;Point.y+=iY;
-
-			ScreenRect.left     = Point.x;
-			ScreenRect.top      = Point.y;
-			ScreenRect.right    = iDX+Point.x;
-			ScreenRect.bottom   = iDY+Point.y;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = iDX;
-			ViewportRect.bottom = iDY;
-
-			WaitVBlank();
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																										DDBLT_WAIT,NULL);
-		}
-	else
-		{
-			RECT ScreenRect,ViewportRect;
-
-			ScreenRect.left     = iX;
-			ScreenRect.top      = iY;
-			ScreenRect.right    = iDX+iX;
-			ScreenRect.bottom   = iDY+iY;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-			ViewportRect.right  = iDX;
-			ViewportRect.bottom = iDY;
-
-			WaitVBlank();
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																										DDBLT_WAIT,NULL);
-		}
-	if(DX.DDSScreenPic) DisplayPic();
-}
-
-////////////////////////////////////////////////////////////////////////
-void NoStretchedBlit3x(void)
-{
-	static int iOldDX=0;
-	static int iOldDY=0;
-
-	int iX,iY,iDX,iDY;
-	int iDX2=PreviousPSXDisplay.DisplayMode.x;
-	int iDY2=PreviousPSXDisplay.DisplayMode.y;
-
-	if(PreviousPSXDisplay.DisplayMode.x<=512)
+	if (iX<0)
 	{
-		iDX2*=3;
-		iDY2*=3;
+		iX=0;
+		iDX=iResX;
+	}
+	else
+	{
+		iX=iX/2;
+		iDX=PreviousPSXDisplay.DisplayMode.x;
 	}
 
-	iX=iResX-iDX2;
-	iY=iResY-iDY2;
+	if (iY<0)
+	{
+		iY=0;
+		iDY=iResY;
+	}
+	else
+	{
+		iY=iY/2;
+		iDY=PreviousPSXDisplay.DisplayMode.y;
+	}
 
-	if(iX<0) {iX=0;iDX=iResX;}
-	else     {iX=iX/2;iDX=iDX2;}
-
-	if(iY<0) {iY=0;iDY=iResY;}
-	else     {iY=iY/2;iDY=iDY2;}
-
-	if(iOldDX!=iDX || iOldDY!=iDY)
+	if (iOldDX!=iDX || iOldDY!=iDY)
 	{
 		DDBLTFX     ddbltfx;
 		ddbltfx.dwSize = sizeof(ddbltfx);
 		ddbltfx.dwFillColor = 0x00000000;
 		IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
-		iOldDX=iDX;iOldDY=iDY;
+		iOldDX=iDX;
+		iOldDY=iDY;
 	}
 
-	if(iWindowMode)
+	if (iWindowMode)
 	{
 		RECT ScreenRect,ViewportRect;
 		POINT Point={0,0};
 		ClientToScreen(DX.hWnd,&Point);
-		Point.x+=iX;Point.y+=iY;
+		Point.x+=iX;
+		Point.y+=iY;
 
 		ScreenRect.left     = Point.x;
 		ScreenRect.top      = Point.y;
@@ -4031,7 +3991,436 @@ void NoStretchedBlit3x(void)
 
 		WaitVBlank();
 		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-			DDBLT_WAIT,NULL);
+		                       DDBLT_WAIT,NULL);
+	}
+	else
+	{
+		RECT ScreenRect,ViewportRect;
+
+		ScreenRect.left     = iX;
+		ScreenRect.top      = iY;
+		ScreenRect.right    = iDX+iX;
+		ScreenRect.bottom   = iDY+iY;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = iDX;
+		ViewportRect.bottom = iDY;
+
+		WaitVBlank();
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+		                       DDBLT_WAIT,NULL);
+	}
+	if (DX.DDSScreenPic) DisplayPic();
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void NoStretchedBlitEx(void)
+{
+	static int iOldDX=0;
+	static int iOldDY=0;
+
+	int iDX,iDY,iX,iY;
+	float fXS,fYS,fS;
+
+	if (!PreviousPSXDisplay.DisplayMode.x) return;
+	if (!PreviousPSXDisplay.DisplayMode.y) return;
+
+	fXS=(float)iResX/(float)PreviousPSXDisplay.DisplayMode.x;
+	fYS=(float)iResY/(float)PreviousPSXDisplay.DisplayMode.y;
+	if (fXS<fYS) fS=fXS;
+	else fS=fYS;
+
+	iDX=(int)(PreviousPSXDisplay.DisplayMode.x*fS);
+	iDY=(int)(PreviousPSXDisplay.DisplayMode.y*fS);
+
+	iX=iResX-iDX;
+	iY=iResY-iDY;
+
+	if (iX<0) iX=0;
+	else     iX=iX/2;
+
+	if (iY<0) iY=0;
+	else     iY=iY/2;
+
+	if (iOldDX!=iDX || iOldDY!=iDY)
+	{
+		DDBLTFX     ddbltfx;
+		ddbltfx.dwSize = sizeof(ddbltfx);
+		ddbltfx.dwFillColor = 0x00000000;
+		IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
+		iOldDX=iDX;
+		iOldDY=iDY;
+	}
+
+	if (iWindowMode)
+	{
+		RECT ScreenRect,ViewportRect;
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+		Point.x+=iX;
+		Point.y+=iY;
+
+		ScreenRect.left     = Point.x;
+		ScreenRect.top      = Point.y;
+		ScreenRect.right    = iDX+Point.x;
+		ScreenRect.bottom   = iDY+Point.y;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+		ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
+
+		WaitVBlank();
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+		                       DDBLT_WAIT,NULL);
+	}
+	else
+	{
+		RECT ScreenRect,ViewportRect;
+
+		ScreenRect.left     = iX;
+		ScreenRect.top      = iY;
+		ScreenRect.right    = iDX+iX;
+		ScreenRect.bottom   = iDY+iY;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+		ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
+
+		WaitVBlank();
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+		                       DDBLT_WAIT,NULL);
+	}
+	if (DX.DDSScreenPic) DisplayPic();
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void StretchedBlit2x(void)
+{
+	if (iWindowMode)
+	{
+		RECT ScreenRect,ViewportRect;
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+
+		ScreenRect.left     = Point.x;
+		ScreenRect.top      = Point.y;
+		ScreenRect.right    = iResX+Point.x;
+		ScreenRect.bottom   = iResY+Point.y;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+		ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
+
+		if (ViewportRect.right<=512)
+		{
+			ViewportRect.right+=ViewportRect.right;
+			ViewportRect.bottom+=ViewportRect.bottom;
+		}
+
+		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		{
+			RECT HelperRect={0,0,iResX,iResY};
+
+			WaitVBlank();
+
+			IDirectDrawSurface_Blt(DX.DDSHelper,&HelperRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&HelperRect,
+			                       DDBLT_WAIT,NULL);
+		}
+		else
+		{
+			WaitVBlank();
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+		}
+	}
+	else
+	{
+		RECT ScreenRect={0,0,iResX,iResY},
+		                ViewportRect={0,0,PreviousPSXDisplay.DisplayMode.x,
+		                              PreviousPSXDisplay.DisplayMode.y
+		                             };
+
+		if (ViewportRect.right<=512)
+		{
+			ViewportRect.right+=ViewportRect.right;
+			ViewportRect.bottom+=ViewportRect.bottom;
+		}
+
+		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		{
+			WaitVBlank();
+
+			IDirectDrawSurface_Blt(DX.DDSHelper,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&ScreenRect,
+			                       DDBLT_WAIT,NULL);
+		}
+		else
+		{
+			WaitVBlank();
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL );
+		}
+	}
+
+	if (DX.DDSScreenPic) DisplayPic();
+
+}
+
+////////////////////////////////////////////////////////////////////////
+void StretchedBlit3x(void)
+{
+	if (iWindowMode)
+	{
+		RECT ScreenRect,ViewportRect;
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+
+		ScreenRect.left     = Point.x;
+		ScreenRect.top      = Point.y;
+		ScreenRect.right    = iResX+Point.x;
+		ScreenRect.bottom   = iResY+Point.y;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+		ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
+
+		if (ViewportRect.right<=512)
+		{
+			// ViewportRect.right+=ViewportRect.right;
+			// ViewportRect.bottom+=ViewportRect.bottom;
+			ViewportRect.right*=3;
+			ViewportRect.bottom*=3;
+		}
+
+		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		{
+			RECT HelperRect={0,0,iResX,iResY};
+
+			WaitVBlank();
+
+			IDirectDrawSurface_Blt(DX.DDSHelper,&HelperRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&HelperRect,
+			                       DDBLT_WAIT,NULL);
+		}
+		else
+		{
+			WaitVBlank();
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+		}
+	}
+	else
+	{
+		RECT ScreenRect={0,0,iResX,iResY},
+		                ViewportRect={0,0,PreviousPSXDisplay.DisplayMode.x,
+		                              PreviousPSXDisplay.DisplayMode.y
+		                             };
+
+		if (ViewportRect.right<=512)
+		{
+			// ViewportRect.right+=ViewportRect.right;
+			//ViewportRect.bottom+=ViewportRect.bottom;
+			ViewportRect.right*=3;
+			ViewportRect.bottom*=3;
+		}
+
+		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		{
+			WaitVBlank();
+
+			IDirectDrawSurface_Blt(DX.DDSHelper,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&ScreenRect,
+			                       DDBLT_WAIT,NULL);
+		}
+		else
+		{
+			WaitVBlank();
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL );
+		}
+	}
+
+	if (DX.DDSScreenPic) DisplayPic();
+
+}
+
+////////////////////////////////////////////////////////////////////////
+void NoStretchedBlit2x(void)
+{
+	static int iOldDX=0;
+	static int iOldDY=0;
+
+	int iX,iY,iDX,iDY;
+	int iDX2=PreviousPSXDisplay.DisplayMode.x;
+	int iDY2=PreviousPSXDisplay.DisplayMode.y;
+	if (PreviousPSXDisplay.DisplayMode.x<=512)
+	{
+		iDX2<<=1;
+		iDY2<<=1;
+	}
+
+	iX=iResX-iDX2;
+	iY=iResY-iDY2;
+
+	if (iX<0)
+	{
+		iX=0;
+		iDX=iResX;
+	}
+	else
+	{
+		iX=iX/2;
+		iDX=iDX2;
+	}
+
+	if (iY<0)
+	{
+		iY=0;
+		iDY=iResY;
+	}
+	else
+	{
+		iY=iY/2;
+		iDY=iDY2;
+	}
+
+	if (iOldDX!=iDX || iOldDY!=iDY)
+	{
+		DDBLTFX     ddbltfx;
+		ddbltfx.dwSize = sizeof(ddbltfx);
+		ddbltfx.dwFillColor = 0x00000000;
+		IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
+		iOldDX=iDX;
+		iOldDY=iDY;
+	}
+
+	if (iWindowMode)
+	{
+		RECT ScreenRect,ViewportRect;
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+		Point.x+=iX;
+		Point.y+=iY;
+
+		ScreenRect.left     = Point.x;
+		ScreenRect.top      = Point.y;
+		ScreenRect.right    = iDX+Point.x;
+		ScreenRect.bottom   = iDY+Point.y;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = iDX;
+		ViewportRect.bottom = iDY;
+
+		WaitVBlank();
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+		                       DDBLT_WAIT,NULL);
+	}
+	else
+	{
+		RECT ScreenRect,ViewportRect;
+
+		ScreenRect.left     = iX;
+		ScreenRect.top      = iY;
+		ScreenRect.right    = iDX+iX;
+		ScreenRect.bottom   = iDY+iY;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = iDX;
+		ViewportRect.bottom = iDY;
+
+		WaitVBlank();
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+		                       DDBLT_WAIT,NULL);
+	}
+	if (DX.DDSScreenPic) DisplayPic();
+}
+
+////////////////////////////////////////////////////////////////////////
+void NoStretchedBlit3x(void)
+{
+	static int iOldDX=0;
+	static int iOldDY=0;
+
+	int iX,iY,iDX,iDY;
+	int iDX2=PreviousPSXDisplay.DisplayMode.x;
+	int iDY2=PreviousPSXDisplay.DisplayMode.y;
+
+	if (PreviousPSXDisplay.DisplayMode.x<=512)
+	{
+		iDX2*=3;
+		iDY2*=3;
+	}
+
+	iX=iResX-iDX2;
+	iY=iResY-iDY2;
+
+	if (iX<0)
+	{
+		iX=0;
+		iDX=iResX;
+	}
+	else
+	{
+		iX=iX/2;
+		iDX=iDX2;
+	}
+
+	if (iY<0)
+	{
+		iY=0;
+		iDY=iResY;
+	}
+	else
+	{
+		iY=iY/2;
+		iDY=iDY2;
+	}
+
+	if (iOldDX!=iDX || iOldDY!=iDY)
+	{
+		DDBLTFX     ddbltfx;
+		ddbltfx.dwSize = sizeof(ddbltfx);
+		ddbltfx.dwFillColor = 0x00000000;
+		IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
+		iOldDX=iDX;
+		iOldDY=iDY;
+	}
+
+	if (iWindowMode)
+	{
+		RECT ScreenRect,ViewportRect;
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+		Point.x+=iX;
+		Point.y+=iY;
+
+		ScreenRect.left     = Point.x;
+		ScreenRect.top      = Point.y;
+		ScreenRect.right    = iDX+Point.x;
+		ScreenRect.bottom   = iDY+Point.y;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+		ViewportRect.right  = iDX;
+		ViewportRect.bottom = iDY;
+
+		WaitVBlank();
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+		                       DDBLT_WAIT,NULL);
 	}
 	else
 	{
@@ -4049,9 +4438,9 @@ void NoStretchedBlit3x(void)
 
 		WaitVBlank();
 		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-			DDBLT_WAIT,NULL);
+		                       DDBLT_WAIT,NULL);
 	}
-	if(DX.DDSScreenPic) DisplayPic();
+	if (DX.DDSScreenPic) DisplayPic();
 }
 
 
@@ -4064,85 +4453,116 @@ void ShowGunCursor(unsigned char * surf)
 	unsigned short dy=(unsigned short)PreviousPSXDisplay.DisplayMode.y;
 	int x,y,iPlayer,sx,ex,sy,ey;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
+
+	if (iUseNoStretchBlt>=3 &&iUseNoStretchBlt < 13)                              // 2xsai is twice as big, of course
+	{
+		dx*=2;
+		dy*=2;
+	}
+	else if (iUseNoStretchBlt >= 13)
+	{
+		dx*=3;
+		dy*=3;
+	}
+
+	if (iDesktopCol==32)                                  // 32 bit color depth
+	{
+		const unsigned long crCursorColor32[8]={0xffff0000,0xff00ff00,0xff0000ff,0xffff00ff,0xffffff00,0xff00ffff,0xffffffff,0xff7f7f7f};
+
+		surf+=PreviousPSXDisplay.Range.x0<<2;               // -> add x left border
+
+		for (iPlayer=0;iPlayer<8;iPlayer++)                 // -> loop all possible players
 		{
-			surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
-
-	if(iUseNoStretchBlt>=3 &&iUseNoStretchBlt < 13)                               // 2xsai is twice as big, of course
-		{dx*=2;dy*=2;}
-	else if(iUseNoStretchBlt >= 13)
-		{dx*=3;dy*=3;}
-
-	if(iDesktopCol==32)                                   // 32 bit color depth
-		{
-			const unsigned long crCursorColor32[8]={0xffff0000,0xff00ff00,0xff0000ff,0xffff00ff,0xffffff00,0xff00ffff,0xffffffff,0xff7f7f7f};
-
-			surf+=PreviousPSXDisplay.Range.x0<<2;               // -> add x left border
-
-			for(iPlayer=0;iPlayer<8;iPlayer++)                  // -> loop all possible players
+			if (usCursorActive&(1<<iPlayer))                  // -> player active?
+			{
+				const int ty=(ptCursorPoint[iPlayer].y*dy)/256;  // -> calculate the cursor pos in the current display
+				const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
+				sx=tx-5;
+				if (sx<0)
 				{
-					if(usCursorActive&(1<<iPlayer))                   // -> player active?
-						{
-							const int ty=(ptCursorPoint[iPlayer].y*dy)/256;  // -> calculate the cursor pos in the current display
-							const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
-							sx=tx-5;if(sx<0) {if(sx&1) sx=1; else sx=0;}
-							sy=ty-5;if(sy<0) {if(sy&1) sy=1; else sy=0;}
-							ex=tx+6;if(ex>dx) ex=dx;
-							ey=ty+6;if(ey>dy) ey=dy;
-
-							for(x=tx,y=sy;y<ey;y+=2)                    // -> do dotted y line
-								*((unsigned long *)((surf)+(y*ddsd.lPitch)+x*4))=crCursorColor32[iPlayer];
-							for(y=ty,x=sx;x<ex;x+=2)                    // -> do dotted x line
-								*((unsigned long *)((surf)+(y*ddsd.lPitch)+x*4))=crCursorColor32[iPlayer];
-						}
+					if (sx&1) sx=1;
+					else sx=0;
 				}
+				sy=ty-5;
+				if (sy<0)
+				{
+					if (sy&1) sy=1;
+					else sy=0;
+				}
+				ex=tx+6;
+				if (ex>dx) ex=dx;
+				ey=ty+6;
+				if (ey>dy) ey=dy;
+
+				for (x=tx,y=sy;y<ey;y+=2)                   // -> do dotted y line
+					*((unsigned long *)((surf)+(y*ddsd.lPitch)+x*4))=crCursorColor32[iPlayer];
+				for (y=ty,x=sx;x<ex;x+=2)                   // -> do dotted x line
+					*((unsigned long *)((surf)+(y*ddsd.lPitch)+x*4))=crCursorColor32[iPlayer];
+			}
 		}
+	}
 	else                                                  // 16 bit color depth
+	{
+		const unsigned short crCursorColor16[8]={0xf800,0x07c0,0x001f,0xf81f,0xffc0,0x07ff,0xffff,0x7bdf};
+
+		surf+=PreviousPSXDisplay.Range.x0<<1;               // -> same stuff as above
+
+		for (iPlayer=0;iPlayer<8;iPlayer++)
 		{
-			const unsigned short crCursorColor16[8]={0xf800,0x07c0,0x001f,0xf81f,0xffc0,0x07ff,0xffff,0x7bdf};
-
-			surf+=PreviousPSXDisplay.Range.x0<<1;               // -> same stuff as above
-
-			for(iPlayer=0;iPlayer<8;iPlayer++)
+			if (usCursorActive&(1<<iPlayer))
+			{
+				const int ty=(ptCursorPoint[iPlayer].y*dy)/256;
+				const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
+				sx=tx-5;
+				if (sx<0)
 				{
-					if(usCursorActive&(1<<iPlayer))
-						{
-							const int ty=(ptCursorPoint[iPlayer].y*dy)/256;
-							const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
-							sx=tx-5;if(sx<0) {if(sx&1) sx=1; else sx=0;}
-							sy=ty-5;if(sy<0) {if(sy&1) sy=1; else sy=0;}
-							ex=tx+6;if(ex>dx) ex=dx;
-							ey=ty+6;if(ey>dy) ey=dy;
-
-							for(x=tx,y=sy;y<ey;y+=2)
-								*((unsigned short *)((surf)+(y*ddsd.lPitch)+x*2))=crCursorColor16[iPlayer];
-							for(y=ty,x=sx;x<ex;x+=2)
-								*((unsigned short *)((surf)+(y*ddsd.lPitch)+x*2))=crCursorColor16[iPlayer];
-						}
+					if (sx&1) sx=1;
+					else sx=0;
 				}
+				sy=ty-5;
+				if (sy<0)
+				{
+					if (sy&1) sy=1;
+					else sy=0;
+				}
+				ex=tx+6;
+				if (ex>dx) ex=dx;
+				ey=ty+6;
+				if (ey>dy) ey=dy;
+
+				for (x=tx,y=sy;y<ey;y+=2)
+					*((unsigned short *)((surf)+(y*ddsd.lPitch)+x*2))=crCursorColor16[iPlayer];
+				for (y=ty,x=sx;x<ex;x+=2)
+					*((unsigned short *)((surf)+(y*ddsd.lPitch)+x*2))=crCursorColor16[iPlayer];
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void DoBufferSwap(void)                                // SWAP BUFFERS
 {                                                      // (we don't swap... we blit only)
-	HRESULT ddrval;long x,y;
+	HRESULT ddrval;
+	long x,y;
 
 	ddrval=IDirectDrawSurface_Lock(DX.DDSRender,NULL, &ddsd, DDLOCK_WAIT|DDLOCK_WRITEONLY, NULL);
 
-	if(ddrval==DDERR_SURFACELOST)
-		{
-			IDirectDrawSurface_Restore(DX.DDSRender);
-		}
+	if (ddrval==DDERR_SURFACELOST)
+	{
+		IDirectDrawSurface_Restore(DX.DDSRender);
+	}
 
-	if(ddrval!=DD_OK)
-		{
-			IDirectDrawSurface_Unlock(DX.DDSRender,&ddsd);
-			return;
-		}
+	if (ddrval!=DD_OK)
+	{
+		IDirectDrawSurface_Unlock(DX.DDSRender,&ddsd);
+		return;
+	}
 
 	//----------------------------------------------------//
 
@@ -4153,119 +4573,128 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 	BlitScreen((unsigned char *)ddsd.lpSurface,x,y);      // fill DDSRender surface
 
-	if(usCursorActive) ShowGunCursor((unsigned char *)ddsd.lpSurface);
+	if (usCursorActive) ShowGunCursor((unsigned char *)ddsd.lpSurface);
 
 	IDirectDrawSurface_Unlock(DX.DDSRender,&ddsd);
 
-	if(ulKeybits&KEY_SHOWFPS) {
+	if (ulKeybits&KEY_SHOWFPS)
+	{
 		DisplayText();              // paint menu text
-		DisplayFrames(); DisplayLag(); DisplayInput(); DisplayMovMode();
+		DisplayFrames();
+		DisplayLag();
+		DisplayInput();
+		DisplayMovMode();
 	}
 
-	if(pExtraBltFunc) {pExtraBltFunc();return;}
+	if (pExtraBltFunc)
+	{
+		pExtraBltFunc();
+		return;
+	}
 
-	if(iWindowMode)
+	if (iWindowMode)
+	{
+		RECT ScreenRect,ViewportRect;
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+
+		ScreenRect.left     = Point.x;
+		ScreenRect.top      = Point.y;
+		ScreenRect.right    = iResX+Point.x;
+		ScreenRect.bottom   = iResY+Point.y;
+
+		ViewportRect.left   = 0;
+		ViewportRect.top    = 0;
+
+		if (iDebugMode)
 		{
-			RECT ScreenRect,ViewportRect;
-			POINT Point={0,0};
-			ClientToScreen(DX.hWnd,&Point);
-
-			ScreenRect.left     = Point.x;
-			ScreenRect.top      = Point.y;
-			ScreenRect.right    = iResX+Point.x;
-			ScreenRect.bottom   = iResY+Point.y;
-
-			ViewportRect.left   = 0;
-			ViewportRect.top    = 0;
-
-			if(iDebugMode)
-				{
-					if(iFVDisplay)
-						{
-							ViewportRect.right  = 1024;
-							ViewportRect.bottom = iGPUHeight;
-						}
-					else
-						{
-							ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
-							ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
-						}
-				}
+			if (iFVDisplay)
+			{
+				ViewportRect.right  = 1024;
+				ViewportRect.bottom = iGPUHeight;
+			}
 			else
-				{
-					ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
-					ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
-
-					if(iRumbleTime) 
-						{
-							ScreenRect.left+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							ScreenRect.right+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							ScreenRect.top+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							ScreenRect.bottom+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							iRumbleTime--;
-						}
-
-				}
-
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
-				{
-					RECT HelperRect={0,0,iResX,iResY};
-
-					WaitVBlank();
-
-					IDirectDrawSurface_Blt(DX.DDSHelper,&HelperRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL);
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&HelperRect,
-																												DDBLT_WAIT,NULL);
-				}
-			else
-				{
-					WaitVBlank();
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																											DDBLT_WAIT,NULL);
-				}
+			{
+				ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+				ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
+			}
 		}
+		else
+		{
+			ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+			ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
+
+			if (iRumbleTime)
+			{
+				ScreenRect.left+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				ScreenRect.right+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				ScreenRect.top+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				ScreenRect.bottom+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				iRumbleTime--;
+			}
+
+		}
+
+		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		{
+			RECT HelperRect={0,0,iResX,iResY};
+
+			WaitVBlank();
+
+			IDirectDrawSurface_Blt(DX.DDSHelper,&HelperRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&HelperRect,
+			                       DDBLT_WAIT,NULL);
+		}
+		else
+		{
+			WaitVBlank();
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+		}
+	}
 	else
+	{
+		RECT ScreenRect={0,0,iResX,iResY},
+		                ViewportRect={0,0,PreviousPSXDisplay.DisplayMode.x,
+		                              PreviousPSXDisplay.DisplayMode.y
+		                             };
+
+		if (iDebugMode && iFVDisplay)
 		{
-			RECT ScreenRect={0,0,iResX,iResY},
-								ViewportRect={0,0,PreviousPSXDisplay.DisplayMode.x,
-																										PreviousPSXDisplay.DisplayMode.y};
-
-			if(iDebugMode && iFVDisplay)
-				{
-					ViewportRect.right=1024;
-					ViewportRect.bottom=iGPUHeight;
-				}
-			else
-				{
-					if(iRumbleTime) 
-						{
-							ScreenRect.left+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							ScreenRect.right+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							ScreenRect.top+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							ScreenRect.bottom+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-							iRumbleTime--;
-						}
-				}
-
-			if(iUseScanLines==2)                                // stupid nvidia scanline mode
-				{
-					WaitVBlank();
-
-					IDirectDrawSurface_Blt(DX.DDSHelper,&ScreenRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL);
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&ScreenRect,
-																												DDBLT_WAIT,NULL);
-				}
-			else
-				{
-					WaitVBlank();
-					IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-																												DDBLT_WAIT,NULL );
-				}
+			ViewportRect.right=1024;
+			ViewportRect.bottom=iGPUHeight;
+		}
+		else
+		{
+			if (iRumbleTime)
+			{
+				ScreenRect.left+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				ScreenRect.right+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				ScreenRect.top+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				ScreenRect.bottom+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+				iRumbleTime--;
+			}
 		}
 
-	if(DX.DDSScreenPic) DisplayPic();
+		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		{
+			WaitVBlank();
+
+			IDirectDrawSurface_Blt(DX.DDSHelper,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL);
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSHelper,&ScreenRect,
+			                       DDBLT_WAIT,NULL);
+		}
+		else
+		{
+			WaitVBlank();
+			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
+			                       DDBLT_WAIT,NULL );
+		}
+	}
+
+	if (DX.DDSScreenPic) DisplayPic();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -4277,31 +4706,33 @@ int iUseGammaVal=2048;
 void DXSetGamma(void)
 {
 	float g;
-	if(iUseGammaVal==2048) return;
+	if (iUseGammaVal==2048) return;
 
 	g=(float)iUseGammaVal;
-	if(g>512) g=((g-512)*2)+512;
+	if (g>512) g=((g-512)*2)+512;
 	g=0.5f+((g)/1024.0f);
 
 // some cards will cheat... so we don't trust the caps here
 // if (DD_Caps.dwCaps2 & DDCAPS2_PRIMARYGAMMA)
+	{
+		float f;
+		DDGAMMARAMP ramp;
+		int i;
+		LPDIRECTDRAWGAMMACONTROL DD_Gamma = NULL;
+
+		if FAILED(IDirectDrawSurface_QueryInterface(DX.DDSPrimary,&IID_IDirectDrawGammaControl,(void**)&DD_Gamma))
+			return;
+
+		for (i=0;i<256;i++)
 		{
-			float f;DDGAMMARAMP ramp;int i;
-			LPDIRECTDRAWGAMMACONTROL DD_Gamma = NULL;
-
-			if FAILED(IDirectDrawSurface_QueryInterface(DX.DDSPrimary,&IID_IDirectDrawGammaControl,(void**)&DD_Gamma))
-				return;
-
-			for (i=0;i<256;i++)
-				{
-					f=(((float)(i*256))*g);
-					if(f>65535) f=65535;
-					ramp.red[i]=ramp.green[i]=ramp.blue[i]=(WORD)f;
-				}
-
-			IDirectDrawGammaControl_SetGammaRamp(DD_Gamma,0,&ramp);
-			IDirectDrawGammaControl_Release(DD_Gamma);
+			f=(((float)(i*256))*g);
+			if (f>65535) f=65535;
+			ramp.red[i]=ramp.green[i]=ramp.blue[i]=(WORD)f;
 		}
+
+		IDirectDrawGammaControl_SetGammaRamp(DD_Gamma,0,&ramp);
+		IDirectDrawGammaControl_Release(DD_Gamma);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -4310,12 +4741,15 @@ void DXSetGamma(void)
 
 void SetScanLineList(LPDIRECTDRAWCLIPPER Clipper)
 {
-	LPRGNDATA lpCL;RECT * pr;int y;POINT Point={0,0};
+	LPRGNDATA lpCL;
+	RECT * pr;
+	int y;
+	POINT Point={0,0};
 
 	IDirectDrawClipper_SetClipList(Clipper,NULL,0);
 
 	lpCL=(LPRGNDATA)malloc(sizeof(RGNDATAHEADER)+((iResY/2)+1)*sizeof(RECT));
-	if(iWindowMode) ClientToScreen(DX.hWnd,&Point);
+	if (iWindowMode) ClientToScreen(DX.hWnd,&Point);
 
 	lpCL->rdh.dwSize=sizeof(RGNDATAHEADER);
 	lpCL->rdh.iType=RDH_RECTANGLES;
@@ -4327,14 +4761,14 @@ void SetScanLineList(LPDIRECTDRAWCLIPPER Clipper)
 	lpCL->rdh.rcBound.right=Point.x+iResX;
 
 	pr=(RECT *)lpCL->Buffer;
-	for(y=0;y<iResY;y+=2)
-		{
-			pr->left=Point.x;
-			pr->top=Point.y+y;
-			pr->right=Point.x+iResX;
-			pr->bottom=Point.y+y+1;
-			pr++;
-		}
+	for (y=0;y<iResY;y+=2)
+	{
+		pr->left=Point.x;
+		pr->top=Point.y+y;
+		pr->right=Point.x+iResX;
+		pr->bottom=Point.y+y+1;
+		pr++;
+	}
 
 	IDirectDrawClipper_SetClipList(Clipper,lpCL,0);
 
@@ -4345,10 +4779,12 @@ void SetScanLineList(LPDIRECTDRAWCLIPPER Clipper)
 
 void MoveScanLineArea(HWND hwnd)
 {
-	LPDIRECTDRAWCLIPPER Clipper;HRESULT h;
-	DDBLTFX ddbltfx;RECT r;
+	LPDIRECTDRAWCLIPPER Clipper;
+	HRESULT h;
+	DDBLTFX ddbltfx;
+	RECT r;
 
-	if(FAILED(h=IDirectDraw_CreateClipper(DX.DD,0,&Clipper,NULL)))
+	if (FAILED(h=IDirectDraw_CreateClipper(DX.DD,0,&Clipper,NULL)))
 		return;
 
 	IDirectDrawSurface_SetClipper(DX.DDSPrimary,NULL);
@@ -4359,16 +4795,16 @@ void MoveScanLineArea(HWND hwnd)
 	// Fixed Scanline Mode for FullScreen where desktop was visible
 	// in background
 
-	if(iWindowMode)
+	if (iWindowMode)
 	{
-	GetClientRect(hwnd,&r);
-	ClientToScreen(hwnd,(LPPOINT)&r.left);
-	r.right+=r.left;
-	r.bottom+=r.top;
+		GetClientRect(hwnd,&r);
+		ClientToScreen(hwnd,(LPPOINT)&r.left);
+		r.right+=r.left;
+		r.bottom+=r.top;
 	}
 	else
 	{
-			r.left   = 0;
+		r.left   = 0;
 		r.top    = 0;
 		r.right  = iResX;
 		r.bottom = iResY;
@@ -4390,8 +4826,10 @@ BOOL ReStart=FALSE;
 
 int DXinitialize()
 {
-	LPDIRECTDRAW DD;int i;
-	LPDIRECTDRAWCLIPPER Clipper;HRESULT h;
+	LPDIRECTDRAW DD;
+	int i;
+	LPDIRECTDRAWCLIPPER Clipper;
+	HRESULT h;
 	GUID FAR * guid=0;
 	unsigned char * c;
 	DDSCAPS ddscaps;
@@ -4405,51 +4843,57 @@ int DXinitialize()
 
 	// make guid !
 	c=(unsigned char *)&guiDev;
-	for(i=0;i<sizeof(GUID);i++,c++)
-		{if(*c) {guid=&guiDev;break;}}
+	for (i=0;i<sizeof(GUID);i++,c++)
+	{
+		if (*c)
+		{
+			guid=&guiDev;
+			break;
+		}
+	}
 
 	// create dd
-	if(DirectDrawCreate(guid,&DD,0))
-		{
-			MessageBox(NULL, "This GPU requires DirectX!", "Error", MB_OK);
-			return 0;
-		}
+	if (DirectDrawCreate(guid,&DD,0))
+	{
+		MessageBox(NULL, "This GPU requires DirectX!", "Error", MB_OK);
+		return 0;
+	}
 
 	DX.DD=DD;
 
 	//////////////////////////////////////////////////////// co-op level
 
-	if(iWindowMode)                                       // win mode?
+	if (iWindowMode)                                      // win mode?
+	{
+		if (IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd,DDSCL_NORMAL))
+			return 0;
+	}
+	else
+	{
+		if (ReStart)
 		{
-			if(IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd,DDSCL_NORMAL))
+			if (IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd, DDSCL_NORMAL | DDSCL_FULLSCREEN | DDSCL_FPUSETUP))
 				return 0;
 		}
-	else
+		else
 		{
-			if(ReStart)
-				{
-					if(IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd, DDSCL_NORMAL | DDSCL_FULLSCREEN | DDSCL_FPUSETUP))
-						return 0;
-				}
-			else
-				{
-					if(IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd, DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_FPUSETUP))
-						return 0;
-				}
-
-			if(iRefreshRate)
-				{
-					LPDIRECTDRAW2 DD2;
-					IDirectDraw_QueryInterface(DX.DD,&IID_IDirectDraw2,(LPVOID *)&DD2);
-					if(IDirectDraw2_SetDisplayMode(DD2,iResX,iResY,iColDepth,iRefreshRate,0))
-						return 0;
-				}
-			else
-				{
-					if(IDirectDraw_SetDisplayMode(DX.DD,iResX,iResY,iColDepth))
-						return 0;
-				}
+			if (IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd, DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_FPUSETUP))
+				return 0;
 		}
+
+		if (iRefreshRate)
+		{
+			LPDIRECTDRAW2 DD2;
+			IDirectDraw_QueryInterface(DX.DD,&IID_IDirectDraw2,(LPVOID *)&DD2);
+			if (IDirectDraw2_SetDisplayMode(DD2,iResX,iResY,iColDepth,iRefreshRate,0))
+				return 0;
+		}
+		else
+		{
+			if (IDirectDraw_SetDisplayMode(DX.DD,iResX,iResY,iColDepth))
+				return 0;
+		}
+	}
 
 	//////////////////////////////////////////////////////// main surfaces
 
@@ -4459,212 +4903,212 @@ int DXinitialize()
 
 	ddsd.dwFlags = DDSD_CAPS;                             // front buffer
 
-	if(iSysMemory)
+	if (iSysMemory)
 		ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_SYSTEMMEMORY;
 	else
 		ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_VIDEOMEMORY;
 
 	//ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;//|DDSCAPS_VIDEOMEMORY;
-	if(IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSPrimary, NULL))
+	if (IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSPrimary, NULL))
 		return 0;
 
 	//----------------------------------------------------//
-	if(iSysMemory && iUseScanLines==2) iUseScanLines=1;   // pete: nvidia hack not needed on system mem
+	if (iSysMemory && iUseScanLines==2) iUseScanLines=1;  // pete: nvidia hack not needed on system mem
 
-	if(iUseScanLines==2)                                  // special nvidia hack
-		{
-			memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-			ddsd.dwSize = sizeof(DDSURFACEDESC);
-			ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
-			ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-			ddsd.dwWidth        = iResX;
-			ddsd.dwHeight       = iResY;
+	if (iUseScanLines==2 || bKkaptureMode)                                 // special nvidia hack
+	{
+		memset(&ddsd, 0, sizeof(DDSURFACEDESC));
+		ddsd.dwSize = sizeof(DDSURFACEDESC);
+		ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
+		ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+		ddsd.dwWidth        = iResX;
+		ddsd.dwHeight       = iResY;
 
-			if(IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSHelper, NULL))
-				return 0;
-		}
+		if (IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSHelper, NULL))
+			return 0;
+	}
 	//----------------------------------------------------//
 
 	memset(&ddsd, 0, sizeof(DDSURFACEDESC));              // back buffer
 	ddsd.dwSize = sizeof(DDSURFACEDESC);
 	ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
 // ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;//|DDSCAPS_VIDEOMEMORY;
-	if(iSysMemory)
+	if (iSysMemory)
 		ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	else
 		ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;
 
-	if(iDebugMode || iUseNoStretchBlt>=3)
-						ddsd.dwWidth        = 1024;
+	if (iDebugMode || iUseNoStretchBlt>=3)
+		ddsd.dwWidth        = 1024;
 //	else ddsd.dwWidth        = 320;
 	else ddsd.dwWidth        = 640;
 
-	if(iUseNoStretchBlt>=3)
-						ddsd.dwHeight       = 1024;
+	if (iUseNoStretchBlt>=3)
+		ddsd.dwHeight       = 1024;
 	else
-		{
-			if(iDebugMode) ddsd.dwHeight = iGPUHeight;
+	{
+		if (iDebugMode) ddsd.dwHeight = iGPUHeight;
 //			else           ddsd.dwHeight = 240;
-			else           ddsd.dwHeight = 512;
-		}
+		else           ddsd.dwHeight = 512;
+	}
 
-	if(IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSRender, NULL))
+	if (IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSRender, NULL))
 		return 0;
 
 	// check for desktop color depth
 	dd.dwSize=sizeof(DDPIXELFORMAT);
 	IDirectDrawSurface_GetPixelFormat(DX.DDSRender,&dd);
 
-	if(dd.dwRBitMask==0x00007c00 &&
-				dd.dwGBitMask==0x000003e0 &&
-				dd.dwBBitMask==0x0000001f)
-		{
-			if(iUseNoStretchBlt>=3)
-								BlitScreen=BlitScreen15_2xSaI;
-			else BlitScreen=BlitScreen15;
-			iDesktopCol=15;
-		}
+	if (dd.dwRBitMask==0x00007c00 &&
+	    dd.dwGBitMask==0x000003e0 &&
+	    dd.dwBBitMask==0x0000001f)
+	{
+		if (iUseNoStretchBlt>=3)
+			BlitScreen=BlitScreen15_2xSaI;
+		else BlitScreen=BlitScreen15;
+		iDesktopCol=15;
+	}
 	else
-	if(dd.dwRBitMask==0x0000f800 &&
-				dd.dwGBitMask==0x000007e0 &&
-				dd.dwBBitMask==0x0000001f)
+		if (dd.dwRBitMask==0x0000f800 &&
+		    dd.dwGBitMask==0x000007e0 &&
+		    dd.dwBBitMask==0x0000001f)
 		{
-			if(iUseNoStretchBlt < 3)
+			if (iUseNoStretchBlt < 3)
 				BlitScreen = BlitScreen16;
-			else if(iUseNoStretchBlt < 13)
-								BlitScreen = BlitScreen16_2xSaI;
+			else if (iUseNoStretchBlt < 13)
+				BlitScreen = BlitScreen16_2xSaI;
 			else
-								BlitScreen = BlitScreen16_3x;
+				BlitScreen = BlitScreen16_3x;
 			iDesktopCol=16;
 		}
-	else
+		else
 		{
-			if(iUseNoStretchBlt < 3)
-	BlitScreen = BlitScreen32;
-			else if(iUseNoStretchBlt < 11)
+			if (iUseNoStretchBlt < 3)
+				BlitScreen = BlitScreen32;
+			else if (iUseNoStretchBlt < 11)
 				BlitScreen = BlitScreen32_2xSaI;
 			else if (iUseNoStretchBlt < 13)
-			BlitScreen = BlitScreen32_hq2x;
-			else if(iUseNoStretchBlt < 15)
+				BlitScreen = BlitScreen32_hq2x;
+			else if (iUseNoStretchBlt < 15)
 				BlitScreen = BlitScreen32_3x;
 			else
-	BlitScreen = BlitScreen32_hq3x;
+				BlitScreen = BlitScreen32_hq3x;
 			iDesktopCol=32;
 		}
 
 	//////////////////////////////////////////////////////// extra blts
 
-	switch(iUseNoStretchBlt)
-		{
-			case 1:
-				pExtraBltFunc=NoStretchedBlit;
-				p2XSaIFunc=NULL;
-				break;
-			case 2:
-				pExtraBltFunc=NoStretchedBlitEx;
-				p2XSaIFunc=NULL;
-				break;
-			case 3:
-				pExtraBltFunc=StretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=Std2xSaI_ex5;
-				else if(iDesktopCol==16) p2XSaIFunc=Std2xSaI_ex6;
-				else                     p2XSaIFunc=Std2xSaI_ex8;
-				break;
-			case 4:
-				pExtraBltFunc=NoStretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=Std2xSaI_ex5;
-				else if(iDesktopCol==16) p2XSaIFunc=Std2xSaI_ex6;
-				else                     p2XSaIFunc=Std2xSaI_ex8;
-				break;
-			case 5:
-				pExtraBltFunc=StretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=Super2xSaI_ex5;
-				else if(iDesktopCol==16) p2XSaIFunc=Super2xSaI_ex6;
-				else                     p2XSaIFunc=Super2xSaI_ex8;
-				break;
-			case 6:
-				pExtraBltFunc=NoStretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=Super2xSaI_ex5;
-				else if(iDesktopCol==16) p2XSaIFunc=Super2xSaI_ex6;
-				else                     p2XSaIFunc=Super2xSaI_ex8;
-				break;
-			case 7:
-				pExtraBltFunc=StretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=SuperEagle_ex5;
-				else if(iDesktopCol==16) p2XSaIFunc=SuperEagle_ex6;
-				else                     p2XSaIFunc=SuperEagle_ex8;
-				break;
-			case 8:
-				pExtraBltFunc=NoStretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=SuperEagle_ex5;
-				else if(iDesktopCol==16) p2XSaIFunc=SuperEagle_ex6;
-				else                     p2XSaIFunc=SuperEagle_ex8;
-				break;
-			case 9:
-				pExtraBltFunc=StretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=Scale2x_ex6_5;
-				else if(iDesktopCol==16) p2XSaIFunc=Scale2x_ex6_5;
-				else                     p2XSaIFunc=Scale2x_ex8;
-				break;
-			case 10:
-				pExtraBltFunc=NoStretchedBlit2x;
-				if     (iDesktopCol==15) p2XSaIFunc=Scale2x_ex6_5;
-				else if(iDesktopCol==16) p2XSaIFunc=Scale2x_ex6_5;
-				else                     p2XSaIFunc=Scale2x_ex8;
-				break;
-			case 11:
-				pExtraBltFunc=NoStretchedBlit2x;
-	InitLUTs();
-				if(iDesktopCol==15)		 p2XSaIFunc=hq2x_16;
-	else if(iDesktopCol==16) p2XSaIFunc=hq2x_16;
-	else 					 p2XSaIFunc=hq2x_32;
-	break;
-			case 12:
-	pExtraBltFunc=StretchedBlit2x;
-	InitLUTs();
-				if(iDesktopCol==15)		 p2XSaIFunc=hq2x_16;
-	else if(iDesktopCol==16) p2XSaIFunc=hq2x_16;
-	else	 				 p2XSaIFunc=hq2x_32;
-	break;
-			case 13:
-	pExtraBltFunc=StretchedBlit3x;
-	if(iDesktopCol==15)      p2XSaIFunc=Scale3x_ex6_5;
-	else if(iDesktopCol==16) p2XSaIFunc=Scale3x_ex6_5;
-	else                     p2XSaIFunc=Scale3x_ex8;
-	break;
-			case 14:
-	pExtraBltFunc=NoStretchedBlit3x;
-	if(iDesktopCol==15)      p2XSaIFunc=Scale3x_ex6_5;
-				else if(iDesktopCol==16) p2XSaIFunc=Scale3x_ex6_5;
-	else                     p2XSaIFunc=Scale3x_ex8;
-	break;
-			case 15:
-	pExtraBltFunc=NoStretchedBlit3x;
-	InitLUTs();
-	if(iDesktopCol==15)		 p2XSaIFunc=hq3x_16;
-	else if(iDesktopCol==16) p2XSaIFunc=hq3x_16;
-	else 					 p2XSaIFunc=hq3x_32;
-	break;
+	switch (iUseNoStretchBlt)
+	{
+	case 1:
+		pExtraBltFunc=NoStretchedBlit;
+		p2XSaIFunc=NULL;
+		break;
+	case 2:
+		pExtraBltFunc=NoStretchedBlitEx;
+		p2XSaIFunc=NULL;
+		break;
+	case 3:
+		pExtraBltFunc=StretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=Std2xSaI_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=Std2xSaI_ex6;
+		else                     p2XSaIFunc=Std2xSaI_ex8;
+		break;
+	case 4:
+		pExtraBltFunc=NoStretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=Std2xSaI_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=Std2xSaI_ex6;
+		else                     p2XSaIFunc=Std2xSaI_ex8;
+		break;
+	case 5:
+		pExtraBltFunc=StretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=Super2xSaI_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=Super2xSaI_ex6;
+		else                     p2XSaIFunc=Super2xSaI_ex8;
+		break;
+	case 6:
+		pExtraBltFunc=NoStretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=Super2xSaI_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=Super2xSaI_ex6;
+		else                     p2XSaIFunc=Super2xSaI_ex8;
+		break;
+	case 7:
+		pExtraBltFunc=StretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=SuperEagle_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=SuperEagle_ex6;
+		else                     p2XSaIFunc=SuperEagle_ex8;
+		break;
+	case 8:
+		pExtraBltFunc=NoStretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=SuperEagle_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=SuperEagle_ex6;
+		else                     p2XSaIFunc=SuperEagle_ex8;
+		break;
+	case 9:
+		pExtraBltFunc=StretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=Scale2x_ex6_5;
+		else if (iDesktopCol==16) p2XSaIFunc=Scale2x_ex6_5;
+		else                     p2XSaIFunc=Scale2x_ex8;
+		break;
+	case 10:
+		pExtraBltFunc=NoStretchedBlit2x;
+		if     (iDesktopCol==15) p2XSaIFunc=Scale2x_ex6_5;
+		else if (iDesktopCol==16) p2XSaIFunc=Scale2x_ex6_5;
+		else                     p2XSaIFunc=Scale2x_ex8;
+		break;
+	case 11:
+		pExtraBltFunc=NoStretchedBlit2x;
+		InitLUTs();
+		if (iDesktopCol==15)		 p2XSaIFunc=hq2x_16;
+		else if (iDesktopCol==16) p2XSaIFunc=hq2x_16;
+		else 					 p2XSaIFunc=hq2x_32;
+		break;
+	case 12:
+		pExtraBltFunc=StretchedBlit2x;
+		InitLUTs();
+		if (iDesktopCol==15)		 p2XSaIFunc=hq2x_16;
+		else if (iDesktopCol==16) p2XSaIFunc=hq2x_16;
+		else	 				 p2XSaIFunc=hq2x_32;
+		break;
+	case 13:
+		pExtraBltFunc=StretchedBlit3x;
+		if (iDesktopCol==15)      p2XSaIFunc=Scale3x_ex6_5;
+		else if (iDesktopCol==16) p2XSaIFunc=Scale3x_ex6_5;
+		else                     p2XSaIFunc=Scale3x_ex8;
+		break;
+	case 14:
+		pExtraBltFunc=NoStretchedBlit3x;
+		if (iDesktopCol==15)      p2XSaIFunc=Scale3x_ex6_5;
+		else if (iDesktopCol==16) p2XSaIFunc=Scale3x_ex6_5;
+		else                     p2XSaIFunc=Scale3x_ex8;
+		break;
+	case 15:
+		pExtraBltFunc=NoStretchedBlit3x;
+		InitLUTs();
+		if (iDesktopCol==15)		 p2XSaIFunc=hq3x_16;
+		else if (iDesktopCol==16) p2XSaIFunc=hq3x_16;
+		else 					 p2XSaIFunc=hq3x_32;
+		break;
 	case 16:
-	pExtraBltFunc=StretchedBlit3x;
-	InitLUTs();
-	if(iDesktopCol==15)		 p2XSaIFunc=hq3x_16;
-	else if(iDesktopCol==16) p2XSaIFunc=hq3x_16;
-	else					 p2XSaIFunc=hq3x_32;
-	break;
-			default:
-				pExtraBltFunc=NULL;
-				p2XSaIFunc=NULL;
-				break;
-		}
+		pExtraBltFunc=StretchedBlit3x;
+		InitLUTs();
+		if (iDesktopCol==15)		 p2XSaIFunc=hq3x_16;
+		else if (iDesktopCol==16) p2XSaIFunc=hq3x_16;
+		else					 p2XSaIFunc=hq3x_32;
+		break;
+	default:
+		pExtraBltFunc=NULL;
+		p2XSaIFunc=NULL;
+		break;
+	}
 
 	//////////////////////////////////////////////////////// clipper init
 
-	if(FAILED(h=IDirectDraw_CreateClipper(DX.DD,0,&Clipper,NULL)))
-			return 0;
+	if (FAILED(h=IDirectDraw_CreateClipper(DX.DD,0,&Clipper,NULL)))
+		return 0;
 
-	if(iUseScanLines)
-						SetScanLineList(Clipper);
+	if (iUseScanLines)
+		SetScanLineList(Clipper);
 	else IDirectDrawClipper_SetHWnd(Clipper,0,DX.hWnd);
 
 	IDirectDrawSurface_SetClipper(DX.DDSPrimary,Clipper);
@@ -4682,24 +5126,24 @@ int DXinitialize()
 
 	//////////////////////////////////////////////////////// finish init
 
-	if(iUseNoStretchBlt>=3)
-		{
-			pSaISmallBuff=malloc(512*512*4);
-			memset(pSaISmallBuff,0,512*512*4);
-			pSaIBigBuff=malloc(1024*1024*4);
-			memset(pSaIBigBuff,0,1024*1024*4);
-		}
+	if (iUseNoStretchBlt>=3)
+	{
+		pSaISmallBuff=malloc(512*512*4);
+		memset(pSaISmallBuff,0,512*512*4);
+		pSaIBigBuff=malloc(1024*1024*4);
+		memset(pSaIBigBuff,0,1024*1024*4);
+	}
 
 	bUsingTWin=FALSE;
 
 	InitMenu();                                           // menu init
 
-	if(iShowFPS)                                          // fps on startup
-		{
-			ulKeybits|=KEY_SHOWFPS;
-			szDispBuf[0]=0;
-			BuildDispMenu(0);
-		}
+	if (iShowFPS)                                         // fps on startup
+	{
+		ulKeybits|=KEY_SHOWFPS;
+		szDispBuf[0]=0;
+		BuildDispMenu(0);
+	}
 
 	bIsFirstFrame = FALSE;                                // done
 
@@ -4714,29 +5158,29 @@ void DXcleanup()                                       // DX CLEANUP
 {
 	CloseMenu();                                          // bye display lists
 
-	if(iUseNoStretchBlt>=3)
-		{
-			if(pSaISmallBuff) free(pSaISmallBuff);
-			pSaISmallBuff=NULL;
-			if(pSaIBigBuff) free(pSaIBigBuff);
-			pSaIBigBuff=NULL;
-		}
+	if (iUseNoStretchBlt>=3)
+	{
+		if (pSaISmallBuff) free(pSaISmallBuff);
+		pSaISmallBuff=NULL;
+		if (pSaIBigBuff) free(pSaIBigBuff);
+		pSaIBigBuff=NULL;
+	}
 
-	if(!bIsFirstFrame)
-		{
-			if(DX.DDSHelper) IDirectDrawSurface_Release(DX.DDSHelper);
-			DX.DDSHelper=0;
-			if(DX.DDSScreenPic) IDirectDrawSurface_Release(DX.DDSScreenPic);
-			DX.DDSScreenPic=0;
-			IDirectDrawSurface_Release(DX.DDSRender);
-			IDirectDrawSurface_Release(DX.DDSPrimary);
-			IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd, DDSCL_NORMAL);
-			IDirectDraw_RestoreDisplayMode(DX.DD);
-			IDirectDraw_Release(DX.DD);
+	if (!bIsFirstFrame)
+	{
+		if (DX.DDSHelper) IDirectDrawSurface_Release(DX.DDSHelper);
+		DX.DDSHelper=0;
+		if (DX.DDSScreenPic) IDirectDrawSurface_Release(DX.DDSScreenPic);
+		DX.DDSScreenPic=0;
+		IDirectDrawSurface_Release(DX.DDSRender);
+		IDirectDrawSurface_Release(DX.DDSPrimary);
+		IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd, DDSCL_NORMAL);
+		IDirectDraw_RestoreDisplayMode(DX.DD);
+		IDirectDraw_Release(DX.DD);
 
-			ReStart=TRUE;
-			bIsFirstFrame = TRUE;
-		}
+		ReStart=TRUE;
+		bIsFirstFrame = TRUE;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -4748,51 +5192,55 @@ HANDLE hGPUMenu=NULL;
 
 unsigned long ulInitDisplay(void)
 {
-	HDC hdc;RECT r;
+	HDC hdc;
+	RECT r;
 
-	if(iWindowMode)                                       // win mode?
-		{
-			DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style
-			dwGPUStyle=dw;
-			dw&=~WS_THICKFRAME;
-			dw|=WS_BORDER|WS_CAPTION;
-			SetWindowLong(hWGPU, GWL_STYLE, dw);
+	if (iWindowMode)                                      // win mode?
+	{
+		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style
+		dwGPUStyle=dw;
+		dw&=~WS_THICKFRAME;
+		dw|=WS_BORDER|WS_CAPTION;
+		SetWindowLong(hWGPU, GWL_STYLE, dw);
 
-			iResX=LOWORD(iWinSize);iResY=HIWORD(iWinSize);
-			ShowWindow(hWGPU,SW_SHOWNORMAL);
+		iResX=LOWORD(iWinSize);
+		iResY=HIWORD(iWinSize);
+		ShowWindow(hWGPU,SW_SHOWNORMAL);
 
-			if(iUseScanLines)
-				SetWindowPos(hWGPU,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
+		if (iUseScanLines)
+			SetWindowPos(hWGPU,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
 
-			MoveWindow(hWGPU,                            // -> move wnd
-						GetSystemMetrics(SM_CXFULLSCREEN)/2-iResX/2,
-						GetSystemMetrics(SM_CYFULLSCREEN)/2-iResY/2,
-						iResX+GetSystemMetrics(SM_CXFIXEDFRAME)+3,
-						iResY+GetSystemMetrics(SM_CYFIXEDFRAME)+GetSystemMetrics(SM_CYCAPTION)+3,
-						TRUE);
-			UpdateWindow(hWGPU);                         // -> let windows do some update
-		}
+		MoveWindow(hWGPU,                            // -> move wnd
+		           GetSystemMetrics(SM_CXFULLSCREEN)/2-iResX/2,
+		           GetSystemMetrics(SM_CYFULLSCREEN)/2-iResY/2,
+		           iResX+GetSystemMetrics(SM_CXFIXEDFRAME)+3,
+		           iResY+GetSystemMetrics(SM_CYFIXEDFRAME)+GetSystemMetrics(SM_CYCAPTION)+3,
+		           TRUE);
+		UpdateWindow(hWGPU);                         // -> let windows do some update
+	}
 	else                                                  // no window mode:
-		{
-			DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style
-			dwGPUStyle=dw;
-			hGPUMenu=GetMenu(hWGPU);
+	{
+		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style
+		dwGPUStyle=dw;
+		hGPUMenu=GetMenu(hWGPU);
 
-			dw&=~(WS_THICKFRAME|WS_BORDER|WS_CAPTION);
-			SetWindowLong(hWGPU, GWL_STYLE, dw);
-			SetMenu(hWGPU,NULL);
+		dw&=~(WS_THICKFRAME|WS_BORDER|WS_CAPTION);
+		SetWindowLong(hWGPU, GWL_STYLE, dw);
+		SetMenu(hWGPU,NULL);
 
-			ShowWindow(hWGPU,SW_SHOWMAXIMIZED);          // -> max mode
-		}
+		ShowWindow(hWGPU,SW_SHOWMAXIMIZED);          // -> max mode
+	}
 
-	r.left=r.top=0;r.right=iResX;r.bottom=iResY;          // init bkg with black
+	r.left=r.top=0;
+	r.right=iResX;
+	r.bottom=iResY;          // init bkg with black
 	hdc = GetDC(hWGPU);
 	FillRect(hdc,&r,(HBRUSH)GetStockObject(BLACK_BRUSH));
 	ReleaseDC(hWGPU, hdc);
 
 	DXinitialize();                                       // init direct draw (not D3D... oh, well)
 
-	if(!iWindowMode)                                      // fullscreen mode?
+	if (!iWindowMode)                                     // fullscreen mode?
 		ShowWindow(hWGPU,SW_SHOWMAXIMIZED);           // -> maximize again (fixes strange DX behavior)
 
 	return 1;
@@ -4805,22 +5253,24 @@ void CloseDisplay(void)
 	DXcleanup();                                          // cleanup dx
 
 	SetWindowLong(hWGPU, GWL_STYLE,dwGPUStyle);    // repair window
-	if(hGPUMenu) SetMenu(hWGPU,(HMENU)hGPUMenu);
+	if (hGPUMenu) SetMenu(hWGPU,(HMENU)hGPUMenu);
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void CreatePic(unsigned char * pMem)
 {
-	DDSURFACEDESC xddsd;HRESULT ddrval;
-	unsigned char * ps;int x,y;
+	DDSURFACEDESC xddsd;
+	HRESULT ddrval;
+	unsigned char * ps;
+	int x,y;
 
 	memset(&xddsd, 0, sizeof(DDSURFACEDESC));
 	xddsd.dwSize = sizeof(DDSURFACEDESC);
 	xddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
 // xddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
 
-	if(iSysMemory)
+	if (iSysMemory)
 		xddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	else
 		xddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;
@@ -4828,71 +5278,74 @@ void CreatePic(unsigned char * pMem)
 	xddsd.dwWidth        = 128;
 	xddsd.dwHeight       = 96;
 
-	if(IDirectDraw_CreateSurface(DX.DD,&xddsd, &DX.DDSScreenPic, NULL))
-		{DX.DDSScreenPic=0;return;}
+	if (IDirectDraw_CreateSurface(DX.DD,&xddsd, &DX.DDSScreenPic, NULL))
+	{
+		DX.DDSScreenPic=0;
+		return;
+	}
 
 	ddrval=IDirectDrawSurface_Lock(DX.DDSScreenPic,NULL, &xddsd, DDLOCK_WAIT|DDLOCK_WRITEONLY, NULL);
 
-	if(ddrval==DDERR_SURFACELOST)
-		{
-			IDirectDrawSurface_Restore(DX.DDSScreenPic);
-		}
+	if (ddrval==DDERR_SURFACELOST)
+	{
+		IDirectDrawSurface_Restore(DX.DDSScreenPic);
+	}
 
-	if(ddrval!=DD_OK)
-		{
-			IDirectDrawSurface_Unlock(DX.DDSScreenPic,&xddsd);
-			return;
-		}
+	if (ddrval!=DD_OK)
+	{
+		IDirectDrawSurface_Unlock(DX.DDSScreenPic,&xddsd);
+		return;
+	}
 
 	ps=(unsigned char *)xddsd.lpSurface;
 
-	if(iDesktopCol==16)
+	if (iDesktopCol==16)
+	{
+		unsigned short s;
+		for (y=0;y<96;y++)
+		{
+			for (x=0;x<128;x++)
+			{
+				s=(*(pMem+0))>>3;
+				s|=((*(pMem+1))&0xfc)<<3;
+				s|=((*(pMem+2))&0xf8)<<8;
+				pMem+=3;
+				*((unsigned short *)(ps+y*xddsd.lPitch+x*2))=s;
+			}
+		}
+	}
+	else
+		if (iDesktopCol==15)
 		{
 			unsigned short s;
-			for(y=0;y<96;y++)
+			for (y=0;y<96;y++)
+			{
+				for (x=0;x<128;x++)
 				{
-					for(x=0;x<128;x++)
-						{
-							s=(*(pMem+0))>>3;
-							s|=((*(pMem+1))&0xfc)<<3;
-							s|=((*(pMem+2))&0xf8)<<8;
-							pMem+=3;
-							*((unsigned short *)(ps+y*xddsd.lPitch+x*2))=s;
-						}
+					s=(*(pMem+0))>>3;
+					s|=((*(pMem+1))&0xfc)<<2;
+					s|=((*(pMem+2))&0xf8)<<7;
+					pMem+=3;
+					*((unsigned short *)(ps+y*xddsd.lPitch+x*2))=s;
 				}
+			}
 		}
-	else
-	if(iDesktopCol==15)
-		{
-			unsigned short s;
-			for(y=0;y<96;y++)
+		else
+			if (iDesktopCol==32)
+			{
+				unsigned long l;
+				for (y=0;y<96;y++)
 				{
-					for(x=0;x<128;x++)
-						{
-							s=(*(pMem+0))>>3;
-							s|=((*(pMem+1))&0xfc)<<2;
-							s|=((*(pMem+2))&0xf8)<<7;
-							pMem+=3;
-							*((unsigned short *)(ps+y*xddsd.lPitch+x*2))=s;
-						}
+					for (x=0;x<128;x++)
+					{
+						l=  *(pMem+0);
+						l|=(*(pMem+1))<<8;
+						l|=(*(pMem+2))<<16;
+						pMem+=3;
+						*((unsigned long *)(ps+y*xddsd.lPitch+x*4))=l;
+					}
 				}
-		}
-	else
-	if(iDesktopCol==32)
-		{
-			unsigned long l;
-			for(y=0;y<96;y++)
-				{
-					for(x=0;x<128;x++)
-						{
-							l=  *(pMem+0);
-							l|=(*(pMem+1))<<8;
-							l|=(*(pMem+2))<<16;
-							pMem+=3;
-							*((unsigned long *)(ps+y*xddsd.lPitch+x*4))=l;
-						}
-				}
-		}
+			}
 
 	IDirectDrawSurface_Unlock(DX.DDSScreenPic,&xddsd);
 }
@@ -4901,37 +5354,12 @@ void CreatePic(unsigned char * pMem)
 
 void DestroyPic(void)
 {
-	if(DX.DDSScreenPic)
-		{
-			RECT ScreenRect={iResX-128,0,iResX,96};
-			DDBLTFX     ddbltfx;
+	if (DX.DDSScreenPic)
+	{
+		RECT ScreenRect={iResX-128,0,iResX,96};
+		DDBLTFX     ddbltfx;
 
-			if(iWindowMode)
-				{
-					POINT Point={0,0};
-					ClientToScreen(DX.hWnd,&Point);
-					ScreenRect.left+=Point.x;
-					ScreenRect.right+=Point.x;
-					ScreenRect.top+=Point.y;
-					ScreenRect.bottom+=Point.y;
-				}
-
-			ddbltfx.dwSize = sizeof(ddbltfx);
-			ddbltfx.dwFillColor = 0x00000000;
-			IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
-
-			IDirectDrawSurface_Release(DX.DDSScreenPic);
-			DX.DDSScreenPic=0;
-		}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-
-void DisplayPic(void)
-{
-	RECT ScreenRect={iResX-128,0,iResX,96},
-						HelperRect={0,0,128,96};
-	if(iWindowMode)
+		if (iWindowMode)
 		{
 			POINT Point={0,0};
 			ClientToScreen(DX.hWnd,&Point);
@@ -4941,24 +5369,61 @@ void DisplayPic(void)
 			ScreenRect.bottom+=Point.y;
 		}
 
+		ddbltfx.dwSize = sizeof(ddbltfx);
+		ddbltfx.dwFillColor = 0x00000000;
+		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
+
+		IDirectDrawSurface_Release(DX.DDSScreenPic);
+		DX.DDSScreenPic=0;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void DisplayPic(void)
+{
+	RECT ScreenRect={iResX-128,0,iResX,96},
+	                HelperRect={0,0,128,96};
+	if (iWindowMode)
+	{
+		POINT Point={0,0};
+		ClientToScreen(DX.hWnd,&Point);
+		ScreenRect.left+=Point.x;
+		ScreenRect.right+=Point.x;
+		ScreenRect.top+=Point.y;
+		ScreenRect.bottom+=Point.y;
+	}
+
 // ??? eh... no need to wait here!
 // WaitVBlank();
 
 	IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSScreenPic,&HelperRect,
-																								DDBLT_WAIT,NULL);
+	                       DDBLT_WAIT,NULL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void ShowGpuPic(void)
 {
-	HRSRC hR;HGLOBAL hG;unsigned long * pRMem;
-	unsigned char * pMem;int x,y;unsigned long * pDMem;
+	HRSRC hR;
+	HGLOBAL hG;
+	unsigned long * pRMem;
+	unsigned char * pMem;
+	int x,y;
+	unsigned long * pDMem;
 
 	// turn off any screen pic, if it does already exist
-	if(DX.DDSScreenPic) {DestroyPic();return;}
+	if (DX.DDSScreenPic)
+	{
+		DestroyPic();
+		return;
+	}
 
-	if(ulKeybits&KEY_SHOWFPS) {ShowTextGpuPic();return;}
+	if (ulKeybits&KEY_SHOWFPS)
+	{
+		ShowTextGpuPic();
+		return;
+	}
 
 	// load and lock the bitmap (lock is kinda obsolete in win32)
 	hR=FindResource(hInst,MAKEINTRESOURCE(IDB_GPU),RT_BITMAP);
@@ -4970,11 +5435,11 @@ void ShowGpuPic(void)
 	// change the data upside-down
 	pMem=(unsigned char *)malloc(128*96*3);
 
-	for(y=0;y<96;y++)
-		{
-			pDMem=(unsigned long *)(pMem+(95-y)*128*3);
-			for(x=0;x<96;x++) *pDMem++=*pRMem++;
-		}
+	for (y=0;y<96;y++)
+	{
+		pDMem=(unsigned long *)(pMem+(95-y)*128*3);
+		for (x=0;x<96;x++) *pDMem++=*pRMem++;
+	}
 
 	// show the pic
 	CreatePic(pMem);
@@ -4988,16 +5453,20 @@ void ShowGpuPic(void)
 
 void ShowTextGpuPic(void)                              // CREATE TEXT SCREEN PIC
 {                                                      // gets an Text and paints
-	unsigned char * pMem;BITMAPINFO bmi;                  // it into a rgb24 bitmap
-	HDC hdc,hdcMem;HBITMAP hBmp,hBmpMem;HFONT hFontMem;   // to display it in the gpu
-	HBRUSH hBrush,hBrushMem;HPEN hPen,hPenMem;
+	unsigned char * pMem;
+	BITMAPINFO bmi;                  // it into a rgb24 bitmap
+	HDC hdc,hdcMem;
+	HBITMAP hBmp,hBmpMem;
+	HFONT hFontMem;   // to display it in the gpu
+	HBRUSH hBrush,hBrushMem;
+	HPEN hPen,hPenMem;
 	char szB[256];
 	RECT r={0,0,128,96};                                  // size of bmp... don't change that
 	COLORREF crFrame = RGB(128,255,128);                  // some example color inits
 	COLORREF crBkg   = RGB(0,0,0);
 	COLORREF crText  = RGB(0,255,0);
 
-	if(DX.DDSScreenPic) DestroyPic();
+	if (DX.DDSScreenPic) DestroyPic();
 
 	//----------------------------------------------------// creation of the dc & bitmap
 
@@ -5013,12 +5482,12 @@ void ShowTextGpuPic(void)                              // CREATE TEXT SCREEN PIC
 	bmi.bmiHeader.biBitCount=24;
 	bmi.bmiHeader.biCompression=BI_RGB;
 	hBmp=CreateDIBSection(hdcMem,&bmi,DIB_RGB_COLORS,
-																							(void **)&pMem,NULL,0);         // pMem will point to 128x96x3 bitmap data
+	                      (void **)&pMem,NULL,0);         // pMem will point to 128x96x3 bitmap data
 
 	hBmpMem   = (HBITMAP)SelectObject(hdcMem,hBmp);       // sel the bmp into the dc
 
 	//----------------------------------------------------// ok, the following is just a drawing example... change it...
-																																																							// create & select an additional font... whatever you want to paint, paint it in the dc :)
+	// create & select an additional font... whatever you want to paint, paint it in the dc :)
 	hBrush=CreateSolidBrush(crBkg);
 	hPen=CreatePen(PS_SOLID,0,crFrame);
 
@@ -5034,7 +5503,7 @@ void ShowTextGpuPic(void)                              // CREATE TEXT SCREEN PIC
 
 	LoadString(hInst,IDS_INFO0+iMPos,szB,255);
 	DrawText(hdcMem,szB,strlen(szB),&r,                   // paint the text (including clipping and word break)
-										DT_LEFT|DT_WORDBREAK);
+	         DT_LEFT|DT_WORDBREAK);
 
 	//----------------------------------------------------// ok, now store the pMem data, or just call the gpu func
 
@@ -5095,12 +5564,13 @@ static int           Xpitch;
 char *               Xpixels;
 char *               pCaptionText;
 
-typedef struct {
+typedef struct
+{
 #define MWM_HINTS_DECORATIONS   2
-		long flags;
-		long functions;
-		long decorations;
-		long input_mode;
+	long flags;
+	long functions;
+	long decorations;
+	long input_mode;
 } MotifWmHints;
 
 static int fx=0;
@@ -5109,65 +5579,65 @@ static int fx=0;
 
 void DestroyDisplay(void)
 {
-	if(display)
-		{
+	if (display)
+	{
 #ifdef USE_DGA2
-			if(iWindowMode)
-				{
+		if (iWindowMode)
+		{
 #endif
 			XFreeColormap(display, colormap);
-			if(hGC)
-				{
-					XFreeGC(display,hGC);
-					hGC = 0;
-				}
-			if(Ximage)
-				{
-					XDestroyImage(Ximage);
-					Ximage=0;
-				}
-			if(XCimage)
-				{
-					XDestroyImage(XCimage);
-					XCimage=0;
-				}
-			if(XFimage)
-				{
-					XDestroyImage(XFimage);
-					XFimage=0;
-				}
+			if (hGC)
+			{
+				XFreeGC(display,hGC);
+				hGC = 0;
+			}
+			if (Ximage)
+			{
+				XDestroyImage(Ximage);
+				Ximage=0;
+			}
+			if (XCimage)
+			{
+				XDestroyImage(XCimage);
+				XCimage=0;
+			}
+			if (XFimage)
+			{
+				XDestroyImage(XFimage);
+				XFimage=0;
+			}
 
 			XSync(display,False);
 
 #ifdef USE_DGA2
-				}
+		}
 #endif
 
 #ifdef USE_XF86VM
 
 #ifdef USE_DGA2
-			if (!iWindowMode)
-				{
-					XFree(dgaModes);
-					XDGACloseFramebuffer(display, DefaultScreen(display));
+		if (!iWindowMode)
+		{
+			XFree(dgaModes);
+			XDGACloseFramebuffer(display, DefaultScreen(display));
 
-					XUngrabKeyboard(display, CurrentTime);
-	}
-#endif
-			if(bModeChanged)                                    // -> repair screen mode
-				{
-					int myscreen=DefaultScreen(display);
-					XF86VidModeSwitchToMode(display,myscreen,         // --> switch mode back
-																													modes[iOldMode]);
-					XF86VidModeSetViewPort(display,myscreen,0,0);     // --> set viewport upperleft
-					free(modes);                                      // --> finally kill mode infos
-					bModeChanged=0;                                   // --> done
-				}
-
-#endif
-
-			XCloseDisplay(display);
+			XUngrabKeyboard(display, CurrentTime);
 		}
+#endif
+		if (bModeChanged)                                   // -> repair screen mode
+		{
+			int myscreen=DefaultScreen(display);
+			XF86VidModeSwitchToMode(display,myscreen,         // --> switch mode back
+			                        modes[iOldMode]);
+			XF86VidModeSetViewPort(display,myscreen,0,0);     // --> set viewport upperleft
+			free(modes);                                      // --> finally kill mode infos
+			bModeChanged=0;                                   // --> done
+		}
+
+#endif
+
+		XCloseDisplay(display);
+	}
 }
 
 int depth=0;
@@ -5179,10 +5649,10 @@ void XClearScreen()
 	char *ptr = dgaDev->data;
 
 	for (y=0; y<iResY; y++)
-		{
-			memset(ptr, 0, iResX * (dgaDev->mode.bitsPerPixel / 8));
-			ptr+= dgaDev->mode.imageWidth * (dgaDev->mode.bitsPerPixel / 8);
-		}
+	{
+		memset(ptr, 0, iResX * (dgaDev->mode.bitsPerPixel / 8));
+		ptr+= dgaDev->mode.imageWidth * (dgaDev->mode.bitsPerPixel / 8);
+	}
 }
 #endif
 
@@ -5193,22 +5663,25 @@ void XClearScreen()
 // (pixel_clock * 1000 * 1000 / htotal) / vtotal
 static int SelectBestMode(XF86VidModeModeInfo* modes[], int nmodes, int iResX, int iResY)
 {
-				int bestmode = -1;
-				int vfreq = 0;
-				int max_vfreq = 0;
-				int i;
+	int bestmode = -1;
+	int vfreq = 0;
+	int max_vfreq = 0;
+	int i;
 
-				for (i = 0; i < nmodes; i++) {
-							if (iResX == modes[i]->hdisplay &&
-											iResY == modes[i]->vdisplay) {
-															vfreq = (modes[i]->dotclock * 1000 * 1000 / modes[i]->htotal) / modes[i]->vtotal;
-															if (vfreq > max_vfreq) {
-																			max_vfreq = vfreq;
-																			bestmode = i;
-															}
-							}
-				}
-				return bestmode;
+	for (i = 0; i < nmodes; i++)
+	{
+		if (iResX == modes[i]->hdisplay &&
+		    iResY == modes[i]->vdisplay)
+		{
+			vfreq = (modes[i]->dotclock * 1000 * 1000 / modes[i]->htotal) / modes[i]->vtotal;
+			if (vfreq > max_vfreq)
+			{
+				max_vfreq = vfreq;
+				bestmode = i;
+			}
+		}
+	}
+	return bestmode;
 }
 
 // Create display
@@ -5231,224 +5704,237 @@ void CreateDisplay(void)
 	// Open display
 	display=XOpenDisplay(NULL);
 
-	if(!display)
-		{
-			fprintf (stderr,"Failed to open display!!!\n");
-			DestroyDisplay();
-			return;
-		}
+	if (!display)
+	{
+		fprintf (stderr,"Failed to open display!!!\n");
+		DestroyDisplay();
+		return;
+	}
 
 	myscreen=DefaultScreen(display);
 
 	// desktop fullscreen switch
 #ifndef USE_XF86VM
-	if(!iWindowMode) fx=1;
+	if (!iWindowMode) fx=1;
 #else
-	if(!iWindowMode)
+	if (!iWindowMode)
+	{
+		XF86VidModeModeLine mode;
+		int nmodes,iC;
+
+		fx=1;                                               // raise flag
+		XF86VidModeGetModeLine(display,myscreen,&iC,&mode); // get actual mode info
+		if (mode.privsize) XFree(mode.private);             // no need for private stuff
+		bModeChanged=0;                                     // init mode change flag
+#ifndef USE_DGA2
+		if (iResX!=mode.hdisplay || iResY!=mode.vdisplay)   // wanted mode is different?
 		{
-			XF86VidModeModeLine mode;
-			int nmodes,iC;
-
-			fx=1;                                               // raise flag
-			XF86VidModeGetModeLine(display,myscreen,&iC,&mode); // get actual mode info
-			if(mode.privsize) XFree(mode.private);              // no need for private stuff
-			bModeChanged=0;                                     // init mode change flag
-#ifndef USE_DGA2
-			if(iResX!=mode.hdisplay || iResY!=mode.vdisplay)    // wanted mode is different?
-				{
 #endif
-					XF86VidModeGetAllModeLines(display,myscreen,      // -> enum all mode infos
-																																&nmodes,&modes);
-					if(modes)                                         // -> infos got?
-						{
-							int bestmode;
-							for(iC=0;iC<nmodes;++iC)                        // -> loop modes
-								{
-									if(mode.hdisplay==modes[iC]->hdisplay &&      // -> act mode found?
-												mode.vdisplay==modes[iC]->vdisplay &&      //    this used to only check for resolution
-												mode.hsyncstart==modes[iC]->hsyncstart &&  //    but that is not sufficient because
-												mode.hsyncend==modes[iC]->hsyncend &&      //    there might be several modes with the same
-												mode.vsyncstart==modes[iC]->vsyncstart &&  //    resolution but different h/v frequency.
-												mode.htotal==modes[iC]->htotal &&
-												mode.vtotal==modes[iC]->vtotal)
-										{                                            //    if yes: store mode id
-											iOldMode=iC;
-											break;
-										}
-								}
+			XF86VidModeGetAllModeLines(display,myscreen,      // -> enum all mode infos
+			                           &nmodes,&modes);
+			if (modes)                                        // -> infos got?
+			{
+				int bestmode;
+				for (iC=0;iC<nmodes;++iC)                       // -> loop modes
+				{
+					if (mode.hdisplay==modes[iC]->hdisplay &&     // -> act mode found?
+					    mode.vdisplay==modes[iC]->vdisplay &&      //    this used to only check for resolution
+					    mode.hsyncstart==modes[iC]->hsyncstart &&  //    but that is not sufficient because
+					    mode.hsyncend==modes[iC]->hsyncend &&      //    there might be several modes with the same
+					    mode.vsyncstart==modes[iC]->vsyncstart &&  //    resolution but different h/v frequency.
+					    mode.htotal==modes[iC]->htotal &&
+					    mode.vtotal==modes[iC]->vtotal)
+					{                                            //    if yes: store mode id
+						iOldMode=iC;
+						break;
+					}
+				}
 
-							if ((bestmode = SelectBestMode(modes, nmodes, iResX, iResY)) > -1)
-								{
-										{
+				if ((bestmode = SelectBestMode(modes, nmodes, iResX, iResY)) > -1)
+				{
+					{
 #ifndef USE_DGA2
-											XF86VidModeSwitchToMode(display,myscreen,   // --> switch to mode
-																																			modes[bestmode]);
-											XF86VidModeSetViewPort(display,myscreen,0,0);
+						XF86VidModeSwitchToMode(display,myscreen,   // --> switch to mode
+						                        modes[bestmode]);
+						XF86VidModeSetViewPort(display,myscreen,0,0);
 
-											bModeChanged=1;                             // --> raise flag for repairing mode on close
+						bModeChanged=1;                             // --> raise flag for repairing mode on close
 #else
-											int Evb, Errb;
-					int Major, Minor;
+						int Evb, Errb;
+						int Major, Minor;
 
-											if (!XDGAQueryExtension(display, &Evb, &Errb))
+						if (!XDGAQueryExtension(display, &Evb, &Errb))
 						{
 							printf("DGA Extension not Available\n");
-					return;
+							return;
 						}
 
-					if (!XDGAQueryVersion(display, &Major, &Minor) || Major < 2)
+						if (!XDGAQueryVersion(display, &Major, &Minor) || Major < 2)
 						{
 							printf("DGA Version 2 not Available\n");
-				return;
+							return;
 						}
 
-											dgaModes = XDGAQueryModes(display, myscreen, &dgaNModes);
+						dgaModes = XDGAQueryModes(display, myscreen, &dgaNModes);
 
-											for (i=0; i<dgaNModes; i++)
+						for (i=0; i<dgaNModes; i++)
 						{
 							if (iResX == dgaModes[i].viewportWidth &&
-								iResY == dgaModes[i].viewportHeight)
-					break;
+							    iResY == dgaModes[i].viewportHeight)
+								break;
 						}
 
-											if (i == dgaNModes)
+						if (i == dgaNModes)
 						{
-				printf("mode found on the XF86VidMode extension but not on the DGA2 one!!\n");
-				break;
-			}
+							printf("mode found on the XF86VidMode extension but not on the DGA2 one!!\n");
+							break;
+						}
 
-											if (XDGAOpenFramebuffer(display, myscreen) == False)
+						if (XDGAOpenFramebuffer(display, myscreen) == False)
 						{
-				printf("couldn't open DGA2 Framebuffer\n");
-				break;
-			}
+							printf("couldn't open DGA2 Framebuffer\n");
+							break;
+						}
 
-											dgaDev = XDGASetMode(display, myscreen, dgaModes[i].num);
-											if (dgaDev == NULL)
+						dgaDev = XDGASetMode(display, myscreen, dgaModes[i].num);
+						if (dgaDev == NULL)
 						{
-				printf("error setting DGA2 mode (num %d)\n", dgaModes[i].num);
-				break;
-			}
+							printf("error setting DGA2 mode (num %d)\n", dgaModes[i].num);
+							break;
+						}
 
-											if (!(dgaDev->mode.flags & XDGAConcurrentAccess))
+						if (!(dgaDev->mode.flags & XDGAConcurrentAccess))
 						{
-				printf("error DGA2 mode has no ConcurrenAccess\n");
-				break;
-			}
+							printf("error DGA2 mode has no ConcurrenAccess\n");
+							break;
+						}
 
-											XDGASetViewport(display, myscreen, 0, 0, XDGAFlipImmediate);
-											XDGASync(display, myscreen);
+						XDGASetViewport(display, myscreen, 0, 0, XDGAFlipImmediate);
+						XDGASync(display, myscreen);
 
-											XClearScreen();
+						XClearScreen();
 
-											XGrabKeyboard(display, DefaultRootWindow(display), True, GrabModeAsync, GrabModeAsync, CurrentTime);
-											XSelectInput(display, DefaultRootWindow(display), KeyPressMask | KeyReleaseMask);
+						XGrabKeyboard(display, DefaultRootWindow(display), True, GrabModeAsync, GrabModeAsync, CurrentTime);
+						XSelectInput(display, DefaultRootWindow(display), KeyPressMask | KeyReleaseMask);
 
-											bModeChanged=1;                             // --> raise flag for repairing mode on close
+						bModeChanged=1;                             // --> raise flag for repairing mode on close
 #endif
-										}
-								}
-
-							if(bModeChanged==0)                             // -> no mode found?
-								{
-									free(modes);                                  // --> free infos
-									printf("No proper fullscreen mode found!\n"); // --> some info output
-								}
-						}
-#ifndef USE_DGA2
+					}
 				}
-#endif
+
+				if (bModeChanged==0)                            // -> no mode found?
+				{
+					free(modes);                                  // --> free infos
+					printf("No proper fullscreen mode found!\n"); // --> some info output
+				}
+			}
+#ifndef USE_DGA2
 		}
+#endif
+	}
 #endif
 
 	screen=DefaultScreenOfDisplay(display);
 
 	myvisual = 0;
 
-	for(i=0;i<4;i++)
-		if(XMatchVisualInfo(display,myscreen, depth_list[i], TrueColor, &vi))
-			{myvisual = &vi;depth=depth_list[i];break;}
-
-	if(!myvisual)
+	for (i=0;i<4;i++)
+		if (XMatchVisualInfo(display,myscreen, depth_list[i], TrueColor, &vi))
 		{
-			fprintf(stderr,"Failed to obtain visual!!!\n");
-			DestroyDisplay();
-			return;
+			myvisual = &vi;
+			depth=depth_list[i];
+			break;
 		}
 
-	if(myvisual->red_mask==0x00007c00 &&
-				myvisual->green_mask==0x000003e0 &&
-				myvisual->blue_mask==0x0000001f)
-					{iColDepth=15;}
+	if (!myvisual)
+	{
+		fprintf(stderr,"Failed to obtain visual!!!\n");
+		DestroyDisplay();
+		return;
+	}
+
+	if (myvisual->red_mask==0x00007c00 &&
+	    myvisual->green_mask==0x000003e0 &&
+	    myvisual->blue_mask==0x0000001f)
+	{
+		iColDepth=15;
+	}
 	else
-	if(myvisual->red_mask==0x0000f800 &&
-				myvisual->green_mask==0x000007e0 &&
-				myvisual->blue_mask==0x0000001f)
-					{iColDepth=16;}
-	else
-	if(myvisual->red_mask==0x00ff0000 &&
-				myvisual->green_mask==0x0000ff00 &&
-				myvisual->blue_mask==0x000000ff)
-					{iColDepth=32;}
-	else
+		if (myvisual->red_mask==0x0000f800 &&
+		    myvisual->green_mask==0x000007e0 &&
+		    myvisual->blue_mask==0x0000001f)
 		{
-			fprintf(stderr,"COLOR DEPTH NOT SUPPORTED!\n");
-			fprintf(stderr,"r: %08lx\n",myvisual->red_mask);
-			fprintf(stderr,"g: %08lx\n",myvisual->green_mask);
-			fprintf(stderr,"b: %08lx\n",myvisual->blue_mask);
-			DestroyDisplay();
-			return;
+			iColDepth=16;
 		}
+		else
+			if (myvisual->red_mask==0x00ff0000 &&
+			    myvisual->green_mask==0x0000ff00 &&
+			    myvisual->blue_mask==0x000000ff)
+			{
+				iColDepth=32;
+			}
+			else
+			{
+				fprintf(stderr,"COLOR DEPTH NOT SUPPORTED!\n");
+				fprintf(stderr,"r: %08lx\n",myvisual->red_mask);
+				fprintf(stderr,"g: %08lx\n",myvisual->green_mask);
+				fprintf(stderr,"b: %08lx\n",myvisual->blue_mask);
+				DestroyDisplay();
+				return;
+			}
 
 	root_window_id=RootWindow(display,DefaultScreen(display));
 
 #ifdef USE_DGA2
-	if(!iWindowMode)
-		{
-			Xpixels = dgaDev->data; return;
-		}
+	if (!iWindowMode)
+	{
+		Xpixels = dgaDev->data;
+		return;
+	}
 #endif
 
 	// pffff... much work for a simple blank cursor... oh, well...
-	if(iWindowMode) cursor=XCreateFontCursor(display,XC_trek);
+	if (iWindowMode) cursor=XCreateFontCursor(display,XC_trek);
 	else
-		{
-			Pixmap p1,p2;XImage * img;
-			XColor b,w;unsigned char * idata;
-			XGCValues GCv;
-			GC        GCc;
+	{
+		Pixmap p1,p2;
+		XImage * img;
+		XColor b,w;
+		unsigned char * idata;
+		XGCValues GCv;
+		GC        GCc;
 
-			memset(&b,0,sizeof(XColor));
-			memset(&w,0,sizeof(XColor));
-			idata=(unsigned char *)malloc(8);
-			memset(idata,0,8);
+		memset(&b,0,sizeof(XColor));
+		memset(&w,0,sizeof(XColor));
+		idata=(unsigned char *)malloc(8);
+		memset(idata,0,8);
 
-			p1=XCreatePixmap(display,RootWindow(display,myvisual->screen),8,8,1);
-			p2=XCreatePixmap(display,RootWindow(display,myvisual->screen),8,8,1);
+		p1=XCreatePixmap(display,RootWindow(display,myvisual->screen),8,8,1);
+		p2=XCreatePixmap(display,RootWindow(display,myvisual->screen),8,8,1);
 
-			img = XCreateImage(display,myvisual->visual,
-																						1,XYBitmap,0,idata,8,8,8,1);
+		img = XCreateImage(display,myvisual->visual,
+		                   1,XYBitmap,0,idata,8,8,8,1);
 
-			GCv.function   = GXcopy;
-			GCv.foreground = ~0;
-			GCv.background =  0;
-			GCv.plane_mask = AllPlanes;
-			GCc = XCreateGC(display,p1,
-																			(GCFunction|GCForeground|GCBackground|GCPlaneMask),&GCv);
+		GCv.function   = GXcopy;
+		GCv.foreground = ~0;
+		GCv.background =  0;
+		GCv.plane_mask = AllPlanes;
+		GCc = XCreateGC(display,p1,
+		                (GCFunction|GCForeground|GCBackground|GCPlaneMask),&GCv);
 
-			XPutImage(display, p1,GCc,img,0,0,0,0,8,8);
-			XPutImage(display, p2,GCc,img,0,0,0,0,8,8);
-			XFreeGC(display, GCc);
+		XPutImage(display, p1,GCc,img,0,0,0,0,8,8);
+		XPutImage(display, p2,GCc,img,0,0,0,0,8,8);
+		XFreeGC(display, GCc);
 
-			cursor = XCreatePixmapCursor(display,p1,p2,&b,&w,0,0);
+		cursor = XCreatePixmapCursor(display,p1,p2,&b,&w,0,0);
 
-			XFreePixmap(display,p1);
-			XFreePixmap(display,p2);
-			XDestroyImage(img); // will free idata as well
-		}
+		XFreePixmap(display,p1);
+		XFreePixmap(display,p2);
+		XDestroyImage(img); // will free idata as well
+	}
 
 	colormap=XCreateColormap(display,root_window_id,
-																										myvisual->visual,AllocNone);
+	                         myvisual->visual,AllocNone);
 
 	winattr.background_pixel=0;
 	winattr.border_pixel=WhitePixelOfScreen(screen);
@@ -5464,24 +5950,24 @@ void CreateDisplay(void)
 	winattr.cursor=None;
 
 	window=XCreateWindow(display,root_window_id,
-																						0,0,iResX,iResY,
-																						0,myvisual->depth,
-																						InputOutput,myvisual->visual,
-																						CWBorderPixel | CWBackPixel |
-																						CWEventMask | CWDontPropagate |
-																						CWColormap | CWCursor,
-																						&winattr);
+	                     0,0,iResX,iResY,
+	                     0,myvisual->depth,
+	                     InputOutput,myvisual->visual,
+	                     CWBorderPixel | CWBackPixel |
+	                     CWEventMask | CWDontPropagate |
+	                     CWColormap | CWCursor,
+	                     &winattr);
 
-	if(!window)
-		{
-			fprintf(stderr,"Failed in XCreateWindow()!!!\n");
-			DestroyDisplay();
-			return;
-		}
+	if (!window)
+	{
+		fprintf(stderr,"Failed in XCreateWindow()!!!\n");
+		DestroyDisplay();
+		return;
+	}
 
 	hints.flags=PMinSize|PMaxSize;
 
-	if(fx) hints.flags|=USPosition|USSize;
+	if (fx) hints.flags|=USPosition|USSize;
 	else   hints.flags|=PSize;
 
 	hints.min_width   = hints.max_width = hints.base_width = iResX;
@@ -5492,80 +5978,80 @@ void CreateDisplay(void)
 
 	XSetWMHints(display,window,&wm_hints);
 	XSetWMNormalHints(display,window,&hints);
-	if(pCaptionText)
-						XStoreName(display,window,pCaptionText);
+	if (pCaptionText)
+		XStoreName(display,window,pCaptionText);
 	else XStoreName(display,window,"P.E.Op.S SoftX PSX Gpu");
 
 	XDefineCursor(display,window,cursor);
 
 	// hack to get rid of window title bar
 
-	if(fx)
-		{
-			mwmhints.flags=MWM_HINTS_DECORATIONS;
-			mwmhints.decorations=0;
-			mwmatom=XInternAtom(display,"_MOTIF_WM_HINTS",0);
-			XChangeProperty(display,window,mwmatom,mwmatom,32,
-																			PropModeReplace,(unsigned char *)&mwmhints,4);
-		}
+	if (fx)
+	{
+		mwmhints.flags=MWM_HINTS_DECORATIONS;
+		mwmhints.decorations=0;
+		mwmatom=XInternAtom(display,"_MOTIF_WM_HINTS",0);
+		XChangeProperty(display,window,mwmatom,mwmatom,32,
+		                PropModeReplace,(unsigned char *)&mwmhints,4);
+	}
 
 	// key stuff
 
 	XSelectInput(display,
-														window,
-														FocusChangeMask | ExposureMask |
-														KeyPressMask | KeyReleaseMask
-													);
+	             window,
+	             FocusChangeMask | ExposureMask |
+	             KeyPressMask | KeyReleaseMask
+	            );
 
 	XMapRaised(display,window);
 	XClearWindow(display,window);
 	XWindowEvent(display,window,ExposureMask,&event);
 
-	if(fx)                                               // fullscreen
-		{
-			XResizeWindow(display,window,screen->width,screen->height);
+	if (fx)                                              // fullscreen
+	{
+		XResizeWindow(display,window,screen->width,screen->height);
 
-			hints.min_width   = hints.max_width = hints.base_width = screen->width;
-			hints.min_height= hints.max_height = hints.base_height = screen->height;
+		hints.min_width   = hints.max_width = hints.base_width = screen->width;
+		hints.min_height= hints.max_height = hints.base_height = screen->height;
 
-			XSetWMNormalHints(display,window,&hints);
-		}
+		XSetWMNormalHints(display,window,&hints);
+	}
 
 	gcv.graphics_exposures = False;
 	hGC = XCreateGC(display,window,
-																	GCGraphicsExposures, &gcv);
-	if(!hGC)
-		{
-			fprintf(stderr,"No gfx context!!!\n");
-			DestroyDisplay();
-		}
+	                GCGraphicsExposures, &gcv);
+	if (!hGC)
+	{
+		fprintf(stderr,"No gfx context!!!\n");
+		DestroyDisplay();
+	}
 
 	Xpixels = (char *)malloc(230*15*4);
 	memset(Xpixels,255,230*15*4);
 	XFimage = XCreateImage(display,myvisual->visual,
-																						depth, ZPixmap, 0,
-																						(char *)Xpixels,
-																						230, 15,
-																						depth>16 ? 32 : 16,
-																						0);
+	                       depth, ZPixmap, 0,
+	                       (char *)Xpixels,
+	                       230, 15,
+	                       depth>16 ? 32 : 16,
+	                       0);
 
 	Xpixels = (char *)malloc(iResY*iResX*4);
 	memset(Xpixels,0,iResY*iResX*4);
 	XCimage = XCreateImage(display,myvisual->visual,
-																						depth, ZPixmap, 0,
-																						(char *)Xpixels,
-																						iResX, iResY,
-																						depth>16 ? 32 : 16,
-																						0);
+	                       depth, ZPixmap, 0,
+	                       (char *)Xpixels,
+	                       iResX, iResY,
+	                       depth>16 ? 32 : 16,
+	                       0);
 
 	Xpixels = (char *)malloc(iResY*iResX*4);
 
 	Ximage = XCreateImage(display,myvisual->visual,
-																						depth, ZPixmap, 0,
-																						(char *)Xpixels,
-																						iResX, iResY,
-																						depth>16 ? 32 : 16,
-																						0);
+	                      depth, ZPixmap, 0,
+	                      (char *)Xpixels,
+	                      iResX, iResY,
+	                      depth>16 ? 32 : 16,
+	                      0);
 	Xpitch = Ximage->bytes_per_line;
 }
 #else  //SDL
@@ -5591,63 +6077,65 @@ SDL_Rect rectdst,rectsrc;
 
 void DestroyDisplay(void)
 {
-if(display){
+	if (display)
+	{
 #ifdef _SDL2
-if(Ximage16) SDL_FreeSurface(Ximage16);
-if(Ximage24) SDL_FreeSurface(Ximage24);
+		if (Ximage16) SDL_FreeSurface(Ximage16);
+		if (Ximage24) SDL_FreeSurface(Ximage24);
 #else
-if(XCimage) SDL_FreeSurface(XCimage);
-if(Ximage) SDL_FreeSurface(Ximage);
+		if (XCimage) SDL_FreeSurface(XCimage);
+		if (Ximage) SDL_FreeSurface(Ximage);
 #endif
-if(XFimage) SDL_FreeSurface(XFimage);
+		if (XFimage) SDL_FreeSurface(XFimage);
 
-SDL_FreeSurface(display);//the display is also a surface in SDL
+		SDL_FreeSurface(display);//the display is also a surface in SDL
+	}
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
-SDL_QuitSubSystem(SDL_INIT_VIDEO);
-}
-void SetDisplay(void){
-if(iWindowMode)
-display = SDL_SetVideoMode(iResX,iResY,depth,sdl_mask);
-else display = SDL_SetVideoMode(iResX,iResY,depth,SDL_FULLSCREEN|sdl_mask);
+void SetDisplay(void)
+{
+	if (iWindowMode)
+		display = SDL_SetVideoMode(iResX,iResY,depth,sdl_mask);
+	else display = SDL_SetVideoMode(iResX,iResY,depth,SDL_FULLSCREEN|sdl_mask);
 }
 
 void CreateDisplay(void)
 {
 
-if(SDL_InitSubSystem(SDL_INIT_VIDEO)<0)
-			{
-			fprintf (stderr,"(x) Failed to Init SDL!!!\n");
-			return;
-			}
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO)<0)
+	{
+		fprintf (stderr,"(x) Failed to Init SDL!!!\n");
+		return;
+	}
 
 //display = SDL_SetVideoMode(iResX,iResY,depth,sdl_mask);
-display = SDL_SetVideoMode(iResX,iResY,depth,!iWindowMode*SDL_FULLSCREEN|sdl_mask);
+	display = SDL_SetVideoMode(iResX,iResY,depth,!iWindowMode*SDL_FULLSCREEN|sdl_mask);
 #ifndef _SDL2
-Ximage = SDL_CreateRGBSurface(sdl_mask,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
-XCimage= SDL_CreateRGBSurface(sdl_mask,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
+	Ximage = SDL_CreateRGBSurface(sdl_mask,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
+	XCimage= SDL_CreateRGBSurface(sdl_mask,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
 #else
 //Ximage16= SDL_CreateRGBSurface(sdl_mask,iResX,iResY,16,0x1f,0x1f<<5,0x1f<<10,0);
 
-Ximage16= SDL_CreateRGBSurfaceFrom((void*)psxVub, 1024,512,16,2048 ,0x1f,0x1f<<5,0x1f<<10,0);
-Ximage24= SDL_CreateRGBSurfaceFrom((void*)psxVub, 1024*2/3,512 ,24,2048 ,0xFF0000,0xFF00,0xFF,0);
+	Ximage16= SDL_CreateRGBSurfaceFrom((void*)psxVub, 1024,512,16,2048 ,0x1f,0x1f<<5,0x1f<<10,0);
+	Ximage24= SDL_CreateRGBSurfaceFrom((void*)psxVub, 1024*2/3,512 ,24,2048 ,0xFF0000,0xFF00,0xFF,0);
 #endif
 
 
-XFimage= SDL_CreateRGBSurface(sdl_mask,170,15,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
+	XFimage= SDL_CreateRGBSurface(sdl_mask,170,15,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
 
-iColDepth=depth;
+	iColDepth=depth;
 //memset(XFimage->pixels,255,170*15*4);//really needed???
 //memset(Ximage->pixels,0,ResX*ResY*4);
 #ifndef _SDL2
-memset(XCimage->pixels,0,iResX*iResY*4);
+	memset(XCimage->pixels,0,iResX*iResY*4);
 #endif
 
 //Xpitch=iResX*32; no more use
 #ifndef _SDL2
-Xpixels=(char *)Ximage->pixels;
+	Xpixels=(char *)Ximage->pixels;
 #endif
-if(pCaptionText)
-						SDL_WM_SetCaption(pCaptionText,NULL);
+	if (pCaptionText)
+		SDL_WM_SetCaption(pCaptionText,NULL);
 	else SDL_WM_SetCaption("FPSE Display - P.E.Op.S SoftSDL PSX Gpu",NULL);
 
 }
@@ -5670,49 +6158,50 @@ void BlitScreen32(unsigned char * surf,long x,long y)
 {
 	unsigned char * pD;
 	unsigned int startxy;
-	unsigned long lu;unsigned short s;
+	unsigned long lu;
+	unsigned short s;
 	unsigned short row,column;
 	unsigned short dx=PreviousPSXDisplay.Range.x1;
 	unsigned short dy=PreviousPSXDisplay.DisplayMode.y;
 	long lPitch=(dx+PreviousPSXDisplay.Range.x0)<<2;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
 	surf+=PreviousPSXDisplay.Range.x0<<2;
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					pD=(unsigned char *)&psxVuw[startxy];
+			startxy=((1024)*(column+y))+x;
+			pD=(unsigned char *)&psxVuw[startxy];
 
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
-										0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
-							pD+=3;
-						}
-				}
+			for (row=0;row<dx;row++)
+			{
+				lu=*((unsigned long *)pD);
+				*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
+				  0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
+				pD+=3;
+			}
 		}
+	}
 	else
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					for(row=0;row<dx;row++)
-						{
-							s=psxVuw[startxy++];
-							*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
-								((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
-						}
-				}
+			startxy=((1024)*(column+y))+x;
+			for (row=0;row<dx;row++)
+			{
+				s=psxVuw[startxy++];
+				*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
+				  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -5721,7 +6210,8 @@ void BlitScreen32NS(unsigned char * surf,long x,long y)
 {
 	unsigned char * pD;
 	unsigned int startxy;
-	unsigned long lu;unsigned short s;
+	unsigned long lu;
+	unsigned short s;
 	unsigned short row,column;
 	unsigned short dx=PreviousPSXDisplay.Range.x1;
 	unsigned short dy=PreviousPSXDisplay.DisplayMode.y;
@@ -5731,43 +6221,43 @@ void BlitScreen32NS(unsigned char * surf,long x,long y)
 		lPitch = (dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth) * 4;
 #endif
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
 	surf+=PreviousPSXDisplay.Range.x0<<2;
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					pD=(unsigned char *)&psxVuw[startxy];
+			startxy=((1024)*(column+y))+x;
+			pD=(unsigned char *)&psxVuw[startxy];
 
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
-										0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
-							pD+=3;
-						}
-				}
+			for (row=0;row<dx;row++)
+			{
+				lu=*((unsigned long *)pD);
+				*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
+				  0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
+				pD+=3;
+			}
 		}
+	}
 	else
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-					for(row=0;row<dx;row++)
-						{
-							s=psxVuw[startxy++];
-							*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
-								((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
-						}
-				}
+			startxy=((1024)*(column+y))+x;
+			for (row=0;row<dx;row++)
+			{
+				s=psxVuw[startxy++];
+				*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
+				  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -5776,7 +6266,8 @@ void BlitScreen32NSSL(unsigned char * surf,long x,long y)
 {
 	unsigned char * pD;
 	unsigned int startxy;
-	unsigned long lu;unsigned short s;
+	unsigned long lu;
+	unsigned short s;
 	unsigned short row,column;
 	unsigned short dx=PreviousPSXDisplay.Range.x1;
 	unsigned short dy=PreviousPSXDisplay.DisplayMode.y;
@@ -5786,44 +6277,44 @@ void BlitScreen32NSSL(unsigned char * surf,long x,long y)
 		lPitch = (dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth) * 4;
 #endif
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
 	surf+=PreviousPSXDisplay.Range.x0<<2;
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
+			startxy=((1024)*(column+y))+x;
+			pD=(unsigned char *)&psxVuw[startxy];
+			if (column&1)
+				for (row=0;row<dx;row++)
 				{
-					startxy=((1024)*(column+y))+x;
-					pD=(unsigned char *)&psxVuw[startxy];
-					if(column&1)
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
-										0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
-							pD+=3;
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
+					  0xff000000|(RED(lu)<<16)|(GREEN(lu)<<8)|(BLUE(lu));
+					pD+=3;
 				}
 		}
+	}
 	else
+	{
+		for (column=0;column<dy;column++)
 		{
-			for(column=0;column<dy;column++)
+			startxy=((1024)*(column+y))+x;
+			if (column&1)
+				for (row=0;row<dx;row++)
 				{
-					startxy=((1024)*(column+y))+x;
-					if(column&1)
-					for(row=0;row<dx;row++)
-						{
-							s=psxVuw[startxy++];
-							*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
-								((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
-						}
+					s=psxVuw[startxy++];
+					*((unsigned long *)((surf)+(column*lPitch)+(row<<2)))=
+					  ((((s<<19)&0xf80000)|((s<<6)&0xf800)|((s>>7)&0xf8))&0xffffff)|0xff000000;
 				}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -5836,63 +6327,64 @@ void BlitScreen15(unsigned char * surf,long x,long y)
 	unsigned short dy=PreviousPSXDisplay.DisplayMode.y;
 	unsigned short LineOffset,SurfOffset;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*((dx+PreviousPSXDisplay.Range.x0)<<1);
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*((dx+PreviousPSXDisplay.Range.x0)<<1);
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
+		unsigned short * DSTPtr =(unsigned short *)surf;
+		DSTPtr+=PreviousPSXDisplay.Range.x0;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned char * pD;unsigned int startxy;
-			unsigned short * DSTPtr =(unsigned short *)surf;
+			startxy=((1024)*(column+y))+x;
+
+			pD=(unsigned char *)&psxVuw[startxy];
+
+			for (row=0;row<dx;row++)
+			{
+				lu=*((unsigned long *)pD);
+				*DSTPtr++=
+				  ((RED(lu)<<7)&0x7c00)|
+				  ((GREEN(lu)<<2)&0x3e0)|
+				  (BLUE(lu)>>3);
+				pD+=3;
+			}
 			DSTPtr+=PreviousPSXDisplay.Range.x0;
-
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-
-					pD=(unsigned char *)&psxVuw[startxy];
-
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*DSTPtr++=
-									((RED(lu)<<7)&0x7c00)|
-									((GREEN(lu)<<2)&0x3e0)|
-										(BLUE(lu)>>3);
-							pD+=3;
-						}
-					DSTPtr+=PreviousPSXDisplay.Range.x0;
-				}
 		}
+	}
 	else
+	{
+		unsigned long * SRCPtr,* DSTPtr;
+
+		SurfOffset=PreviousPSXDisplay.Range.x0>>1;
+
+		SRCPtr = (unsigned long *)(psxVuw +
+		                           (y<<10) + x);
+		DSTPtr = ((unsigned long *)surf) + SurfOffset;
+
+		dx>>=1;
+		LineOffset = 512 - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned long * SRCPtr,* DSTPtr;
-
-			SurfOffset=PreviousPSXDisplay.Range.x0>>1;
-
-			SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-			DSTPtr = ((unsigned long *)surf) + SurfOffset;
-
-			dx>>=1;
-			LineOffset = 512 - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-							*DSTPtr++=
-								((lu<<10)&0x7c007c00)|
-								((lu)&0x3e003e0)|
-								((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
+				*DSTPtr++=
+				  ((lu<<10)&0x7c007c00)|
+				  ((lu)&0x3e003e0)|
+				  ((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -5909,75 +6401,77 @@ void BlitScreen15NS(unsigned char * surf,long x,long y)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)surf == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)surf == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
-	if(PSXDisplay.RGB24)
-		{
-			unsigned char * pD;unsigned int startxy;
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
 
-			surf+=PreviousPSXDisplay.Range.x0<<1;
+		surf+=PreviousPSXDisplay.Range.x0<<1;
 #ifdef USE_DGA2
-			if (DGA2fix) lPitch+= dga2Fix*2;
+		if (DGA2fix) lPitch+= dga2Fix*2;
 #endif
 
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
+		for (column=0;column<dy;column++)
+		{
+			startxy=((1024)*(column+y))+x;
 
-					pD=(unsigned char *)&psxVuw[startxy];
+			pD=(unsigned char *)&psxVuw[startxy];
 
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
-									((RED(lu)<<7)&0x7c00)|
-									((GREEN(lu)<<2)&0x3e0)|
-										(BLUE(lu)>>3);
-							pD+=3;
-						}
-				}
+			for (row=0;row<dx;row++)
+			{
+				lu=*((unsigned long *)pD);
+				*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
+				  ((RED(lu)<<7)&0x7c00)|
+				  ((GREEN(lu)<<2)&0x3e0)|
+				  (BLUE(lu)>>3);
+				pD+=3;
+			}
 		}
+	}
 	else
+	{
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+
+		unsigned long * DSTPtr =
+		  ((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			unsigned long * DSTPtr =
-				((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
-
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<10)&0x7c007c00)|
-								((lu)&0x3e003e0)|
-								((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
+				*DSTPtr++=
+				  ((lu<<10)&0x7c007c00)|
+				  ((lu)&0x3e003e0)|
+				  ((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 #ifdef USE_DGA2
-					if (DGA2fix) DSTPtr+= dga2Fix/2;
+			if (DGA2fix) DSTPtr+= dga2Fix/2;
 #endif
-				}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -5994,86 +6488,88 @@ void BlitScreen15NSSL(unsigned char * surf,long x,long y)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)surf == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)surf == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
-	if(PSXDisplay.RGB24)
-		{
-			unsigned char * pD;unsigned int startxy;
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
 
-			surf+=PreviousPSXDisplay.Range.x0<<1;
+		surf+=PreviousPSXDisplay.Range.x0<<1;
 #ifdef USE_DGA2
-			if (DGA2fix) lPitch+= dga2Fix*2;
+		if (DGA2fix) lPitch+= dga2Fix*2;
 #endif
 
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
+		for (column=0;column<dy;column++)
+		{
+			startxy=((1024)*(column+y))+x;
 
-					pD=(unsigned char *)&psxVuw[startxy];
-					if(column&1)
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
-									((RED(lu)<<7)&0x7c00)|
-									((GREEN(lu)<<2)&0x3e0)|
-										(BLUE(lu)>>3);
-							pD+=3;
-						}
+			pD=(unsigned char *)&psxVuw[startxy];
+			if (column&1)
+				for (row=0;row<dx;row++)
+				{
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
+					  ((RED(lu)<<7)&0x7c00)|
+					  ((GREEN(lu)<<2)&0x3e0)|
+					  (BLUE(lu)>>3);
+					pD+=3;
 				}
 		}
+	}
 	else
+	{
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+
+		unsigned long * DSTPtr =
+		  ((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-
-			unsigned long * DSTPtr =
-				((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
-
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
+			if (column&1)
+			{
+				for (row=0;row<dx;row++)
 				{
-					if(column&1)
-						{
-							for(row=0;row<dx;row++)
-								{
-									lu=*SRCPtr++;
+					lu=*SRCPtr++;
 
-									*DSTPtr++=
-										((lu<<10)&0x7c007c00)|
-										((lu)&0x3e003e0)|
-										((lu>>10)&0x1f001f);
-								}
-							SRCPtr += LineOffset;
-							DSTPtr += SurfOffset;
-#ifdef USE_DGA2
-							if (DGA2fix) DSTPtr+= dga2Fix/2;
-#endif
-						}
-					else
-						{
-#ifdef USE_DGA2
-							if (DGA2fix) DSTPtr+= dga2Fix/2;
-#endif
-							DSTPtr+=iResX>>1;
-							SRCPtr+=512;
-						}
+					*DSTPtr++=
+					  ((lu<<10)&0x7c007c00)|
+					  ((lu)&0x3e003e0)|
+					  ((lu>>10)&0x1f001f);
 				}
+				SRCPtr += LineOffset;
+				DSTPtr += SurfOffset;
+#ifdef USE_DGA2
+				if (DGA2fix) DSTPtr+= dga2Fix/2;
+#endif
+			}
+			else
+			{
+#ifdef USE_DGA2
+				if (DGA2fix) DSTPtr+= dga2Fix/2;
+#endif
+				DSTPtr+=iResX>>1;
+				SRCPtr+=512;
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6086,59 +6582,60 @@ void BlitScreen16(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MO
 	unsigned short dy=PreviousPSXDisplay.DisplayMode.y;
 	unsigned short LineOffset,SurfOffset;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*((dx+PreviousPSXDisplay.Range.x0)<<1);
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*((dx+PreviousPSXDisplay.Range.x0)<<1);
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
+		unsigned short * DSTPtr =(unsigned short *)surf;
+		DSTPtr+=PreviousPSXDisplay.Range.x0;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned char * pD;unsigned int startxy;
-			unsigned short * DSTPtr =(unsigned short *)surf;
+			startxy=((1024)*(column+y))+x;
+
+			pD=(unsigned char *)&psxVuw[startxy];
+
+			for (row=0;row<dx;row++)
+			{
+				lu=*((unsigned long *)pD);
+				*DSTPtr++=
+				  ((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3);
+				pD+=3;
+			}
 			DSTPtr+=PreviousPSXDisplay.Range.x0;
-
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
-
-					pD=(unsigned char *)&psxVuw[startxy];
-
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*DSTPtr++=
-									((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3);
-							pD+=3;
-						}
-					DSTPtr+=PreviousPSXDisplay.Range.x0;
-				}
 		}
+	}
 	else
+	{
+		unsigned long * SRCPtr,* DSTPtr;
+
+		SurfOffset=PreviousPSXDisplay.Range.x0>>1;
+
+		SRCPtr = (unsigned long *)(psxVuw +
+		                           (y<<10) + x);
+		DSTPtr = ((unsigned long *)surf) + SurfOffset;
+
+		dx>>=1;
+		LineOffset = 512 - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned long * SRCPtr,* DSTPtr;
-
-			SurfOffset=PreviousPSXDisplay.Range.x0>>1;
-
-			SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-			DSTPtr = ((unsigned long *)surf) + SurfOffset;
-
-			dx>>=1;
-			LineOffset = 512 - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-							*DSTPtr++=
-								((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-				}
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
+				*DSTPtr++=
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6155,74 +6652,76 @@ void BlitScreen16NS(unsigned char * surf,long x,long y)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)surf == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)surf == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
-	if(PSXDisplay.RGB24)
-		{
-			unsigned char * pD;unsigned int startxy;
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
 
-			surf+=PreviousPSXDisplay.Range.x0<<1;
+		surf+=PreviousPSXDisplay.Range.x0<<1;
 #ifdef USE_DGA2
-			if (DGA2fix) lPitch+= dga2Fix*2;
+		if (DGA2fix) lPitch+= dga2Fix*2;
 #endif
 
-			for(column=0;column<dy;column++)
-				{
-					startxy=((1024)*(column+y))+x;
+		for (column=0;column<dy;column++)
+		{
+			startxy=((1024)*(column+y))+x;
 
-					pD=(unsigned char *)&psxVuw[startxy];
+			pD=(unsigned char *)&psxVuw[startxy];
 
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
-									((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3);
-							pD+=3;
-						}
-				}
+			for (row=0;row<dx;row++)
+			{
+				lu=*((unsigned long *)pD);
+				*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
+				  ((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3);
+				pD+=3;
+			}
 		}
+	}
 	else
+	{
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+
+		unsigned long * DSTPtr =
+		  ((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+
+#ifdef USE_DGA2
+		dga2Fix/=2;
+#endif
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
+			for (row=0;row<dx;row++)
+			{
+				lu=*SRCPtr++;
 
-			unsigned long * DSTPtr =
-				((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
-
+				*DSTPtr++=
+				  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
+			}
+			SRCPtr += LineOffset;
+			DSTPtr += SurfOffset;
 #ifdef USE_DGA2
-			dga2Fix/=2;
+			if (DGA2fix) DSTPtr+= dga2Fix;
 #endif
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
-				{
-					for(row=0;row<dx;row++)
-						{
-							lu=*SRCPtr++;
-
-							*DSTPtr++=
-								((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
-						}
-					SRCPtr += LineOffset;
-					DSTPtr += SurfOffset;
-#ifdef USE_DGA2
-					if (DGA2fix) DSTPtr+= dga2Fix;
-#endif
-				}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6239,86 +6738,88 @@ void BlitScreen16NSSL(unsigned char * surf,long x,long y)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)surf == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)surf == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
-		{
-			surf+=PreviousPSXDisplay.Range.y0*lPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*lPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
 
-	if(PSXDisplay.RGB24)
-		{
-			unsigned char * pD;unsigned int startxy;
+	if (PSXDisplay.RGB24)
+	{
+		unsigned char * pD;
+		unsigned int startxy;
 
-			surf+=PreviousPSXDisplay.Range.x0<<1;
+		surf+=PreviousPSXDisplay.Range.x0<<1;
 #ifdef USE_DGA2
-			if (DGA2fix) lPitch+= dga2Fix*2;
+		if (DGA2fix) lPitch+= dga2Fix*2;
 #endif
 
-			for(column=0;column<dy;column++)
+		for (column=0;column<dy;column++)
+		{
+			startxy=((1024)*(column+y))+x;
+
+			pD=(unsigned char *)&psxVuw[startxy];
+
+			if (column&1)
+				for (row=0;row<dx;row++)
 				{
-					startxy=((1024)*(column+y))+x;
-
-					pD=(unsigned char *)&psxVuw[startxy];
-
-					if(column&1)
-					for(row=0;row<dx;row++)
-						{
-							lu=*((unsigned long *)pD);
-							*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
-									((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3);
-							pD+=3;
-						}
+					lu=*((unsigned long *)pD);
+					*((unsigned short *)((surf)+(column*lPitch)+(row<<1)))=
+					  ((RED(lu)<<8)&0xf800)|((GREEN(lu)<<3)&0x7e0)|(BLUE(lu)>>3);
+					pD+=3;
 				}
 		}
+	}
 	else
+	{
+		unsigned long * SRCPtr = (unsigned long *)(psxVuw +
+		                         (y<<10) + x);
+
+		unsigned long * DSTPtr =
+		  ((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
+
+#ifdef USE_DGA2
+		dga2Fix/=2;
+#endif
+		dx>>=1;
+
+		LineOffset = 512 - dx;
+		SurfOffset = (lPitch>>2) - dx;
+
+		for (column=0;column<dy;column++)
 		{
-			unsigned long * SRCPtr = (unsigned long *)(psxVuw +
-																													(y<<10) + x);
-
-			unsigned long * DSTPtr =
-				((unsigned long *)surf)+(PreviousPSXDisplay.Range.x0>>1);
-
-#ifdef USE_DGA2
-			dga2Fix/=2;
-#endif
-			dx>>=1;
-
-			LineOffset = 512 - dx;
-			SurfOffset = (lPitch>>2) - dx;
-
-			for(column=0;column<dy;column++)
+			if (column&1)
+			{
+				for (row=0;row<dx;row++)
 				{
-					if(column&1)
-						{
-							for(row=0;row<dx;row++)
-								{
-									lu=*SRCPtr++;
+					lu=*SRCPtr++;
 
-									*DSTPtr++=
-										((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
-								}
-							DSTPtr += SurfOffset;
-							SRCPtr += LineOffset;
-#ifdef USE_DGA2
-							if (DGA2fix) DSTPtr+= dga2Fix;
-#endif
-						}
-					else
-						{
-							DSTPtr+=iResX>>1;
-							SRCPtr+=512;
-#ifdef USE_DGA2
-							if (DGA2fix) DSTPtr+= dga2Fix;
-#endif
-						}
+					*DSTPtr++=
+					  ((lu<<11)&0xf800f800)|((lu<<1)&0x7c007c0)|((lu>>10)&0x1f001f);
 				}
+				DSTPtr += SurfOffset;
+				SRCPtr += LineOffset;
+#ifdef USE_DGA2
+				if (DGA2fix) DSTPtr+= dga2Fix;
+#endif
+			}
+			else
+			{
+				DSTPtr+=iResX>>1;
+				SRCPtr+=512;
+#ifdef USE_DGA2
+				if (DGA2fix) DSTPtr+= dga2Fix;
+#endif
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6336,68 +6837,70 @@ void XStretchBlt16(unsigned char * pBB,int sdx,int sdy,int ddx,int ddy)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)pBB == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)pBB == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
 	// 2xsai stretching
-if(iUseNoStretchBlt>=2)
-{
-	//p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				if(p2XSaIFunc==hq2x_16 )
-	p2XSaIFunc(pBackBuffer,sdx<<2,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				else if(p2XSaIFunc==hq3x_16)
-	p2XSaIFunc(pBackBuffer,sdx*6,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				else
-	p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				pSrc=(unsigned short *)pSaIBigBuff;
-				//sdx+=sdx;sdy+=sdy;
-			if(iUseNoStretchBlt>=12)
-			{
-	sdx= sdx*3;
-	sdy=sdy*3;
-			}
-			else
-	sdx+=sdx;sdy+=sdy;
-}
+	if (iUseNoStretchBlt>=2)
+	{
+		//p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		if (p2XSaIFunc==hq2x_16 )
+			p2XSaIFunc(pBackBuffer,sdx<<2,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		else if (p2XSaIFunc==hq3x_16)
+			p2XSaIFunc(pBackBuffer,sdx*6,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		else
+			p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		pSrc=(unsigned short *)pSaIBigBuff;
+		//sdx+=sdx;sdy+=sdy;
+		if (iUseNoStretchBlt>=12)
+		{
+			sdx= sdx*3;
+			sdy=sdy*3;
+		}
+		else
+			sdx+=sdx;
+		sdy+=sdy;
+	}
 
 	xinc = (sdx << 16) / ddx;
 
 	ypos=0;
 	yinc = (sdy << 16) / ddy;
 
-	for(y=0;y<ddy;y++,ypos+=yinc)
-		{
-			cy=(ypos>>16);
+	for (y=0;y<ddy;y++,ypos+=yinc)
+	{
+		cy=(ypos>>16);
 
-			if(cy==cyo)
-				{
+		if (cy==cyo)
+		{
 #ifndef USE_DGA2
-					pDstR=(unsigned long *)(pDst-ddx);
+			pDstR=(unsigned long *)(pDst-ddx);
 #else
-					pDstR=(unsigned long *)(pDst-(ddx+dga2Fix));
+			pDstR=(unsigned long *)(pDst-(ddx+dga2Fix));
 #endif
-					for(x=0;x<ddx2;x++) *((unsigned long*)pDst)++=*pDstR++;
-				}
-			else
-				{
-					cyo=cy;
-					pSrcR=pSrc+(cy*sdx);
-					xpos = 0;
-					for(x=ddx;x>0;--x)
-						{
-				pSrcR+= xpos>>16;
-							xpos -= xpos&0xffff0000;
-							*pDst++=*pSrcR;
-							xpos += xinc;
-						}
-				}
-#ifdef USE_DGA2
-			if (DGA2fix) pDst+= dga2Fix;
-#endif
+			for (x=0;x<ddx2;x++) *((unsigned long*)pDst)++=*pDstR++;
 		}
+		else
+		{
+			cyo=cy;
+			pSrcR=pSrc+(cy*sdx);
+			xpos = 0;
+			for (x=ddx;x>0;--x)
+			{
+				pSrcR+= xpos>>16;
+				xpos -= xpos&0xffff0000;
+				*pDst++=*pSrcR;
+				xpos += xinc;
+			}
+		}
+#ifdef USE_DGA2
+		if (DGA2fix) pDst+= dga2Fix;
+#endif
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6412,32 +6915,33 @@ void XStretchBlt16NS(unsigned char * pBB,int sdx,int sdy,int ddx,int ddy)
 	unsigned short * pSrc,* pDst=(unsigned short *)pBB;
 
 	int iX,iY,iDX,iDY,x,y,iOffS,iOffD,iS;
-if(iUseNoStretchBlt>=12 && sdx < 341)
-{
-if(p2XSaIFunc==hq2x_16)
-		p2XSaIFunc=hq3x_16;
-if(p2XSaIFunc==Scale2x_ex6_5)
-		p2XSaIFunc=Scale3x_ex6_5;
-	iDX2=PreviousPSXDisplay.DisplayMode.x*3;
-	iDY2=PreviousPSXDisplay.DisplayMode.y*3;
-}
-else
-{
-	iDX2=PreviousPSXDisplay.DisplayMode.x<<1;
-	iDY2=PreviousPSXDisplay.DisplayMode.y<<1;
-if(p2XSaIFunc==hq3x_16)
-		p2XSaIFunc=hq2x_16;
-if(p2XSaIFunc==Scale3x_ex6_5)
-		p2XSaIFunc=Scale2x_ex6_5;
-}
+	if (iUseNoStretchBlt>=12 && sdx < 341)
+	{
+		if (p2XSaIFunc==hq2x_16)
+			p2XSaIFunc=hq3x_16;
+		if (p2XSaIFunc==Scale2x_ex6_5)
+			p2XSaIFunc=Scale3x_ex6_5;
+		iDX2=PreviousPSXDisplay.DisplayMode.x*3;
+		iDY2=PreviousPSXDisplay.DisplayMode.y*3;
+	}
+	else
+	{
+		iDX2=PreviousPSXDisplay.DisplayMode.x<<1;
+		iDY2=PreviousPSXDisplay.DisplayMode.y<<1;
+		if (p2XSaIFunc==hq3x_16)
+			p2XSaIFunc=hq2x_16;
+		if (p2XSaIFunc==Scale3x_ex6_5)
+			p2XSaIFunc=Scale2x_ex6_5;
+	}
 #ifdef USE_DGA2
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)pBB == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)pBB == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
 	iX=iResX-iDX2;
@@ -6446,41 +6950,67 @@ if(p2XSaIFunc==Scale3x_ex6_5)
 	iOffS=0;
 	iOffD=0;
 
-	if(iX<0) {iOffS=iDX2-iResX;iX=0;   iDX=iResX;}
-	else     {iOffD=iX;        iX=iX/2;iDX=iDX2;}
+	if (iX<0)
+	{
+		iOffS=iDX2-iResX;
+		iX=0;
+		iDX=iResX;
+	}
+	else
+	{
+		iOffD=iX;
+		iX=iX/2;
+		iDX=iDX2;
+	}
 
-	if(iY<0) {iY=0;iDY=iResY;}
-	else     {iY=iY/2;iDY=iDY2;}
+	if (iY<0)
+	{
+		iY=0;
+		iDY=iResY;
+	}
+	else
+	{
+		iY=iY/2;
+		iDY=iDY2;
+	}
 
-	if(iOldDX!=iDX || iOldDY!=iDY)
-		{
-			memset(Xpixels,0,iResY*iResX*2);
-			iOldDX=iDX;iOldDY=iDY;
-		}
+	if (iOldDX!=iDX || iOldDY!=iDY)
+	{
+		memset(Xpixels,0,iResY*iResX*2);
+		iOldDX=iDX;
+		iOldDY=iDY;
+	}
 
 	p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				if(p2XSaIFunc==hq2x_16 )
-	p2XSaIFunc(pBackBuffer,sdx<<2,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				else if(p2XSaIFunc==hq3x_16)
-	p2XSaIFunc(pBackBuffer,sdx*6,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				else
+	if (p2XSaIFunc==hq2x_16 )
+		p2XSaIFunc(pBackBuffer,sdx<<2,(unsigned char *)pSaIBigBuff,sdx,sdy);
+	else if (p2XSaIFunc==hq3x_16)
+		p2XSaIFunc(pBackBuffer,sdx*6,(unsigned char *)pSaIBigBuff,sdx,sdy);
+	else
 		p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
 	pSrc=(unsigned short *)pSaIBigBuff;
 
-	if(iUseScanLines) {iS=2;iOffD+=iResX;iOffS+=iDX2;} else iS=1;
+	if (iUseScanLines)
+	{
+		iS=2;
+		iOffD+=iResX;
+		iOffS+=iDX2;
+	}
+	else iS=1;
 	pDst+=iX+iY*iResX;
 
-	for(y=0;y<iDY;y+=iS)
+	for (y=0;y<iDY;y+=iS)
+	{
+		for (x=0;x<iDX;x++)
 		{
-			for(x=0;x<iDX;x++)
-				{
-					*pDst++=*pSrc++;
-				}
-#ifdef USE_DGA2
-			if (DGA2fix) pDst+= dga2Fix;
-#endif
-			pDst+=iOffD;pSrc+=iOffS;
+			*pDst++=*pSrc++;
 		}
+#ifdef USE_DGA2
+		if (DGA2fix) pDst+= dga2Fix;
+#endif
+		pDst+=iOffD;
+		pSrc+=iOffS;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6497,55 +7027,57 @@ void XStretchBlt16SL(unsigned char * pBB,int sdx,int sdy,int ddx,int ddy)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)pBB == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)pBB == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
 	// 2xsai stretching
 
-	if(iUseNoStretchBlt>=2)
+	if (iUseNoStretchBlt>=2)
+	{
+		if (p2XSaIFunc==hq2x_16 )
+			p2XSaIFunc(pBackBuffer,sdx<<2,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		else if (p2XSaIFunc==hq3x_16)
+			p2XSaIFunc(pBackBuffer,sdx*6,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		else
+			p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
+		pSrc=(unsigned short *)pSaIBigBuff;
+		//sdx+=sdx;sdy+=sdy;
+		if (iUseNoStretchBlt>=12)
 		{
-				if(p2XSaIFunc==hq2x_16 )
-	p2XSaIFunc(pBackBuffer,sdx<<2,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				else if(p2XSaIFunc==hq3x_16)
-	p2XSaIFunc(pBackBuffer,sdx*6,(unsigned char *)pSaIBigBuff,sdx,sdy);
-				else
-		p2XSaIFunc(pBackBuffer,sdx<<1,(unsigned char *)pSaIBigBuff,sdx,sdy);
-			pSrc=(unsigned short *)pSaIBigBuff;
-			//sdx+=sdx;sdy+=sdy;
-			if(iUseNoStretchBlt>=12)
-			{
-	sdx= sdx*3;
-	sdy=sdy*3;
-			}
-			else
-	sdx+=sdx;sdy+=sdy;
+			sdx= sdx*3;
+			sdy=sdy*3;
 		}
+		else
+			sdx+=sdx;
+		sdy+=sdy;
+	}
 
 	xinc = (sdx << 16) / ddx;
 
 	ypos=0;
 	yinc = ((sdy << 16) / ddy)<<1;
 
-	for(y=0;y<ddy;y+=2,ypos+=yinc)
+	for (y=0;y<ddy;y+=2,ypos+=yinc)
+	{
+		cy=(ypos>>16);
+		pSrcR=pSrc+(cy*sdx);
+		xpos = 0;
+		for (x=ddx;x>0;--x)
 		{
-			cy=(ypos>>16);
-			pSrcR=pSrc+(cy*sdx);
-			xpos = 0;
-			for(x=ddx;x>0;--x)
-				{
-					pSrcR+= xpos>>16;
-					xpos -= xpos&0xffff0000;
-					*pDst++=*pSrcR;
-					xpos += xinc;
-				}
-#ifdef USE_DGA2
-			if (DGA2fix) pDst+= dga2Fix*2;
-#endif
-			pDst+=iResX;
+			pSrcR+= xpos>>16;
+			xpos -= xpos&0xffff0000;
+			*pDst++=*pSrcR;
+			xpos += xinc;
 		}
+#ifdef USE_DGA2
+		if (DGA2fix) pDst+= dga2Fix*2;
+#endif
+		pDst+=iResX;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6563,78 +7095,81 @@ void XStretchBlt32(unsigned char * pBB,int sdx,int sdy,int ddx,int ddy)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)pBB == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-			dga2Fix/=2;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)pBB == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+		dga2Fix/=2;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
 	//!P!
 	// 2xsai stretching
-	if(iUseNoStretchBlt>=2)
+	if (iUseNoStretchBlt>=2)
+	{
+
+		if ( p2XSaIFunc==hq3x_32)
+			p2XSaIFunc(pBackBuffer,sdx*12,
+			           (unsigned char *)pSaIBigBuff,
+			           sdx,sdy);
+		else if (p2XSaIFunc==hq2x_32)
+			p2XSaIFunc(pBackBuffer,sdx<<3,
+			           (unsigned char *)pSaIBigBuff,
+			           sdx,sdy);
+		else
+			p2XSaIFunc(pBackBuffer,sdx<<2,
+			           (unsigned char *)pSaIBigBuff,
+			           sdx,sdy);
+
+
+		pSrc=(unsigned long *)pSaIBigBuff;
+		//sdx+=sdx;sdy+=sdy;
+		if (iUseNoStretchBlt>=12)
 		{
-
-if( p2XSaIFunc==hq3x_32)
-	p2XSaIFunc(pBackBuffer,sdx*12,
-											(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-else if(p2XSaIFunc==hq2x_32)
-	p2XSaIFunc(pBackBuffer,sdx<<3,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-else
-	p2XSaIFunc(pBackBuffer,sdx<<2,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-
-
-			pSrc=(unsigned long *)pSaIBigBuff;
+			sdx= sdx*3;
+			sdy=sdy*3;
 			//sdx+=sdx;sdy+=sdy;
-			if(iUseNoStretchBlt>=12)
-			{
-	sdx= sdx*3;sdy=sdy*3;
-	//sdx+=sdx;sdy+=sdy;
-			}
-			else
-	sdx+=sdx;sdy+=sdy;
 		}
+		else
+			sdx+=sdx;
+		sdy+=sdy;
+	}
 
 	xinc = (sdx << 16) / ddx;
 
 	ypos=0;
 	yinc = (sdy << 16) / ddy;
 
-	for(y=0;y<ddy;y++,ypos+=yinc)
-		{
-			cy=(ypos>>16);
+	for (y=0;y<ddy;y++,ypos+=yinc)
+	{
+		cy=(ypos>>16);
 
-			if(cy==cyo)
-				{
+		if (cy==cyo)
+		{
 #ifndef USE_DGA2
-					pDstR=pDst-ddx;
+			pDstR=pDst-ddx;
 #else
-					pDstR=pDst-(ddx+dga2Fix);
+			pDstR=pDst-(ddx+dga2Fix);
 #endif
-					for(x=0;x<ddx;x++) *pDst++=*pDstR++;
-				}
-			else
-				{
-					cyo=cy;
-					pSrcR=pSrc+(cy*sdx);
-					xpos = 0L;
-					for(x=ddx;x>0;--x)
-						{
-							pSrcR+= xpos>>16;
-							xpos -= xpos&0xffff0000;
-							*pDst++=*pSrcR;
-							xpos += xinc;
-						}
-				}
-#ifdef USE_DGA2
-			if (DGA2fix) pDst+= dga2Fix;
-#endif
+			for (x=0;x<ddx;x++) *pDst++=*pDstR++;
 		}
+		else
+		{
+			cyo=cy;
+			pSrcR=pSrc+(cy*sdx);
+			xpos = 0L;
+			for (x=ddx;x>0;--x)
+			{
+				pSrcR+= xpos>>16;
+				xpos -= xpos&0xffff0000;
+				*pDst++=*pSrcR;
+				xpos += xinc;
+			}
+		}
+#ifdef USE_DGA2
+		if (DGA2fix) pDst+= dga2Fix;
+#endif
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6651,33 +7186,34 @@ void XStretchBlt32NS(unsigned char * pBB,int sdx,int sdy,int ddx,int ddy)
 	int iX,iY,iDX,iDY,x,y,iOffS,iOffD,iS;
 	int iDX2;
 	int iDY2;
-if(iUseNoStretchBlt>=12 && sdx < 341)
-{
-if(p2XSaIFunc==hq2x_32)
-		p2XSaIFunc=hq3x_32;
-		if(p2XSaIFunc==Scale2x_ex8)
-		p2XSaIFunc=Scale3x_ex8;
-	iDX2=PreviousPSXDisplay.DisplayMode.x*3;
-	iDY2=PreviousPSXDisplay.DisplayMode.y*3;
-}
-else
-{
-	iDX2=PreviousPSXDisplay.DisplayMode.x<<1;
-	iDY2=PreviousPSXDisplay.DisplayMode.y<<1;
-if(p2XSaIFunc==hq3x_32)
-		p2XSaIFunc=hq2x_32;
-				if(p2XSaIFunc==Scale3x_ex8)
-		p2XSaIFunc=Scale2x_ex8;
-}
+	if (iUseNoStretchBlt>=12 && sdx < 341)
+	{
+		if (p2XSaIFunc==hq2x_32)
+			p2XSaIFunc=hq3x_32;
+		if (p2XSaIFunc==Scale2x_ex8)
+			p2XSaIFunc=Scale3x_ex8;
+		iDX2=PreviousPSXDisplay.DisplayMode.x*3;
+		iDY2=PreviousPSXDisplay.DisplayMode.y*3;
+	}
+	else
+	{
+		iDX2=PreviousPSXDisplay.DisplayMode.x<<1;
+		iDY2=PreviousPSXDisplay.DisplayMode.y<<1;
+		if (p2XSaIFunc==hq3x_32)
+			p2XSaIFunc=hq2x_32;
+		if (p2XSaIFunc==Scale3x_ex8)
+			p2XSaIFunc=Scale2x_ex8;
+	}
 #ifdef USE_DGA2
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)pBB == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-			dga2Fix/=2;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)pBB == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+		dga2Fix/=2;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
 	iX=iResX-iDX2;
@@ -6686,46 +7222,72 @@ if(p2XSaIFunc==hq3x_32)
 	iOffS=0;
 	iOffD=0;
 
-	if(iX<0) {iOffS=iDX2-iResX;iX=0;   iDX=iResX;}
-	else     {iOffD=iX;        iX=iX/2;iDX=iDX2;}
+	if (iX<0)
+	{
+		iOffS=iDX2-iResX;
+		iX=0;
+		iDX=iResX;
+	}
+	else
+	{
+		iOffD=iX;
+		iX=iX/2;
+		iDX=iDX2;
+	}
 
-	if(iY<0) {iY=0;iDY=iResY;}
-	else     {iY=iY/2;iDY=iDY2;}
+	if (iY<0)
+	{
+		iY=0;
+		iDY=iResY;
+	}
+	else
+	{
+		iY=iY/2;
+		iDY=iDY2;
+	}
 
-	if(iOldDX!=iDX || iOldDY!=iDY)
-		{
-			memset(Xpixels,0,iResY*iResX*4);
-			iOldDX=iDX;iOldDY=iDY;
-		}
+	if (iOldDX!=iDX || iOldDY!=iDY)
+	{
+		memset(Xpixels,0,iResY*iResX*4);
+		iOldDX=iDX;
+		iOldDY=iDY;
+	}
 
-if( p2XSaIFunc==hq3x_32)
-	p2XSaIFunc(pBackBuffer,sdx*12,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-else if(p2XSaIFunc==hq2x_32)
-	p2XSaIFunc(pBackBuffer,sdx<<3,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-else
-	p2XSaIFunc(pBackBuffer,sdx<<2,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
+	if ( p2XSaIFunc==hq3x_32)
+		p2XSaIFunc(pBackBuffer,sdx*12,
+		           (unsigned char *)pSaIBigBuff,
+		           sdx,sdy);
+	else if (p2XSaIFunc==hq2x_32)
+		p2XSaIFunc(pBackBuffer,sdx<<3,
+		           (unsigned char *)pSaIBigBuff,
+		           sdx,sdy);
+	else
+		p2XSaIFunc(pBackBuffer,sdx<<2,
+		           (unsigned char *)pSaIBigBuff,
+		           sdx,sdy);
 	pSrc=(unsigned long *)pSaIBigBuff;
 
-	if(iUseScanLines) {iS=2;iOffD+=iResX;iOffS+=iDX2;} else iS=1;
+	if (iUseScanLines)
+	{
+		iS=2;
+		iOffD+=iResX;
+		iOffS+=iDX2;
+	}
+	else iS=1;
 	pDst+=iX+iY*iResX;
 
-	for(y=0;y<iDY;y+=iS)
+	for (y=0;y<iDY;y+=iS)
+	{
+		for (x=0;x<iDX;x++)
 		{
-			for(x=0;x<iDX;x++)
-				{
-					*pDst++=*pSrc++;
-				}
-#ifdef USE_DGA2
-			if (DGA2fix) pDst+= dga2Fix;
-#endif
-			pDst+=iOffD;pSrc+=iOffS;
+			*pDst++=*pSrc++;
 		}
+#ifdef USE_DGA2
+		if (DGA2fix) pDst+= dga2Fix;
+#endif
+		pDst+=iOffD;
+		pSrc+=iOffS;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6742,60 +7304,62 @@ void XStretchBlt32SL(unsigned char * pBB,int sdx,int sdy,int ddx,int ddy)
 	int DGA2fix;
 	int dga2Fix;
 	if (!iWindowMode)
-		{
-			DGA2fix = (char*)pBB == Xpixels;
-			dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
-		} else DGA2fix = dga2Fix = 0;
+	{
+		DGA2fix = (char*)pBB == Xpixels;
+		dga2Fix = dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth;
+	}
+	else DGA2fix = dga2Fix = 0;
 #endif
 
 	// 2xsai stretching
-	if(iUseNoStretchBlt>=2)
-		{
-if( p2XSaIFunc==hq3x_32)
-	p2XSaIFunc(pBackBuffer,sdx*12,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-else if(p2XSaIFunc==hq2x_32)
-	p2XSaIFunc(pBackBuffer,sdx<<3,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-else
-	p2XSaIFunc(pBackBuffer,sdx<<2,
-												(unsigned char *)pSaIBigBuff,
-												sdx,sdy);
-			pSrc=(unsigned long *)pSaIBigBuff;
+	if (iUseNoStretchBlt>=2)
+	{
+		if ( p2XSaIFunc==hq3x_32)
+			p2XSaIFunc(pBackBuffer,sdx*12,
+			           (unsigned char *)pSaIBigBuff,
+			           sdx,sdy);
+		else if (p2XSaIFunc==hq2x_32)
+			p2XSaIFunc(pBackBuffer,sdx<<3,
+			           (unsigned char *)pSaIBigBuff,
+			           sdx,sdy);
+		else
+			p2XSaIFunc(pBackBuffer,sdx<<2,
+			           (unsigned char *)pSaIBigBuff,
+			           sdx,sdy);
+		pSrc=(unsigned long *)pSaIBigBuff;
 //   sdx+=sdx;sdy+=sdy;
-			if(iUseNoStretchBlt>=12)
-			{
-	sdx= sdx*3;
-	sdy=sdy*3;
-			}
-			else
-	sdx+=sdx;sdy+=sdy;
+		if (iUseNoStretchBlt>=12)
+		{
+			sdx= sdx*3;
+			sdy=sdy*3;
 		}
+		else
+			sdx+=sdx;
+		sdy+=sdy;
+	}
 
 	xinc = (sdx << 16) / ddx;
 
 	ypos=0;
 	yinc = ((sdy << 16) / ddy)<<1;
 
-	for(y=0;y<ddy;y+=2,ypos+=yinc)
+	for (y=0;y<ddy;y+=2,ypos+=yinc)
+	{
+		cy=(ypos>>16);
+		pSrcR=pSrc+(cy*sdx);
+		xpos = 0;
+		for (x=ddx;x>0;--x)
 		{
-			cy=(ypos>>16);
-			pSrcR=pSrc+(cy*sdx);
-			xpos = 0;
-			for(x=ddx;x>0;--x)
-				{
-					pSrcR+= xpos>>16;
-					xpos -= xpos&0xffff0000;
-					*pDst++=*pSrcR;
-					xpos += xinc;
-				}
-#ifdef USE_DGA2
-			if (DGA2fix) pDst+= dga2Fix;
-#endif
-			pDst+=iResX;
+			pSrcR+= xpos>>16;
+			xpos -= xpos&0xffff0000;
+			*pDst++=*pSrcR;
+			xpos += xinc;
 		}
+#ifdef USE_DGA2
+		if (DGA2fix) pDst+= dga2Fix;
+#endif
+		pDst+=iResX;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -6806,12 +7370,12 @@ void XDGABlit(unsigned char *pSrc, int sw, int sh, int dx, int dy)
 	unsigned char *pDst;
 	int bytesPerPixel = dgaDev->mode.bitsPerPixel / 8;
 
-	for(;dy<sh;dy++)
-		{
-			pDst = dgaDev->data + dgaDev->mode.imageWidth * dy * bytesPerPixel + dx * bytesPerPixel;
-			memcpy(pDst, pSrc, sw * bytesPerPixel);
-			pSrc+= sw * bytesPerPixel;
-		}
+	for (;dy<sh;dy++)
+	{
+		pDst = dgaDev->data + dgaDev->mode.imageWidth * dy * bytesPerPixel + dx * bytesPerPixel;
+		memcpy(pDst, pSrc, sw * bytesPerPixel);
+		pSrc+= sw * bytesPerPixel;
+	}
 }
 
 #endif
@@ -6827,63 +7391,87 @@ void ShowGunCursor(unsigned char * surf,int iPitch)
 	unsigned short dy=(unsigned short)PreviousPSXDisplay.DisplayMode.y;
 	int x,y,iPlayer,sx,ex,sy,ey;
 
-	if(iColDepth==32) iPitch=iPitch<<2;
+	if (iColDepth==32) iPitch=iPitch<<2;
 	else              iPitch=iPitch<<1;
 
-	if(PreviousPSXDisplay.Range.y0)                       // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	{
+		surf+=PreviousPSXDisplay.Range.y0*iPitch;
+		dy-=PreviousPSXDisplay.Range.y0;
+	}
+
+	if (iColDepth==32)                                    // 32 bit color depth
+	{
+		const unsigned long crCursorColor32[8]={0xffff0000,0xff00ff00,0xff0000ff,0xffff00ff,0xffffff00,0xff00ffff,0xffffffff,0xff7f7f7f};
+
+		surf+=PreviousPSXDisplay.Range.x0<<2;               // -> add x left border
+
+		for (iPlayer=0;iPlayer<8;iPlayer++)                 // -> loop all possible players
 		{
-			surf+=PreviousPSXDisplay.Range.y0*iPitch;
-			dy-=PreviousPSXDisplay.Range.y0;
-		}
-
-	if(iColDepth==32)                                     // 32 bit color depth
-		{
-			const unsigned long crCursorColor32[8]={0xffff0000,0xff00ff00,0xff0000ff,0xffff00ff,0xffffff00,0xff00ffff,0xffffffff,0xff7f7f7f};
-
-			surf+=PreviousPSXDisplay.Range.x0<<2;               // -> add x left border
-
-			for(iPlayer=0;iPlayer<8;iPlayer++)                  // -> loop all possible players
+			if (usCursorActive&(1<<iPlayer))                  // -> player active?
+			{
+				const int ty=(ptCursorPoint[iPlayer].y*dy)/256;  // -> calculate the cursor pos in the current display
+				const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
+				sx=tx-5;
+				if (sx<0)
 				{
-					if(usCursorActive&(1<<iPlayer))                   // -> player active?
-						{
-							const int ty=(ptCursorPoint[iPlayer].y*dy)/256;  // -> calculate the cursor pos in the current display
-							const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
-							sx=tx-5;if(sx<0) {if(sx&1) sx=1; else sx=0;}
-							sy=ty-5;if(sy<0) {if(sy&1) sy=1; else sy=0;}
-							ex=tx+6;if(ex>dx) ex=dx;
-							ey=ty+6;if(ey>dy) ey=dy;
-
-							for(x=tx,y=sy;y<ey;y+=2)                        // -> do dotted y line
-								*((unsigned long *)((surf)+(y*iPitch)+x*4))=crCursorColor32[iPlayer];
-							for(y=ty,x=sx;x<ex;x+=2)                        // -> do dotted x line
-								*((unsigned long *)((surf)+(y*iPitch)+x*4))=crCursorColor32[iPlayer];
-						}
+					if (sx&1) sx=1;
+					else sx=0;
 				}
+				sy=ty-5;
+				if (sy<0)
+				{
+					if (sy&1) sy=1;
+					else sy=0;
+				}
+				ex=tx+6;
+				if (ex>dx) ex=dx;
+				ey=ty+6;
+				if (ey>dy) ey=dy;
+
+				for (x=tx,y=sy;y<ey;y+=2)                       // -> do dotted y line
+					*((unsigned long *)((surf)+(y*iPitch)+x*4))=crCursorColor32[iPlayer];
+				for (y=ty,x=sx;x<ex;x+=2)                       // -> do dotted x line
+					*((unsigned long *)((surf)+(y*iPitch)+x*4))=crCursorColor32[iPlayer];
+			}
 		}
+	}
 	else                                                  // 16 bit color depth
+	{
+		const unsigned short crCursorColor16[8]={0xf800,0x07c0,0x001f,0xf81f,0xffc0,0x07ff,0xffff,0x7bdf};
+
+		surf+=PreviousPSXDisplay.Range.x0<<1;               // -> same stuff as above
+
+		for (iPlayer=0;iPlayer<8;iPlayer++)
 		{
-			const unsigned short crCursorColor16[8]={0xf800,0x07c0,0x001f,0xf81f,0xffc0,0x07ff,0xffff,0x7bdf};
-
-			surf+=PreviousPSXDisplay.Range.x0<<1;               // -> same stuff as above
-
-			for(iPlayer=0;iPlayer<8;iPlayer++)
+			if (usCursorActive&(1<<iPlayer))
+			{
+				const int ty=(ptCursorPoint[iPlayer].y*dy)/256;
+				const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
+				sx=tx-5;
+				if (sx<0)
 				{
-					if(usCursorActive&(1<<iPlayer))
-						{
-							const int ty=(ptCursorPoint[iPlayer].y*dy)/256;
-							const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
-							sx=tx-5;if(sx<0) {if(sx&1) sx=1; else sx=0;}
-							sy=ty-5;if(sy<0) {if(sy&1) sy=1; else sy=0;}
-							ex=tx+6;if(ex>dx) ex=dx;
-							ey=ty+6;if(ey>dy) ey=dy;
-
-							for(x=tx,y=sy;y<ey;y+=2)
-								*((unsigned short *)((surf)+(y*iPitch)+x*2))=crCursorColor16[iPlayer];
-							for(y=ty,x=sx;x<ex;x+=2)
-								*((unsigned short *)((surf)+(y*iPitch)+x*2))=crCursorColor16[iPlayer];
-						}
+					if (sx&1) sx=1;
+					else sx=0;
 				}
+				sy=ty-5;
+				if (sy<0)
+				{
+					if (sy&1) sy=1;
+					else sy=0;
+				}
+				ex=tx+6;
+				if (ex>dx) ex=dx;
+				ey=ty+6;
+				if (ey>dy) ey=dy;
+
+				for (x=tx,y=sy;y<ey;y+=2)
+					*((unsigned short *)((surf)+(y*iPitch)+x*2))=crCursorColor16[iPlayer];
+				for (y=ty,x=sx;x<ex;x+=2)
+					*((unsigned short *)((surf)+(y*iPitch)+x*2))=crCursorColor16[iPlayer];
+			}
 		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -6900,51 +7488,62 @@ void NoStretchSwap(void)
 	int iX=iResX-(PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0);
 	int iY=iResY-PreviousPSXDisplay.DisplayMode.y;
 
-	if(iX<0)
-		{
-			iX=0;iDX=iResX;
-			iODX=PreviousPSXDisplay.Range.x1;
-			PreviousPSXDisplay.Range.x1=iResX-PreviousPSXDisplay.Range.x0;
-		}
-	else {iX=iX/2;iDX=PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0;}
+	if (iX<0)
+	{
+		iX=0;
+		iDX=iResX;
+		iODX=PreviousPSXDisplay.Range.x1;
+		PreviousPSXDisplay.Range.x1=iResX-PreviousPSXDisplay.Range.x0;
+	}
+	else
+	{
+		iX=iX/2;
+		iDX=PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0;
+	}
 
-	if(iY<0)
-		{
-			iY=0;iDY=iResY;
-			iODY=PreviousPSXDisplay.DisplayMode.y;
-			PreviousPSXDisplay.DisplayMode.y=iResY;
-		}
-	else {iY=iY/2;iDY=PreviousPSXDisplay.DisplayMode.y;}
+	if (iY<0)
+	{
+		iY=0;
+		iDY=iResY;
+		iODY=PreviousPSXDisplay.DisplayMode.y;
+		PreviousPSXDisplay.DisplayMode.y=iResY;
+	}
+	else
+	{
+		iY=iY/2;
+		iDY=PreviousPSXDisplay.DisplayMode.y;
+	}
 
-	if(iOldDX!=iDX || iOldDY!=iDY)
-		{
+	if (iOldDX!=iDX || iOldDY!=iDY)
+	{
 #ifndef _SDL2
-			memset(Xpixels,0,iResY*iResX*4);
+		memset(Xpixels,0,iResY*iResX*4);
 #endif
 #ifndef _SDL
 #ifdef USE_DGA2
-			if(iWindowMode)
+		if (iWindowMode)
 #endif
 			XPutImage(display,window,hGC, XCimage,
-													0, 0, 0, 0, iResX,iResY);
+			          0, 0, 0, 0, iResX,iResY);
 #else
-	rectdst.x=iX;
-	rectdst.y=iY;
-	rectdst.w=iDX;
-	rectdst.h=iDY;
+		rectdst.x=iX;
+		rectdst.y=iY;
+		rectdst.w=iDX;
+		rectdst.h=iDY;
 //   SDL_BlitSurface(XCimage,NULL,display,NULL);
 
-			SDL_FillRect(display,NULL,0);
+		SDL_FillRect(display,NULL,0);
 #endif
 
-			iOldDX=iDX;iOldDY=iDY;
-		}
+		iOldDX=iDX;
+		iOldDY=iDY;
+	}
 #ifndef _SDL2
 	BlitScreenNS((unsigned char *)Xpixels,
-														PSXDisplay.DisplayPosition.x,
-														PSXDisplay.DisplayPosition.y);
+	             PSXDisplay.DisplayPosition.x,
+	             PSXDisplay.DisplayPosition.y);
 
-	if(usCursorActive) ShowGunCursor((unsigned char *)Xpixels,iResX);
+	if (usCursorActive) ShowGunCursor((unsigned char *)Xpixels,iResX);
 
 
 
@@ -6952,7 +7551,7 @@ void NoStretchSwap(void)
 	rectsrc.x=PSXDisplay.DisplayPosition.x;
 	rectsrc.y=PSXDisplay.DisplayPosition.y;
 	rectsrc.h=PreviousPSXDisplay.DisplayMode.y;
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
 	{
 
 		rectsrc.w=PreviousPSXDisplay.Range.x1/*2/3*/;
@@ -6965,15 +7564,15 @@ void NoStretchSwap(void)
 		SDL_BlitSurface(Ximage16,&rectsrc,display,&rectdst);
 	}
 #endif
-	if(iODX) PreviousPSXDisplay.Range.x1=iODX;
-	if(iODY) PreviousPSXDisplay.DisplayMode.y=iODY;
+	if (iODX) PreviousPSXDisplay.Range.x1=iODX;
+	if (iODY) PreviousPSXDisplay.DisplayMode.y=iODY;
 
 #ifndef _SDL
 #ifdef USE_DGA2
-	if(iWindowMode)
+	if (iWindowMode)
 #endif
-	XPutImage(display,window,hGC, Ximage,
-											0, 0, iX, iY, iDX,iDY);
+		XPutImage(display,window,hGC, Ximage,
+		          0, 0, iX, iY, iDX,iDY);
 #else
 
 #ifndef _SDL2
@@ -6982,39 +7581,39 @@ void NoStretchSwap(void)
 
 #endif
 
-	if(ulKeybits&KEY_SHOWFPS) //DisplayText();               // paint menu text
+	if (ulKeybits&KEY_SHOWFPS) //DisplayText();               // paint menu text
+	{
+		if (szDebugText[0] && ((time(NULL) - tStart) < 2))
 		{
-			if(szDebugText[0] && ((time(NULL) - tStart) < 2))
-				{
-					strcpy(szDispBuf,szDebugText);
-				}
-			else
-				{
-					szDebugText[0]=0;
-					strcat(szDispBuf,szMenuBuf);
-				}
+			strcpy(szDispBuf,szDebugText);
+		}
+		else
+		{
+			szDebugText[0]=0;
+			strcat(szDispBuf,szMenuBuf);
+		}
 #ifndef _SDL
 #ifdef USE_DGA2
-			if(iWindowMode)
-				{
+		if (iWindowMode)
+		{
 #endif
 			XPutImage(display,window,hGC, XFimage,
-													0, 0, 0, 0, 230,15);
+			          0, 0, 0, 0, 230,15);
 			XDrawString(display,window,hGC,2,13,szDispBuf,strlen(szDispBuf));
 #ifdef USE_DGA2
-				}
-			else
-				{
-					DrawString(dgaDev->data, dgaDev->mode.imageWidth * (dgaDev->mode.bitsPerPixel / 8)
-					, dgaDev->mode.bitsPerPixel, 0, 0, iResX, 15, szDispBuf, strlen(szDispBuf), DSM_NORMAL);
-	}
+		}
+		else
+		{
+			DrawString(dgaDev->data, dgaDev->mode.imageWidth * (dgaDev->mode.bitsPerPixel / 8)
+			           , dgaDev->mode.bitsPerPixel, 0, 0, iResX, 15, szDispBuf, strlen(szDispBuf), DSM_NORMAL);
+		}
 #endif
 #else
-				SDL_WM_SetCaption(szDispBuf,NULL); //just a quick fix,
+		SDL_WM_SetCaption(szDispBuf,NULL); //just a quick fix,
 #endif
-		}
+	}
 
-	if(XPimage) DisplayPic();
+	if (XPimage) DisplayPic();
 
 #ifndef _SDL
 	XSync(display,False);
@@ -7031,42 +7630,45 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 	// TODO: visual rumble
 
-/*     
-		if(iRumbleTime) 
-			{
-				ScreenRect.left+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-				ScreenRect.right+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-				ScreenRect.top+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-				ScreenRect.bottom+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-				iRumbleTime--;
-			}
-*/
+	/*
+			if(iRumbleTime)
+				{
+					ScreenRect.left+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+					ScreenRect.right+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+					ScreenRect.top+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+					ScreenRect.bottom+=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2);
+					iRumbleTime--;
+				}
+	*/
 
-	#ifdef _SDL2
+#ifdef _SDL2
 	SDL_Surface *buf;
-	#endif
+#endif
 
-	if(iUseNoStretchBlt<2)
+	if (iUseNoStretchBlt<2)
+	{
+		if (iUseNoStretchBlt ||
+		    (PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0 == iResX &&
+		     PreviousPSXDisplay.DisplayMode.y == iResY))
 		{
-			if(iUseNoStretchBlt ||
-					(PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0 == iResX &&
-						PreviousPSXDisplay.DisplayMode.y == iResY))
-				{NoStretchSwap();return;}
+			NoStretchSwap();
+			return;
 		}
+	}
 
 #ifndef _SDL2
 	BlitScreen(pBackBuffer,
-												PSXDisplay.DisplayPosition.x,
-												PSXDisplay.DisplayPosition.y);
+	           PSXDisplay.DisplayPosition.x,
+	           PSXDisplay.DisplayPosition.y);
 
-	if(usCursorActive) ShowGunCursor(pBackBuffer,PreviousPSXDisplay.Range.x0+PreviousPSXDisplay.Range.x1);
+	if (usCursorActive) ShowGunCursor(pBackBuffer,PreviousPSXDisplay.Range.x0+PreviousPSXDisplay.Range.x1);
 
 	//----------------------------------------------------//
 
 	XStretchBlt((unsigned char *)Xpixels,
-															PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0,
-															PreviousPSXDisplay.DisplayMode.y,
-															iResX,iResY);
+	            PreviousPSXDisplay.Range.x1+PreviousPSXDisplay.Range.x0,
+	            PreviousPSXDisplay.DisplayMode.y,
+	            iResX,iResY);
 
 	//----------------------------------------------------//
 #else
@@ -7080,64 +7682,64 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 	rectsrc.y=PSXDisplay.DisplayPosition.y;
 	rectsrc.h=PreviousPSXDisplay.DisplayMode.y;
 	rectsrc.w=PreviousPSXDisplay.Range.x1;
-	if(PSXDisplay.RGB24)
+	if (PSXDisplay.RGB24)
 	{
 
 		SDL_SoftStretch(buf=SDL_DisplayFormat(Ximage24), &rectsrc,
-																				display, &rectdst);
+		                display, &rectdst);
 	}
 	else
 	{
 		SDL_SoftStretch(buf=SDL_DisplayFormat(Ximage16), &rectsrc,
-																				display, &rectdst);
+		                display, &rectdst);
 	}
-SDL_FreeSurface(buf);
+	SDL_FreeSurface(buf);
 #endif
 #ifndef _SDL2
 #ifndef _SDL
 #ifdef USE_DGA2
 	if (iWindowMode)
 #endif
-	XPutImage(display,window,hGC, Ximage,
-											0, 0, 0, 0,
-											iResX, iResY);
+		XPutImage(display,window,hGC, Ximage,
+		          0, 0, 0, 0,
+		          iResX, iResY);
 #else
 	SDL_BlitSurface(Ximage,NULL,display,NULL);
 #endif
 #endif
-	if(ulKeybits&KEY_SHOWFPS) //DisplayText();               // paint menu text
+	if (ulKeybits&KEY_SHOWFPS) //DisplayText();               // paint menu text
+	{
+		if (szDebugText[0] && ((time(NULL) - tStart) < 2))
 		{
-			if(szDebugText[0] && ((time(NULL) - tStart) < 2))
-				{
-					strcpy(szDispBuf,szDebugText);
-				}
-			else
-				{
-					szDebugText[0]=0;
-					strcat(szDispBuf,szMenuBuf);
-				}
+			strcpy(szDispBuf,szDebugText);
+		}
+		else
+		{
+			szDebugText[0]=0;
+			strcat(szDispBuf,szMenuBuf);
+		}
 #ifndef _SDL
 #ifdef USE_DGA2
-			if (iWindowMode)
-				{
+		if (iWindowMode)
+		{
 #endif
 			XPutImage(display,window,hGC, XFimage,
-													0, 0, 0, 0, 230,15);
+			          0, 0, 0, 0, 230,15);
 			XDrawString(display,window,hGC,2,13,szDispBuf,strlen(szDispBuf));
 #ifdef USE_DGA2
-				}
-			else
-				{
-					DrawString(dgaDev->data, dgaDev->mode.imageWidth * (dgaDev->mode.bitsPerPixel / 8)
-					, dgaDev->mode.bitsPerPixel, 0, 0, iResX, 15, szDispBuf, strlen(szDispBuf), DSM_NORMAL);
-	}
+		}
+		else
+		{
+			DrawString(dgaDev->data, dgaDev->mode.imageWidth * (dgaDev->mode.bitsPerPixel / 8)
+			           , dgaDev->mode.bitsPerPixel, 0, 0, iResX, 15, szDispBuf, strlen(szDispBuf), DSM_NORMAL);
+		}
 #endif
 #else
-				SDL_WM_SetCaption(szDispBuf,NULL); //just a quick fix,
+		SDL_WM_SetCaption(szDispBuf,NULL); //just a quick fix,
 #endif
-		}
+	}
 
-	if(XPimage) DisplayPic();
+	if (XPimage) DisplayPic();
 
 #ifndef _SDL
 	XSync(display,False);
@@ -7156,9 +7758,9 @@ void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
 	if (iWindowMode)
 	{
 #endif
-	XPutImage(display,window,hGC, XCimage,
-											0, 0, 0, 0, iResX, iResY);
-	XSync(display,False);
+		XPutImage(display,window,hGC, XCimage,
+		          0, 0, 0, 0, iResX, iResY);
+		XSync(display,False);
 #ifdef USE_DGA2
 	}
 #endif
@@ -7179,9 +7781,9 @@ void DoClearFrontBuffer(void)                          // CLEAR DX BUFFER
 	if (iWindowMode)
 	{
 #endif
-	XPutImage(display,window,hGC, XCimage,
-											0, 0, 0, 0, iResX, iResY);
-	XSync(display,False);
+		XPutImage(display,window,hGC, XCimage,
+		          0, 0, 0, 0, iResX, iResY);
+		XSync(display,False);
 #ifdef USE_DGA2
 	}
 #endif
@@ -7202,110 +7804,113 @@ int Xinitialize()
 	memset(pBackBuffer,0,640*512*sizeof(unsigned long));
 
 
-	if(iColDepth==16)
-		{
-			BlitScreen=BlitScreen16;iDesktopCol=16;
-			if(iUseScanLines) XStretchBlt=XStretchBlt16SL;
-			else              XStretchBlt=XStretchBlt16;
-			if(iUseScanLines) BlitScreenNS=BlitScreen16NSSL;
-			else              BlitScreenNS=BlitScreen16NS;
-		}
+	if (iColDepth==16)
+	{
+		BlitScreen=BlitScreen16;
+		iDesktopCol=16;
+		if (iUseScanLines) XStretchBlt=XStretchBlt16SL;
+		else              XStretchBlt=XStretchBlt16;
+		if (iUseScanLines) BlitScreenNS=BlitScreen16NSSL;
+		else              BlitScreenNS=BlitScreen16NS;
+	}
 	else
-	if(iColDepth==15)
+		if (iColDepth==15)
 		{
-			BlitScreen=BlitScreen15;iDesktopCol=15;
-			if(iUseScanLines) XStretchBlt=XStretchBlt16SL;
+			BlitScreen=BlitScreen15;
+			iDesktopCol=15;
+			if (iUseScanLines) XStretchBlt=XStretchBlt16SL;
 			else              XStretchBlt=XStretchBlt16;
-			if(iUseScanLines) BlitScreenNS=BlitScreen15NSSL;
+			if (iUseScanLines) BlitScreenNS=BlitScreen15NSSL;
 			else              BlitScreenNS=BlitScreen15NS;
 		}
-	else
+		else
 		{
-			BlitScreen=BlitScreen32;iDesktopCol=32;
-			if(iUseScanLines) XStretchBlt=XStretchBlt32SL;
+			BlitScreen=BlitScreen32;
+			iDesktopCol=32;
+			if (iUseScanLines) XStretchBlt=XStretchBlt32SL;
 			else              XStretchBlt=XStretchBlt32;
-			if(iUseScanLines) BlitScreenNS=BlitScreen32NSSL;
+			if (iUseScanLines) BlitScreenNS=BlitScreen32NSSL;
 			else              BlitScreenNS=BlitScreen32NS;
 		}
 
-			pSaIBigBuff=malloc(1280*1024*sizeof(unsigned long));
-			memset(pSaIBigBuff,0,1280*1024*sizeof(unsigned long));
+	pSaIBigBuff=malloc(1280*1024*sizeof(unsigned long));
+	memset(pSaIBigBuff,0,1280*1024*sizeof(unsigned long));
 
 	p2XSaIFunc=NULL;
 
-	if(iUseNoStretchBlt==2 || iUseNoStretchBlt==3)
-		{
-			if     (iDesktopCol==15) p2XSaIFunc=Std2xSaI_ex5;
-			else if(iDesktopCol==16) p2XSaIFunc=Std2xSaI_ex6;
-			else                     p2XSaIFunc=Std2xSaI_ex8;
-		}
-
-	if(iUseNoStretchBlt==4 || iUseNoStretchBlt==5)
-		{
-			if     (iDesktopCol==15) p2XSaIFunc=Super2xSaI_ex5;
-			else if(iDesktopCol==16) p2XSaIFunc=Super2xSaI_ex6;
-			else                     p2XSaIFunc=Super2xSaI_ex8;
-		}
-
-	if(iUseNoStretchBlt==6 || iUseNoStretchBlt==7)
-		{
-			if     (iDesktopCol==15) p2XSaIFunc=SuperEagle_ex5;
-			else if(iDesktopCol==16) p2XSaIFunc=SuperEagle_ex6;
-			else                     p2XSaIFunc=SuperEagle_ex8;
-		}
-
-	if(iUseNoStretchBlt==8 || iUseNoStretchBlt==9)
-		{
-			if     (iDesktopCol==15) p2XSaIFunc=Scale2x_ex6_5;
-			else if(iDesktopCol==16) p2XSaIFunc=Scale2x_ex6_5;
-			else                     p2XSaIFunc=Scale2x_ex8;
-		}
-	if(iUseNoStretchBlt==10 || iUseNoStretchBlt==11)
-		{
-			InitLUTs();
-			if     (iDesktopCol==15) p2XSaIFunc=hq2x_16;
-			else if(iDesktopCol==16) p2XSaIFunc=hq2x_16;
-			else
+	if (iUseNoStretchBlt==2 || iUseNoStretchBlt==3)
 	{
-			BlitScreen=BlitScreen16;
-										p2XSaIFunc=hq2x_32;
+		if     (iDesktopCol==15) p2XSaIFunc=Std2xSaI_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=Std2xSaI_ex6;
+		else                     p2XSaIFunc=Std2xSaI_ex8;
 	}
-		}
-			if(iUseNoStretchBlt==12 || iUseNoStretchBlt==13)
-		{
-			if     (iDesktopCol==15) p2XSaIFunc=Scale3x_ex6_5;
-			else if(iDesktopCol==16) p2XSaIFunc=Scale3x_ex6_5;
-			else                     p2XSaIFunc=Scale3x_ex8;
-		}
-		if(iUseNoStretchBlt==14 || iUseNoStretchBlt==15)
-		{
-			InitLUTs();
-			if     (iDesktopCol==15) p2XSaIFunc=hq3x_16;
-			else if(iDesktopCol==16) p2XSaIFunc=hq3x_16;
-			else
-	{
-			BlitScreen=BlitScreen16;
-										p2XSaIFunc=hq3x_32;
-	}
-		}
 
-	if(iUseNoStretchBlt==3  ||
-				iUseNoStretchBlt==5  ||
-				iUseNoStretchBlt==7  ||
-				iUseNoStretchBlt==9  ||
-				iUseNoStretchBlt==11 ||
-				iUseNoStretchBlt==13 ||
-				iUseNoStretchBlt==15)
+	if (iUseNoStretchBlt==4 || iUseNoStretchBlt==5)
+	{
+		if     (iDesktopCol==15) p2XSaIFunc=Super2xSaI_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=Super2xSaI_ex6;
+		else                     p2XSaIFunc=Super2xSaI_ex8;
+	}
+
+	if (iUseNoStretchBlt==6 || iUseNoStretchBlt==7)
+	{
+		if     (iDesktopCol==15) p2XSaIFunc=SuperEagle_ex5;
+		else if (iDesktopCol==16) p2XSaIFunc=SuperEagle_ex6;
+		else                     p2XSaIFunc=SuperEagle_ex8;
+	}
+
+	if (iUseNoStretchBlt==8 || iUseNoStretchBlt==9)
+	{
+		if     (iDesktopCol==15) p2XSaIFunc=Scale2x_ex6_5;
+		else if (iDesktopCol==16) p2XSaIFunc=Scale2x_ex6_5;
+		else                     p2XSaIFunc=Scale2x_ex8;
+	}
+	if (iUseNoStretchBlt==10 || iUseNoStretchBlt==11)
+	{
+		InitLUTs();
+		if     (iDesktopCol==15) p2XSaIFunc=hq2x_16;
+		else if (iDesktopCol==16) p2XSaIFunc=hq2x_16;
+		else
 		{
-			if(iDesktopCol<=16)
-				{
-					XStretchBlt=XStretchBlt16NS;
-				}
-			else
-				{
-				XStretchBlt=XStretchBlt32NS;
-				}
+			BlitScreen=BlitScreen16;
+			p2XSaIFunc=hq2x_32;
 		}
+	}
+	if (iUseNoStretchBlt==12 || iUseNoStretchBlt==13)
+	{
+		if     (iDesktopCol==15) p2XSaIFunc=Scale3x_ex6_5;
+		else if (iDesktopCol==16) p2XSaIFunc=Scale3x_ex6_5;
+		else                     p2XSaIFunc=Scale3x_ex8;
+	}
+	if (iUseNoStretchBlt==14 || iUseNoStretchBlt==15)
+	{
+		InitLUTs();
+		if     (iDesktopCol==15) p2XSaIFunc=hq3x_16;
+		else if (iDesktopCol==16) p2XSaIFunc=hq3x_16;
+		else
+		{
+			BlitScreen=BlitScreen16;
+			p2XSaIFunc=hq3x_32;
+		}
+	}
+
+	if (iUseNoStretchBlt==3  ||
+	    iUseNoStretchBlt==5  ||
+	    iUseNoStretchBlt==7  ||
+	    iUseNoStretchBlt==9  ||
+	    iUseNoStretchBlt==11 ||
+	    iUseNoStretchBlt==13 ||
+	    iUseNoStretchBlt==15)
+	{
+		if (iDesktopCol<=16)
+		{
+			XStretchBlt=XStretchBlt16NS;
+		}
+		else
+		{
+			XStretchBlt=XStretchBlt32NS;
+		}
+	}
 
 
 #endif
@@ -7315,13 +7920,13 @@ int Xinitialize()
 
 	bIsFirstFrame = FALSE;                                // done
 
-	if(iShowFPS)
-		{
-			iShowFPS=0;
-			ulKeybits|=KEY_SHOWFPS;
-			szDispBuf[0]=0;
-			BuildDispMenu(0);
-		}
+	if (iShowFPS)
+	{
+		iShowFPS=0;
+		ulKeybits|=KEY_SHOWFPS;
+		szDispBuf[0]=0;
+		BuildDispMenu(0);
+	}
 
 	return 0;
 }
@@ -7332,13 +7937,13 @@ void Xcleanup()                                        // X CLEANUP
 {
 	CloseMenu();
 #ifndef _SDL2
-	if(pBackBuffer)  free(pBackBuffer);
+	if (pBackBuffer)  free(pBackBuffer);
 	pBackBuffer=0;
-	if(iUseNoStretchBlt>=2)
-		{
-			if(pSaIBigBuff) free(pSaIBigBuff);
-			pSaIBigBuff=0;
-		}
+	if (iUseNoStretchBlt>=2)
+	{
+		if (pSaIBigBuff) free(pSaIBigBuff);
+		pSaIBigBuff=0;
+	}
 
 #endif
 }
@@ -7365,74 +7970,79 @@ void CloseDisplay(void)
 void CreatePic(unsigned char * pMem)
 {
 	unsigned char * p=(unsigned char *)malloc(128*96*4);
-	unsigned char * ps; int x,y;
+	unsigned char * ps;
+	int x,y;
 
 	ps=p;
 
-	if(iDesktopCol==16)
+	if (iDesktopCol==16)
+	{
+		unsigned short s;
+		for (y=0;y<96;y++)
+		{
+			for (x=0;x<128;x++)
+			{
+				s=(*(pMem+0))>>3;
+				s|=((*(pMem+1))&0xfc)<<3;
+				s|=((*(pMem+2))&0xf8)<<8;
+				pMem+=3;
+				*((unsigned short *)(ps+y*256+x*2))=s;
+			}
+		}
+	}
+	else
+		if (iDesktopCol==15)
 		{
 			unsigned short s;
-			for(y=0;y<96;y++)
+			for (y=0;y<96;y++)
+			{
+				for (x=0;x<128;x++)
 				{
-					for(x=0;x<128;x++)
-						{
-							s=(*(pMem+0))>>3;
-							s|=((*(pMem+1))&0xfc)<<3;
-							s|=((*(pMem+2))&0xf8)<<8;
-							pMem+=3;
-							*((unsigned short *)(ps+y*256+x*2))=s;
-						}
+					s=(*(pMem+0))>>3;
+					s|=((*(pMem+1))&0xfc)<<2;
+					s|=((*(pMem+2))&0xf8)<<7;
+					pMem+=3;
+					*((unsigned short *)(ps+y*256+x*2))=s;
 				}
+			}
 		}
-	else
-	if(iDesktopCol==15)
-		{
-			unsigned short s;
-			for(y=0;y<96;y++)
+		else
+			if (iDesktopCol==32)
+			{
+				unsigned long l;
+				for (y=0;y<96;y++)
 				{
-					for(x=0;x<128;x++)
-						{
-							s=(*(pMem+0))>>3;
-							s|=((*(pMem+1))&0xfc)<<2;
-							s|=((*(pMem+2))&0xf8)<<7;
-							pMem+=3;
-							*((unsigned short *)(ps+y*256+x*2))=s;
-						}
+					for (x=0;x<128;x++)
+					{
+						l=  *(pMem+0);
+						l|=(*(pMem+1))<<8;
+						l|=(*(pMem+2))<<16;
+						pMem+=3;
+						*((unsigned long *)(ps+y*512+x*4))=l;
+					}
 				}
-		}
-	else
-	if(iDesktopCol==32)
-		{
-			unsigned long l;
-			for(y=0;y<96;y++)
-				{
-					for(x=0;x<128;x++)
-						{
-							l=  *(pMem+0);
-							l|=(*(pMem+1))<<8;
-							l|=(*(pMem+2))<<16;
-							pMem+=3;
-							*((unsigned long *)(ps+y*512+x*4))=l;
-						}
-				}
-		}
+			}
 
 #ifndef _SDL
 #ifdef USE_DGA2
-	if (!iWindowMode) { Xpic = p; XPimage = (XImage*)1; }
+	if (!iWindowMode)
+	{
+		Xpic = p;
+		XPimage = (XImage*)1;
+	}
 	else
 #endif
-	XPimage = XCreateImage(display,myvisual->visual,
-																								depth, ZPixmap, 0,
-																								(char *)p,
-																								128, 96,
-																								depth>16 ? 32 : 16,
-																								0);
+		XPimage = XCreateImage(display,myvisual->visual,
+		                       depth, ZPixmap, 0,
+		                       (char *)p,
+		                       128, 96,
+		                       depth>16 ? 32 : 16,
+		                       0);
 #else
 	XPimage = SDL_CreateRGBSurfaceFrom((void *)p,128,96,
-			depth,depth*16,
-			0x00ff0000,0x0000ff00,0x000000ff,
-			0);/*hmm what about having transparency?
+	                                   depth,depth*16,
+	                                   0x00ff0000,0x0000ff00,0x000000ff,
+	                                   0);/*hmm what about having transparency?
 							*Set a nonzero value here.
 							*and set the ALPHA flag ON
 							*/
@@ -7443,25 +8053,25 @@ void CreatePic(unsigned char * pMem)
 
 void DestroyPic(void)
 {
-	if(XPimage)
-		{
+	if (XPimage)
+	{
 #ifndef _SDL
 #ifdef USE_DGA2
-			if (iWindowMode)
-				{
+		if (iWindowMode)
+		{
 #endif
 			XPutImage(display,window,hGC, XCimage,
-													0, 0, 0, 0, iResX, iResY);
+			          0, 0, 0, 0, iResX, iResY);
 			XDestroyImage(XPimage);
 #ifdef USE_DGA2
-				}
+		}
 #endif
 #else
-			SDL_FillRect(display,NULL,0);
-			SDL_FreeSurface(XPimage);
+		SDL_FillRect(display,NULL,0);
+		SDL_FreeSurface(XPimage);
 #endif
-			XPimage=0;
-		}
+		XPimage=0;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -7472,12 +8082,12 @@ void DisplayPic(void)
 #ifdef USE_DGA2
 	if (!iWindowMode) XDGABlit(Xpic, 128, 96, iResX-128, 0);
 	else
-		{
+	{
 #endif
-	XPutImage(display,window,hGC, XPimage,
-											0, 0, iResX-128, 0,128,96);
+		XPutImage(display,window,hGC, XPimage,
+		          0, 0, iResX-128, 0,128,96);
 #ifdef USE_DGA2
-		}
+	}
 #endif
 #else
 	rectdst.x=iResX-128;
