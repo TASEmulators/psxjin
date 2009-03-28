@@ -16,7 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 
-//*************************************************************************// 
+//*************************************************************************//
 // History of changes:
 //
 // 2005/04/15 - Pete
@@ -27,7 +27,7 @@
 //
 // 2002/12/14 - Pete
 // - Added dithering menu item
-//                                    
+//
 // 2002/05/25 - Pete
 // - Added menu support for linuzappz's fast forward skipping
 //
@@ -35,17 +35,17 @@
 // - Added timing for the szDebugText (to 2 secs)
 //
 // 2001/12/22 - syo
-// - modified for "transparent menu" 
+// - modified for "transparent menu"
 //   (Pete: added 'V' display for WaitVBlank)
 //
 // 2001/11/09 - Darko Matesic
-// - added recording status 
+// - added recording status
 //   (Pete: added terminate zero to the menu buffer ;)
 //
-// 2001/10/28 - Pete  
+// 2001/10/28 - Pete
 // - generic cleanup for the Peops release
 //
-//*************************************************************************// 
+//*************************************************************************//
 
 #include "stdafx.h"
 
@@ -55,7 +55,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "record.h" 
+#include "record.h"
 
 #endif
 
@@ -95,15 +95,15 @@ BOOL bTransparent=FALSE;
 void InitMenu(void)
 {
 #ifdef _WINDOWS
- StatusFont = CreateFont(24, 0, 0, 0, FW_DEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, FF_SWISS, "Webdings");
- hGFont=CreateFont(//-8,
-                   13,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
-                   ANSI_CHARSET,OUT_DEFAULT_PRECIS,
-                   CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,
-                   DEFAULT_PITCH,
-                   //"Courier New");
-                   //"MS Sans Serif");
-                   "Arial");
+	StatusFont = CreateFont(24, 0, 0, 0, FW_DEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, FF_SWISS, "Webdings");
+	hGFont=CreateFont(//-8,
+	         13,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
+	         ANSI_CHARSET,OUT_DEFAULT_PRECIS,
+	         CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,
+	         DEFAULT_PITCH,
+	         //"Courier New");
+	         //"MS Sans Serif");
+	         "Arial");
 #endif
 }
 
@@ -114,12 +114,12 @@ void InitMenu(void)
 void CloseMenu(void)
 {
 #ifdef _WINDOWS
- if(hGFont) DeleteObject(hGFont);
- hGFont=NULL;
- if(StatusFont) DeleteObject(StatusFont);
- StatusFont=NULL;
+	if (hGFont) DeleteObject(hGFont);
+	hGFont=NULL;
+	if (StatusFont) DeleteObject(StatusFont);
+	StatusFont=NULL;
 #else
- DestroyPic();
+	DestroyPic();
 #endif
 }
 
@@ -135,120 +135,126 @@ int iMPos=0;                                           // menu arrow pos
 void DisplayText(void)                                 // DISPLAY TEXT
 {
 #ifdef _WINDOWS
- HDC hdc;HFONT hFO;
+	HDC hdc;
+	HFONT hFO;
 
- IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
- hFO=(HFONT)SelectObject(hdc,hGFont);
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	hFO=(HFONT)SelectObject(hdc,hGFont);
 
- SetTextColor(hdc,RGB(0,255,0));
- if(bTransparent) 
-      SetBkMode(hdc,TRANSPARENT);
- else SetBkColor(hdc,RGB(0,0,0));
+	SetTextColor(hdc,RGB(0,255,0));
+	if (bTransparent)
+		SetBkMode(hdc,TRANSPARENT);
+	else SetBkColor(hdc,RGB(0,0,0));
 
- if(szDebugText[0] && ((time(NULL) - tStart) < 2))     // special debug text? show it
-  {
-   RECT r={2,PSXDisplay.DisplayMode.y-12,1022,1024};
-   DrawText(hdc,szDebugText,lstrlen(szDebugText),&r,DT_LEFT|DT_NOCLIP);
-  }
- else                                                  // else standard gpu menu
-  {
-   szDebugText[0]=0;
-   lstrcat(szDispBuf,szMenuBuf);
-   ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szDispBuf,lstrlen(szDispBuf),NULL);
-  }
+	if (szDebugText[0] && ((time(NULL) - tStart) < 2))    // special debug text? show it
+	{
+		RECT r={2,PSXDisplay.DisplayMode.y-12,1022,1024};
+		DrawText(hdc,szDebugText,lstrlen(szDebugText),&r,DT_LEFT|DT_NOCLIP);
+	}
+	else                                                  // else standard gpu menu
+	{
+		szDebugText[0]=0;
+		lstrcat(szDispBuf,szMenuBuf);
+		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szDispBuf,lstrlen(szDispBuf),NULL);
+	}
 
- SelectObject(hdc,hFO);
- IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
 
 void DisplayFrames(void)
 {
 #ifdef _WINDOWS
- HDC hdc;HFONT hFO;
+	HDC hdc;
+	HFONT hFO;
 
- IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
- hFO=(HFONT)SelectObject(hdc,hGFont);
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	hFO=(HFONT)SelectObject(hdc,hGFont);
 
- if (ThereIsLag) {
-  SetTextColor(hdc,RGB(255,0,0));
- }
- else SetTextColor(hdc,RGB(255,255,255));
+	if (ThereIsLag)
+	{
+		SetTextColor(hdc,RGB(255,0,0));
+	}
+	else SetTextColor(hdc,RGB(255,255,255));
 
- if(bTransparent)
-      SetBkMode(hdc,TRANSPARENT);
- else SetBkColor(hdc,RGB(0,0,0));
+	if (bTransparent)
+		SetBkMode(hdc,TRANSPARENT);
+	else SetBkColor(hdc,RGB(0,0,0));
 
- ExtTextOut(hdc,3,2,0,NULL,cCurrentFrame,lstrlen(cCurrentFrame),NULL);
+	ExtTextOut(hdc,3,2,0,NULL,cCurrentFrame,lstrlen(cCurrentFrame),NULL);
 
- SelectObject(hdc,hFO);
- IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
 
 void DisplayLag(void)
 {
 #ifdef _WINDOWS
- HDC hdc;HFONT hFO;
+	HDC hdc;
+	HFONT hFO;
 
- IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
- hFO=(HFONT)SelectObject(hdc,hGFont);
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	hFO=(HFONT)SelectObject(hdc,hGFont);
 
- SetTextColor(hdc,RGB(255,0,0));
- if(bTransparent)
-      SetBkMode(hdc,TRANSPARENT);
- else SetBkColor(hdc,RGB(0,0,0));
+	SetTextColor(hdc,RGB(255,0,0));
+	if (bTransparent)
+		SetBkMode(hdc,TRANSPARENT);
+	else SetBkColor(hdc,RGB(0,0,0));
 
- ExtTextOut(hdc,3,12,0,NULL,cCurrentLag,lstrlen(cCurrentLag),NULL);
+	ExtTextOut(hdc,3,12,0,NULL,cCurrentLag,lstrlen(cCurrentLag),NULL);
 
- SelectObject(hdc,hFO);
- IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
 
 void DisplayMovMode(void)
 {
 #ifdef _WINDOWS
- HDC hdc;HFONT hFO;
+	HDC hdc;
+	HFONT hFO;
 
- IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
 
- hFO=(HFONT)SelectObject(hdc,StatusFont);
+	hFO=(HFONT)SelectObject(hdc,StatusFont);
 
- if (modeFlags&MODE_FLAG_RECORD)
-  SetTextColor(hdc,RGB(255,0,0));
- else if (modeFlags&MODE_FLAG_REPLAY)
-  SetTextColor(hdc,RGB(255,255,255));
- else
-  SetTextColor(hdc,RGB(0,255,0));
+	if (modeFlags&MODE_FLAG_RECORD)
+		SetTextColor(hdc,RGB(255,0,0));
+	else if (modeFlags&MODE_FLAG_REPLAY)
+		SetTextColor(hdc,RGB(255,255,255));
+	else
+		SetTextColor(hdc,RGB(0,255,0));
 
- SetBkMode(hdc,TRANSPARENT);
- SetTextAlign(hdc, TA_TOP | TA_RIGHT);
+	SetBkMode(hdc,TRANSPARENT);
+	SetTextAlign(hdc, TA_TOP | TA_RIGHT);
 
- ExtTextOut(hdc,PSXDisplay.DisplayMode.x-3,2,0,NULL,cCurrentMode,lstrlen(cCurrentMode),NULL);
+	ExtTextOut(hdc,PSXDisplay.DisplayMode.x-3,2,0,NULL,cCurrentMode,lstrlen(cCurrentMode),NULL);
 
- SelectObject(hdc,hFO);
- IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
 
 void DisplayInput(void)
 {
 #ifdef _WINDOWS
- HDC hdc;HFONT hFO;
+	HDC hdc;
+	HFONT hFO;
 
- IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
- hFO=(HFONT)SelectObject(hdc,hGFont);
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	hFO=(HFONT)SelectObject(hdc,hGFont);
 
- SetTextColor(hdc,RGB(0,255,0));
- if(bTransparent)
-      SetBkMode(hdc,TRANSPARENT);
- else SetBkColor(hdc,RGB(0,0,0));
+	SetTextColor(hdc,RGB(0,255,0));
+	if (bTransparent)
+		SetBkMode(hdc,TRANSPARENT);
+	else SetBkColor(hdc,RGB(0,0,0));
 
- ExtTextOut(hdc,3,PSXDisplay.DisplayMode.y-22,0,NULL,cCurrentInput,36,NULL);
+	ExtTextOut(hdc,3,PSXDisplay.DisplayMode.y-22,0,NULL,cCurrentInput,36,NULL);
 
- SelectObject(hdc,hFO);
- IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
 
@@ -258,123 +264,126 @@ void DisplayInput(void)
 
 void BuildDispMenu(int iInc)
 {
- unsigned char nStatusSymbols[3] = {0x3D, 0x34, 0x3B};
- int j = 0;int i = 0;
- if(!(ulKeybits&KEY_SHOWFPS)) return;                  // mmm, cheater ;)
+	unsigned char nStatusSymbols[3] = {0x3D, 0x34, 0x3B};
+	int j = 0;
+	int i = 0;
+	if (!(ulKeybits&KEY_SHOWFPS)) return;                 // mmm, cheater ;)
 
- iMPos+=iInc;                                          // up or down
- if(iMPos<0) iMPos=3;                                  // wrap around
- if(iMPos>3) iMPos=0;
+	iMPos+=iInc;                                          // up or down
+	if (iMPos<0) iMPos=3;                                 // wrap around
+	if (iMPos>3) iMPos=0;
 
- strcpy(szMenuBuf,"   FL   FS   DI   GF        ");     // main menu items
+	strcpy(szMenuBuf,"   FL   FS   DI   GF        ");     // main menu items
 
- if(UseFrameLimit)                                     // set marks
-  {
-   if(iFrameLimit==1) szMenuBuf[2]  = '+';
-   else               szMenuBuf[2]  = '*';
-  }
- if(iFastFwd)       szMenuBuf[7]  = '~';
- else
- if(UseFrameSkip)   szMenuBuf[7]  = '*';
-
- if(iUseDither)                                        // set marks
-  {
-   if(iUseDither==1) szMenuBuf[12]  = '+';
-   else              szMenuBuf[12]  = '*';
-  }
-
- if(dwActFixes)     szMenuBuf[17] = '*';
-
-sprintf( cCurrentLag,"%d", currentLag);
-if (modeFlags&MODE_FLAG_REPLAY)
-	sprintf( cCurrentFrame,"%d / %d", currentFrame,totalFrames);
-else
-	sprintf( cCurrentFrame,"%d", currentFrame);
-
-memset(cCurrentMode, 0, sizeof(cCurrentMode));
-for (i = 0; i < 3; i++) {
-	if (modeFlags & (1 << (i+1))) {
-		cCurrentMode[j] = nStatusSymbols[i];
-		j++;
+	if (UseFrameLimit)                                    // set marks
+	{
+		if (iFrameLimit==1) szMenuBuf[2]  = '+';
+		else               szMenuBuf[2]  = '*';
 	}
-}
+	if (iFastFwd)       szMenuBuf[7]  = '~';
+	else
+		if (UseFrameSkip)   szMenuBuf[7]  = '*';
 
-cCurrentInput[0] = currentInput&0x80?' ':'<';
-cCurrentInput[1] = currentInput&0x10?' ':'^';
-cCurrentInput[2] = currentInput&0x20?' ':'>';
-cCurrentInput[3] = currentInput&0x40?' ':'v';
-cCurrentInput[4] = currentInput&0x8?' ':'S';
-cCurrentInput[5] = currentInput&0x1?' ':'s';
-cCurrentInput[6] = currentInput&0x8000?' ':19;
-cCurrentInput[7] = currentInput&0x4000?' ':'X';
-cCurrentInput[8] = currentInput&0x2000?' ':'O';
-cCurrentInput[9] = currentInput&0x1000?' ':'T';
-cCurrentInput[10] = currentInput&0x400?' ':'L'; //l1
-cCurrentInput[11] = currentInput&0x400?' ':'1'; //l1
-cCurrentInput[12] = currentInput&0x800?' ':'R'; //r1
-cCurrentInput[13] = currentInput&0x800?' ':'1'; //r1
-cCurrentInput[14] = currentInput&0x100?' ':'L'; //l2
-cCurrentInput[15] = currentInput&0x100?' ':'2'; //l2
-cCurrentInput[16] = currentInput&0x200?' ':'R'; //r2
-cCurrentInput[17] = currentInput&0x200?' ':'2'; //r2
-cCurrentInput[18] = currentInput&0x800000?' ':'<';
-cCurrentInput[19] = currentInput&0x100000?' ':'^';
-cCurrentInput[20] = currentInput&0x200000?' ':'>';
-cCurrentInput[21] = currentInput&0x400000?' ':'v';
-cCurrentInput[22] = currentInput&0x80000?' ':'S';
-cCurrentInput[23] = currentInput&0x10000?' ':'s';
-cCurrentInput[24] = currentInput&0x80000000?' ':19;
-cCurrentInput[25] = currentInput&0x40000000?' ':'X';
-cCurrentInput[26] = currentInput&0x20000000?' ':'O';
-cCurrentInput[27] = currentInput&0x10000000?' ':'T';
-cCurrentInput[28] = currentInput&0x4000000?' ':'L'; //l1
-cCurrentInput[29] = currentInput&0x4000000?' ':'1'; //l1
-cCurrentInput[30] = currentInput&0x8000000?' ':'R'; //r1
-cCurrentInput[31] = currentInput&0x8000000?' ':'1'; //r1
-cCurrentInput[32] = currentInput&0x1000000?' ':'L'; //l2
-cCurrentInput[33] = currentInput&0x1000000?' ':'2'; //l2
-cCurrentInput[34] = currentInput&0x2000000?' ':'R'; //r2
-cCurrentInput[35] = currentInput&0x2000000?' ':'2'; //r2
+	if (iUseDither)                                       // set marks
+	{
+		if (iUseDither==1) szMenuBuf[12]  = '+';
+		else              szMenuBuf[12]  = '*';
+	}
 
- if(dwCoreFlags&1)  szMenuBuf[23]  = 'A';
- if(dwCoreFlags&2)  szMenuBuf[23]  = 'M';
-  if(dwCoreFlags&0xff00)                                //A/M/G/D   
-  {
-   if((dwCoreFlags&0x0f00)==0x0000)                    // D
-    szMenuBuf[23]  = 'D';
-   else
-   if((dwCoreFlags&0x0f00)==0x0100)                    // A
-    szMenuBuf[23]  = 'A';
-   else
-   if((dwCoreFlags&0x0f00)==0x0200)                    // M
-    szMenuBuf[23]  = 'M';
-   else
-   if((dwCoreFlags&0x0f00)==0x0300)                    // G
-    szMenuBuf[23]  = 'G';
+	if (dwActFixes)     szMenuBuf[17] = '*';
 
-   szMenuBuf[24]='0'+(char)((dwCoreFlags&0xf000)>>12);                         // number
-  }
+	sprintf( cCurrentLag,"%d", currentLag);
+	if (modeFlags&MODE_FLAG_REPLAY)
+		sprintf( cCurrentFrame,"%d / %d", currentFrame,totalFrames);
+	else
+		sprintf( cCurrentFrame,"%d", currentFrame);
+
+	memset(cCurrentMode, 0, sizeof(cCurrentMode));
+	for (i = 0; i < 3; i++)
+	{
+		if (modeFlags & (1 << (i+1)))
+		{
+			cCurrentMode[j] = nStatusSymbols[i];
+			j++;
+		}
+	}
+
+	cCurrentInput[0] = currentInput&0x80?' ':'<';
+	cCurrentInput[1] = currentInput&0x10?' ':'^';
+	cCurrentInput[2] = currentInput&0x20?' ':'>';
+	cCurrentInput[3] = currentInput&0x40?' ':'v';
+	cCurrentInput[4] = currentInput&0x8?' ':'S';
+	cCurrentInput[5] = currentInput&0x1?' ':'s';
+	cCurrentInput[6] = currentInput&0x8000?' ':19;
+	cCurrentInput[7] = currentInput&0x4000?' ':'X';
+	cCurrentInput[8] = currentInput&0x2000?' ':'O';
+	cCurrentInput[9] = currentInput&0x1000?' ':'T';
+	cCurrentInput[10] = currentInput&0x400?' ':'L'; //l1
+	cCurrentInput[11] = currentInput&0x400?' ':'1'; //l1
+	cCurrentInput[12] = currentInput&0x800?' ':'R'; //r1
+	cCurrentInput[13] = currentInput&0x800?' ':'1'; //r1
+	cCurrentInput[14] = currentInput&0x100?' ':'L'; //l2
+	cCurrentInput[15] = currentInput&0x100?' ':'2'; //l2
+	cCurrentInput[16] = currentInput&0x200?' ':'R'; //r2
+	cCurrentInput[17] = currentInput&0x200?' ':'2'; //r2
+	cCurrentInput[18] = currentInput&0x800000?' ':'<';
+	cCurrentInput[19] = currentInput&0x100000?' ':'^';
+	cCurrentInput[20] = currentInput&0x200000?' ':'>';
+	cCurrentInput[21] = currentInput&0x400000?' ':'v';
+	cCurrentInput[22] = currentInput&0x80000?' ':'S';
+	cCurrentInput[23] = currentInput&0x10000?' ':'s';
+	cCurrentInput[24] = currentInput&0x80000000?' ':19;
+	cCurrentInput[25] = currentInput&0x40000000?' ':'X';
+	cCurrentInput[26] = currentInput&0x20000000?' ':'O';
+	cCurrentInput[27] = currentInput&0x10000000?' ':'T';
+	cCurrentInput[28] = currentInput&0x4000000?' ':'L'; //l1
+	cCurrentInput[29] = currentInput&0x4000000?' ':'1'; //l1
+	cCurrentInput[30] = currentInput&0x8000000?' ':'R'; //r1
+	cCurrentInput[31] = currentInput&0x8000000?' ':'1'; //r1
+	cCurrentInput[32] = currentInput&0x1000000?' ':'L'; //l2
+	cCurrentInput[33] = currentInput&0x1000000?' ':'2'; //l2
+	cCurrentInput[34] = currentInput&0x2000000?' ':'R'; //r2
+	cCurrentInput[35] = currentInput&0x2000000?' ':'2'; //r2
+
+	if (dwCoreFlags&1)  szMenuBuf[23]  = 'A';
+	if (dwCoreFlags&2)  szMenuBuf[23]  = 'M';
+	if (dwCoreFlags&0xff00)                               //A/M/G/D
+	{
+		if ((dwCoreFlags&0x0f00)==0x0000)                   // D
+			szMenuBuf[23]  = 'D';
+		else
+			if ((dwCoreFlags&0x0f00)==0x0100)                   // A
+				szMenuBuf[23]  = 'A';
+			else
+				if ((dwCoreFlags&0x0f00)==0x0200)                   // M
+					szMenuBuf[23]  = 'M';
+				else
+					if ((dwCoreFlags&0x0f00)==0x0300)                   // G
+						szMenuBuf[23]  = 'G';
+
+		szMenuBuf[24]='0'+(char)((dwCoreFlags&0xf000)>>12);                         // number
+	}
 
 #ifdef _WINDOWS
- if(bVsync_Key)     szMenuBuf[25]  = 'V';
+	if (bVsync_Key)     szMenuBuf[25]  = 'V';
 #endif
- if(lSelectedSlot)  szMenuBuf[26]  = '0'+(char)lSelectedSlot;   
+	if (lSelectedSlot)  szMenuBuf[26]  = '0'+(char)lSelectedSlot;
 
- szMenuBuf[(iMPos+1)*5]='<';                           // set arrow
+	szMenuBuf[(iMPos+1)*5]='<';                           // set arrow
 
 #ifdef _WINDOWS
- if(RECORD_RECORDING)
-  {
-   szMenuBuf[27]  = ' ';
-   szMenuBuf[28]  = ' ';
-   szMenuBuf[29]  = ' ';
-   szMenuBuf[30]  = 'R';
-   szMenuBuf[31]  = 'e';
-   szMenuBuf[32]  = 'c';
-   szMenuBuf[33]  = 0;
-  }
+	if (RECORD_RECORDING)
+	{
+		szMenuBuf[27]  = ' ';
+		szMenuBuf[28]  = ' ';
+		szMenuBuf[29]  = ' ';
+		szMenuBuf[30]  = 'R';
+		szMenuBuf[31]  = 'e';
+		szMenuBuf[32]  = 'c';
+		szMenuBuf[33]  = 0;
+	}
 
- if(DX.DDSScreenPic) ShowTextGpuPic();
+	if (DX.DDSScreenPic) ShowTextGpuPic();
 #endif
 }
 
@@ -384,77 +393,102 @@ cCurrentInput[35] = currentInput&0x2000000?' ':'2'; //r2
 
 void SwitchDispMenu(int iStep)                         // SWITCH DISP MENU
 {
- if(!(ulKeybits&KEY_SHOWFPS)) return;                  // tststs
+	if (!(ulKeybits&KEY_SHOWFPS)) return;                 // tststs
 
- switch(iMPos)
-  {//////////////////////////////////////////////////////
-   case 0:                                             // frame limit
-    {
-     int iType=0;
-     bInitCap = TRUE;
+	switch (iMPos)
+	{//////////////////////////////////////////////////////
+	case 0:                                             // frame limit
+	{
+		int iType=0;
+		bInitCap = TRUE;
 
 #ifdef _WINDOWS
-     if(iFrameLimit==1 && UseFrameLimit &&
-        GetAsyncKeyState(VK_SHIFT)&32768)
-      {
-       fFrameRate+=iStep;
-       if(fFrameRate<1.0f) fFrameRate=1.0f;
-       SetAutoFrameCap();
-       break;
-      }
+		if (iFrameLimit==1 && UseFrameLimit &&
+		    GetAsyncKeyState(VK_SHIFT)&32768)
+		{
+			fFrameRate+=iStep;
+			if (fFrameRate<1.0f) fFrameRate=1.0f;
+			SetAutoFrameCap();
+			break;
+		}
 #endif
 
-     if(UseFrameLimit) iType=iFrameLimit;
-     iType+=iStep;
-     if(iType<0) iType=2;
-     if(iType>2) iType=0;
-     if(iType==0) UseFrameLimit=0;
-     else
-      {
-       UseFrameLimit=1;
-       iFrameLimit=iType;
-       SetAutoFrameCap();
-      }
-    } break;
-   //////////////////////////////////////////////////////
-   case 1:                                             // frame skip
-    bInitCap = TRUE;
-    if(iStep>0)
-     {
-      if(!UseFrameSkip) {UseFrameSkip=1;iFastFwd = 0;}
-      else
-       {
-        if(!iFastFwd) iFastFwd=1;
-        else {UseFrameSkip=0;iFastFwd = 0;}
-       }
-     }
-    else
-     {
-      if(!UseFrameSkip) {UseFrameSkip=1;iFastFwd = 1;}
-      else
-       {
-        if(iFastFwd) iFastFwd=0;
-        else {UseFrameSkip=0;iFastFwd = 0;}
-       }
-     }
-    bSkipNextFrame=FALSE;
-    break;
-   //////////////////////////////////////////////////////
-   case 2:                                             // dithering
-    iUseDither+=iStep;
-    if(iUseDither<0) iUseDither=2;
-    if(iUseDither>2) iUseDither=0;
-    break;
-   //////////////////////////////////////////////////////
-   case 3:                                             // special fixes
-    if(iUseFixes) {iUseFixes=0;dwActFixes=0;}
-    else          {iUseFixes=1;dwActFixes=dwCfgFixes;}
-    SetFixes();
-    if(iFrameLimit==2) SetAutoFrameCap();
-    break;
-  }
+		if (UseFrameLimit) iType=iFrameLimit;
+		iType+=iStep;
+		if (iType<0) iType=2;
+		if (iType>2) iType=0;
+		if (iType==0) UseFrameLimit=0;
+		else
+		{
+			UseFrameLimit=1;
+			iFrameLimit=iType;
+			SetAutoFrameCap();
+		}
+	}
+	break;
+	//////////////////////////////////////////////////////
+	case 1:                                             // frame skip
+		bInitCap = TRUE;
+		if (iStep>0)
+		{
+			if (!UseFrameSkip)
+			{
+				UseFrameSkip=1;
+				iFastFwd = 0;
+			}
+			else
+			{
+				if (!iFastFwd) iFastFwd=1;
+				else
+				{
+					UseFrameSkip=0;
+					iFastFwd = 0;
+				}
+			}
+		}
+		else
+		{
+			if (!UseFrameSkip)
+			{
+				UseFrameSkip=1;
+				iFastFwd = 1;
+			}
+			else
+			{
+				if (iFastFwd) iFastFwd=0;
+				else
+				{
+					UseFrameSkip=0;
+					iFastFwd = 0;
+				}
+			}
+		}
+		bSkipNextFrame=FALSE;
+		break;
+		//////////////////////////////////////////////////////
+	case 2:                                             // dithering
+		iUseDither+=iStep;
+		if (iUseDither<0) iUseDither=2;
+		if (iUseDither>2) iUseDither=0;
+		break;
+		//////////////////////////////////////////////////////
+	case 3:                                             // special fixes
+		if (iUseFixes)
+		{
+			iUseFixes=0;
+			dwActFixes=0;
+		}
+		else
+		{
+			iUseFixes=1;
+			dwActFixes=dwCfgFixes;
+		}
+		SetFixes();
+		if (iFrameLimit==2) SetAutoFrameCap();
+		break;
+	}
 
- BuildDispMenu(0);                                     // update info
+	BuildDispMenu(0);                                     // update info
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

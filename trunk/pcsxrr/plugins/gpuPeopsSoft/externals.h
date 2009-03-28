@@ -16,13 +16,13 @@
  *                                                                         *
  ***************************************************************************/
 
-//*************************************************************************// 
+//*************************************************************************//
 // History of changes:
 //
 // 2005/04/15 - Pete
 // - Changed user frame limit to floating point value
 //
-// 2004/01/31 - Pete  
+// 2004/01/31 - Pete
 // - added zn stuff
 //
 // 2002/04/20 - linuzappz
@@ -37,10 +37,10 @@
 // 2001/12/05 - syo
 // - added iSysMemory and iStopSaver
 //
-// 2001/10/28 - Pete  
+// 2001/10/28 - Pete
 // - generic cleanup for the Peops release
 //
-//*************************************************************************// 
+//*************************************************************************//
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -85,48 +85,48 @@
 
 typedef struct VRAMLOADTTAG
 {
- short x;
- short y;
- short Width;
- short Height;
- short RowsRemaining;
- short ColsRemaining;
- unsigned short *ImagePtr;
+	short x;
+	short y;
+	short Width;
+	short Height;
+	short RowsRemaining;
+	short ColsRemaining;
+	unsigned short *ImagePtr;
 } VRAMLoad_t;
 
 /////////////////////////////////////////////////////////////////////////////
 
 typedef struct PSXPOINTTAG
 {
- long x;
- long y;
+	long x;
+	long y;
 } PSXPoint_t;
 
 typedef struct PSXSPOINTTAG
 {
- short x;
- short y;
+	short x;
+	short y;
 } PSXSPoint_t;
 
 typedef struct PSXRECTTAG
 {
- short x0;
- short x1;
- short y0;
- short y1;
+	short x0;
+	short x1;
+	short y0;
+	short y1;
 } PSXRect_t;
 
 #ifdef _WINDOWS
 
 typedef struct SDXTAG
 {
- LPDIRECTDRAW                   DD;
+	LPDIRECTDRAW                   DD;
 
- LPDIRECTDRAWSURFACE            DDSPrimary;
- LPDIRECTDRAWSURFACE            DDSRender;
- LPDIRECTDRAWSURFACE            DDSHelper;
- LPDIRECTDRAWSURFACE            DDSScreenPic;
- HWND                           hWnd;
+	LPDIRECTDRAWSURFACE            DDSPrimary;
+	LPDIRECTDRAWSURFACE            DDSRender;
+	LPDIRECTDRAWSURFACE            DDSHelper;
+	LPDIRECTDRAWSURFACE            DDSScreenPic;
+	HWND                           hWnd;
 } sDX;
 
 #else
@@ -140,14 +140,14 @@ typedef struct SDXTAG
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #define DWORD unsigned long
-#define __int64 long long int 
+#define __int64 long long int
 
 typedef struct RECTTAG
 {
- int left;
- int top;
- int right;
- int bottom;
+	int left;
+	int top;
+	int right;
+	int bottom;
 }RECT;
 
 #endif
@@ -156,28 +156,28 @@ typedef struct RECTTAG
 
 typedef struct TWINTAG
 {
- PSXRect_t  Position;
+	PSXRect_t  Position;
 } TWin_t;
 
 /////////////////////////////////////////////////////////////////////////////
 
 typedef struct PSXDISPLAYTAG
 {
- PSXPoint_t  DisplayModeNew;
- PSXPoint_t  DisplayMode;
- PSXPoint_t  DisplayPosition;
- PSXPoint_t  DisplayEnd;
- 
- long        Double;
- long        Height;
- long        PAL;
- long        InterlacedNew;
- long        Interlaced;
- long        RGB24New;
- long        RGB24;
- PSXSPoint_t DrawOffset;
- long        Disabled;
- PSXRect_t   Range;
+	PSXPoint_t  DisplayModeNew;
+	PSXPoint_t  DisplayMode;
+	PSXPoint_t  DisplayPosition;
+	PSXPoint_t  DisplayEnd;
+
+	long        Double;
+	long        Height;
+	long        PAL;
+	long        InterlacedNew;
+	long        Interlaced;
+	long        RGB24New;
+	long        RGB24;
+	PSXSPoint_t DrawOffset;
+	long        Disabled;
+	PSXRect_t   Range;
 
 } PSXDisplay_t;
 
@@ -186,7 +186,7 @@ typedef struct PSXDISPLAYTAG
 #ifdef _WINDOWS
 extern HINSTANCE hInst;
 #endif
-                                
+
 /////////////////////////////////////////////////////////////////////////////
 
 // draw.c
@@ -195,8 +195,8 @@ extern HINSTANCE hInst;
 
 #ifdef _WINDOWS
 extern sDX            DX;
-extern HWND           hWGPU; 
-extern GUID           guiDev; 
+extern HWND           hWGPU;
+extern GUID           guiDev;
 extern int            iRefreshRate;
 extern BOOL           bVsync;
 extern BOOL           bVsync_Key;
@@ -312,6 +312,7 @@ extern unsigned long dwCoreFlags;
 extern HFONT hGFont;
 extern int   iMPos;
 extern BOOL  bTransparent;
+extern BOOL  bKkaptureMode;
 #endif
 
 #endif

@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by gpuPeopsSoft.rc
 //
 #define IDS_INFO0                       1
@@ -58,6 +58,7 @@
 #define IDC_OPAQUE                      2017
 #define IDC_STOPSAVER                   2017
 #define IDC_TEXQUALITY                  2018
+#define IDC_GAMEFIX2                    2018
 #define IDC_QUALTXT                     2019
 #define IDC_USESKIP                     2020
 #define IDC_QUALTXT2                    2020
@@ -131,9 +132,10 @@
 #define IDC_TRANSPARENT                 2081
 #define IDC_DEBUGMODE                   2082
 #define IDC_SSSPSXLIMIT                 2083
+#define IDC_KKAPTURE                    2084
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143

@@ -16,13 +16,13 @@
  *                                                                         *
  ***************************************************************************/
 
-//*************************************************************************// 
+//*************************************************************************//
 // History of changes:
 //
-// 2001/10/28 - Pete  
+// 2001/10/28 - Pete
 // - generic cleanup for the Peops release
 //
-//*************************************************************************// 
+//*************************************************************************//
 
 #ifdef _WINDOWS
 
@@ -36,15 +36,15 @@
 #include <TCHAR.H>
 #include "resource.h"
 
-// Pete: since my last OS + compiler reinstall, I needed to user newer 
-// defines/libs, therefore I've decided to use the mingw headers and 
+// Pete: since my last OS + compiler reinstall, I needed to user newer
+// defines/libs, therefore I've decided to use the mingw headers and
 // the d3dx.lib (old libs: d3dim.lib dxguid.lib)
 
 #ifdef __MINGW32__
 #include <ddraw.h>
 #include <d3d.h>
 #else
-#include "mingw_ddraw.h"                       
+#include "mingw_ddraw.h"
 #include "mingw_d3dtypes.h"
 #include "mingw_d3d.h"
 #endif
@@ -77,19 +77,19 @@ typedef DWORD EXECUTION_STATE;
 #else
 
 #ifndef _SDL
-#define __X11_C_ 
+#define __X11_C_
 //X11 render
 #define __inline inline
 #define CALLBACK
 
-#include <stdio.h> 
-#include <stdlib.h> 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sys/time.h> 
-#include <GL/gl.h>  
-#include <GL/glx.h>  
-#include <math.h> 
-#include <X11/cursorfont.h> 
+#include <sys/time.h>
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <math.h>
+#include <X11/cursorfont.h>
 
 #else 		//SDL render
 
@@ -97,13 +97,13 @@ typedef DWORD EXECUTION_STATE;
 #define CALLBACK
 
 #include <SDL/SDL.h>
-#include <stdio.h> 
-#include <stdlib.h> 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sys/time.h> 
-#include <math.h> 
+#include <sys/time.h>
+#include <math.h>
 
 #endif
- 
+
 #endif
 

@@ -16,20 +16,20 @@
  *                                                                         *
  ***************************************************************************/
 
-//*************************************************************************// 
+//*************************************************************************//
 // History of changes:
 //
-// 2001/10/28 - Pete  
+// 2001/10/28 - Pete
 // - generic cleanup for the Peops release
 //
-//*************************************************************************// 
+//*************************************************************************//
 
 #ifndef _FPS_INTERNALS_H
 #define _FPS_INTERNALS_H
 
-void FrameCap(void); 
+void FrameCap(void);
 void FrameCapSSSPSX (void);
-void FrameSkip(void); 
+void FrameSkip(void);
 void calcfps(void);
 void PCFrameCap (void);
 void PCcalcfps(void);
