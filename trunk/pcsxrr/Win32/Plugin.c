@@ -156,9 +156,6 @@ void PADhandleKey(int key) {
 	{
 		flagSaveState=StatesC+1;
 	}
-	
-//	if(key == 'Z')
-//		gpuShowPic(); //only shows a black screen :/
 
 	if(key == EmuCommandTable[EMUCMD_MENU].key
 	&& modifiers == EmuCommandTable[EMUCMD_MENU].keymod)
@@ -550,23 +547,14 @@ void PADhandleKey(int key) {
 		}
 	}
 
-//		case VK_F6:
-//			if (Config.QKeys) break;
-//			Config.Mdec ^= 0x1;
-//			if (Config.Mdec)
-//				 sprintf(Text, _("*PCSX*: Black&White Mdecs Only Enabled"));
-//			else sprintf(Text, _("*PCSX*: Black&White Mdecs Only Disabled"));
-//			GPU_displayText(Text);
-//			break;
-//
-//		case VK_F7:
-//			if (Config.QKeys) break;
-//			Config.Xa ^= 0x1;
-//			if (Config.Xa == 0)
-//				 sprintf (Text, _("*PCSX*: Xa Enabled"));
-//			else sprintf (Text, _("*PCSX*: Xa Disabled"));
-//			GPU_displayText(Text);
-//			break;
+	//debug stuff
+//	if(key == 'Z')
+//		gpuShowPic(); //only shows a black screen :/
+//	if(key == 'Z') {
+//		SysPrintf("CD-ROM Label: %.32s\n", CdromLabel);
+//		SysPrintf("CD-ROM ID: %.9s\n", CdromId);
+//	}
+//	if(key == 'X') LoadCdrom();
 }
 
 void CALLBACK SPUirq(void);
