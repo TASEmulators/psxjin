@@ -4,9 +4,11 @@
 
 == Step 1: Configure PCSX. ==
   # Go to "Configuration"->"Options" and make sure "Pause After Playback" is unchecked and then press "OK".
-  # Go to "Configuration"->"Graphics" and select the final resolution the video will have. Also, make sure these 3 checkboxes are unchecked:
+  # Go to "Configuration"->"Graphics" and select the final resolution the video will have.
+  # Make sure these 3 checkboxes are unchecked:
+  # *`*`NEW SINCE v0.0.08`*`* Make sure ".kkapture mode" is checked:
 
-http://i43.tinypic.com/3486dfn.png
+http://i39.tinypic.com/1zflxrq.png
 
 == Step 2: Using .kkapture. ==
   # Download [http://www.farbrausch.de/~fg/kkapture/ .kkapture] and run it.
