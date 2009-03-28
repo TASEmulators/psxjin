@@ -95,7 +95,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	char* arg;
 
 	printf ("PCSX\n");
-	strcpy(cfgfile, "Software\\Pcsx");
+	strcpy(cfgfile, "Software\\PCSX-RR");
 
 	for (arg = strtok(lpCmdLine, " "); arg; arg = strtok(0, " ")) {
 		if (lastArg == 1)
@@ -128,7 +128,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	GetCurrentPath();
-	strcpy(cfgfile, "Software\\Pcsx");
 
 /*
 	for (i=1; i<argc; i++) {
@@ -153,13 +152,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	strcpy(Config.Net, "Disabled");
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
-		strcpy(Config.PluginsDir, "Plugin\\");
-		strcpy(Config.BiosDir,    "Bios\\");
-		SysMessage(_("Pcsx needs to be configured"));
+		Config.Pause = 1;
+		strcpy(Config.PluginsDir, "plugin\\");
+		strcpy(Config.BiosDir,    "bios\\");
+		strcpy(Config.Bios,       "scph1001.bin");
+		strcpy(Config.Gpu,        "gpuPeopsSoft.dll");
+		strcpy(Config.Spu,        "spuPeopsDSound.dll");
+		strcpy(Config.Cdr,        "cdriso.dll");
+		strcpy(Config.Pad1,       "padSeguDPP.dll");
+		strcpy(Config.Pad2,       "padSeguDPP.dll");
+		SysMessage(_("PCSX-RR needs to be configured."));
 		ConfPlug=1;
 		ConfigurePlugins(gApp.hWnd);
 		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), gApp.hWnd, (DLGPROC)ConfigureMcdsDlgProc);
-		SysMessage(_("Pcsx now will quit, restart it"));
+		SysMessage(_("PCSX-RR now will quit, restart it."));
 		return 0;
 	}
 
@@ -1428,7 +1434,7 @@ void CreateMainWindow(int nCmdShow) {
 	RegisterClass(&wc);
 
 	hWnd = CreateWindow("PCSX Main",
-						"PCSX-RR v0.0.7",
+						"PCSX-RR v0.0.8",
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						20,
 						20,
@@ -1529,7 +1535,7 @@ void SysMessage(char *fmt, ...) {
 	va_start(list,fmt);
 	vsprintf(tmp,fmt,list);
 	va_end(list);
-	MessageBox(0, tmp, _("Pcsx Msg"), 0);
+	MessageBox(0, tmp, _("PCSX-RR Message"), 0);
 }
 
 static char *err = N_("Error Loading Symbol");
