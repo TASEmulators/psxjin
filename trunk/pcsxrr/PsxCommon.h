@@ -19,6 +19,8 @@
 #ifndef __PSXCOMMON_H__
 #define __PSXCOMMON_H__
 
+#define PCSXRR_VERSION 9
+
 #include <inttypes.h>
 typedef int8_t int8;
 typedef int16_t int16;
@@ -199,7 +201,6 @@ struct MovieControlType {
 	char VSyncWA;
 };
 
-#define EMU_VERSION 6
 #define MOVIE_VERSION 2
 
 #define MOVIE_FLAG_FROM_SAVESTATE (1<<1)

@@ -41,6 +41,10 @@ int flagEscPressed;
 char szCurrentPath[256];
 char szMovieToLoad[256];
 
+HWND memPokeHWND = NULL;
+char bufPokeAddress[7];
+char bufPokeNewval[7];
+
 #ifdef __MINGW32__
 #ifndef LVM_GETSELECTIONMARK
 #define LVM_GETSELECTIONMARK (LVM_FIRST+66)
@@ -88,59 +92,129 @@ void GetCurrentPath()
 	sprintf(szCurrentPath,"%s%s" + '\0',szDrive, szDirectory);
 }
 
+PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
+{
+	PCHAR* argv;
+	PCHAR  _argv;
+	ULONG  len;
+	ULONG  argc;
+	CHAR   a;
+	ULONG  i, j;
+
+	BOOLEAN  in_QM;
+	BOOLEAN  in_TEXT;
+	BOOLEAN  in_SPACE;
+
+	len = strlen(CmdLine);
+	i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
+
+	argv = (PCHAR*)GlobalAlloc(GMEM_FIXED, i + (len+2)*sizeof(CHAR));
+
+	_argv = (PCHAR)(((PUCHAR)argv)+i);
+
+	argc = 0;
+	argv[argc] = _argv;
+	in_QM = FALSE;
+	in_TEXT = FALSE;
+	in_SPACE = TRUE;
+	i = 0;
+	j = 0;
+
+	while(( a = CmdLine[i] )) {
+		if(in_QM) {
+			if(a == '\"') {
+				in_QM = FALSE;
+			} else {
+				_argv[j] = a;
+				j++;
+			}
+		} else {
+			switch(a) {
+			case '\"':
+				in_QM = TRUE;
+				in_TEXT = TRUE;
+				if(in_SPACE) {
+					argv[argc] = _argv+j;
+					argc++;
+				}
+				in_SPACE = FALSE;
+				break;
+			case ' ':
+			case '\t':
+			case '\n':
+			case '\r':
+				if(in_TEXT) {
+					_argv[j] = '\0';
+					j++;
+				}
+				in_TEXT = FALSE;
+				in_SPACE = TRUE;
+				break;
+			default:
+				in_TEXT = TRUE;
+				if(in_SPACE) {
+					argv[argc] = _argv+j;
+					argc++;
+				}
+				_argv[j] = a;
+				j++;
+				in_SPACE = FALSE;
+				break;
+			}
+		}
+		i++;
+	}
+	_argv[j] = '\0';
+	argv[argc] = NULL;
+
+	(*_argc) = argc;
+	return argv;
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	char runcd=0;
-	char lastArg=0;
 	char loadMovie=0;
-	char* arg;
+	int i, argc;
+	PCHAR *argv;
 
 	printf ("PCSX\n");
 	strcpy(cfgfile, "Software\\PCSX-RR");
 
-	for (arg = strtok(lpCmdLine, " "); arg; arg = strtok(0, " ")) {
-		if (lastArg == 1)
-			sprintf(szMovieToLoad,"%s",arg);
-		if (lastArg == 2)
-			sprintf(Movie.aviFilename,"%s",arg);
-		if (lastArg == 3)
-			sprintf(Movie.wavFilename,"%s",arg);
-		if (lastArg == 4)
-			sscanf (arg,"%lu",&Movie.stopCapture);
-		lastArg = 0;
-		if (!strcmp(arg, "-runcd"))
+	argv = CommandLineToArgvA(GetCommandLine(), &argc);
+	if( argc > 1 )
+	for( i=1; i < argc; i++ ) {
+//		MessageBox( NULL, argv[i], "Argument list", MB_ICONINFORMATION );
+		if (!strcmp(argv[i], "-runcd"))
 			runcd = 1;
-		else if (!strcmp(arg, "-runcdbios"))
+		else if (!strcmp(argv[i], "-runcdbios"))
 			runcd = 2;
-		else if (!strcmp(arg, "-play")) {
-			lastArg = 1;
+		else if (!strcmp(argv[i], "-play")) {
 			loadMovie = 1;
+			sprintf(szMovieToLoad,"%s",argv[++i]);
 		}
-		else if (!strcmp(arg, "-dumpavi")) {
-			lastArg = 2;
+		else if (!strcmp(argv[i], "-dumpavi")) {
 			Movie.startAvi = 1;
+			sprintf(Movie.aviFilename,"%s",argv[++i]);
 		}
-		else if (!strcmp(arg, "-dumpwav")) {
-			lastArg = 3;
+		else if (!strcmp(argv[i], "-dumpwav")) {
 			Movie.startWav = 1;
+			sprintf(Movie.wavFilename,"%s",argv[++i]);
 		}
-		else if (!strcmp(arg, "-stopcapture"))
-			lastArg = 4;
+		else if (!strcmp(argv[i], "-stopcapture"))
+			sscanf (argv[++i],"%lu",&Movie.stopCapture);
+		else if (!strcmp(argv[i], "-readonly"))
+			Movie.readOnly = 1;
+		else if (!strcmp(argv[i], "-memwatch")) {
+			CreateMemWatch();
+			if (! LoadMemWatchFile(argv[++i]) ) {
+				char errorMessage[320];
+				sprintf(errorMessage, "RAM Watch file \"%s\" doesn't exist.",argv[i]);
+				MessageBox(NULL, errorMessage, NULL, MB_ICONERROR);
+			}
+		}
 	}
 
 	GetCurrentPath();
-
-/*
-	for (i=1; i<argc; i++) {
-		if (!strcmp(argv[i], "-runcd")) runcd = 1;
-		else if (!strcmp(argv[i], "-runcdbios")) runcd = 2;
-		else if (!strcmp(argv[i], "-nogui")) UseGui = 0;
-		else if (!strcmp(argv[i], "-psxout")) Config.PsxOut = 1;
-		else if (!strcmp(argv[i], "-load")) loadst = atol(argv[++i]);
-		else if (!strcmp(argv[i], "-cfg")) strcpy(cfgfile, argv[++i]);
-		else if (!strcmp(argv[i], "-h") ||
-			 !strcmp(argv[i], "-help")) { printf ("%s\n", PcsxHelp); return 0; }
-		else file = argv[i];
-	}*/
 
 	gApp.hInstance = hInstance;
 
@@ -150,15 +224,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	memset(&Config, 0, sizeof(PcsxConfig));
 	strcpy(Config.Net, "Disabled");
+	strcpy(Config.PluginsDir, "plugins\\");
+	strcpy(Config.BiosDir,    "bios\\");
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
 		Config.Pause = 1;
-		strcpy(Config.PluginsDir, "plugin\\");
-		strcpy(Config.BiosDir,    "bios\\");
 		strcpy(Config.Bios,       "scph1001.bin");
-		strcpy(Config.Gpu,        "gpuPeopsSoft.dll");
-		strcpy(Config.Spu,        "spuPeopsDSound.dll");
-		strcpy(Config.Cdr,        "cdriso.dll");
+		strcpy(Config.Gpu,        "gpuTASsoft.dll");
+		strcpy(Config.Spu,        "spuTAS.dll");
+		strcpy(Config.Cdr,        "cdrTASiso.dll");
 		strcpy(Config.Pad1,       "padSeguDPP.dll");
 		strcpy(Config.Pad2,       "padSeguDPP.dll");
 		SysMessage(_("PCSX-RR needs to be configured."));
@@ -511,6 +585,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						CreateMemWatch();
 					return TRUE;
 
+				case ID_CONFIGURATION_MEMPOKE:
+						CreateMemPoke();
+					return TRUE;
+
 				case ID_CONFIGURATION_MEMSEARCH:
 						CreateMemSearch();
 					return TRUE;
@@ -579,11 +657,12 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	
 		case WM_DESTROY:
 			if (!AccBreak) {
-				if (Movie.mode == 1)
-					MOV_WriteMovieFile();
+				if (Movie.mode)
+					MOV_StopMovie();
 				if (Movie.capture)
 					WIN32_StopAviRecord();
-				if (Running) ClosePlugins();
+				if (Running)
+					ClosePlugins();
 				SysClose();
 				PostQuitMessage(0);
 				exit(0);
@@ -594,8 +673,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_QUIT:
 			if (Movie.capture)
 				WIN32_StopAviRecord();
-			if (Movie.mode == 1)
-				MOV_WriteMovieFile();
+			if (Movie.mode)
+				MOV_StopMovie();
 			exit(0);
 			break;
 
@@ -1399,6 +1478,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("RAM &Watch"), ID_CONFIGURATION_MEMWATCH);
+	ADDMENUITEM(0, _("RAM &Poke"), ID_CONFIGURATION_MEMPOKE);
 	ADDMENUITEM(0, _("RAM &Search"), ID_CONFIGURATION_MEMSEARCH);
 	ADDMENUITEM(0, _("&Cheat Editor"), ID_CONFIGURATION_CHEATS);
 	ADDSEPARATOR(0);
@@ -1414,6 +1494,7 @@ void CreateMainMenu() {
 }
 
 void CreateMainWindow(int nCmdShow) {
+	char szPcsxVersion[32];
 	WNDCLASS wc;
 	HWND hWnd;
 	HBRUSH hBrush;
@@ -1433,8 +1514,11 @@ void CreateMainWindow(int nCmdShow) {
 
 	RegisterClass(&wc);
 
+
+	sprintf(szPcsxVersion,"%3.3d",PCSXRR_VERSION);
+	sprintf(szPcsxVersion,"PCSX-RR v%c.%c.%c",szPcsxVersion[0],szPcsxVersion[1],szPcsxVersion[2]);
 	hWnd = CreateWindow("PCSX Main",
-						"PCSX-RR v0.0.8",
+						szPcsxVersion,
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						20,
 						20,
@@ -1708,4 +1792,58 @@ void WIN32_StopAviRecord()
 	SPU_stopWav();
 	Movie.capture = 0;
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_ENABLED);
+}
+
+
+INT_PTR CALLBACK DlgMemPoke(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg) {
+		case WM_INITDIALOG: {
+			SetDlgItemText(hDlg, IDC_NC_ADDRESS, bufPokeAddress);
+			SetDlgItemText(hDlg, IDC_NC_NEWVAL, bufPokeNewval);
+		}
+		return TRUE;
+		case WM_DESTROY: {
+			memPokeHWND = NULL;
+			GetDlgItemText(hDlg, IDC_NC_ADDRESS, bufPokeAddress, 7);
+			GetDlgItemText(hDlg, IDC_NC_NEWVAL, bufPokeNewval, 7);
+			break;
+		}
+		case WM_COMMAND: {
+			switch(LOWORD(wParam)) {
+
+				case IDC_C_ADD: {
+					uint32 address;
+					uint8 newval;
+					unsigned int scanned;
+					GetDlgItemText(hDlg, IDC_NC_ADDRESS, bufPokeAddress, 7);
+					GetDlgItemText(hDlg, IDC_NC_NEWVAL, bufPokeNewval, 7);
+					ScanAddress(bufPokeAddress,&address);
+					sscanf(bufPokeNewval, "%d", &scanned);
+					newval = (uint8)(scanned & 0xff);
+					psxMemWrite8(address,newval);
+					return TRUE;
+				}
+
+				case IDCANCEL:
+					DestroyWindow(hDlg);
+					return TRUE;
+
+				default:
+					break;
+			}
+		}
+		default:
+			return FALSE;
+	}
+}
+
+void CreateMemPoke()
+{
+	if(!memPokeHWND) { // create and show non-modal cheat search window
+		memPokeHWND = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAM_POKE), NULL, DlgMemPoke);
+		ShowWindow(memPokeHWND, SW_SHOW);
+	}
+	else // already open so just reactivate the window
+		SetActiveWindow(memPokeHWND);
 }

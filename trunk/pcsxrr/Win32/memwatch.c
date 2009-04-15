@@ -12,6 +12,7 @@ static char addresses[24][16];
 static char labels[24][24];
 static int NeedsInit = 1;
 char *MemWatchDir = 0;
+static BOOL bLoadingMemWatchFile;
 
 HFONT hFixedFont=NULL;
 
@@ -22,6 +23,13 @@ static char *U8ToStr(uint8 a)
  TempArray[1] = '0' + (a%100)/10;
  TempArray[2] = '0' + (a%10);
  TempArray[3] = 0;
+ return TempArray;
+}
+
+static char *IToStr(int a)
+{
+ static char TempArray[32];
+ sprintf(TempArray,"% 5.5d",a);
  return TempArray;
 }
 
@@ -82,7 +90,7 @@ static int xPositions[MWNUM];
 
 struct MWRec
 {
-	int valid, twobytes, hex;
+	int valid, twobytes, hex, sign;
 	uint32 addr;
 };
 
@@ -103,7 +111,7 @@ void MWRec_parse(WORD ctl,int changed)
 	GetDlgItemText(hwndMemWatch,ctl,TempArray,16);
 	TempArray[15]=0;
 
-	mwrecs[changed].valid = mwrecs[changed].hex = mwrecs[changed].twobytes = 0;
+	mwrecs[changed].valid = mwrecs[changed].hex = mwrecs[changed].twobytes = mwrecs[changed].sign = 0;
 	switch(TempArray[0])
 	{
 		case 0:
@@ -123,6 +131,16 @@ void MWRec_parse(WORD ctl,int changed)
 			mwrecs[changed].valid = 1;
 			mwrecs[changed].addr=FastStrToU32(TempArray+1);
 			break;
+		case 's':
+			mwrecs[changed].sign = 1;
+			mwrecs[changed].valid = 1;
+			mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			break;
+		case 'S':
+			mwrecs[changed].sign = mwrecs[changed].twobytes = 1;
+			mwrecs[changed].valid = 1;
+			mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			break;
 		default:
 			mwrecs[changed].valid = 1;
 			mwrecs[changed].addr=FastStrToU32(TempArray);
@@ -137,49 +155,42 @@ void UpdateMemWatch()
 	int len;
 	int j;
 
-	if(hwndMemWatch)
-	{
+	if(hwndMemWatch) {
 		SetTextColor(hdc,RGB(0,0,0));
 		SetBkColor(hdc,GetSysColor(COLOR_3DFACE));
 
-		for(i = 0; i < MWNUM; i++)
-		{
+		for(i = 0; i < MWNUM; i++) {
 			struct MWRec mwrec;
 			memcpy(&mwrec,&mwrecs[i],sizeof(mwrecs[i]));
 
-			if(mwrec.valid)
-			{
-				if(mwrec.hex)
-				{
+			if(mwrec.valid) {
+				if(mwrec.hex) {
 					if(mwrec.twobytes)
-					{
 						text = U16ToHexStr(psxMs16(mwrec.addr));
-					}
 					else
-					{
 						text = U8ToHexStr(psxMs8(mwrec.addr));
-					}
 				}
-				else
-				{
-					if(mwrec.twobytes)
-					{
-						text = U16ToDecStr(psxMs16(mwrec.addr));
+				else {
+					if(mwrec.twobytes) {
+						if(mwrec.sign)
+							text = IToStr(psxMs16(mwrec.addr));
+						else
+							text = U16ToDecStr(psxMs16(mwrec.addr));
 					}
-					else
-					{
-						text = U8ToStr(psxMs8(mwrec.addr));
+					else {
+						if(mwrec.sign)
+							text = IToStr(psxMs8(mwrec.addr));
+						else
+							text = U8ToStr(psxMs8(mwrec.addr));
 					}
 				}
 				len = strlen(text);
-				for(j=len;j<5;j++)
+				for(j=len;j<6;j++)
 					text[j] = ' ';
-				text[5] = 0;
+				text[6] = 0;
 			}
 			else
-			{
-				text = "-    ";
-			}
+				text = "      ";
 
 			MoveToEx(hdc,xPositions[i],yPositions[i],NULL);
 			TextOut(hdc,0,0,text,strlen(text));
@@ -302,10 +313,47 @@ static void SaveMemWatch()
 	}
 }
 
+int LoadMemWatchFile(char nameo[2048])
+{
+	FILE *fp;
+	int i,j;
+
+	fp=fopen(nameo,"r");
+	if (!fp)
+		return 0;
+
+	bLoadingMemWatchFile = TRUE;
+	for(i=0;i<24;i++) {
+		fscanf(fp, "%s ", nameo);
+		for(j = 0; j < 16; j++)
+			addresses[i][j] = nameo[j];
+		fscanf(fp, "%s\n", nameo);
+		for(j = 0; j < 24; j++)
+			labels[i][j] = nameo[j];
+
+		//Replace dummy strings with empty strings
+		if(addresses[i][0] == '|')
+			addresses[i][0] = 0;
+		if(labels[i][0] == '|')
+			labels[i][0] = 0;
+		PutInSpaces(i);
+
+		addresses[i][15] = 0;
+		labels[i][23] = 0; //just in case
+
+		SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
+		SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+	}
+	bLoadingMemWatchFile = FALSE;
+
+	fclose(fp);
+
+	return 1;
+}
+
 //Loads a previously saved file
 static void LoadMemWatch()
 {
-	FILE *fp;
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
@@ -320,48 +368,16 @@ static void LoadMemWatch()
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.lpstrInitialDir=".\\";
 	
-	if(GetOpenFileName(&ofn))
-	{
-		int i,j;
-		
+	if(GetOpenFileName(&ofn)) {
 		//Save the directory
-		if(ofn.nFileOffset < 1024)
-		{
+		if(ofn.nFileOffset < 1024) {
 			free(MemWatchDir);
 			MemWatchDir=(char*)malloc(strlen(ofn.lpstrFile)+1);
 			strcpy(MemWatchDir,ofn.lpstrFile);
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
 		
-		fp=fopen(nameo,"r");
-		for(i=0;i<24;i++)
-		{
-			fscanf(fp, "%s ", nameo); //re-using nameo--bady style :P
-			for(j = 0; j < 16; j++)
-				addresses[i][j] = nameo[j];
-			fscanf(fp, "%s\n", nameo);
-			for(j = 0; j < 24; j++)
-				labels[i][j] = nameo[j];
-			
-			//Replace dummy strings with empty strings
-			if(addresses[i][0] == '|')
-			{
-				addresses[i][0] = 0;
-			}
-			if(labels[i][0] == '|')
-			{
-				labels[i][0] = 0;
-			}
-			PutInSpaces(i);
-			
-			addresses[i][15] = 0;
-			labels[i][23] = 0; //just in case
-
-			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
-			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-			SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
-		}
-		fclose(fp);
+		LoadMemWatchFile(nameo);
 	}
 	UpdateMemWatch();
 }
@@ -425,7 +441,8 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				int changed = MWRec_findIndex(LOWORD(wParam));
 				if(changed==-1) break;
 				MWRec_parse(LOWORD(wParam),changed);
-				UpdateMemWatch();
+				if (!bLoadingMemWatchFile)
+					UpdateMemWatch();
 				break;
 			}
 			

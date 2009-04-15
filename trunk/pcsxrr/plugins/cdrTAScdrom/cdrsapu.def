@@ -1,0 +1,37 @@
+EXPORTS
+; PSEMU plugin functions:
+	PSEgetLibType		@2
+	PSEgetLibName		@3
+	PSEgetLibVersion	@4
+	CDRinit				@5
+	CDRshutdown			@6
+	CDRopen				@7
+	CDRclose			@8
+	CDRconfigure		@9
+	CDRabout			@10
+	CDRtest				@11
+	CDRgetTN			@12
+	CDRgetTD			@13
+	CDRreadTrack		@14
+	CDRgetBuffer		@15
+	CDRgetDriveLetter	@16
+	CDRplay				@17
+	CDRstop				@18
+	CDRgetStatus		@19
+	CDRgetBufferSub		@20
+	CDRreadCDDA			@21
+	CDRgetTE			@22
+; FPSE plugin functions:
+	CD_Read				@31
+	CD_Stop				@32
+	CD_Play				@33
+	CD_GetTD			@34
+	CD_GetTN			@35
+	CD_Open				@36
+	CD_Close			@37
+	CD_Wait				@38
+	CD_Configure		@40
+	CD_About			@41
+	CD_GetSeek			@42
+	CD_Eject			@43
+	CD_GetStatus		@44

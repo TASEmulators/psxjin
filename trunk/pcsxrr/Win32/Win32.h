@@ -70,6 +70,8 @@ void SaveConfig();
 void UpdateMenuSlots();
 void ResetMenuSlots();
 
+void CreateMemPoke();
+
 // maphkeys.c
 extern HWND hMHkeysDlg;
 int MHkeysUpdate();
@@ -80,6 +82,7 @@ int MHkeysListMake(int bBuild);
 void UpdateMemWatch();
 void CreateMemWatch();
 void AddMemWatch(char memaddress[32]);
+int LoadMemWatchFile(char nameo[2048]);
 extern char * MemWatchDir;
 
 // cheats

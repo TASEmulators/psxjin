@@ -48,18 +48,15 @@ int LoadConfig() {
 
 	err = 1;
 	QueryKeyV(256, "Bios", Conf->Bios);
-	QueryKeyV(256, "Gpu",  Conf->Gpu);
-	QueryKeyV(256, "Spu",  Conf->Spu);
-	QueryKeyV(256, "Cdr",  Conf->Cdr);
-	QueryKeyV(256, "Pad1", Conf->Pad1);
-	QueryKeyV(256, "Pad2", Conf->Pad2);
-	QueryKeyV(256, "Mcd1", Conf->Mcd1);
-	QueryKeyV(256, "Mcd2", Conf->Mcd2);
-	QueryKeyV(256, "PluginsDir", Conf->PluginsDir);
-	QueryKeyV(256, "BiosDir",    Conf->BiosDir);
+	QueryKeyV(256, "PluginGPU",  Conf->Gpu);
+	QueryKeyV(256, "PluginSPU",  Conf->Spu);
+	QueryKeyV(256, "PluginCDR",  Conf->Cdr);
+	QueryKeyV(256, "PluginPAD1", Conf->Pad1);
+	QueryKeyV(256, "PluginPAD2", Conf->Pad2);
+	QueryKeyV(256, "MCD1", Conf->Mcd1);
+	QueryKeyV(256, "MCD2", Conf->Mcd2);
 	err = 0;
 	QueryKeyV(256, "Net",  Conf->Net);
-	QueryKeyV(256, "Lang", Conf->Lang);
 	QueryKeyV(sizeof(Conf->Xa),      "Xa",      &Conf->Xa);
 	QueryKeyV(sizeof(Conf->Sio),     "Sio",     &Conf->Sio);
 	QueryKeyV(sizeof(Conf->Mdec),    "Mdec",    &Conf->Mdec);
@@ -109,17 +106,16 @@ void SaveConfig() {
 	RegCreateKeyEx(HKEY_CURRENT_USER, cfgfile, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &myKey, &myDisp);
 
 	SetKeyV("Bios", Conf->Bios, strlen(Conf->Bios), REG_SZ);
-	SetKeyV("Gpu",  Conf->Gpu,  strlen(Conf->Gpu),  REG_SZ);
-	SetKeyV("Spu",  Conf->Spu,  strlen(Conf->Spu),  REG_SZ);
-	SetKeyV("Cdr",  Conf->Cdr,  strlen(Conf->Cdr),  REG_SZ);
-	SetKeyV("Pad1", Conf->Pad1, strlen(Conf->Pad1), REG_SZ);
-	SetKeyV("Pad2", Conf->Pad2, strlen(Conf->Pad2), REG_SZ);
+	SetKeyV("PluginGPU",  Conf->Gpu,  strlen(Conf->Gpu),  REG_SZ);
+	SetKeyV("PluginSPU",  Conf->Spu,  strlen(Conf->Spu),  REG_SZ);
+	SetKeyV("PluginCDR",  Conf->Cdr,  strlen(Conf->Cdr),  REG_SZ);
+	SetKeyV("PluginPAD1", Conf->Pad1, strlen(Conf->Pad1), REG_SZ);
+	SetKeyV("PluginPAD2", Conf->Pad2, strlen(Conf->Pad2), REG_SZ);
 	SetKeyV("Net",  Conf->Net,  strlen(Conf->Net),  REG_SZ);
-	SetKeyV("Mcd1", Conf->Mcd1, strlen(Conf->Mcd1), REG_SZ);
-	SetKeyV("Mcd2", Conf->Mcd2, strlen(Conf->Mcd2), REG_SZ);
-	SetKeyV("Lang", Conf->Lang, strlen(Conf->Lang), REG_SZ);
-	SetKeyV("PluginsDir", Conf->PluginsDir, strlen(Conf->PluginsDir), REG_SZ);
-	SetKeyV("BiosDir",    Conf->BiosDir,    strlen(Conf->BiosDir), REG_SZ);
+	if (strcmp(Conf->Mcd1, "memcards\\movie001.tmp"))
+		SetKeyV("MCD1", Conf->Mcd1, strlen(Conf->Mcd1), REG_SZ);
+	if (strcmp(Conf->Mcd2, "memcards\\movie002.tmp"))
+		SetKeyV("MCD2", Conf->Mcd2, strlen(Conf->Mcd2), REG_SZ);
 	SetKeyV("Xa",      &Conf->Xa,      sizeof(Conf->Xa),      REG_DWORD);
 	SetKeyV("Sio",     &Conf->Sio,     sizeof(Conf->Sio),     REG_DWORD);
 	SetKeyV("Mdec",    &Conf->Mdec,    sizeof(Conf->Mdec),    REG_DWORD);
@@ -473,24 +469,6 @@ int SelectPath(HWND hW, char *Title, char *Path) {
 	return -1;
 }
 
-void SetPluginsDir(HWND hW) {
-	char Path[256];
-
-	if (SelectPath(hW, "Select Plugins Directory", Path) == -1) return;
-	strcpy(Config.PluginsDir, Path);
-	CleanUpCombos(hW);
-	OnConfigurePluginsDialog(hW);
-}
-
-void SetBiosDir(HWND hW) {
-	char Path[256];
-
-	if (SelectPath(hW, "Select Bios Directory", Path) == -1) return;
-	strcpy(Config.BiosDir, Path);
-	CleanUpCombos(hW);
-	OnConfigurePluginsDialog(hW);
-}
-
 BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
 		case WM_INITDIALOG:
@@ -504,8 +482,6 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 			Static_SetText(GetDlgItem(hW, IDC_SOUND), _("Sound"));
 			Static_SetText(GetDlgItem(hW, IDC_CDROM), _("CD-ROM"));
 			Static_SetText(GetDlgItem(hW, IDC_BIOS), _("Bios"));
-			Button_SetText(GetDlgItem(hW, IDC_BIOSDIR), _("Set Bios Directory"));
-			Button_SetText(GetDlgItem(hW, IDC_PLUGINSDIR), _("Set Plugins Directory"));
 			Button_SetText(GetDlgItem(hW, IDC_CONFIGGPU), _("Configure..."));
 			Button_SetText(GetDlgItem(hW, IDC_TESTGPU), _("Test..."));
 			Button_SetText(GetDlgItem(hW, IDC_ABOUTGPU), _("About..."));
@@ -543,9 +519,6 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
                 case IDC_ABOUTCDR:   AboutCDR(hW);  return TRUE;
     	        case IDC_ABOUTPAD1:  AboutPAD1(hW); return TRUE;
     		    case IDC_ABOUTPAD2:  AboutPAD2(hW); return TRUE;
-
-				case IDC_PLUGINSDIR: SetPluginsDir(hW); return TRUE;
-				case IDC_BIOSDIR:	 SetBiosDir(hW);	return TRUE;
 
 				case IDCANCEL: 
 					OnCancel(hW); 

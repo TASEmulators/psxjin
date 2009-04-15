@@ -1,0 +1,182 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Italian (Italy) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ITA)
+#ifdef _WIN32
+LANGUAGE LANG_ITALIAN, SUBLANG_ITALIAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_CONFIG DIALOGEX 0, 0, 280, 175
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configure the TAS CD-ROM Plugin..."
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,60,156,48,14
+    PUSHBUTTON      "Cancel",IDCANCEL,170,156,48,14
+    GROUPBOX        "Drive Properties:",IDC_STATIC,4,4,272,84
+    LTEXT           "Drive Selection:",IDC_STATIC,10,17,50,8
+    COMBOBOX        IDC_COMBO_DRIVE,65,15,200,44,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Interface Type:",IDC_STATIC,10,35,50,8
+    COMBOBOX        IDC_COMBO_INTERFACE,65,33,90,58,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Read Mode:",IDC_STATIC,10,53,50,8
+    COMBOBOX        IDC_COMBO_READMODE,65,51,90,72,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Cdrom Speed:",IDC_STATIC,160,35,55,8
+    COMBOBOX        IDC_COMBO_CDSPEED,215,33,50,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Subchannel\nRead Mode:",IDC_STATIC,10,67,50,15
+    COMBOBOX        IDC_COMBO_SUBREADMODE,65,69,90,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Use SBI/M3S file (if present):",IDC_CHECK_USESUBFILE,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | NOT WS_VISIBLE | WS_TABSTOP,160,70,105,10
+    LTEXT           "Caching Level:",IDC_STATIC,10,106,50,8
+    COMBOBOX        IDC_COMBO_CACHELEVEL,66,104,200,58,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Performance Settings:",IDC_STATIC,4,92,272,55
+    CONTROL         "Track ISO9660 File System:",IDC_CHECK_TRACKISOFS,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,10,124,105,10
+    CONTROL         "Slider1",IDC_SLIDER_ASYNCTRIG,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | NOT WS_VISIBLE | WS_TABSTOP,202,121,70,15
+    LTEXT           "Async read\nStart Delay:",IDC_STATIC,166,121,40,16,NOT WS_VISIBLE
+    CONTROL         201,IDB_BITMAP_ASYNCTRIG,"Static",SS_BITMAP | NOT WS_VISIBLE,210,137,56,5
+    CONTROL         "Cdrom Spindown:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,160,53,55,8
+    COMBOBOX        IDC_COMBO_CDSPINDOWN,215,51,50,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_DIALOG_ABOUT DIALOGEX 0, 0, 166, 106
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About the TAS CD-ROM Plugin..."
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,58,86,50,14
+    GROUPBOX        "",IDC_STATIC,8,5,150,76
+    CTEXT           "#",IDC_STATIC_PLGNAME,10,16,146,8
+    CTEXT           "0",IDC_STATIC_ABOUT_0,10,30,146,8
+    CTEXT           "1",IDC_STATIC_ABOUT_1,10,40,146,8
+    CTEXT           "2",IDC_STATIC_ABOUT_2,10,54,146,8
+    CTEXT           "3",IDC_STATIC_ABOUT_3,10,68,146,8
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""resource.h""\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DIALOG_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 165
+        TOPMARGIN, 1
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,1,0,3
+ PRODUCTVERSION 0,1,0,3
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041004b0"
+        BEGIN
+            VALUE "CompanyName", "SaPu"
+            VALUE "FileDescription", "TAS CD-ROM Plugin"
+            VALUE "FileVersion", "0, 1, 0, 3"
+            VALUE "InternalName", "cdrTAScdrom"
+            VALUE "LegalCopyright", "Copyright © 2002 by SaPu"
+            VALUE "OriginalFilename", "cdrTAScdrom.dll"
+            VALUE "ProductName", "TAS CD-ROM Plugin"
+            VALUE "ProductVersion", "0, 1, 0, 3"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x410, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP_ASYNCTRIG    BITMAP                  "asynctrig.bmp"
+#endif    // Italian (Italy) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

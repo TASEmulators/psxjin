@@ -258,9 +258,7 @@
 #define IDC_COP2C30                     1182
 #define IDC_COP2C31                     1183
 #define IDC_BUTTON1                     1254
-#define IDC_BIOSDIR                     1254
 #define IDC_FORMAT1                     1254
-#define IDC_PLUGINSDIR                  1255
 #define IDC_FORMAT2                     1255
 #define IDC_LENGTH                      1256
 #define IDC_FRAMES                      1257
@@ -277,6 +275,8 @@
 #define IDC_USEDCDROM                   1268
 #define IDC_CURRENTCDROM                1269
 #define IDC_PAUSE                       1270
+#define IDC_REPLAYEMUVERSION            1271
+#define IDC_EMUVERSION                  1272
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
@@ -375,6 +375,8 @@
 #define IDD_CHEAT_FROM_SEARCH           40107
 #define IDC_REFRESHLIST                 40108
 #define ID_HELP_TUTORIAL                40109
+#define IDD_RAM_POKE                    40110
+#define ID_CONFIGURATION_MEMPOKE        40111
 
 #define MW_ADDR00                       1001
 #define MW_ADDR01                       1004
@@ -402,6 +404,18 @@
 #define MW_ADDR23                       1070
 
 #define IDC_STATIC                      50000
+#define IDC_STATIC1                     50001
+#define IDC_STATIC2                     50002
+#define IDC_STATIC3                     50003
+#define IDC_STATIC4                     50004
+#define IDC_STATIC5                     50005
+#define IDC_STATIC6                     50006
+#define IDC_STATIC7                     50007
+#define IDC_STATIC8                     50008
+#define IDC_STATIC9                     50009
+#define IDC_STATIC10                    50010
+#define IDC_STATIC11                    50011
+#define IDC_STATIC12                    50012
 
 // Next default values for new objects
 // 

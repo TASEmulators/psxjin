@@ -647,11 +647,11 @@ static void SetTempMemoryCard(char slot) {
 }
 
 void SIO_UnsetTempMemoryCards() {
-	remove("memcards\\movie001.tmp");
-	remove("memcards\\movie002.tmp");
 	strncpy(Config.Mcd1, Config.OldMcd1, 256);
 	strncpy(Config.Mcd2, Config.OldMcd2, 256);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
+	remove("memcards\\movie001.tmp");
+	remove("memcards\\movie002.tmp");
 }
 
 static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefile) {
@@ -756,9 +756,9 @@ void SIO_LoadMemoryCardsEmbed(char *file) {
 }
 
 void SIO_ClearMemoryCardsEmbed() {
-	remove("memcards\\movie001.tmp");
-	remove("memcards\\movie002.tmp");
 	SetTempMemoryCard(1);
 	SetTempMemoryCard(2);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
+	remove("memcards\\movie001.tmp");
+	remove("memcards\\movie002.tmp");
 }

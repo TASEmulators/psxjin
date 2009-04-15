@@ -285,6 +285,12 @@ void PADhandleKey(int key) {
 		CreateMemSearch();
 	}
 
+	if(key == EmuCommandTable[EMUCMD_RAMPOKE].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMPOKE].keymod)
+	{
+		CreateMemPoke();
+	}
+
 	if(key == EmuCommandTable[EMUCMD_CONFGPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFGPU].keymod)
 	{
