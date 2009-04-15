@@ -183,7 +183,7 @@ void MOV_WriteMovieFile()
 static void WriteMovieHeader()
 {
 	int empty=0;
-	unsigned long emuVersion = EMU_VERSION;
+	unsigned long emuVersion = PCSXRR_VERSION;
 	unsigned long movieVersion = MOVIE_VERSION;
 	int authLen;
 	unsigned char* authbuf;
