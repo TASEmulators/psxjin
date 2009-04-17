@@ -1,3 +1,0 @@
-= How to record AVI files with PCSX and .kkapture =
-
-Visit this page for an updated version of this page: AviHelp
