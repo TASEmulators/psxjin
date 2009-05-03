@@ -99,10 +99,10 @@ The corresponding bytes indicate which buttons are pressed at each frame for eac
     bit 9: R2
     bit 10: L1
     bit 11: R1
-    bit 12: Square
-    bit 13: Triangle
-    bit 14: Circle
-    bit 15: X
+    bit 12: Triangle
+    bit 13: Circle
+    bit 14: X
+    bit 15: Square
 }}}
 
 *Analog Joystick/Controller*
