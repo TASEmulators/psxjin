@@ -109,7 +109,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /y /d &quot;$(ProjectDir)\includes\zlib1.dll&quot; &quot;$(OutDir)&quot;"
+				CommandLine="xcopy /y /d &quot;$(ProjectDir)\dll\*.dll&quot; &quot;$(OutDir)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -213,7 +213,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /y /d &quot;$(ProjectDir)\includes\zlib1.dll&quot; &quot;$(OutDir)&quot;"
+				CommandLine="xcopy /y /d &quot;$(ProjectDir)\dll\*.dll&quot; &quot;$(OutDir)&quot;"
 			/>
 		</Configuration>
 	</Configurations>
