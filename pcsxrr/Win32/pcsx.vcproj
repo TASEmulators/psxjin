@@ -213,7 +213,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /y /d &quot;$(ProjectDir)\dll\*.dll&quot; &quot;$(OutDir)&quot;"
+				CommandLine="output.bat"
 			/>
 		</Configuration>
 	</Configurations>
