@@ -74,11 +74,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2005-x86-Release.lib"
 				OutputFile="..\..\..\output\plugins/cdrTASiso.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\includes"
+				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2-1.0.5"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile=".\cdriso.def"
 				ProgramDatabaseFile=".\Release/cdriso.pdb"

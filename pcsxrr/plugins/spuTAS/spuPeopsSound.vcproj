@@ -48,6 +48,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\win32\directx"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -57,7 +58,7 @@
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
-				BrowseInformation="1"
+				BrowseInformation="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="1"
@@ -79,6 +80,7 @@
 				OutputFile="..\..\output\plugins/spuTAS.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\win32\directx"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile=".\spuPeopsSound.def"
@@ -226,7 +228,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -250,7 +252,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -274,7 +276,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -298,7 +300,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -322,7 +324,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -346,7 +348,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -370,7 +372,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -394,7 +396,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -418,7 +420,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -442,7 +444,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -466,7 +468,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -490,7 +492,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -514,7 +516,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -546,7 +548,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -570,7 +572,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;$(NoInherit)"
-						BrowseInformation="1"
+						BrowseInformation="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
