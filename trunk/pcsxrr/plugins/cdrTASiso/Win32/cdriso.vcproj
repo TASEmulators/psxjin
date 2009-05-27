@@ -16,7 +16,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\output\plugins\"
+			OutputDirectory="..\..\..\output\plugins\"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2.lib"
-				OutputFile="..\..\output\plugins/cdrTASiso.dll"
+				OutputFile="..\..\..\output\plugins/cdrTASiso.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=".\includes"
