@@ -4,7 +4,7 @@ PCSX-RR v0.0.9
 PCSX-RR is a special version of PCSX
 with many new features such as
 input rerecording, cheat support,
-RAM search, RAM watch,
+RAM search, RAM watch, 
 customizable hotkeys, etc.
 
 http://code.google.com/p/pcsxrr/
