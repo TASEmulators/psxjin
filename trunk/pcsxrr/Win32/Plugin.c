@@ -393,21 +393,21 @@ void PADhandleKey(int key) {
 	{
 		if (Movie.mode == 1) {
 			MovieControl.cdCase ^= 1;
-			if (!cdOpenCase) {
-				if (MovieControl.cdCase)
-					GPU_displayText("*PCSX*: CD Case Will Open On Next Frame");
-				else
-					GPU_displayText("*PCSX*: CD Case Won't Open On Next Frame");
-			}
-			else {
+			if (cdOpenCase < 0 || cdOpenCase > time(NULL)) {
 				if (MovieControl.cdCase)
 					GPU_displayText("*PCSX*: CD Case Will Close On Next Frame");
 				else
 					GPU_displayText("*PCSX*: CD Case Won't Close On Next Frame");
 			}
+			else {
+				if (MovieControl.cdCase)
+					GPU_displayText("*PCSX*: CD Case Will Open On Next Frame");
+				else
+					GPU_displayText("*PCSX*: CD Case Won't Open On Next Frame");
+			}
 		}
 		else {
-			cdOpenCase ^= 1;
+			cdOpenCase ^= -1;
 			if (cdOpenCase)
 				GPU_displayText(_("*PCSX*: CD Case Opened"));
 			else
@@ -556,11 +556,11 @@ void PADhandleKey(int key) {
 	//debug stuff
 //	if(key == 'Z')
 //		gpuShowPic(); //only shows a black screen :/
-//	if(key == 'Z') {
+//	if(key == 'C') {
 //		SysPrintf("CD-ROM Label: %.32s\n", CdromLabel);
 //		SysPrintf("CD-ROM ID: %.9s\n", CdromId);
 //	}
-//	if(key == 'X') LoadCdrom();
+//	if(key == 'X') CheckCdrom();
 }
 
 void CALLBACK SPUirq(void);

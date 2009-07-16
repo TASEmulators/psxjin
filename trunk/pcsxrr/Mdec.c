@@ -164,7 +164,6 @@ void idct(int *block,int k)
 
 unsigned short* rl2blk(int *blk,unsigned short *mdec_rl);
 void iqtab_init(int *iqtab,unsigned char *iq_y);
-void round_init(void);
 void yuv2rgb24(int *blk,unsigned char *image);
 void yuv2rgb15(int *blk,unsigned short *image);
 
@@ -181,7 +180,6 @@ void mdecInit(void) {
 	mdec.rl = (u16*)&psxM[0x100000];
 	mdec.command = 0;
 	mdec.status = 0;
-	round_init();
 }
 
 
@@ -393,13 +391,7 @@ unsigned short* rl2blk(int *blk,unsigned short *mdec_rl) {
 #endif
 
 #define	MAKERGB15(r,g,b)	( (((r)>>3)<<10)|(((g)>>3)<<5)|((b)>>3) )
-#define	ROUND(c)	roundtbl[((c)+128+256)]//&0x3ff]
-/*#define ROUND(c)	round(c+128)
-int round(int r) {
-	if (r<0) return 0;
-	if (r>255) return 255;
-	return r;
-}*/
+#define ROUND(c)	( ((c) < -128) ? 0 : (((c) > (255 - 128)) ? 255 : ((c) + 128)) )
 
 #define RGB15(n, Y) \
 	image[n] = MAKERGB15(ROUND(Y + R),ROUND(Y + G),ROUND(Y + B));
@@ -416,17 +408,6 @@ int round(int r) {
 	image[n+2] = ROUND(Y); \
 	image[n+1] = ROUND(Y); \
 	image[n+0] = ROUND(Y);
-
-unsigned char roundtbl[256*3];
-
-void round_init(void) {
-	int i;
-	for(i=0;i<256;i++) {
-		roundtbl[i]=0;
-		roundtbl[i+256]=i;
-		roundtbl[i+512]=255;
-	}
-}
 
 void yuv2rgb15(int *blk,unsigned short *image) {
 	int x,y;

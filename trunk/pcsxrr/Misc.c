@@ -438,7 +438,7 @@ int SaveState(char *file) {
 	int Size;
 	unsigned char *pMem;
 
-	f = gzopen(file, "wb1");
+	f = gzopen(file, "wb0");
 	if (f == NULL) return -1;
 
 	gzwrite(f, (void*)PcsxHeader, 32);

@@ -87,6 +87,8 @@ unsigned char Test23[] = { 0x43, 0x58, 0x44, 0x32, 0x39 ,0x34, 0x30, 0x51 };
 static struct CdrStat stat;
 static struct SubQ *subq;
 
+unsigned long CDR_fakeStatus();
+
 #define CDR_INT(eCycle) { \
 	psxRegs.interrupt|= 0x4; \
 	psxRegs.intCycle[2+1] = eCycle; \
@@ -179,7 +181,8 @@ void cdrInterrupt() {
         	cdr.Result[0] = cdr.StatP;
         	cdr.Stat = Acknowledge;
 			i = stat.Status;
-        	if (CDR_getStatus(&stat) != -1) {
+			if (CDR_getStatus(&stat) != -1) {
+				stat.Status = CDR_fakeStatus();
 				if (stat.Type == 0xff) cdr.Stat = DiskError;
 				if (stat.Status & 0x10) {
 					cdr.Stat = DiskError;
