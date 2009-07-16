@@ -526,8 +526,8 @@ void MOV_WriteControl() {
 
 void MOV_ProcessControlFlags() {
 	if (MovieControl.cdCase) {
-		cdOpenCase ^= 1;
-		if (cdOpenCase) {
+		cdOpenCase ^= -1;
+		if (cdOpenCase < 0) {
 			Movie.currentCdrom++;
 			Movie.CdromCount++;
 			#ifdef WIN32

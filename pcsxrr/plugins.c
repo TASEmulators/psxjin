@@ -215,9 +215,19 @@ long CALLBACK CDR__play(unsigned char *sector) { return 0; }
 long CALLBACK CDR__stop(void) { return 0; }
 
 long CALLBACK CDR__getStatus(struct CdrStat *stat) {
-    if (cdOpenCase) stat->Status = 0x10;
-    else stat->Status = 0;
-    return 0;
+	if (cdOpenCase < 0)
+		stat->Status = 0x10;
+	else
+		stat->Status = 0;
+
+	return 0;
+}
+
+unsigned long CDR_fakeStatus() {
+	if (cdOpenCase < 0)
+		return 0x10;
+	else
+		return 0;
 }
 
 char* CALLBACK CDR__getDriveLetter(void) { return NULL; }
