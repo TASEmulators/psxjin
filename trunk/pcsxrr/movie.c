@@ -167,7 +167,6 @@ void MOV_WriteMovieFile()
 		int i;
 		for(i=0; i<cdidsLen; ++i) {
 			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
-			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
 		}
 		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
 		free(cdidsbuf);
@@ -224,7 +223,6 @@ static void WriteMovieHeader()
 		authbuf = (unsigned char*)malloc(authLen);
 		for(i=0; i<authLen; ++i) {
 			authbuf[i + 0] = Movie.authorInfo[i] & 0xff;
-			authbuf[i + 1] = (Movie.authorInfo[i] >> 8) & 0xff;
 		}
 		fwrite(authbuf, 1, authLen, fpMovie);        //author info
 		free(authbuf);
@@ -284,7 +282,6 @@ static void WriteMovieHeader()
 		int i;
 		for(i=0; i<cdidsLen; ++i) {
 			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
-			cdidsbuf[i + 1] = (Movie.CdromIds[i] >> 8) & 0xff;
 		}
 		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
 		free(cdidsbuf);
