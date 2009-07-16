@@ -670,8 +670,10 @@ int LoadPAD1plugin(char *PAD1dll) {
 	LoadPad1Sym0(test, "PADtest");
 	LoadPad1Sym0(about, "PADabout");
 	LoadPad1Sym0(keypressed, "PADkeypressed");
-	LoadPad1Sym0(startPoll, "PADstartPoll");
-	LoadPad1Sym0(poll, "PADpoll");
+	//LoadPad1Sym0(startPoll, "PADstartPoll");
+	//LoadPad1Sym0(poll, "PADpoll");
+	PAD1_startPoll = PAD1__startPoll;
+	PAD1_poll = PAD1__poll;
 	LoadPad1SymN(setSensitive, "PADsetSensitive");
 
 	return 0;
@@ -739,8 +741,10 @@ int LoadPAD2plugin(char *PAD2dll) {
 	LoadPad2Sym0(test, "PADtest");
 	LoadPad2Sym0(about, "PADabout");
 	LoadPad2Sym0(keypressed, "PADkeypressed");
-	LoadPad2Sym0(startPoll, "PADstartPoll");
-	LoadPad2Sym0(poll, "PADpoll");
+	//LoadPad2Sym0(startPoll, "PADstartPoll");
+	//LoadPad2Sym0(poll, "PADpoll");
+	PAD2_startPoll = PAD2__startPoll;
+	PAD2_poll = PAD2__poll;
 	LoadPad2SymN(setSensitive, "PADsetSensitive");
 
 	return 0;
