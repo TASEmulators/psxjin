@@ -534,7 +534,11 @@ void MOV_ProcessControlFlags() {
 			#endif
 		}
 		else {
+			CDR_close();
+			CDR_open();
 			CheckCdrom();
+			if (LoadCdrom() == -1)
+				SysMessage(_("Could not load Cdrom"));
 			sprintf(Movie.CdromIds, "%s%9.9s", Movie.CdromIds,CdromId);
 		}
 	}

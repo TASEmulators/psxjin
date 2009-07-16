@@ -410,8 +410,14 @@ void PADhandleKey(int key) {
 			cdOpenCase ^= -1;
 			if (cdOpenCase)
 				GPU_displayText(_("*PCSX*: CD Case Opened"));
-			else
+			else {
 				GPU_displayText(_("*PCSX*: CD Case Closed"));
+				CDR_close();
+				CDR_open();
+				CheckCdrom();
+				if (LoadCdrom() == -1)
+					SysMessage(_("Could not load Cdrom"));
+			}
 		}
 	}
 
@@ -560,7 +566,10 @@ void PADhandleKey(int key) {
 //		SysPrintf("CD-ROM Label: %.32s\n", CdromLabel);
 //		SysPrintf("CD-ROM ID: %.9s\n", CdromId);
 //	}
-//	if(key == 'X') CheckCdrom();
+//	if(key == 'X') {
+//		CheckCdrom();
+//		LoadCdrom();
+//	}
 }
 
 void CALLBACK SPUirq(void);
