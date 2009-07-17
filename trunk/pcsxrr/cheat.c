@@ -8,10 +8,10 @@
 
 void PCSXRemoveCheat (uint32 which1)
 {
-	if (Cheat.c [which1].saved) {
-		uint32 address = Cheat.c[which1].address;
+//	if (Cheat.c [which1].saved) {
+//		uint32 address = Cheat.c[which1].address;
 //		psxMemWrite8(address,Cheat.c[which1].saved_byte);
-	}
+//	}
 }
 
 void PCSXDeleteCheat (uint32 which1)

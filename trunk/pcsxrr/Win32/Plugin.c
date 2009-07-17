@@ -393,7 +393,7 @@ void PADhandleKey(int key) {
 	{
 		if (Movie.mode == 1) {
 			MovieControl.cdCase ^= 1;
-			if (cdOpenCase < 0 || cdOpenCase > time(NULL)) {
+			if (cdOpenCase < 0) {
 				if (MovieControl.cdCase)
 					GPU_displayText("*PCSX*: CD Case Will Close On Next Frame");
 				else
@@ -408,8 +408,9 @@ void PADhandleKey(int key) {
 		}
 		else {
 			cdOpenCase ^= -1;
-			if (cdOpenCase)
+			if (cdOpenCase < 0) {
 				GPU_displayText(_("*PCSX*: CD Case Opened"));
+			}
 			else {
 				GPU_displayText(_("*PCSX*: CD Case Closed"));
 				CDR_close();
