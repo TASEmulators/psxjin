@@ -1637,8 +1637,10 @@ ENDVRAM:
 	if (DataWriteMode==DR_NORMAL)
 	{
 		void (* *primFunc)(unsigned char *);
-		if (bSkipNextFrame) primFunc=primTableSkip;
-		else               primFunc=primTableJ;
+		/*if (bSkipNextFrame)
+			primFunc=primTableSkip; //causes desync if frame skip is enabled
+		else*/
+			primFunc=primTableJ;
 
 		for (;i<iSize;)
 		{
