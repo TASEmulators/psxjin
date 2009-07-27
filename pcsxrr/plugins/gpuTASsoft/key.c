@@ -78,6 +78,7 @@ char                   szGPUKeys[11];
 
 void CALLBACK GPUshowScreenPic(unsigned char * pMem);
 void CALLBACK GPUgetScreenPic(unsigned char * pMem);
+void CALLBACK GPUsetspeedmode(unsigned long newSpeedMode);
 
 LRESULT CALLBACK KeyWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 {
@@ -96,6 +97,10 @@ LRESULT CALLBACK KeyWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 	//--------------------------------------------------//
 	case WM_KEYDOWN:                                    // keydown
 		if (wParam==(WPARAM)szGPUKeys[2]) ulKeybits|=KEY_RESETTEXSTORE;
+		if (wParam==(WPARAM)szGPUKeys[8]) {
+			if (!speedModifierFlag) GPUsetspeedmode(0);
+			speedModifierFlag = 1;
+		}
 		break;
 		//--------------------------------------------------//
 	case WM_SYSKEYUP:                                   // alt+enter
@@ -182,11 +187,8 @@ LRESULT CALLBACK KeyWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 		}
 		if (wParam==(WPARAM)szGPUKeys[8])
 		{
-			iFastFwd = 1 - iFastFwd;
-			bSkipNextFrame = FALSE;
-			UseFrameSkip=iFastFwd;
-			UseFrameLimit=!iFastFwd;
-			BuildDispMenu(0);
+			speedModifierFlag = 0;
+			GPUsetspeedmode(7);
 			break;
 		}
 		break;
