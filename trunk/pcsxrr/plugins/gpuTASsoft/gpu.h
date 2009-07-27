@@ -61,7 +61,8 @@ void           updateDisplay(void);
 void           SetAutoFrameCap(void);
 void           SetFixes(void);
 void           speedModifier(unsigned long option);
-void           makeNormalSnapshot(void);
+void           makeNormalSnapshotPNG(void);
+void           makeNormalSnapshotBMP(void);
 void           makeVramSnapshot(void);
 void           makeFullVramSnapshot(void);
 
