@@ -121,6 +121,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "resource.h"
+#include <png.h>
 
 #endif
 
@@ -442,10 +443,149 @@ void DoTextSnapShot(int iNum)
 
 void CALLBACK GPUmakeSnapshot(void)
 {
-	makeNormalSnapshot();
+	makeNormalSnapshotPNG();
 }
 
-void makeNormalSnapshot(void)                    // snapshot of current screen
+void makeNormalSnapshotPNG(void)                    // snapshot of current screen
+{
+	static unsigned short *srcs,*src,cs;
+	static unsigned char *srcc,*destc;
+	static long x,y,cx,cy,ax,ay;
+	static unsigned long cl;
+	char sendThisText[50];
+	BITMAPINFOHEADER BMP_INFO = {40,0,0,1,16,0,0,2048,2048,0,0};
+	FILE *bmpfile;
+	char filename[256];
+	unsigned long snapshotnr = 0;
+	png_structp png_ptr;
+	png_infop info_ptr;
+
+	BMP_INFO.biWidth = PSXDisplay.DisplayMode.x;
+	BMP_INFO.biHeight = PSXDisplay.DisplayMode.y;
+	BMP_INFO.biBitCount = 16;
+	BMP_INFO.biSizeImage = BMP_INFO.biWidth*BMP_INFO.biHeight*3;
+
+	do
+	{
+		snapshotnr++;
+#ifdef _WINDOWS
+		sprintf(filename,"SNAP\\snap_%03lu.png",snapshotnr);
+#else
+		sprintf(filename,"%s/peopssoft%03ld.png",getenv("HOME"),snapshotnr);
+#endif
+
+		bmpfile=fopen(filename,"rb");
+		if (bmpfile == NULL) break;
+		fclose(bmpfile);
+	}
+	while (TRUE);
+
+	srcs = (unsigned short*)&psxVuw[PSXDisplay.DisplayPosition.x+(PSXDisplay.DisplayPosition.y<<10)];
+	destc = (unsigned char*)BMP_BUFFER;
+	ax = (BMP_INFO.biWidth*65535L)/BMP_INFO.biWidth;
+	ay = (BMP_INFO.biHeight*65535L)/BMP_INFO.biHeight;
+	cy = (BMP_INFO.biHeight-1)<<16;
+
+	if (PSXDisplay.RGB24)
+	{
+		if (iFPSEInterface)
+		{
+			for (y=0;y<BMP_INFO.biHeight;y++)
+			{
+				srcc = (unsigned char*)&srcs[(cy&0xffff0000)>>6];
+				cx = 0;
+				for (x=0;x<BMP_INFO.biWidth;x++)
+				{
+					cl = *((unsigned long*)&srcc[(cx>>16)*3]);
+					*(destc++) = (unsigned char)((cl&0xff0000)>>16);
+					*(destc++) = (unsigned char)((cl&0xff00)>>8);
+					*(destc++) = (unsigned char)(cl&0xff);
+					cx += ax;
+				}
+				cy -= ay;
+				if (cy<0) cy=0;
+			}
+		}
+		else
+		{
+			for (y=0;y<BMP_INFO.biHeight;y++)
+			{
+				srcc = (unsigned char*)&srcs[(cy&0xffff0000)>>6];
+				cx = 0;
+				for (x=0;x<BMP_INFO.biWidth;x++)
+				{
+					cl = *((unsigned long*)&srcc[(cx>>16)*3]);
+					*(destc++) = (unsigned char)(cl&0xff);
+					*(destc++) = (unsigned char)((cl&0xff00)>>8);
+					*(destc++) = (unsigned char)((cl&0xff0000)>>16);
+					cx += ax;
+				}
+				cy -= ay;
+				if (cy<0) cy=0;
+			}
+		}
+	}
+	else
+	{
+		for (y=0;y<BMP_INFO.biHeight;y++)
+		{
+			src = &srcs[(cy&0xffff0000)>>6];
+			cx = 0;
+			for (x=0;x<BMP_INFO.biWidth;x++)
+			{
+				cs = src[cx>>16];
+				*(destc++) = (unsigned char)((cs&0x001f)<<3);
+				*(destc++) = (unsigned char)((cs&0x03e0)>>2);
+				*(destc++) = (unsigned char)((cs&0x7c00)>>7);
+				cx += ax;
+			}
+			cy -= ay;
+			if (cy<0) cy=0;
+		}
+	}
+
+	if ((bmpfile=fopen(filename,"wb"))==NULL)
+		return;
+
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
+	if(png_ptr == NULL) {
+		fclose(bmpfile);
+		return;
+	}
+	info_ptr = png_create_info_struct(png_ptr);
+	if(info_ptr == NULL) {
+		fclose(bmpfile);
+		png_destroy_write_struct(&png_ptr, png_infopp_NULL);
+		return;
+	}
+	if(setjmp(png_jmpbuf(png_ptr))) {
+		fclose(bmpfile);
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		return;
+	}
+	png_init_io(png_ptr, bmpfile);
+
+	png_set_IHDR(png_ptr, info_ptr, BMP_INFO.biWidth, BMP_INFO.biHeight, 8, PNG_COLOR_TYPE_RGB,
+	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+	png_write_info(png_ptr, info_ptr);
+	{
+		png_bytep row_pointers[BMP_INFO.biHeight];
+		destc = (unsigned char*)BMP_BUFFER;
+		for (y = 0; y < BMP_INFO.biHeight; y++)
+			row_pointers[BMP_INFO.biHeight-y-1] = destc + y*BMP_INFO.biWidth*3;
+		png_write_image(png_ptr, row_pointers);
+	}
+	png_write_end(png_ptr, info_ptr);
+
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+
+	sprintf(sendThisText,"Snap saved as \"snap_%03lu.png\".",snapshotnr);
+	GPUdisplayText(sendThisText);
+	fclose(bmpfile);
+}
+
+void makeNormalSnapshotBMP(void)                    // snapshot of current screen
 {
 	static unsigned short *srcs,*src,cs;
 	static unsigned char *srcc,*destc;
