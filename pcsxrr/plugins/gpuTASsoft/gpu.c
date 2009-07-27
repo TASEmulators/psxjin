@@ -200,8 +200,9 @@ int               totalFrames=0;
 int               currentLag=0;
 int               currentInput=0;
 int               ThereIsLag=0;
-
 char              modeFlags;
+
+unsigned char BMP_BUFFER[1600*1200*3];
 
 static unsigned   long gpuDataM[256];
 static unsigned   char gpuCommand = 0;
@@ -441,10 +442,150 @@ void DoTextSnapShot(int iNum)
 
 void CALLBACK GPUmakeSnapshot(void)
 {
-	makeCleanSnapshot();
+	makeNormalSnapshot();
 }
 
-void makeCleanSnapshot(void)                    // snapshot of current screen
+void makeNormalSnapshot(void)                    // snapshot of current screen
+{
+	static unsigned short *srcs,*src,cs;
+	static unsigned char *srcc,*destc;
+	static long x,y,cx,cy,ax,ay;
+	static unsigned long cl;
+	char sendThisText[50];
+	unsigned char empty[2]={0,0};
+	BITMAPINFOHEADER BMP_INFO = {40,0,0,1,16,0,0,2048,2048,0,0};
+
+	FILE *bmpfile;
+	char filename[256];
+	char header[0x36];
+	unsigned long snapshotnr = 0;
+	long size;
+
+	BMP_INFO.biWidth = PSXDisplay.DisplayMode.x;
+	BMP_INFO.biHeight = PSXDisplay.DisplayMode.y;
+	BMP_INFO.biBitCount = 24;
+	BMP_INFO.biSizeImage = BMP_INFO.biWidth*BMP_INFO.biHeight*3;
+	size=BMP_INFO.biSizeImage+0x38;
+
+	// hardcoded BMP header
+	memset(header,0,0x36);
+	header[0]='B';
+	header[1]='M';
+	header[2]=size&0xff;
+	header[3]=(size>>8)&0xff;
+	header[4]=(size>>16)&0xff;
+	header[5]=(size>>24)&0xff;
+	header[0x0a]=0x36;
+	header[0x0e]=0x28;
+	header[0x12]=BMP_INFO.biWidth%256;
+	header[0x13]=BMP_INFO.biWidth/256;
+	header[0x16]=BMP_INFO.biHeight%256;
+	header[0x17]=BMP_INFO.biHeight/256;
+	header[0x1a]=0x01;
+	header[0x1c]=0x18;
+	header[0x26]=0x12;
+	header[0x27]=0x0B;
+	header[0x2A]=0x12;
+	header[0x2B]=0x0B;
+
+	do
+	{
+		snapshotnr++;
+#ifdef _WINDOWS
+		sprintf(filename,"SNAP\\snap_%03lu.bmp",snapshotnr);
+#else
+		sprintf(filename,"%s/peopssoft%03ld.bmp",getenv("HOME"),snapshotnr);
+#endif
+
+		bmpfile=fopen(filename,"rb");
+		if (bmpfile == NULL) break;
+		fclose(bmpfile);
+	}
+	while (TRUE);
+
+	// try opening new snapshot file
+	if ((bmpfile=fopen(filename,"wb"))==NULL)
+		return;
+
+	fwrite(header,0x36,1,bmpfile);
+
+	srcs = (unsigned short*)&psxVuw[PSXDisplay.DisplayPosition.x+(PSXDisplay.DisplayPosition.y<<10)];
+	destc = (unsigned char*)BMP_BUFFER;
+	ax = (BMP_INFO.biWidth*65535L)/BMP_INFO.biWidth;
+	ay = (BMP_INFO.biHeight*65535L)/BMP_INFO.biHeight;
+	cy = (BMP_INFO.biHeight-1)<<16;
+
+	if (PSXDisplay.RGB24)
+	{
+		if (iFPSEInterface)
+		{
+			for (y=0;y<BMP_INFO.biHeight;y++)
+			{
+				srcc = (unsigned char*)&srcs[(cy&0xffff0000)>>6];
+				cx = 0;
+				for (x=0;x<BMP_INFO.biWidth;x++)
+				{
+					cl = *((unsigned long*)&srcc[(cx>>16)*3]);
+					*(destc++) = (unsigned char)(cl&0xff);
+					*(destc++) = (unsigned char)((cl&0xff00)>>8);
+					*(destc++) = (unsigned char)((cl&0xff0000)>>16);
+					cx += ax;
+				}
+				cy -= ay;
+				if (cy<0) cy=0;
+			}
+		}
+		else
+		{
+			for (y=0;y<BMP_INFO.biHeight;y++)
+			{
+				srcc = (unsigned char*)&srcs[(cy&0xffff0000)>>6];
+				cx = 0;
+				for (x=0;x<BMP_INFO.biWidth;x++)
+				{
+					cl = *((unsigned long*)&srcc[(cx>>16)*3]);
+					*(destc++) = (unsigned char)((cl&0xff0000)>>16);
+					*(destc++) = (unsigned char)((cl&0xff00)>>8);
+					*(destc++) = (unsigned char)(cl&0xff);
+					cx += ax;
+				}
+				cy -= ay;
+				if (cy<0) cy=0;
+			}
+		}
+	}
+	else
+	{
+		for (y=0;y<BMP_INFO.biHeight;y++)
+		{
+			src = &srcs[(cy&0xffff0000)>>6];
+			cx = 0;
+			for (x=0;x<BMP_INFO.biWidth;x++)
+			{
+				cs = src[cx>>16];
+				*(destc++) = (unsigned char)((cs&0x7c00)>>7);
+				*(destc++) = (unsigned char)((cs&0x03e0)>>2);
+				*(destc++) = (unsigned char)((cs&0x001f)<<3);
+				cx += ax;
+			}
+			cy -= ay;
+			if (cy<0) cy=0;
+		}
+	}
+
+
+	destc = (unsigned char*)BMP_BUFFER;
+	for (y=0;y<BMP_INFO.biHeight;y++) {
+		fwrite(destc+(y*BMP_INFO.biWidth*3),BMP_INFO.biWidth*3,1,bmpfile);
+	}
+	fwrite(empty,0x2,1,bmpfile);
+	fclose(bmpfile);
+
+	sprintf(sendThisText,"Snap saved as \"snap_%03lu.bmp\".",snapshotnr);
+	GPUdisplayText(sendThisText);
+}
+
+void makeVramSnapshot(void)                    // snapshot of current screen
 {
 	char sendThisText[50];
 	FILE *bmpfile;
@@ -458,8 +599,8 @@ void makeCleanSnapshot(void)                    // snapshot of current screen
 	unsigned long snapshotnr = 0;
 	start_x = PSXDisplay.DisplayPosition.x;
 	start_y = PSXDisplay.DisplayPosition.y;
-	width=PSXDisplay.DisplayModeNew.x;
-	height=PSXDisplay.DisplayModeNew.y;
+	width=PSXDisplay.DisplayMode.x;
+	height=PSXDisplay.DisplayMode.y;
 	line = (unsigned char*) malloc(width*3);
 	size=height*width*3+0x38;
 
@@ -525,7 +666,7 @@ void makeCleanSnapshot(void)                    // snapshot of current screen
 	GPUdisplayText(sendThisText);
 }
 
-void makeSnapshot(void)                    // snapshot of whole vram
+void makeFullVramSnapshot(void)                    // snapshot of whole vram
 {
 	FILE *bmpfile;
 	char filename[256];
