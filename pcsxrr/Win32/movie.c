@@ -514,7 +514,7 @@ int MOV_W32_StartRecordDialog()
 
 static BOOL CALLBACK CdChangeDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	if (Msg == WM_INITDIALOG && Movie.mode == 2) {
+	if (Msg == WM_INITDIALOG && Movie.mode == MOVIEMODE_PLAY) {
 		char tmpText[128];
 		char tmpCdromId[20];
 		memcpy(tmpCdromId,Movie.CdromIds+((Movie.currentCdrom-1)*9),9);
@@ -528,7 +528,7 @@ static BOOL CALLBACK CdChangeDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPAR
 	return FALSE;
 }
 
-int MOV_W32_StartCdChangeDialog()
+int MOV_W32_CdChangeDialog()
 {
 	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CDCHANGE), gApp.hWnd, CdChangeDialogProc);
 }

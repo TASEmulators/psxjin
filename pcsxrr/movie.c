@@ -16,11 +16,12 @@ struct MovieType Movie;
 struct MovieControlType MovieControl;
 
 FILE* fpMovie = 0;
-int flagDontPause = 1;    //1: keep running emulation | 2: frame advance | 0: real pause
-int flagFakePause = 0;    //if 1 call pause at next VSync
-int flagGPUchain = 0;     //has the GPUchain function been called already?
-int flagVSync = 0;        //has a VSync while flagGPUchain==1 already occured?
-int HasEmulatedFrame = 0; //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
+int iDoPauseAtVSync = 0; //if 1 call pause at next VSync
+int iPause = 0;          //0: keep running emulation | 1: real pause
+int iFrameAdvance = 0;   //1: advance one frame while key is down
+int iGpuHasUpdated = 0;  //has the GPUchain function been called already?
+int iVSyncFlag = 0;      //has a VSync already occured while iGpuHasUpdated==1? (because we can only save just after a VSync+GPUchain)
+int iJoysToPoll = 0;     //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
 
 static const char szFileHeader[] = "PXM "; //movie file identifier
 
@@ -378,20 +379,20 @@ void MOV_StartMovie(int mode)
 	Config.RCntFix = 0;
 	Config.VSyncWA = 0;
 	memset(&MovieControl, 0, sizeof(MovieControl));
-	if (Movie.mode == 1)
+	if (Movie.mode == MOVIEMODE_RECORD)
 		StartRecord();
-	else if (Movie.mode == 2)
+	else if (Movie.mode == MOVIEMODE_PLAY)
 		StartReplay();
 }
 
 void MOV_StopMovie()
 {
-	if (Movie.mode == 1) {
+	if (Movie.mode == MOVIEMODE_RECORD) {
 		MOV_WriteMovieFile();
 		fclose(fpMovie);
 		TruncateMovie();
 	}
-	Movie.mode = 0;
+	Movie.mode = MOVIEMODE_INACTIVE;
 	fpMovie = NULL;
 	SIO_UnsetTempMemoryCards();
 }
@@ -528,7 +529,7 @@ void MOV_ProcessControlFlags() {
 			Movie.currentCdrom++;
 			Movie.CdromCount++;
 			#ifdef WIN32
-				MOV_W32_StartCdChangeDialog();
+				MOV_W32_CdChangeDialog();
 			#else
 				//TODO: pause and ask for a new CD?
 			#endif
@@ -555,7 +556,7 @@ void MOV_ProcessControlFlags() {
 	}
 	if ((MovieControl.spuIrq || MovieControl.sioIrq ||
 		   MovieControl.RCntFix || MovieControl.VSyncWA) &&
-		   !Movie.irqHacksIncluded && Movie.mode == 1) {
+		   !Movie.irqHacksIncluded && Movie.mode == MOVIEMODE_RECORD) {
 		Movie.irqHacksIncluded = 1;
 		Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
 	}
@@ -596,13 +597,13 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Movie.CdromCount);
 	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
 	gzfreezel(&bufSize);
-	if (!(Movie.mode == 2 && Mode == 0)) {
+	if (!(Movie.mode == MOVIEMODE_PLAY && Mode == 0)) {
 		gzfreeze(Movie.inputBuffer, bufSize);
 	}
 
 	//loading state
 	if (Mode == 0) {
-		if (Movie.mode == 1)
+		if (Movie.mode == MOVIEMODE_RECORD)
 			Movie.rerecordCount++;
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
 		

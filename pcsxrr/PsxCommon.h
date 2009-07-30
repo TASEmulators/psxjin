@@ -122,7 +122,7 @@ typedef struct {
 	long RCntFix;
 	long UseNet;
 	long VSyncWA;
-	long Pause;
+	long PauseAfterPlayback;
 } PcsxConfig;
 
 PcsxConfig Config;
@@ -220,6 +220,12 @@ struct MovieControlType {
 #define MODE_FLAG_RECORD (1<<1)
 #define MODE_FLAG_REPLAY (1<<2)
 #define MODE_FLAG_PAUSED (1<<3)
+
+enum EMOVIEMODE {
+	MOVIEMODE_INACTIVE,
+	MOVIEMODE_RECORD,
+	MOVIEMODE_PLAY
+};
 
 #define gzfreeze(ptr, size) \
 	if (Mode == 1) gzwrite(f, ptr, size); \

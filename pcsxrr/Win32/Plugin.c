@@ -31,8 +31,8 @@
 #include "resource.h"
 #include "maphkeys.h"
 
-extern int speedModifierFlag;
-int speedModeTemp = 7;
+extern int iTurboMode;
+int iSpeedMode = 7;
 
 int ShowPic=0;
 char Text[255];
@@ -65,7 +65,7 @@ void gpuShowPic() {
 
 void WIN32_SaveState(int newState) {
 	StatesC=newState;
-	if (Movie.mode)
+	if (Movie.mode != MOVIEMODE_INACTIVE)
 		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC);
 	else
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
@@ -80,17 +80,17 @@ void WIN32_SaveState(int newState) {
 
 void WIN32_LoadState(int newState) {
 	int previousMode = Movie.mode;
-	if (Movie.mode == 1) {
-		if (Movie.readOnly == 1) {
+	if (Movie.mode == MOVIEMODE_RECORD) {
+		if (Movie.readOnly) {
 			MOV_WriteMovieFile();
-			Movie.mode = 2;
+			Movie.mode = MOVIEMODE_PLAY;
 		}
 	}
-	else if (Movie.mode == 2) {
-		if (Movie.readOnly == 0) Movie.mode = 1;
+	else if (Movie.mode == MOVIEMODE_PLAY) {
+		if (!Movie.readOnly) Movie.mode = MOVIEMODE_RECORD;
 	}
 	StatesC=newState;
-	if (Movie.mode)
+	if (Movie.mode != MOVIEMODE_INACTIVE)
 		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC);
 	else
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
@@ -115,13 +115,11 @@ void PADhandleKey(int key) {
 	else if(GetAsyncKeyState(VK_SHIFT))
 		modifiers = VK_SHIFT;
 
-//	if (Running == 0) return;
-
 	for (i = EMUCMD_LOADSTATE1; i <= EMUCMD_LOADSTATE1+8; i++) {
 		if(key == EmuCommandTable[i].key
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
-			flagLoadState=i-EMUCMD_LOADSTATE1+1;
+			iLoadStateFrom=i-EMUCMD_LOADSTATE1+1;
 		}
 	}
 
@@ -129,7 +127,7 @@ void PADhandleKey(int key) {
 		if(key == EmuCommandTable[i].key
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
-			flagSaveState=i-EMUCMD_SAVESTATE1+1;
+			iSaveStateTo=i-EMUCMD_SAVESTATE1+1;
 		}
 	}
 
@@ -148,41 +146,41 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_LOADSTATE].key
 	&& modifiers == EmuCommandTable[EMUCMD_LOADSTATE].keymod)
 	{
-		flagLoadState=StatesC+1;
+		iLoadStateFrom=StatesC+1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SAVESTATE].key
 	&& modifiers == EmuCommandTable[EMUCMD_SAVESTATE].keymod)
 	{
-		flagSaveState=StatesC+1;
+		iSaveStateTo=StatesC+1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_MENU].key
 	&& modifiers == EmuCommandTable[EMUCMD_MENU].keymod)
 	{
-		flagEscPressed=1;
+		iCallW32Gui=1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_PAUSE].key
 	&& modifiers == EmuCommandTable[EMUCMD_PAUSE].keymod)
 	{
-		if (flagDontPause)
-			flagFakePause = 1;
+		if (!iPause)
+			iDoPauseAtVSync=1;
 		else
-			flagDontPause = 1;
+			iPause=0;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_FRAMEADVANCE].key
 	&& modifiers == EmuCommandTable[EMUCMD_FRAMEADVANCE].keymod)
 	{
-		flagDontPause=2;
+		iFrameAdvance=1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_VSYNCADVANCE].key
 	&& modifiers == EmuCommandTable[EMUCMD_VSYNCADVANCE].keymod)
 	{
-		flagDontPause=2;
-		flagGPUchain=1;
+		iFrameAdvance=1;
+		iGpuHasUpdated=1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RWTOGGLE].key
@@ -223,22 +221,22 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_TURBOMODE].key
 	&& modifiers == EmuCommandTable[EMUCMD_TURBOMODE].keymod)
 	{
-		if (!speedModifierFlag) GPU_setspeedmode(0);
-		speedModifierFlag = 1;
+		if (!iTurboMode) GPU_setspeedmode(0);
+		iTurboMode = 1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDDEC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDDEC].keymod)
 	{
-		if (speedModeTemp>1) speedModeTemp--;
-		GPU_setspeedmode(speedModeTemp);
+		if (iSpeedMode>1) iSpeedMode--;
+		GPU_setspeedmode(iSpeedMode);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDINC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDINC].keymod)
 	{
-		if (speedModeTemp<12) speedModeTemp++;
-		GPU_setspeedmode(speedModeTemp);
+		if (iSpeedMode<12) iSpeedMode++;
+		GPU_setspeedmode(iSpeedMode);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_FRAMECOUNTER].key
@@ -325,7 +323,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STARTRECORDING].key
 	&& modifiers == EmuCommandTable[EMUCMD_STARTRECORDING].keymod)
 	{
-		if (!Movie.mode)
+		if (Movie.mode == MOVIEMODE_INACTIVE)
 			WIN32_StartMovieRecord();
 		else
 			GPU_displayText("*PCSX*: error: Movie Already Active");
@@ -334,7 +332,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
 	&& modifiers == EmuCommandTable[EMUCMD_STARTPLAYBACK].keymod)
 	{
-		if (!Movie.mode)
+		if (Movie.mode == MOVIEMODE_INACTIVE)
 			WIN32_StartMovieReplay(0);
 		else
 			GPU_displayText("*PCSX*: error: Movie Already Active");
@@ -343,7 +341,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].key
 	&& modifiers == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].keymod)
 	{
-		if (Movie.mode) {
+		if (Movie.mode != MOVIEMODE_INACTIVE) {
 			MOV_StopMovie();
 			WIN32_StartMovieReplay(Movie.movieFilename);
 		}
@@ -354,7 +352,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
 	&& modifiers == EmuCommandTable[EMUCMD_STOPMOVIE].keymod)
 	{
-		if (Movie.mode) {
+		if (Movie.mode != MOVIEMODE_INACTIVE) {
 			MOV_StopMovie();
 			GPU_displayText("*PCSX*: Stop Movie");
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
@@ -368,7 +366,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RESET].key
 	&& modifiers == EmuCommandTable[EMUCMD_RESET].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.reset ^= 1;
 			if (MovieControl.reset)
 				GPU_displayText("*PCSX*: CPU Will Reset On Next Frame");
@@ -391,7 +389,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CDCASE].key
 	&& modifiers == EmuCommandTable[EMUCMD_CDCASE].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.cdCase ^= 1;
 			if (cdOpenCase < 0) {
 				if (MovieControl.cdCase)
@@ -425,7 +423,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CHEATTOGLE].key
 	&& modifiers == EmuCommandTable[EMUCMD_CHEATTOGLE].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			if (Movie.cheatListIncluded) {
 				MovieControl.cheats ^= 1;
 				if (!cheatsEnabled) {
@@ -455,7 +453,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
 	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.sioIrq ^= 1;
 			if (!Config.Sio) {
 				if (MovieControl.sioIrq)
@@ -482,7 +480,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.spuIrq ^= 1;
 			if (!Config.SpuIrq) {
 				if (MovieControl.spuIrq)
@@ -509,7 +507,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RCNTFIX].key
 	&& modifiers == EmuCommandTable[EMUCMD_RCNTFIX].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.RCntFix ^= 1;
 			if (!Config.RCntFix) {
 				if (MovieControl.RCntFix)
@@ -536,7 +534,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_VSYNCWA].key
 	&& modifiers == EmuCommandTable[EMUCMD_VSYNCWA].keymod)
 	{
-		if (Movie.mode == 1) {
+		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.VSyncWA ^= 1;
 			if (!Config.VSyncWA) {
 				if (MovieControl.VSyncWA)

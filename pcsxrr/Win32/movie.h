@@ -3,7 +3,7 @@
 
 int MOV_W32_StartRecordDialog();
 int MOV_W32_StartReplayDialog();
-int MOV_W32_StartCdChangeDialog();
+int MOV_W32_CdChangeDialog();
 void GetMovieFilenameMini(char* filenameMini);
 
 #endif /* __W32_MOVIE_H__ */

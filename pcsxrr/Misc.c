@@ -480,7 +480,7 @@ int SaveState(char *file) {
 	psxRcntFreeze(f, 1);
 	mdecFreeze(f, 1);
 
-	if (Movie.mode)
+	if (Movie.mode != MOVIEMODE_INACTIVE)
 		MovieFreeze(f, 1);
 
 	gzclose(f);
@@ -533,7 +533,7 @@ int LoadState(char *file) {
 	psxRcntFreeze(f, 0);
 	mdecFreeze(f, 0);
 
-	if (Movie.mode)
+	if (Movie.mode != MOVIEMODE_INACTIVE)
 		MovieFreeze(f, 0);
 
 	gzclose(f);

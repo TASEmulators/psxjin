@@ -157,22 +157,23 @@ Movie.currentFrame++;
 GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
 
 // if GPUchain has already been called within this frame
-if (flagGPUchain == 1) {
+if (iGpuHasUpdated == 1) {
 	// raise VSync flag
-	flagVSync = 1;
+	iVSyncFlag = 1;
 	// frame advance or pause
-	if (flagDontPause == 2 || flagFakePause == 1) {
-		flagDontPause = 0;
-		flagFakePause = 0;
+	if (iFrameAdvance || iDoPauseAtVSync) {
+		iPause = 1;
+		iDoPauseAtVSync = 0;
+		iFrameAdvance = 0;
 	}
-	flagGPUchain = 0;
+	iGpuHasUpdated = 0;
 }
 
 // handle movie end while in replay mode
-if (Movie.mode == 2) {
+if (Movie.mode == MOVIEMODE_PLAY) {
 	// pause at last movie frame
-	if (Movie.currentFrame==Movie.totalFrames && Config.Pause)
-		flagDontPause = 0;
+	if (Movie.currentFrame==Movie.totalFrames && Config.PauseAfterPlayback)
+		iPause = 1;
 	// stop if we're beyond last frame
 	if (Movie.currentFrame>Movie.totalFrames) {
 		GPU_displayText("*PCSX*: Movie End");
@@ -181,36 +182,36 @@ if (Movie.mode == 2) {
 }
 
 // write/read joypad information for this frame
-if (HasEmulatedFrame == 2) {
-	if (Movie.mode == 1) {
+if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
+	if (Movie.mode == MOVIEMODE_RECORD) {
 		MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
 		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	}
-	else if (Movie.mode == 2) {
+	else if (Movie.mode == MOVIEMODE_PLAY) {
 		MOV_ReadJoy(&paddtemp,Movie.padType1);
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 	}
 	Movie.lagCounter++;
 	GPU_setlagcounter(Movie.lagCounter);
 }
-else if (HasEmulatedFrame == 1) { //this should never happen, but one can never be sure
-	if (Movie.mode == 1)
+else if (iJoysToPoll == 1) { //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
+	if (Movie.mode == MOVIEMODE_RECORD)
 		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
-	else if (Movie.mode == 2)
+	else if (Movie.mode == MOVIEMODE_PLAY)
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
-HasEmulatedFrame = 2;
+iJoysToPoll = 2;
 
 // write/read control byte for this frame
-if (Movie.mode == 1)
+if (Movie.mode == MOVIEMODE_RECORD)
 	MOV_WriteControl();
-else if (Movie.mode == 2)
+else if (Movie.mode == MOVIEMODE_PLAY)
 	MOV_ReadControl();
 
 MOV_ProcessControlFlags();
 
 // write file once in a while to prevent data loss
-if ((Movie.mode == 1) && (Movie.currentFrame%1800 == 0))
+if ((Movie.mode == MOVIEMODE_RECORD) && (Movie.currentFrame%1800 == 0))
 	MOV_WriteMovieFile();
 
 buttonToSend = 0;
@@ -219,11 +220,11 @@ buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 GPU_inputdisplay(buttonToSend);
 
 modeFlags = 0;
-if (!flagDontPause)
+if (iPause)
 	modeFlags |= MODE_FLAG_PAUSED;
-if (Movie.mode == 1)
+if (Movie.mode == MOVIEMODE_RECORD)
 	modeFlags |= MODE_FLAG_RECORD;
-if (Movie.mode == 2)
+if (Movie.mode == MOVIEMODE_PLAY)
 	modeFlags |= MODE_FLAG_REPLAY;
 GPU_setcurrentmode(modeFlags);
 
