@@ -93,9 +93,9 @@ void PCSXInitCheatData();
 
 void WIN32_LoadState(int newState);
 void WIN32_SaveState(int newState);
-extern int flagSaveState;
-extern int flagLoadState;
-extern int flagEscPressed;
+extern int iSaveStateTo;
+extern int iLoadStateFrom;
+extern int iCallW32Gui;
 extern char szCurrentPath[256];
 
 void WIN32_StartMovieReplay(char* szFilenanme);

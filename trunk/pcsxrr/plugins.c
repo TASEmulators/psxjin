@@ -615,13 +615,13 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 /* movie stuff start */
 
-if (HasEmulatedFrame == 2) { // only poll once each frame
-	if (Movie.mode == 1)
+if (iJoysToPoll == 2) { // only poll once each frame
+	if (Movie.mode == MOVIEMODE_RECORD)
 		MOV_WriteJoy(&padd,Movie.padType1);
-	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
+	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
 		MOV_ReadJoy(&padd,Movie.padType1);
 	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
-	HasEmulatedFrame = 1;
+	iJoysToPoll--;
 }
 else
 	memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
@@ -686,13 +686,13 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 
 /* movie stuff start */
 
-if (HasEmulatedFrame == 1) { // only poll once each frame
-	if (Movie.mode == 1)
+if (iJoysToPoll == 1) { // only poll once each frame
+	if (Movie.mode == MOVIEMODE_RECORD)
 		MOV_WriteJoy(&padd,Movie.padType2);
-	else if (Movie.mode == 2 && (Movie.currentFrame<Movie.totalFrames))
+	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
 		MOV_ReadJoy(&padd,Movie.padType2);
 	memcpy(&Movie.lastPad2,&padd,sizeof(padd));
-	HasEmulatedFrame = 0;
+	iJoysToPoll--;
 }
 else
 	memcpy(&padd,&Movie.lastPad2,sizeof(Movie.lastPad2));

@@ -433,16 +433,16 @@ __inline static void execute() {
 	void (**recFunc)();
 	char *p;
 
-	if (flagDontPause) { // emulate
-		if (flagVSync) {
+	if (!iPause || iFrameAdvance) { // emulate
+		if (iVSyncFlag) {
 			#ifdef WIN32
-			if (flagSaveState) {
-				WIN32_SaveState(flagSaveState-1);
-				flagSaveState = 0;
+			if (iSaveStateTo) {
+				WIN32_SaveState(iSaveStateTo-1);
+				iSaveStateTo = 0;
 			}
 			#endif
 		}
-		flagVSync = 0;
+		iVSyncFlag = 0;
 
 		p =	(char*)PC_REC(psxRegs.pc);
 		if (p != NULL) recFunc = (void (**)()) (u32)p;
@@ -456,9 +456,9 @@ __inline static void execute() {
 	else { // pause
 		char modeFlags = 0;
 		modeFlags |= MODE_FLAG_PAUSED;
-		if (Movie.mode == 1)
+		if (Movie.mode == MOVIEMODE_RECORD)
 			modeFlags |= MODE_FLAG_RECORD;
-		if (Movie.mode == 2)
+		if (Movie.mode == MOVIEMODE_PLAY)
 			modeFlags |= MODE_FLAG_REPLAY;
 		GPU_setcurrentmode(modeFlags);
 
@@ -466,22 +466,22 @@ __inline static void execute() {
 		SysUpdate();
 
 		#ifdef WIN32
-		if (flagSaveState) {
-			WIN32_SaveState(flagSaveState-1);
-			flagSaveState = 0;
+		if (iSaveStateTo) {
+			WIN32_SaveState(iSaveStateTo-1);
+			iSaveStateTo = 0;
 		}
 		#endif
 	}
 	#ifdef WIN32
-	if (flagLoadState) {
-		WIN32_LoadState(flagLoadState-1);
-		flagLoadState = 0;
+	if (iLoadStateFrom) {
+		WIN32_LoadState(iLoadStateFrom-1);
+		iLoadStateFrom = 0;
 	}
-	if (flagEscPressed) {
+	if (iCallW32Gui) {
+		iCallW32Gui=0;
 		Running = 0;
-		flagEscPressed=0;
-		flagDontPause = 1;
-		if (Movie.mode == 1)
+		iPause = 0;
+		if (Movie.mode == MOVIEMODE_RECORD)
 			MOV_WriteMovieFile();
 		if (Movie.capture)
 			WIN32_StopAviRecord();

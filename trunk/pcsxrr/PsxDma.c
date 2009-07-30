@@ -110,7 +110,7 @@ void psxDma2(u32 madr, u32 bcr, u32 chcr) { // GPU
 #ifdef PSXDMA_LOG
 			PSXDMA_LOG("*** DMA 2 - GPU dma chain *** %lx addr = %lx size = %lx\n", chcr, madr, bcr);
 #endif
-			flagGPUchain=1;
+			iGpuHasUpdated=1;
 			GPU_dmaChain((u32 *)psxM, madr & 0x1fffff);
 			break;
 

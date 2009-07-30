@@ -1,11 +1,12 @@
 #ifndef __MOVIE_H__
 #define __MOVIE_H__
 
-extern int flagDontPause;
-extern int flagFakePause;
-extern int flagGPUchain;
-extern int flagVSync;
-extern int HasEmulatedFrame;
+extern int iPause;
+extern int iDoPauseAtVSync;
+extern int iGpuHasUpdated;
+extern int iVSyncFlag;
+extern int iFrameAdvance;
+extern int iJoysToPoll;
 extern struct MovieType Movie;
 extern struct MovieControlType MovieControl;
 

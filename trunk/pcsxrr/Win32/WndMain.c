@@ -35,9 +35,9 @@
 #include "../movie.h"
 #include "../Win32/movie.h"
 
-int flagSaveState;
-int flagLoadState;
-int flagEscPressed;
+int iSaveStateTo;
+int iLoadStateFrom;
+int iCallW32Gui;
 char szCurrentPath[256];
 char szMovieToLoad[256];
 
@@ -54,10 +54,8 @@ char bufPokeNewval[7];
 #endif
 #endif
 
-int recording;
-
 #include "maphkeys.h"
-int speedModifierFlag;
+int iTurboMode;
 
 int AccBreak=0;
 int ConfPlug=0;
@@ -228,7 +226,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	strcpy(Config.BiosDir,    "bios\\");
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
-		Config.Pause = 1;
+		Config.PauseAfterPlayback = 1;
 		strcpy(Config.Bios,       "scph1001.bin");
 		strcpy(Config.Gpu,        "gpuTASsoft.dll");
 		strcpy(Config.Spu,        "spuTAS.dll");
@@ -650,14 +648,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			&& modifier == EmuCommandTable[EMUCMD_TURBOMODE].keymod)
 			{
 				GPU_setspeedmode(7);
-				speedModifierFlag = 0;
+				iTurboMode = 0;
 			}
 			return TRUE;
 		}
 	
 		case WM_DESTROY:
 			if (!AccBreak) {
-				if (Movie.mode)
+				if (Movie.mode != MOVIEMODE_INACTIVE)
 					MOV_StopMovie();
 				if (Movie.capture)
 					WIN32_StopAviRecord();
@@ -673,7 +671,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_QUIT:
 			if (Movie.capture)
 				WIN32_StopAviRecord();
-			if (Movie.mode)
+			if (Movie.mode != MOVIEMODE_INACTIVE)
 				MOV_StopMovie();
 			exit(0);
 			break;
@@ -1243,7 +1241,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Button_SetCheck(GetDlgItem(hW,IDC_CDDA),    Config.Cdda);
 			Button_SetCheck(GetDlgItem(hW,IDC_PSXAUTO), Config.PsxAuto);
 			Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
-			Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.Pause);
+			Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.PauseAfterPlayback);
 			Button_SetCheck(GetDlgItem(hW,IDC_PSXOUT),  Config.PsxOut);
 			Button_SetCheck(GetDlgItem(hW,IDC_SPUIRQ),  Config.SpuIrq);
 			Button_SetCheck(GetDlgItem(hW,IDC_RCNTFIX), Config.RCntFix);
@@ -1266,7 +1264,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 					Config.QKeys   = Button_GetCheck(GetDlgItem(hW,IDC_QKEYS));
 					Config.Cdda    = Button_GetCheck(GetDlgItem(hW,IDC_CDDA));
 					Config.PsxAuto = Button_GetCheck(GetDlgItem(hW,IDC_PSXAUTO));
-					Config.Pause   = Button_GetCheck(GetDlgItem(hW,IDC_PAUSE));
+					Config.PauseAfterPlayback = Button_GetCheck(GetDlgItem(hW,IDC_PAUSE));
 					tmp = Config.Cpu;
 					Config.Cpu     = Button_GetCheck(GetDlgItem(hW,IDC_CPU));
 					if (tmp != Config.Cpu) {
@@ -1535,7 +1533,7 @@ void CreateMainWindow(int nCmdShow) {
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
 
-	if (Movie.mode) {
+	if (Movie.mode != MOVIEMODE_INACTIVE) {
 		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_ENABLED);
@@ -1689,7 +1687,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 			return;
 		}
 		Running = 1;
-		MOV_StartMovie(2);
+		MOV_StartMovie(MOVIEMODE_PLAY);
 		psxCpu->Execute();
 	}
 }
@@ -1704,7 +1702,7 @@ void WIN32_StartMovieRecord()
 			SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			Running = 1;
-			MOV_StartMovie(1);
+			MOV_StartMovie(MOVIEMODE_RECORD);
 			psxCpu->Execute();
 			return;
 		}
@@ -1721,7 +1719,7 @@ void WIN32_StartMovieRecord()
 			return;
 		}
 		Running = 1;
-		MOV_StartMovie(1);
+		MOV_StartMovie(MOVIEMODE_RECORD);
 		psxCpu->Execute();
 	}
 }

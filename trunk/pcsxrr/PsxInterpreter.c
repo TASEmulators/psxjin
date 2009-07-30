@@ -45,15 +45,15 @@ static u32 branchPC;
 #define execI() \
 { \
 	u32 *code; \
-	if (flagDontPause) \
+	if (!iPause) \
 	{ \
-		if (flagVSync) { \
-			if (flagSaveState) { \
-				WIN32_SaveState(flagSaveState-1); \
-				flagSaveState = 0; \
+		if (iVSyncFlag) { \
+			if (iSaveStateTo) { \
+				WIN32_SaveState(iSaveStateTo-1); \
+				iSaveStateTo = 0; \
 			} \
 		} \
-		flagVSync = 0; \
+		iVSyncFlag = 0; \
  \
 		code = PSXM(psxRegs.pc); \
 		psxRegs.code = code == NULL ? 0 : *code; \
@@ -64,29 +64,29 @@ static u32 branchPC;
 	else { \
 		char modeFlags = 0; \
 		modeFlags |= MODE_FLAG_PAUSED; \
-		if (Movie.mode == 1) \
+		if (Movie.mode == MOVIEMODE_RECORD) \
 			modeFlags |= MODE_FLAG_RECORD; \
-		if (Movie.mode == 2) \
+		if (Movie.mode == MOVIEMODE_PLAY) \
 			modeFlags |= MODE_FLAG_REPLAY; \
 		GPU_setcurrentmode(modeFlags); \
  \
 		GPU_updateframe(); \
 		SysUpdate(); \
  \
-		if (flagSaveState) { \
-			WIN32_SaveState(flagSaveState-1); \
-			flagSaveState = 0; \
+		if (iSaveStateTo) { \
+			WIN32_SaveState(iSaveStateTo-1); \
+			iSaveStateTo = 0; \
 		} \
 	} \
-	if (flagLoadState) { \
-		WIN32_LoadState(flagLoadState-1); \
-		flagLoadState = 0; \
+	if (iLoadStateFrom) { \
+		WIN32_LoadState(iLoadStateFrom-1); \
+		iLoadStateFrom = 0; \
 	} \
-	if (flagEscPressed) { \
+	if (iCallW32Gui) { \
+		iCallW32Gui=0; \
 		Running = 0; \
-		flagEscPressed=0; \
-		flagDontPause = 1; \
-		if (Movie.mode == 1) \
+		iPause = 0; \
+		if (Movie.mode == MOVIEMODE_RECORD) \
 			MOV_WriteMovieFile(); \
 		if (Movie.capture) \
 			WIN32_StopAviRecord(); \
@@ -98,9 +98,9 @@ static u32 branchPC;
 #else
 #define execI() \
 { \
-	if (flagDontPause)	\
+	if (!iPause)	\
 	{ \
-		flagVSync = 0; \
+		iVSyncFlag = 0; \
 		u32 *code = PSXM(psxRegs.pc); \
 		psxRegs.code = code == NULL ? 0 : *code; \
 		debugI(); \
@@ -111,9 +111,9 @@ static u32 branchPC;
 	{	\
 		char modeFlags = 0; \
 		modeFlags |= MODE_FLAG_PAUSED; \
-		if (Movie.mode == 1) \
+		if (Movie.mode == MOVIEMODE_RECORD) \
 			modeFlags |= MODE_FLAG_RECORD; \
-		if (Movie.mode == 2) \
+		if (Movie.mode == MOVIEMODE_PLAY) \
 			modeFlags |= MODE_FLAG_REPLAY; \
 		GPU_setcurrentmode(modeFlags); \
  \
