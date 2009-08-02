@@ -19,8 +19,6 @@
 #include <string.h>
 
 #include "PsxCommon.h"
-#include "movie.h"
-#include "cheat.h"
 #ifdef WIN32
 #include "Win32/Win32.h"
 #endif
@@ -200,7 +198,6 @@ else if (iJoysToPoll == 1) { //this should never happen, but one can never be su
 	else if (Movie.mode == MOVIEMODE_PLAY)
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
-iJoysToPoll = 2;
 
 // write/read control byte for this frame
 if (Movie.mode == MOVIEMODE_RECORD)
@@ -235,12 +232,16 @@ GPU_setcurrentmode(modeFlags);
 //		UpdateMemSearch();
 #endif
 
+PCSX_LuaFrameBoundary();
+iJoysToPoll = 2; //reset lag counter after Lua
+
 					/* movie stuff end */
 		} else { // VSync Start (240 hsyncs) 
 			psxCounters[3].mode|= 0x10000;
 			psxUpdateVSyncRateEnd();
 			psxRcntUpd(3);
 			psxHu32ref(0x1070)|= SWAPu32(1);
+			CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 		}
 	}
 

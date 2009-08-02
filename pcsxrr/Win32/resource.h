@@ -377,6 +377,9 @@
 #define ID_HELP_TUTORIAL                40109
 #define IDD_RAM_POKE                    40110
 #define ID_CONFIGURATION_MEMPOKE        40111
+#define ID_LUA_RUN                      40112
+#define ID_LUA_STOP                     40113
+#define ID_LUA_RELOAD                   40114
 
 #define MW_ADDR00                       1001
 #define MW_ADDR01                       1004

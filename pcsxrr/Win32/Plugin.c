@@ -105,6 +105,14 @@ void WIN32_LoadState(int newState) {
 	UpdateMemWatch();
 }
 
+char *GetSavestateFilename(int newState) {
+	if (Movie.mode != MOVIEMODE_INACTIVE)
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, newState);
+	else
+		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, newState);
+	return Text;
+}
+
 void PADhandleKey(int key) {
 	int i;
 	int modifiers = 0;
@@ -558,6 +566,30 @@ void PADhandleKey(int key) {
 		}
 	}
 
+	if(key == EmuCommandTable[EMUCMD_LUA_RUN].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_RUN].keymod)
+	{
+		if(!PCSX_LuaRunning())
+			WIN32_LuaRunScript();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_LUA_STOP].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_STOP].keymod)
+	{
+		if(PCSX_LuaRunning()) {
+			PCSX_LuaStop();
+			EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_ENABLED);
+			EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
+			EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
+		}
+	}
+
+	if(key == EmuCommandTable[EMUCMD_LUA_RELOAD].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_RELOAD].keymod)
+	{
+		PCSX_ReloadLuaCode();
+	}
+
 	//debug stuff
 //	if(key == 'Z')
 //		gpuShowPic(); //only shows a black screen :/
@@ -671,6 +703,7 @@ int OpenPlugins(HWND hWnd) {
 
 	SetCurrentDirectory(PcsxDir);
 //	ShowCursor(FALSE);
+	GPU_sendFpLuaGui(PCSX_LuaGui);
 	return 0;
 }
 
@@ -720,4 +753,23 @@ void ResetPlugins() {
 	}
 
 	NetOpened = 0;
+}
+
+void SetEmulationSpeed(int cmd) {
+	if(cmd == EMUSPEED_TURBO)
+		GPU_setspeedmode(0);
+	else if(cmd == EMUSPEED_NORMAL)
+		GPU_setspeedmode(7);
+	else if(cmd == EMUSPEED_FASTEST)
+		GPU_setspeedmode(12);
+	else if(cmd == EMUSPEED_SLOWEST)
+		GPU_setspeedmode(1);
+	else if(cmd == EMUSPEED_SLOWER) {
+		if (iSpeedMode>1) iSpeedMode--;
+		GPU_setspeedmode(iSpeedMode);
+	}
+	else if(cmd == EMUSPEED_FASTER) {
+		if (iSpeedMode<12) iSpeedMode++;
+		GPU_setspeedmode(iSpeedMode);
+	}
 }

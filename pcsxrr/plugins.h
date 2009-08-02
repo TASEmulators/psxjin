@@ -85,6 +85,7 @@ typedef void (CALLBACK* GPUsetspeedmode)(unsigned long);
 typedef void (CALLBACK* GPUshowframecounter)(void);
 typedef long (CALLBACK* GPUstartAvi)(char* filename);
 typedef long (CALLBACK* GPUstopAvi)(void);
+typedef long (CALLBACK* GPUsendFpLuaGui)(void (*fpPCSX_LuaGui)(void *,int,int,int,int));
 
 //plugin stuff From Shadow
 // *** walking in the valley of your darking soul i realize that i was alone
@@ -121,6 +122,7 @@ GPUsetspeedmode     GPU_setspeedmode;
 GPUshowframecounter GPU_showframecounter;
 GPUstartAvi         GPU_startAvi;
 GPUstopAvi          GPU_stopAvi;
+GPUsendFpLuaGui     GPU_sendFpLuaGui;
 
 //cd rom plugin ;)
 typedef long (CALLBACK* CDRinit)(void);

@@ -151,13 +151,15 @@ int           iGPUHeightMask;
 int           GlobalTextIL;
 int           iTileCheat;
 
+void (*fpPCSX_LuaGui)(void *s, int width, int height, int bpp, int pitch);
+
 ////////////////////////////////////////////////////////////////////////
 // PPDK developer must change libraryName field and can change revision and build
 ////////////////////////////////////////////////////////////////////////
 
 const  unsigned char version  = 1;    // do not touch - library for PSEmu 1.x
 const  unsigned char revision = 0;
-const  unsigned char build    = 1;   // increase that with each version
+const  unsigned char build    = 2;   // increase that with each version
 
 #ifdef _WINDOWS
 static char *libraryName      = "TAS Soft Graphics Plugin";
@@ -3175,4 +3177,9 @@ void CALLBACK GPUstopAvi()
 		RECORD_Stop();
 		BuildDispMenu(0);
 	}
+}
+
+void CALLBACK GPUsendFpLuaGui(void (*fpPCSX_LuaGuiTemp)(void *s, int width, int height, int bpp, int pitch))
+{
+	fpPCSX_LuaGui = fpPCSX_LuaGuiTemp;
 }

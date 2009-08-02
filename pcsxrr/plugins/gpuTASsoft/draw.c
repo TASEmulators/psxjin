@@ -2657,15 +2657,15 @@ void SuperEagle_ex5(unsigned char *srcPtr, DWORD srcPitch,
 ////////////////////////////////////////////////////////////////////////
 
 sDX            DX;
-static DDSURFACEDESC       ddsd;
+static DDSURFACEDESC ddsd;
 GUID           guiDev;
 BOOL           bDeviceOK;
 HWND           hWGPU;
-int			   iSysMemory=0;
+int            iSysMemory=0;
 int            iFPSEInterface=0;
-int			   iRefreshRate;
-BOOL		   bVsync=FALSE;
-BOOL		   bVsync_Key=FALSE;
+int            iRefreshRate;
+BOOL           bVsync=FALSE;
+BOOL           bVsync_Key=FALSE;
 
 void (*BlitScreen) (unsigned char *,long,long);
 void (*pExtraBltFunc) (void);
@@ -4572,6 +4572,10 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 	//----------------------------------------------------//
 
 	BlitScreen((unsigned char *)ddsd.lpSurface,x,y);      // fill DDSRender surface
+
+	if(fpPCSX_LuaGui)
+		fpPCSX_LuaGui((void *)ddsd.lpSurface,PreviousPSXDisplay.Range.x1,
+		              PreviousPSXDisplay.DisplayMode.y,iColDepth,ddsd.lPitch);
 
 	if (usCursorActive) ShowGunCursor((unsigned char *)ddsd.lpSurface);
 

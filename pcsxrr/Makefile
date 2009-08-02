@@ -49,12 +49,12 @@ endif
 #FLAGS+= -fprofile-use
 
 RC1FLAGS = -d__MINGW32__
-LIBS = -lz -lcomctl32
+LIBS = -lz -lcomctl32 -llua51
 RESOBJ = Win32/pcsxres.o
 OBJS = PsxBios.o Gte.o CdRom.o PsxCounters.o PsxDma.o \
        DisR3000A.o Spu.o Sio.o PsxHw.o Mdec.o PsxMem.o Misc.o \
        plugins.o Decode_XA.o R3000A.o PsxInterpreter.o \
-       PsxHLE.o movie.o cheat.o
+       PsxHLE.o Movie.o Cheat.o LuaEngine.o
 OBJS+= Win32/WndMain.o Win32/Plugin.o Win32/ConfigurePlugins.o \
        Win32/AboutDlg.o Win32/memwatch.o Win32/memsearch.o \
        Win32/memcheat.o Win32/maphkeys.o Win32/movie.o ${RESOBJ}

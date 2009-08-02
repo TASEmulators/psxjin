@@ -227,11 +227,24 @@ enum EMOVIEMODE {
 	MOVIEMODE_PLAY
 };
 
+enum EMUSPEED_SET
+{
+	EMUSPEED_SLOWEST=0,
+	EMUSPEED_SLOWER,
+	EMUSPEED_NORMAL,
+	EMUSPEED_FASTER,
+	EMUSPEED_FASTEST,
+	EMUSPEED_TURBO
+};
+void SetEmulationSpeed(int cmd);
+
 #define gzfreeze(ptr, size) \
 	if (Mode == 1) gzwrite(f, ptr, size); \
 	if (Mode == 0) gzread(f, ptr, size);
 
 #define gzfreezel(ptr) gzfreeze(ptr, sizeof(ptr))
+
+char *GetSavestateFilename(int newState);
 
 //#define BIAS	4
 #define BIAS	2
@@ -253,5 +266,8 @@ enum EMOVIEMODE {
 #include "Misc.h"
 #include "Debug.h"
 #include "Gte.h"
+#include "Movie.h"
+#include "Cheat.h"
+#include "LuaEngine.h"
 
 #endif /* __PSXCOMMON_H__ */

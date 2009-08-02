@@ -481,11 +481,26 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_FILE_STOP_MOVIE:
-						MOV_StopMovie();
-						EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
-						EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
-						EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
+					MOV_StopMovie();
+					EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
+					EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
+					EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 					return TRUE;
+
+				case ID_LUA_RUN:
+					WIN32_LuaRunScript();
+					break;
+
+				case ID_LUA_STOP:
+					PCSX_LuaStop();
+					EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_ENABLED);
+					EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
+					EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
+					break;
+
+				case ID_LUA_RELOAD:
+					PCSX_ReloadLuaCode();
+					break;
 
 				case ID_START_CAPTURE:
 					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/AviHelp", NULL, NULL, SW_SHOWNORMAL);
@@ -1445,16 +1460,21 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&File"));
 	ADDMENUITEM(0, _("E&xit"), ID_FILE_EXIT);
 	ADDSEPARATOR(0);
+	ADDSUBMENUS(0, 2, _("&Lua"));
+	ADDMENUITEM(2, _("Re&load Script"), ID_LUA_RELOAD);
+	ADDSEPARATOR(2);
+	ADDMENUITEM(2, _("&Stop Script"), ID_LUA_STOP);
+	ADDMENUITEM(2, _("&Run Script..."), ID_LUA_RUN);
 	ADDSUBMENUS(0, 1, _("&Movie"));
-	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
-	ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
-	ADDMENUITEM(0, _("Run &CD"), ID_FILE_RUN_CD);
 	ADDMENUITEM(1, _("Record &AVI Help..."), ID_START_CAPTURE);
 	ADDSEPARATOR(1);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
+	ADDSEPARATOR(0);
+	ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
+	ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
+	ADDMENUITEM(0, _("Run &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
@@ -1489,6 +1509,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Quick Tutorial"), ID_HELP_TUTORIAL);
 
 	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
+	EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
+	EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
 }
 
 void CreateMainWindow(int nCmdShow) {
@@ -1537,6 +1559,11 @@ void CreateMainWindow(int nCmdShow) {
 		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_ENABLED);
+	}
+	if (PCSX_LuaRunning()) {
+		EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_GRAYED);
+		EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_ENABLED);
+		EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_ENABLED);
 	}
 //	if (Movie.capture) {
 //		EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
@@ -1844,4 +1871,27 @@ void CreateMemPoke()
 	}
 	else // already open so just reactivate the window
 		SetActiveWindow(memPokeHWND);
+}
+
+void WIN32_LuaRunScript() {
+	const char filter[]="PCSX-RR Lua Script (*.lua)\0*.lua\0All files(*.*)\0*.*\0\0";
+	char nameo[2048];
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=gApp.hInstance;
+	ofn.lpstrTitle="Load Memory Watch...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.lpstrInitialDir=".\\";
+	
+	if(GetOpenFileName(&ofn)) {
+		PCSX_LoadLuaCode(nameo);
+		EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_GRAYED);
+		EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_ENABLED);
+		EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_ENABLED);
+	}
 }
