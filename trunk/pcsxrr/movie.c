@@ -3,9 +3,6 @@
 #include <string.h>
 #include <assert.h>
 #include "PsxCommon.h"
-#include "movie.h"
-#include "cheat.h"
-#include "Sio.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -603,7 +600,7 @@ int MovieFreeze(gzFile f, int Mode) {
 
 	//loading state
 	if (Mode == 0) {
-		if (Movie.mode == MOVIEMODE_RECORD)
+		if (Movie.mode == MOVIEMODE_RECORD && !PCSX_LuaRerecordCountSkip())
 			Movie.rerecordCount++;
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
 		

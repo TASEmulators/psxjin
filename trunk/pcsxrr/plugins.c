@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "PsxCommon.h"
-#include "movie.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)
@@ -153,6 +152,7 @@ void CALLBACK GPU__setspeedmode(unsigned long newSpeedMode) {}
 void CALLBACK GPU__showframecounter(void) {}
 void CALLBACK GPU__startAvi(char* filename) {}
 void CALLBACK GPU__stopAvi(void) {}
+void CALLBACK GPU__sendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int)) {}
 
 #define LoadGpuSym1(dest, name) \
 	LoadSym(GPU_##dest, GPU##dest, name, 1);
@@ -205,6 +205,7 @@ int LoadGPUplugin(char *GPUdll) {
 	LoadGpuSym0(showframecounter, "GPUshowframecounter");
 	LoadGpuSym0(startAvi, "GPUstartAvi");
 	LoadGpuSym0(stopAvi, "GPUstopAvi");
+	LoadGpuSym0(sendFpLuaGui, "GPUsendFpLuaGui");
 
 	return 0;
 }
@@ -613,6 +614,8 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 	PAD1_readPort1(&padd);
 
+	if(PCSX_LuaReadJoypad(0)) padd.buttonStatus = PCSX_LuaReadJoypad(0)^0xffff;
+
 /* movie stuff start */
 
 if (iJoysToPoll == 2) { // only poll once each frame
@@ -683,6 +686,8 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	PadDataS padd;
 
 	PAD2_readPort2(&padd);
+
+	if(PCSX_LuaReadJoypad(1)) padd.buttonStatus = PCSX_LuaReadJoypad(1)^0xffff;
 
 /* movie stuff start */
 

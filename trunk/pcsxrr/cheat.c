@@ -1,6 +1,4 @@
 #include "PsxCommon.h"
-#include "cheat.h"
-#include "movie.h"
 
 #ifdef WIN32
 #include "Win32.h"

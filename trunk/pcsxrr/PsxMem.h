@@ -46,7 +46,7 @@ s8 *psxM;
 #define psxMs8(mem)     psxM[(mem) & 0x1fffff]
 #define psxMs16(mem)    (SWAP16(*(s16*)&psxM[(mem) & 0x1fffff]))
 #define psxMs32(mem)    (SWAP32(*(s32*)&psxM[(mem) & 0x1fffff]))
-#define psxMu8(mem)     (*(u8*)&psxM[(mem) & 0x1fffff]))
+#define psxMu8(mem)     (*(u8*)&psxM[(mem) & 0x1fffff])
 #define psxMu16(mem)    (SWAP16(*(u16*)&psxM[(mem) & 0x1fffff]))
 #define psxMu32(mem)    (SWAP32(*(u32*)&psxM[(mem) & 0x1fffff]))
 

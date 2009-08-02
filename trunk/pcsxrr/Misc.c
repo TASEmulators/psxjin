@@ -25,7 +25,6 @@
 #include "Coff.h"
 #include "PsxCommon.h"
 #include "plugins.h"
-#include "movie.h"
 
 int Log = 0;
 

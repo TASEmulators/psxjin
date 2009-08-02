@@ -20,7 +20,6 @@
 #include <string.h>
 
 #include "PsxCommon.h"
-#include "movie.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)

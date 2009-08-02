@@ -434,6 +434,7 @@ __inline static void execute() {
 	char *p;
 
 	if (!iPause || iFrameAdvance) { // emulate
+		CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
 		if (iVSyncFlag) {
 			#ifdef WIN32
 			if (iSaveStateTo) {

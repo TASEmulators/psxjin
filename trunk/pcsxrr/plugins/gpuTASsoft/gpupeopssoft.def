@@ -80,4 +80,5 @@ EXPORTS
 		GPUshowframecounter @72
 		GPUstartAvi         @73
 		GPUstopAvi          @74
+		GPUsendFpLuaGui     @75
 		;GPUdebugSetPC      @6x

@@ -76,7 +76,10 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,               0,           "Resident Evil 2/3 Fix E/D", },
 	{ 0,               0,           "Parasite Eve 2 Fix E/D", },
 	{ VK_F3,           VK_CONTROL,  "Reset", },
-	{ 0,               0,           "VSync Advance", }
+	{ 0,               0,           "VSync Advance", },
+	{ 'L',             VK_CONTROL,  "Run Lua Script", },
+	{ 0,               0,           "Stop Lua Script", },
+	{ 'L',             VK_SHIFT,    "Reload Lua Script", }
 };
 static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;

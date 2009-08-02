@@ -102,5 +102,6 @@ void WIN32_StartMovieReplay(char* szFilenanme);
 void WIN32_StartMovieRecord();
 void WIN32_StartAviRecord();
 void WIN32_StopAviRecord();
+void WIN32_LuaRunScript();
 
 #endif /* __WIN32_H__ */
