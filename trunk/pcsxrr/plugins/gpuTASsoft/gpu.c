@@ -572,11 +572,17 @@ void makeNormalSnapshotPNG(void)                    // snapshot of current scree
 
 	png_write_info(png_ptr, info_ptr);
 	{
-		png_bytep row_pointers[BMP_INFO.biHeight];
+		png_bytepp row_pointers = (png_bytepp) calloc(BMP_INFO.biHeight, sizeof(png_bytep));
+		if(row_pointers == NULL) {
+			fclose(bmpfile);
+			png_destroy_write_struct(&png_ptr, png_infopp_NULL);
+			return;
+		}
 		destc = (unsigned char*)BMP_BUFFER;
 		for (y = 0; y < BMP_INFO.biHeight; y++)
 			row_pointers[BMP_INFO.biHeight-y-1] = destc + y*BMP_INFO.biWidth*3;
 		png_write_image(png_ptr, row_pointers);
+		free(row_pointers);
 	}
 	png_write_end(png_ptr, info_ptr);
 

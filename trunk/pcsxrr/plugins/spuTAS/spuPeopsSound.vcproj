@@ -175,6 +175,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="dsound.lib winmm.lib"
 				OutputFile=".\Debug/spuPeopsSound.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
