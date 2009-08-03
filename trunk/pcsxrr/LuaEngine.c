@@ -474,7 +474,7 @@ static int joypad_read(lua_State *L) {
 
 	lua_newtable(L);
 	
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 16; i++) {
 		if (buttons & (1<<i)) {
 			lua_pushinteger(L,1);
 			lua_setfield(L, -2, button_mappings[i]);
@@ -507,7 +507,7 @@ static int joypad_set(lua_State *L) {
 	lua_joypads_used |= 1 << (which-1);
 	lua_joypads[which-1] = 0;
 
-	for (i=0; i < 8; i++) {
+	for (i=0; i < 16; i++) {
 		lua_getfield(L, 2, button_mappings[i]);
 		if (!lua_isnil(L,-1))
 			lua_joypads[which-1] |= 1 << i;
