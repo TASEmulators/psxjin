@@ -1621,23 +1621,22 @@ static void LuaDisplayString (const char *string, int y, int x, uint32 color, ui
 static int gui_text(lua_State *L) {
 	const char *msg;
 	int x, y;
-	uint32 colour, borderColour,displayColor=0xffff;
-	uint8 displayColorR;
-	uint8 displayColorG;
-	uint8 displayColorB;
+	uint32 colour, borderColour;
+	int argCount = lua_gettop(L);
 
 	x = luaL_checkinteger(L,1);
 	y = luaL_checkinteger(L,2);
 	msg = luaL_checkstring(L,3);
 
-//	if (x < 0 || x >= LUA_SCREEN_WIDTH || y < 0 || y >= (LUA_SCREEN_HEIGHT - font_height))
-//		luaL_error(L,"bad coordinates");
+	if(argCount>=4)
+		colour = gui_getcolour(L,4);
+	else
+		colour = gui_optcolour(L,4,LUA_BUILD_PIXEL(255, 255, 255, 255));
 
-	displayColorR = (displayColor >> 11) << 3;
-	displayColorG = ((displayColor >> 6) & 0x1f) << 3;
-	displayColorB = (displayColor & 0x1f) << 3;
-	colour = gui_optcolour(L,4,LUA_BUILD_PIXEL(255, displayColorR, displayColorG, displayColorB));
-	borderColour = gui_optcolour(L,5,LUA_BUILD_PIXEL(255, 0, 0, 0));
+	if(argCount>=5)
+		borderColour = gui_getcolour(L,5);
+	else
+		borderColour = gui_optcolour(L,5,LUA_BUILD_PIXEL(255, 0, 0, 0));
 
 	gui_prepare();
 
