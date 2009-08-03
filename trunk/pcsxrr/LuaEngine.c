@@ -686,8 +686,8 @@ static int movie_stop(lua_State *L) {
 
 }
 
-#define LUA_SCREEN_WIDTH    640
-#define LUA_SCREEN_HEIGHT   512
+int LUA_SCREEN_WIDTH  = 640;
+int LUA_SCREEN_HEIGHT = 512;
 
 // Common code by the gui library: make sure the screen array is ready
 static void gui_prepare() {
@@ -1776,47 +1776,60 @@ static int gui_register(lua_State *L) {
 }
 
 
-// string gui.popup(string message, [string type = "ok"])
-//
-//  Popup dialog!
-int gui_popup(lua_State *L) {
-	const char *message = luaL_checkstring(L, 1);
-	const char *type = luaL_optstring(L, 2, "ok");
-	
-#ifdef __WIN32__
-	int t;
-	if (strcmp(type, "ok") == 0)
-		t = MB_OK;
-	else if (strcmp(type, "yesno") == 0)
-		t = MB_YESNO;
-	else if (strcmp(type, "yesnocancel") == 0)
-		t = MB_YESNOCANCEL;
-	else
-		return luaL_error(L, "invalid popup type \"%s\"", type);
+static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
+	const char *str = luaL_checkstring(L, 1);
+	const char* type = lua_type(L,2) == LUA_TSTRING ? lua_tostring(L,2) : deftype;
+	const char* icon = lua_type(L,3) == LUA_TSTRING ? lua_tostring(L,3) : deficon;
 
-	int result = MessageBox(gApp.hWnd, message, "Lua Script Pop-up", t);
-	
-	lua_settop(L,1);
+	int itype = -1, iters = 0;
+	while(itype == -1 && iters++ < 2)
+	{
+		if(!stricmp(type, "ok")) itype = 0;
+		else if(!stricmp(type, "yesno")) itype = 1;
+		else if(!stricmp(type, "yesnocancel")) itype = 2;
+		else if(!stricmp(type, "okcancel")) itype = 3;
+		else if(!stricmp(type, "abortretryignore")) itype = 4;
+		else type = deftype;
+	}
+	assert(itype >= 0 && itype <= 4);
+	if(!(itype >= 0 && itype <= 4)) itype = 0;
 
-	if (t != MB_OK) {
-		if (result == IDYES)
-			lua_pushstring(L, "yes");
-		else if (result == IDNO)
-			lua_pushstring(L, "no");
-		else if (result == IDCANCEL)
-			lua_pushstring(L, "cancel");
-		else
-			luaL_error(L, "win32 unrecognized return value %d", result);
-		return 1;
+	int iicon = -1; iters = 0;
+	while(iicon == -1 && iters++ < 2)
+	{
+		if(!stricmp(icon, "message") || !stricmp(icon, "notice")) iicon = 0;
+		else if(!stricmp(icon, "question")) iicon = 1;
+		else if(!stricmp(icon, "warning")) iicon = 2;
+		else if(!stricmp(icon, "error")) iicon = 3;
+		else icon = deficon;
+	}
+	assert(iicon >= 0 && iicon <= 3);
+	if(!(iicon >= 0 && iicon <= 3)) iicon = 0;
+
+	static const char * const titles [] = {"Notice", "Question", "Warning", "Error"};
+	const char* answer = "ok";
+
+#ifdef WIN32
+	static const int etypes [] = {MB_OK, MB_YESNO, MB_YESNOCANCEL, MB_OKCANCEL, MB_ABORTRETRYIGNORE};
+	static const int eicons [] = {MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONWARNING, MB_ICONERROR};
+	int ianswer = MessageBox(gApp.hWnd, str, titles[iicon], etypes[itype] | eicons[iicon]);
+	switch(ianswer)
+	{
+		case IDOK: answer = "ok"; break;
+		case IDCANCEL: answer = "cancel"; break;
+		case IDABORT: answer = "abort"; break;
+		case IDRETRY: answer = "retry"; break;
+		case IDIGNORE: answer = "ignore"; break;
+		case IDYES: answer = "yes"; break;
+		case IDNO: answer = "no"; break;
 	}
 
-	// else, we don't care.
-	return 0;
+	lua_pushstring(L, answer);
+	return 1;
 #else
 
 	char *t;
 #ifdef __linux
-
 	int pid; // appease compiler
 
 	// Before doing any work, verify the correctness of the parameters.
@@ -1872,7 +1885,7 @@ int gui_popup(lua_State *L) {
 	
 		// I'm gonna be dead in a matter of microseconds anyways, so wasted memory doesn't matter to me.
 		// Go ahead and abuse strdup.
-		char * parameters[] = {"xmessage", "-buttons", t, strdup(message), NULL};
+		char * parameters[] = {"xmessage", "-buttons", t, strdup(str), NULL};
 
 		execvp("xmessage", parameters);
 		
@@ -1931,9 +1944,9 @@ use_console:
 	else
 		return luaL_error(L, "invalid popup type \"%s\"", type);
 
-	fprintf(stderr, "Lua Message: %s\n", message);
+	fprintf(stderr, "Lua Message: %s\n", str);
 
-	while (TRUE) {
+	while (true) {
 		char buffer[64];
 
 		// We don't want parameters
@@ -1971,6 +1984,179 @@ use_console:
 
 	// Nothing here, since the only way out is in the loop.
 #endif
+
+}
+
+// string gui.popup(string message, string type = "ok", string icon = "message")
+// string input.popup(string message, string type = "yesno", string icon = "question")
+static int gui_popup(lua_State *L)
+{
+	return doPopup(L, "ok", "message");
+}
+static int input_popup(lua_State *L)
+{
+	return doPopup(L, "yesno", "question");
+}
+
+#ifdef WIN32
+
+const char* s_keyToName[256] =
+{
+	NULL,
+	"leftclick",
+	"rightclick",
+	NULL,
+	"middleclick",
+	NULL,
+	NULL,
+	NULL,
+	"backspace",
+	"tab",
+	NULL,
+	NULL,
+	NULL,
+	"enter",
+	NULL,
+	NULL,
+	"shift", // 0x10
+	"control",
+	"alt",
+	"pause",
+	"capslock",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"escape",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"space", // 0x20
+	"pageup",
+	"pagedown",
+	"end",
+	"home",
+	"left",
+	"up",
+	"right",
+	"down",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"insert",
+	"delete",
+	NULL,
+	"0","1","2","3","4","5","6","7","8","9",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	"A","B","C","D","E","F","G","H","I","J",
+	"K","L","M","N","O","P","Q","R","S","T",
+	"U","V","W","X","Y","Z",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"numpad0","numpad1","numpad2","numpad3","numpad4","numpad5","numpad6","numpad7","numpad8","numpad9",
+	"numpad*","numpad+",
+	NULL,
+	"numpad-","numpad.","numpad/",
+	"F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12",
+	"F13","F14","F15","F16","F17","F18","F19","F20","F21","F22","F23","F24",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"numlock",
+	"scrolllock",
+	NULL, // 0x92
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, // 0xB9
+	"semicolon",
+	"plus",
+	"comma",
+	"minus",
+	"period",
+	"slash",
+	"tilde",
+	NULL, // 0xC1
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, // 0xDA
+	"leftbracket",
+	"backslash",
+	"rightbracket",
+	"quote",
+};
+
+void GetMouseData(uint32 *md)
+{
+	extern uint32 mousex,mousey;
+	RECT t;
+	GetClientRect(gApp.hWnd, &t);
+	md[0] = mousex / ((float)t.right / iScreenWidth);
+	md[1] = mousey / ((float)t.bottom / iScreenHeight);
+}
+
+#endif
+
+// input.get()
+// takes no input, returns a lua table of entries representing the current input state,
+// independent of the joypad buttons the emulated game thinks are pressed
+// for example:
+//   if the user is holding the W key and the left mouse button
+//   and has the mouse at the bottom-right corner of the game screen,
+//   then this would return {W=true, leftclick=true, xmouse=255, ymouse=223}
+static int input_getcurrentinputstatus(lua_State *L) {
+	lua_newtable(L);
+
+#ifdef WIN32
+	// keyboard and mouse button status
+	{
+		int i;
+		for(i = 1; i < 255; i++) {
+			const char* name = s_keyToName[i];
+			if(name) {
+				int active;
+				if(i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL)
+					active = GetKeyState(i) & 0x01;
+				else
+					active = GetAsyncKeyState(i) & 0x8000;
+				if(active) {
+					lua_pushboolean(L, TRUE);
+					lua_setfield(L, -2, name);
+				}
+			}
+		}
+	}
+	// mouse position in game screen pixel coordinates
+	{
+		uint32 MouseData[2];
+		GetMouseData(MouseData);
+		int x = MouseData[0];
+		int y = MouseData[1];
+	
+		lua_pushinteger(L, x);
+		lua_setfield(L, -2, "xmouse");
+		lua_pushinteger(L, y);
+		lua_setfield(L, -2, "ymouse");
+	}
+#else
+	// NYI (well, return an empty table)
+#endif
+
+	return 1;
 }
 
 
@@ -2266,6 +2452,14 @@ static const struct luaL_reg guilib[] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg inputlib[] = {
+	{"get", input_getcurrentinputstatus},
+	{"popup", input_popup},
+	// alternative names
+	{"read", input_getcurrentinputstatus},
+	{NULL, NULL}
+};
+
 
 void PCSX_LuaFrameBoundary() {
 	// HA!
@@ -2338,6 +2532,7 @@ int PCSX_LoadLuaCode(const char *filename) {
 		luaL_register(LUA, "savestate", savestatelib);
 		luaL_register(LUA, "movie", movielib);
 		luaL_register(LUA, "gui", guilib);
+		luaL_register(LUA, "input", inputlib);
 		lua_settop(LUA, 0); // clean the stack, because each call to luaL_register leaves a table on top
 
 		lua_register(LUA, "AND", base_AND);
@@ -2478,6 +2673,14 @@ void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 	XBuf = (uint8 *)s;
 	iScreenWidth = width;
 	iScreenHeight = height;
+	if (pitch >=3) {
+		LUA_SCREEN_WIDTH  = 1024;
+		LUA_SCREEN_HEIGHT = 1024;
+	}
+	else {
+		LUA_SCREEN_WIDTH  = 640;
+		LUA_SCREEN_HEIGHT = 512;
+	}
 
 	if (!LUA || !luaRunning)
 		return;

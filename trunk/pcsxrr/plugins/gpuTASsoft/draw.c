@@ -4575,7 +4575,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 	if(fpPCSX_LuaGui)
 		fpPCSX_LuaGui((void *)ddsd.lpSurface,PreviousPSXDisplay.Range.x1,
-		              PreviousPSXDisplay.DisplayMode.y,iColDepth,ddsd.lPitch);
+		              PreviousPSXDisplay.DisplayMode.y,iColDepth,iUseNoStretchBlt);
 
 	if (usCursorActive) ShowGunCursor((unsigned char *)ddsd.lpSurface);
 
