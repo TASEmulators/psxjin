@@ -37,6 +37,11 @@
 #include <commctrl.h>
 #include <ctype.h>
 #include <io.h>
+#include <direct.h>
+
+#ifndef strcasecmp
+#define strcasecmp _stricmp
+#endif
 
 AppData gApp;
 HANDLE hConsole;

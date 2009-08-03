@@ -74,11 +74,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib lua-5.1.4-x86.lib"
 				OutputFile=".\Debug/pcsx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes"
+				AdditionalLibraryDirectories="./includes;./lua/lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/pcsx.pdb"
 				SubSystem="2"
@@ -179,11 +179,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib lua-5.1.4-x86.lib"
 				OutputFile="..\output/pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes"
+				AdditionalLibraryDirectories="./includes;./lua/lib"
 				ProgramDatabaseFile=".\Release/pcsx.pdb"
 				SubSystem="2"
 				TargetMachine="1"
@@ -773,6 +773,22 @@
 			</File>
 			<File
 				RelativePath="..\Coff.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LuaEngine.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\LuaEngine.h"
 				>
 			</File>
 			<File

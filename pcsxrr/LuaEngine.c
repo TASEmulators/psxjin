@@ -28,6 +28,10 @@
 #define FALSE 0
 #endif
 
+#ifndef inline
+#define inline __inline
+#endif
+
 static lua_State *LUA;
 
 // Screen
@@ -172,6 +176,8 @@ void PCSX_LuaWriteInform() {
 		value = luaL_checkinteger(LUA, 5);
 		if (psxMs8(addr) != value)
 		{
+			int res;
+
 			// Value changed; update & invoke the Lua callback
 			lua_pushinteger(LUA, addr);
 			lua_pushinteger(LUA, psxMs8(addr));
@@ -179,7 +185,7 @@ void PCSX_LuaWriteInform() {
 			lua_pop(LUA, 2);
 
 			numTries = 1000;
-			int res = lua_pcall(LUA, 0, 0, 0);
+			res = lua_pcall(LUA, 0, 0, 0);
 			if (res) {
 				const char *err = lua_tostring(LUA, -1);
 				
@@ -454,9 +460,11 @@ static int memory_registerwrite(lua_State *L) {
 //  This is really the only way to get input to the system.
 static int joypad_read(lua_State *L) {
 	unsigned short buttons=0;
-	// Reads the joypads as inputted by the user
-	int which = luaL_checkinteger(L,1);
+	int which;
+	int i;
 	
+	// Reads the joypads as inputted by the user
+	which = luaL_checkinteger(L,1);
 	if(which == 1)
 		buttons = Movie.lastPad1.buttonStatus^0xffff;
 	else if(which == 2)
@@ -466,7 +474,6 @@ static int joypad_read(lua_State *L) {
 
 	lua_newtable(L);
 	
-	int i;
 	for (i = 0; i < 8; i++) {
 		if (buttons & (1<<i)) {
 			lua_pushinteger(L,1);
@@ -484,8 +491,11 @@ static int joypad_read(lua_State *L) {
 //   frame advance. The table should have the right 
 //   keys (no pun intended) set.
 static int joypad_set(lua_State *L) {
+	int which;
+	int i;
+
 	// Which joypad we're tampering with
-	int which = luaL_checkinteger(L,1);
+	which = luaL_checkinteger(L,1);
 	if (which < 1 || which > 2) {
 		luaL_error(L,"Invalid output port (valid range 1-2, specified %d)", which);
 	}
@@ -497,7 +507,6 @@ static int joypad_set(lua_State *L) {
 	lua_joypads_used |= 1 << (which-1);
 	lua_joypads[which-1] = 0;
 
-	int i;
 	for (i=0; i < 8; i++) {
 		lua_getfield(L, 2, button_mappings[i]);
 		if (!lua_isnil(L,-1))
@@ -534,11 +543,12 @@ static char *savestateobj2filename(lua_State *L, int offset) {
 
 // Helper function for garbage collection.
 static int savestate_gc(lua_State *L) {
+	const char *filename;
+
 	// The object we're collecting is on top of the stack
 	lua_getmetatable(L,1);
 	
 	// Get the filename
-	const char *filename;
 	lua_getfield(L, -1, "filename");
 	filename = lua_tostring(L,-1);
 
@@ -557,6 +567,8 @@ static int savestate_gc(lua_State *L) {
 //  ("which" between 1 and 10) or not (which == nil).
 static int savestate_create(lua_State *L) {
 	int which = -1;
+	char *filename;
+
 	if (lua_gettop(L) >= 1) {
 		which = luaL_checkinteger(L, 1);
 		if (which < 1 || which > 10) {
@@ -564,8 +576,6 @@ static int savestate_create(lua_State *L) {
 		}
 	}
 	
-
-	char *filename;
 
 	if (which > 0) {
 		// Find an appropriate filename. This is OS specific, unfortunately.
@@ -769,6 +779,13 @@ static void gui_drawline_internal(int x1, int y1, int x2, int y2, uint8 lastPixe
 
 	int xtemp = x1-x2;
 	int ytemp = y1-y2;
+
+	int delta_x;
+	int delta_y;
+
+	signed char ix;
+	signed char iy;
+
 	if (xtemp == 0 && ytemp == 0) {
 		gui_drawpixel_internal(x1, y1, colour);
 		return;
@@ -782,11 +799,11 @@ static void gui_drawline_internal(int x1, int y1, int x2, int y2, uint8 lastPixe
 		swappedy = 1;
 	}
 
-	int delta_x = xtemp << 1;
-	int delta_y = ytemp << 1;
+	delta_x = xtemp << 1;
+	delta_y = ytemp << 1;
 
-	signed char ix = x1 > x2?1:-1;
-	signed char iy = y1 > y2?1:-1;
+	ix = x1 > x2?1:-1;
+	iy = y1 > y2?1:-1;
 
 	if (lastPixel)
 		gui_drawpixel_internal(x2, y2, colour);
@@ -858,6 +875,12 @@ static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 // draw a circle on gui_data
 static void gui_drawcircle_internal(int x0, int y0, int radius, uint32 colour) {
 
+	int f;
+	int ddF_x;
+	int ddF_y;
+	int x;
+	int y;
+
 	//gui_prepare();
 
 	if (radius < 0)
@@ -871,11 +894,11 @@ static void gui_drawcircle_internal(int x0, int y0, int radius, uint32 colour) {
 
 	// http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
 
-	int f = 1 - radius;
-	int ddF_x = 1;
-	int ddF_y = -2 * radius;
-	int x = 0;
-	int y = radius;
+	f = 1 - radius;
+	ddF_x = 1;
+	ddF_y = -2 * radius;
+	x = 0;
+	y = radius;
 
 	gui_drawpixel_internal(x0, y0 + radius, colour);
 	gui_drawpixel_internal(x0, y0 - radius, colour);
@@ -924,6 +947,8 @@ static void gui_drawcircle_internal(int x0, int y0, int radius, uint32 colour) {
 // draw fill rect on gui_data
 static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
 
+	int ix, iy;
+
 	if (x1 > x2) 
 		swap(int, x1, x2);
 	if (y1 > y2) 
@@ -939,7 +964,6 @@ static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 
 	//gui_prepare();
 
-	int ix, iy;
 	for (iy = y1; iy <= y2; iy++) {
 		for (ix = x1; ix <= x2; ix++) {
 			gui_drawpixel_fast(ix, iy, colour);
@@ -949,6 +973,12 @@ static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 
 // fill a circle on gui_data
 static void gui_fillcircle_internal(int x0, int y0, int radius, uint32 colour) {
+
+	int f;
+	int ddF_x;
+	int ddF_y;
+	int x;
+	int y;
 
 	//gui_prepare();
 
@@ -963,11 +993,11 @@ static void gui_fillcircle_internal(int x0, int y0, int radius, uint32 colour) {
 
 	// http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
 
-	int f = 1 - radius;
-	int ddF_x = 1;
-	int ddF_y = -2 * radius;
-	int x = 0;
-	int y = radius;
+	f = 1 - radius;
+	ddF_x = 1;
+	ddF_y = -2 * radius;
+	x = 0;
+	y = radius;
 
 	gui_drawline_internal(x0, y0 - radius, x0, y0 + radius, TRUE, colour);
  
@@ -1038,9 +1068,11 @@ s_colorMapping [] =
 static inline uint8 str2colour(uint32 *colour, lua_State *L, const char *str) {
 	if (str[0] == '#') {
 		int color;
+		int len;
+		int missing;
 		sscanf(str+1, "%X", &color);
-		int len = strlen(str+1);
-		int missing = max(0, 8-len);
+		len = strlen(str+1);
+		missing = max(0, 8-len);
 		color <<= missing << 2;
 		if(missing >= 2) color |= 0xFF;
 		*colour = color;
@@ -1288,8 +1320,11 @@ static int gui_gdscreenshot(lua_State *L) {
 
 	int size = 11 + width * height * 4;
 	char* str = (char*)malloc(size+1);
+	unsigned char* ptr;
+	uint8 *screen;
+
 	str[size] = 0;
-	unsigned char* ptr = (unsigned char*)str;
+	ptr = (unsigned char*)str;
 
 	// GD format header for truecolor image (11 bytes)
 	*ptr++ = (65534 >> 8) & 0xFF;
@@ -1304,7 +1339,7 @@ static int gui_gdscreenshot(lua_State *L) {
 	*ptr++ = 255;
 	*ptr++ = 255;
 
-	uint8 *screen=XBuf;
+	screen=XBuf;
 	for(y=0; y<height; y++){
 		for(x=0; x<width; x++){
 			uint32 r, g, b;
@@ -1495,6 +1530,9 @@ static void PutTextInternal (const char *str, int len, short x, short y, int col
 	while(*str && len && y < LUA_SCREEN_HEIGHT)
 	{
 		int c = *str++;
+		const unsigned char* Cur_Glyph;
+		int y2,x2,y3,x3;
+
 		while (x > LUA_SCREEN_WIDTH && c != '\n') {
 			c = *str;
 			if (c == '\0')
@@ -1515,9 +1553,8 @@ static void PutTextInternal (const char *str, int len, short x, short y, int col
 		}
 		if((unsigned int)(c-32) >= 96)
 			continue;
-		const unsigned char* Cur_Glyph = (const unsigned char*)&Small_Font_Data + (c-32)*7*4;
+		Cur_Glyph = (const unsigned char*)&Small_Font_Data + (c-32)*7*4;
 
-		int y2,x2,y3,x3;
 		for(y2 = 0; y2 < 8; y2++)
 		{
 			unsigned int glyphLine = *((unsigned int*)Cur_Glyph + y2);
@@ -1585,6 +1622,9 @@ static int gui_text(lua_State *L) {
 	const char *msg;
 	int x, y;
 	uint32 colour, borderColour,displayColor=0xffff;
+	uint8 displayColorR;
+	uint8 displayColorG;
+	uint8 displayColorB;
 
 	x = luaL_checkinteger(L,1);
 	y = luaL_checkinteger(L,2);
@@ -1593,9 +1633,9 @@ static int gui_text(lua_State *L) {
 //	if (x < 0 || x >= LUA_SCREEN_WIDTH || y < 0 || y >= (LUA_SCREEN_HEIGHT - font_height))
 //		luaL_error(L,"bad coordinates");
 
-	uint8 displayColorR = (displayColor >> 11) << 3;
-	uint8 displayColorG = ((displayColor >> 6) & 0x1f) << 3;
-	uint8 displayColorB = (displayColor & 0x1f) << 3;
+	displayColorR = (displayColor >> 11) << 3;
+	displayColorG = ((displayColor >> 6) & 0x1f) << 3;
+	displayColorB = (displayColor & 0x1f) << 3;
 	colour = gui_optcolour(L,4,LUA_BUILD_PIXEL(255, displayColorR, displayColorG, displayColorB));
 	borderColour = gui_optcolour(L,5,LUA_BUILD_PIXEL(255, 0, 0, 0));
 
@@ -1620,6 +1660,22 @@ static int gui_gdoverlay(lua_State *L) {
 	int xStartSrc = 0;
 	int yStartSrc = 0;
 
+	const unsigned char* ptr;
+
+	int trueColor;
+	int imgwidth;
+	int width;
+	int imgheight;
+	int height;
+	int pitch;
+	int alphaMul;
+	int opacMap[256];
+	int colorsTotal = 0;
+	int transparent;
+	struct { uint8 r, g, b, a; } pal[256];
+	const uint8* pix;
+	int bytesToNextLine;
+
 	int index = 1;
 	if(lua_type(L,index) == LUA_TNUMBER)
 	{
@@ -1629,22 +1685,22 @@ static int gui_gdoverlay(lua_State *L) {
 	}
 
 	luaL_checktype(L,index,LUA_TSTRING);
-	const unsigned char* ptr = (const unsigned char*)lua_tostring(L,index++);
+	ptr = (const unsigned char*)lua_tostring(L,index++);
 
 	if (ptr[0] != 255 || (ptr[1] != 254 && ptr[1] != 255))
 		luaL_error(L, "bad image data");
-	int trueColor = (ptr[1] == 254);
+	trueColor = (ptr[1] == 254);
 	ptr += 2;
-	int imgwidth = *ptr++ << 8;
+	imgwidth = *ptr++ << 8;
 	imgwidth |= *ptr++;
-	int width = imgwidth;
-	int imgheight = *ptr++ << 8;
+	width = imgwidth;
+	imgheight = *ptr++ << 8;
 	imgheight |= *ptr++;
-	int height = imgheight;
+	height = imgheight;
 	if ((!trueColor && *ptr) || (trueColor && !*ptr))
 		luaL_error(L, "bad image data");
 	ptr++;
-	int pitch = imgwidth * (trueColor?4:1);
+	pitch = imgwidth * (trueColor?4:1);
 
 	if ((argCount - index + 1) >= 4) {
 		xStartSrc = luaL_checkinteger(L,index++);
@@ -1653,7 +1709,7 @@ static int gui_gdoverlay(lua_State *L) {
 		height = luaL_checkinteger(L,index++);
 	}
 
-	int alphaMul = transparencyModifier;
+	alphaMul = transparencyModifier;
 	if(lua_isnumber(L, index))
 		alphaMul = (int)(alphaMul * lua_tonumber(L, index++));
 	if(alphaMul <= 0)
@@ -1661,7 +1717,6 @@ static int gui_gdoverlay(lua_State *L) {
 
 	// since there aren't that many possible opacity levels,
 	// do the opacity modification calculations beforehand instead of per pixel
-	int opacMap[256];
 	for(i = 0; i < 128; i++)
 	{
 		int opac = 255 - ((i << 1) | (i & 1)); // gdAlphaMax = 127, not 255
@@ -1673,16 +1728,14 @@ static int gui_gdoverlay(lua_State *L) {
 	for(i = 128; i < 256; i++)
 		opacMap[i] = 0; // what should we do for them, actually?
 
-	int colorsTotal = 0;
 	if (!trueColor) {
 		colorsTotal = *ptr++ << 8;
 		colorsTotal |= *ptr++;
 	}
-	int transparent = *ptr++ << 24;
+	transparent = *ptr++ << 24;
 	transparent |= *ptr++ << 16;
 	transparent |= *ptr++ << 8;
 	transparent |= *ptr++;
-	struct { uint8 r, g, b, a; } pal[256];
 	if (!trueColor) for (i = 0; i < 256; i++) {
 		pal[i].r = *ptr++;
 		pal[i].g = *ptr++;
@@ -1728,8 +1781,8 @@ static int gui_gdoverlay(lua_State *L) {
 
 	gui_prepare();
 
-	const uint8* pix = (const uint8*)(&ptr[yStartSrc*pitch + (xStartSrc*(trueColor?4:1))]);
-	int bytesToNextLine = pitch - (width * (trueColor?4:1));
+	pix = (const uint8*)(&ptr[yStartSrc*pitch + (xStartSrc*(trueColor?4:1))]);
+	bytesToNextLine = pitch - (width * (trueColor?4:1));
 	if (trueColor)
 		for (y = yStartDst; y < height+yStartDst && y < LUA_SCREEN_HEIGHT; y++, pix += bytesToNextLine) {
 			for (x = xStartDst; x < width+xStartDst && x < LUA_SCREEN_WIDTH; x++, pix += 4) {
@@ -1782,6 +1835,10 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	const char* icon = lua_type(L,3) == LUA_TSTRING ? lua_tostring(L,3) : deficon;
 
 	int itype = -1, iters = 0;
+	int iicon = -1;
+	static const char * const titles [] = {"Notice", "Question", "Warning", "Error"};
+	const char* answer = "ok";
+
 	while(itype == -1 && iters++ < 2)
 	{
 		if(!stricmp(type, "ok")) itype = 0;
@@ -1794,7 +1851,7 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	assert(itype >= 0 && itype <= 4);
 	if(!(itype >= 0 && itype <= 4)) itype = 0;
 
-	int iicon = -1; iters = 0;
+	iters = 0;
 	while(iicon == -1 && iters++ < 2)
 	{
 		if(!stricmp(icon, "message") || !stricmp(icon, "notice")) iicon = 0;
@@ -1806,26 +1863,25 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	assert(iicon >= 0 && iicon <= 3);
 	if(!(iicon >= 0 && iicon <= 3)) iicon = 0;
 
-	static const char * const titles [] = {"Notice", "Question", "Warning", "Error"};
-	const char* answer = "ok";
-
 #ifdef WIN32
-	static const int etypes [] = {MB_OK, MB_YESNO, MB_YESNOCANCEL, MB_OKCANCEL, MB_ABORTRETRYIGNORE};
-	static const int eicons [] = {MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONWARNING, MB_ICONERROR};
-	int ianswer = MessageBox(gApp.hWnd, str, titles[iicon], etypes[itype] | eicons[iicon]);
-	switch(ianswer)
 	{
-		case IDOK: answer = "ok"; break;
-		case IDCANCEL: answer = "cancel"; break;
-		case IDABORT: answer = "abort"; break;
-		case IDRETRY: answer = "retry"; break;
-		case IDIGNORE: answer = "ignore"; break;
-		case IDYES: answer = "yes"; break;
-		case IDNO: answer = "no"; break;
-	}
+		static const int etypes [] = {MB_OK, MB_YESNO, MB_YESNOCANCEL, MB_OKCANCEL, MB_ABORTRETRYIGNORE};
+		static const int eicons [] = {MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONWARNING, MB_ICONERROR};
+		int ianswer = MessageBox(gApp.hWnd, str, titles[iicon], etypes[itype] | eicons[iicon]);
+		switch(ianswer)
+		{
+			case IDOK: answer = "ok"; break;
+			case IDCANCEL: answer = "cancel"; break;
+			case IDABORT: answer = "abort"; break;
+			case IDRETRY: answer = "retry"; break;
+			case IDIGNORE: answer = "ignore"; break;
+			case IDYES: answer = "yes"; break;
+			case IDNO: answer = "no"; break;
+		}
 
-	lua_pushstring(L, answer);
-	return 1;
+		lua_pushstring(L, answer);
+		return 1;
+	}
 #else
 
 	char *t;
@@ -2143,9 +2199,10 @@ static int input_getcurrentinputstatus(lua_State *L) {
 	// mouse position in game screen pixel coordinates
 	{
 		uint32 MouseData[2];
+		int x, y;
 		GetMouseData(MouseData);
-		int x = MouseData[0];
-		int y = MouseData[1];
+		x = MouseData[0];
+		y = MouseData[1];
 	
 		lua_pushinteger(L, x);
 		lua_setfield(L, -2, "xmouse");
@@ -2300,13 +2357,14 @@ void HandleCallbackError(lua_State* L)
 
 
 void CallExitFunction() {
+	int errorcode = 0;
+
 	if (!LUA)
 		return;
 
 	lua_settop(LUA, 0);
 	lua_getfield(LUA, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFOREEXIT]);
 
-	int errorcode = 0;
 	if (lua_isfunction(LUA, -1))
 	{
 		chdir(luaCWD);
@@ -2321,8 +2379,11 @@ void CallExitFunction() {
 
 void CallRegisteredLuaFunctions(int calltype)
 {
+	const char* idstring;
+	int errorcode = 0;
+
 	assert((unsigned int)calltype < (unsigned int)LUACALL_COUNT);
-	const char* idstring = luaCallIDStrings[calltype];
+	idstring = luaCallIDStrings[calltype];
 
 	if (!LUA)
 		return;
@@ -2330,7 +2391,6 @@ void CallRegisteredLuaFunctions(int calltype)
 	lua_settop(LUA, 0);
 	lua_getfield(LUA, LUA_REGISTRYINDEX, idstring);
 
-	int errorcode = 0;
 	if (lua_isfunction(LUA, -1))
 	{
 		errorcode = lua_pcall(LUA, 0, 0, 0);
@@ -2462,6 +2522,9 @@ static const struct luaL_reg inputlib[] = {
 
 
 void PCSX_LuaFrameBoundary() {
+	lua_State *thread;
+	int result;
+
 	// HA!
 	if (!LUA || !luaRunning)
 		return;
@@ -2469,14 +2532,14 @@ void PCSX_LuaFrameBoundary() {
 	// Our function needs calling
 	lua_settop(LUA,0);
 	lua_getfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
-	lua_State *thread = lua_tothread(LUA,1);	
+	thread = lua_tothread(LUA,1);	
 
 	// Lua calling C must know that we're busy inside a frame boundary
 	frameBoundary = TRUE;
 	frameAdvanceWaiting = FALSE;
 
 	numTries = 1000;
-	int result = lua_resume(thread, 0);
+	result = lua_resume(thread, 0);
 	
 	if (result == LUA_YIELD) {
 		// Okay, we're fine with that.
@@ -2516,6 +2579,9 @@ void PCSX_LuaFrameBoundary() {
  * Returns true on success, false on failure.
  */
 int PCSX_LoadLuaCode(const char *filename) {
+	lua_State *thread;
+	int result;
+
 	if (filename != luaScriptName)
 	{
 		if (luaScriptName) free(luaScriptName);
@@ -2550,10 +2616,10 @@ int PCSX_LoadLuaCode(const char *filename) {
 
 	// We make our thread NOW because we want it at the bottom of the stack.
 	// If all goes wrong, we let the garbage collector remove it.
-	lua_State *thread = lua_newthread(LUA);
+	thread = lua_newthread(LUA);
 	
 	// Load the data	
-	int result = luaL_loadfile(LUA,filename);
+	result = luaL_loadfile(LUA,filename);
 
 	if (result) {
 #ifdef WIN32
@@ -2670,6 +2736,9 @@ int PCSX_LuaRerecordCountSkip() {
  * Currently we only support 256x* resolutions.
  */
 void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
+	int x,y;
+	uint8 r,g,b,gui_alpha,gui_red,gui_green,gui_blue;
+
 	XBuf = (uint8 *)s;
 	iScreenWidth = width;
 	iScreenHeight = height;
@@ -2689,9 +2758,11 @@ void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 	lua_getfield(LUA, LUA_REGISTRYINDEX, guiCallbackTable);
 	
 	if (lua_isfunction(LUA, -1)) {
+		int ret;
+
 		// We call it now
 		numTries = 1000;
-		int ret = lua_pcall(LUA, 0, 0, 0);
+		ret = lua_pcall(LUA, 0, 0, 0);
 		if (ret != 0) {
 #ifdef WIN32
 			MessageBox(gApp.hWnd, lua_tostring(LUA, -1), "Lua Error in GUI function", MB_OK);
@@ -2711,9 +2782,6 @@ void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 		return;
 
 	gui_used = GUI_USED_SINCE_LAST_FRAME;
-
-	int x,y;
-	uint8 r,g,b,gui_alpha,gui_red,gui_green,gui_blue;
 
 	for (y = 0; y < LUA_SCREEN_HEIGHT; y++) {
 		for (x=0; x < LUA_SCREEN_WIDTH; x++) {
