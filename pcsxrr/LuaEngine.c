@@ -400,19 +400,19 @@ static int memory_readbyterange(lua_State *L) {
 
 static int memory_writebyte(lua_State *L)
 {
-	psxMemWrite8(luaL_checkinteger(L,2), luaL_checkinteger(L,1));
+	psxMemWrite8(luaL_checkinteger(L,1), luaL_checkinteger(L,2));
 	return 0;
 }
 
 static int memory_writeword(lua_State *L)
 {
-	psxMemWrite16(luaL_checkinteger(L,2), luaL_checkinteger(L,1));
+	psxMemWrite16(luaL_checkinteger(L,1), luaL_checkinteger(L,2));
 	return 0;
 }
 
 static int memory_writedword(lua_State *L)
 {
-	psxMemWrite32(luaL_checkinteger(L,2), luaL_checkinteger(L,1));
+	psxMemWrite32(luaL_checkinteger(L,1), luaL_checkinteger(L,2));
 	return 0;
 }
 
@@ -2206,7 +2206,7 @@ static const struct luaL_reg memorylib [] = {
 };
 
 static const struct luaL_reg joypadlib[] = {
-	{"read", joypad_read},
+	{"get", joypad_read},
 	{"set", joypad_set},
 	// alternative names
 	{"read", joypad_read},
