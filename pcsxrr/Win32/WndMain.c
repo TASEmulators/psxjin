@@ -41,6 +41,8 @@ int iCallW32Gui;
 char szCurrentPath[256];
 char szMovieToLoad[256];
 
+uint32 mousex,mousey;
+
 HWND memPokeHWND = NULL;
 char bufPokeAddress[7];
 char bufPokeNewval[7];
@@ -665,6 +667,12 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				GPU_setspeedmode(7);
 				iTurboMode = 0;
 			}
+			return TRUE;
+		}
+	
+		case WM_MOUSEMOVE: {
+			mousex=LOWORD(lParam);
+			mousey=HIWORD(lParam);
 			return TRUE;
 		}
 	
