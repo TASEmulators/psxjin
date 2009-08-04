@@ -152,6 +152,7 @@ int           GlobalTextIL;
 int           iTileCheat;
 
 void (*fpPCSX_LuaGui)(void *s, int width, int height, int bpp, int pitch);
+int iMaximumSpeed=0;
 
 ////////////////////////////////////////////////////////////////////////
 // PPDK developer must change libraryName field and can change revision and build
@@ -1082,6 +1083,8 @@ void updateDisplay(void)                               // UPDATE DISPLAY
 	{
 		static int fpscount;
 		UseFrameSkip=1;
+		if (iMaximumSpeed)
+			bSkipNextFrame=1;
 
 		if (!bSkipNextFrame) DoBufferSwap();                // -> to skip or not to skip
 		if (fpscount%6)                                     // -> skip 6/7 frames
@@ -3082,9 +3085,17 @@ void CALLBACK GPUsetspeedmode(unsigned long newSpeedMode)
 		SetAutoFrameCap();
 		BuildDispMenu(0);
 		break;
+	case 13:
+		iFastFwd=1;
+		iMaximumSpeed=1;
+		bSkipNextFrame=FALSE;
+		UseFrameSkip=1;
+		UseFrameLimit=0;
+		break;
 	default:
-		iFastFwd = 1;
-		bSkipNextFrame = FALSE;
+		iFastFwd=1;
+		iMaximumSpeed=0;
+		bSkipNextFrame=FALSE;
 		UseFrameSkip=1;
 		UseFrameLimit=0;
 		BuildDispMenu(0);

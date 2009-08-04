@@ -667,7 +667,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(key == EmuCommandTable[EMUCMD_TURBOMODE].key
 			&& modifier == EmuCommandTable[EMUCMD_TURBOMODE].keymod)
 			{
-				GPU_setspeedmode(7);
+				SetEmulationSpeed(EMUSPEED_NORMAL);
 				iTurboMode = 0;
 			}
 			return TRUE;

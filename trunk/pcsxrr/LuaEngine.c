@@ -204,7 +204,7 @@ void PCSX_LuaWriteInform() {
 
 
 
-// PCSX.speedmode(string mode)
+// pcsx.speedmode(string mode)
 //
 //   Takes control of the emulation speed
 //   of the system. Normal is normal speed (60fps, 50 for PAL),
@@ -216,23 +216,24 @@ static int pcsx_speedmode(lua_State *L) {
 	
 	if (strcasecmp(mode, "normal")==0) {
 		speedmode = SPEED_NORMAL;
+		SetEmulationSpeed(EMUSPEED_NORMAL);
 	} else if (strcasecmp(mode, "nothrottle")==0) {
 		speedmode = SPEED_NOTHROTTLE;
+		SetEmulationSpeed(EMUSPEED_FASTEST);
 	} else if (strcasecmp(mode, "turbo")==0) {
 		speedmode = SPEED_TURBO;
+		SetEmulationSpeed(EMUSPEED_TURBO);
 	} else if (strcasecmp(mode, "maximum")==0) {
 		speedmode = SPEED_MAXIMUM;
+		SetEmulationSpeed(EMUSPEED_MAXIMUM);
 	} else
-		luaL_error(L, "Invalid mode %s to PCSX.speedmode",mode);
-	
-	if (speedmode == SPEED_NORMAL) SetEmulationSpeed(EMUSPEED_NORMAL);
-	else SetEmulationSpeed(EMUSPEED_TURBO);
+		luaL_error(L, "Invalid mode %s to pcsx.speedmode",mode);
 
 	return 0;
 }
 
 
-// PCSX.frameadvance()
+// pcsx.frameadvance()
 //
 //  Executes a frame advance. Occurs by yielding the coroutine, then re-running
 //  when we break out.
@@ -240,7 +241,7 @@ static int pcsx_frameadvance(lua_State *L) {
 	// We're going to sleep for a frame-advance. Take notes.
 
 	if (frameAdvanceWaiting) 
-		return luaL_error(L, "can't call PCSX.frameadvance() from here");
+		return luaL_error(L, "can't call pcsx.frameadvance() from here");
 
 	frameAdvanceWaiting = TRUE;
 
@@ -249,7 +250,7 @@ static int pcsx_frameadvance(lua_State *L) {
 }
 
 
-// PCSX.pause()
+// pcsx.pause()
 //
 //  Pauses the emulator, function "waits" until the user unpauses.
 //  This function MAY be called from a non-frame boundary, but the frame
@@ -270,7 +271,7 @@ static int pcsx_pause(lua_State *L) {
 }
 
 char pcsx_message_buffer[1024];
-// PCSX.message(string msg)
+// pcsx.message(string msg)
 //
 //  Displays the given message on the screen.
 static int pcsx_message(lua_State *L) {
