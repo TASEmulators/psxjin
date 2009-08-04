@@ -1,0 +1,99 @@
+#summary Lua Scripting Function List
+
+{{{
+= Global =
+  AND(int one, int two, ..., int n)
+  OR(int one, int two, ..., int n)
+  XOR(int one, int two, ..., int n)
+  SHIFT(int num,int shift)
+  BIT(int one, int two, ..., int n)
+
+= PCSX =
+  pcsx.speedmode(string mode) [mode:"normal","nothrottle","turbo","maximum"]
+  pcsx.frameadvance()
+  pcsx.pause()
+  pcsx.framecount()
+  pcsx.lagcount()
+  pcsx.lagged()
+  pcsx.registerbefore(function func)
+  pcsx.registerafter(function func)
+  pcsx.registerexit(function func)
+  pcsx.message(string msg)
+
+= MEMORY =
+  memory.readbyte(int address)
+        .readbyteunsigned
+  memory.readbytesigned(int address)
+  memory.readword(int address)
+        .readwordunsigned
+        .readshort
+        .readshortunsigned
+  memory.readwordsigned(int address)
+        .readshortsigned
+  memory.readdword(int address)
+        .readdwordunsigned
+        .readlong
+        .readlongunsigned
+  memory.readdwordsigned(int address)
+        .readlongsigned
+  memory.readbyterange(int address, int size)
+  memory.writebyte(int address, int value)
+  memory.writeword(int address, int value)
+        .writeshort
+  memory.writedword(int address, int value)
+        .writelong
+  memory.registerwrite(int address, function func)
+        .register
+
+= JOYPAD =
+  joypad.get(int whichcontroller)
+        .read
+  joypad.set(int whichcontroller, table buttons)
+        .write
+
+= SAVESTATE =
+  savestate.create(int which = nil)
+  savestate.save(object state)
+  savestate.load(object state)
+
+= MOVIE =
+  movie.framecount()
+  movie.mode() [mode:"record","playback",nil]
+  movie.rerecordcounting(bool enabled)
+  movie.stop()
+       .close
+
+= GUI =
+  gui.register(function func)
+  gui.text(int x, int y, string msg, color = "white", outline = "black")
+     .drawtext
+  gui.box(int x1, int y1, int x2, int y2, color)
+     .drawbox
+     .rect
+     .drawrect
+  gui.line(int x1, int y1, int x2, int y2, color)
+     .drawline
+  gui.pixel(int x, int y, color)
+     .drawpixel
+     .setpixel
+     .writepixel
+  gui.circle(int x0, int y0, int radius, color)
+     .drawcircle
+  gui.opacity(number alphaValue)
+  gui.fillbox(int x1, int y1, int x2, int y2, color)
+  gui.fillcircle(int x0, int y0, int radius, color)
+  gui.transparency(int strength)
+  gui.popup(string message, string type = "ok", string icon = "message")
+  gui.gdscreenshot()
+  gui.gdoverlay(int x=0, int y=0, string gdimage)
+     .drawimage
+     .image
+  gui.getpixel(int x, int y)
+     .readpixel
+  gui.clearuncommitted()
+
+= INPUT =
+  input.get()
+       .read
+  input.popup(string message, string type = "yesno", string icon = "question")
+}}}
