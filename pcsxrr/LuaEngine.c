@@ -106,7 +106,6 @@ static void PCSX_LuaOnStop() {
 	gui_used = GUI_CLEAR;
 	if (wasPaused && !iPause)
 		iPause=1;
-	GPU_setspeedmode(7);
 }
 
 
@@ -465,10 +464,16 @@ static int joypad_read(lua_State *L) {
 	
 	// Reads the joypads as inputted by the user
 	which = luaL_checkinteger(L,1);
-	if(which == 1)
-		buttons = Movie.lastPad1.buttonStatus^0xffff;
-	else if(which == 2)
-		buttons = Movie.lastPad2.buttonStatus^0xffff;
+	if(which == 1) {
+		PadDataS padd;
+		PAD1_readPort1(&padd);
+		buttons = padd.buttonStatus^0xffff;
+	}
+	else if(which == 2) {
+		PadDataS padd;
+		PAD2_readPort2(&padd);
+		buttons = padd.buttonStatus^0xffff;
+	}
 	else
 		luaL_error(L,"Invalid input port (valid range 1-2, specified %d)", which);
 
@@ -1614,7 +1619,7 @@ static void LuaDisplayString (const char *string, int y, int x, uint32 color, ui
 }
 
 
-// gui.text(int x, int y, string msg)
+// gui.text(int x, int y, string msg[, color="white"[, outline="black"]])
 //
 //  Displays the given text on the screen, using the same font and techniques as the
 //  main HUD.
@@ -2591,7 +2596,8 @@ int PCSX_LoadLuaCode(const char *filename) {
 		LUA = lua_open();
 		luaL_openlibs(LUA);
 
-		luaL_register(LUA, "PCSX", pcsxlib);
+		luaL_register(LUA, "emu", pcsxlib);
+		luaL_register(LUA, "pcsx", pcsxlib);
 		luaL_register(LUA, "memory", memorylib);
 		luaL_register(LUA, "joypad", joypadlib);
 		luaL_register(LUA, "savestate", savestatelib);
@@ -2678,12 +2684,15 @@ void PCSX_ReloadLuaCode()
  *
  */
 void PCSX_LuaStop() {
-	// Kill it.
-	if (LUA) {
-		lua_close(LUA); // this invokes our garbage collectors for us
-		LUA = NULL;
-		PCSX_LuaOnStop();
-	}
+	//already killed
+	if (!LUA) return;
+
+	//execute the user's shutdown callbacks
+	CallExitFunction();
+
+	lua_close(LUA); // this invokes our garbage collectors for us
+	LUA = NULL;
+	PCSX_LuaOnStop();
 }
 
 

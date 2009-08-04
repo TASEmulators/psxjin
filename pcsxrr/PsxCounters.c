@@ -131,6 +131,9 @@ void psxRcntUpdate() {
 	#endif
 
 					/* movie stuff start */
+// raise VSync flag
+iVSyncFlag = 1;
+
 // start capture?
 if ( (Movie.startAvi) || (Movie.startWav) ) {
 	if (Movie.startAvi)
@@ -153,19 +156,6 @@ Movie.currentFrame++;
 
 // update OSD information
 GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
-
-// if GPUchain has already been called within this frame
-if (iGpuHasUpdated == 1) {
-	// raise VSync flag
-	iVSyncFlag = 1;
-	// frame advance or pause
-	if (iFrameAdvance || iDoPauseAtVSync) {
-		iPause = 1;
-		iDoPauseAtVSync = 0;
-		iFrameAdvance = 0;
-	}
-	iGpuHasUpdated = 0;
-}
 
 // handle movie end while in replay mode
 if (Movie.mode == MOVIEMODE_PLAY) {
@@ -232,16 +222,15 @@ GPU_setcurrentmode(modeFlags);
 //		UpdateMemSearch();
 #endif
 
-PCSX_LuaFrameBoundary();
-iJoysToPoll = 2; //reset lag counter after Lua
+CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 
 					/* movie stuff end */
 		} else { // VSync Start (240 hsyncs) 
+			CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
 			psxCounters[3].mode|= 0x10000;
 			psxUpdateVSyncRateEnd();
 			psxRcntUpd(3);
 			psxHu32ref(0x1070)|= SWAPu32(1);
-			CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 		}
 	}
 
