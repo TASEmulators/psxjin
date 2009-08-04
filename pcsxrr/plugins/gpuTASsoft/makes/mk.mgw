@@ -18,7 +18,9 @@ LDFLAGS = -mwindows -Wl,--enable-stdcall-fixup
 LIBS += -lddraw -lwinmm -ld3dim -ldxguid -ladvapi32 -lmsacm32
 #LIBS += -lvfw32
 LIBS += -lvfw_cap32 -lvfw_ms32 -lvfw_avi32 -llibpng
-
+#CFLAGS+= -fprofile-generate
+#LIBS += -lgcov
+#CFLAGS+= -fprofile-use
 ifeq ($(CPU), i386)
 	OBJECTS += i386.o
 endif

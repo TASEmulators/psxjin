@@ -217,34 +217,38 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_SPEEDNORMAL].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDNORMAL].keymod)
 	{
-		GPU_setspeedmode(7);
+		SetEmulationSpeed(EMUSPEED_NORMAL);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDTURBO].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDTURBO].keymod)
 	{
-		GPU_setspeedmode(0);
+		SetEmulationSpeed(EMUSPEED_TURBO);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPEEDMAXIMUM].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPEEDMAXIMUM].keymod)
+	{
+		SetEmulationSpeed(EMUSPEED_MAXIMUM);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_TURBOMODE].key
 	&& modifiers == EmuCommandTable[EMUCMD_TURBOMODE].keymod)
 	{
-		if (!iTurboMode) GPU_setspeedmode(0);
+		if (!iTurboMode) SetEmulationSpeed(EMUSPEED_TURBO);
 		iTurboMode = 1;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDDEC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDDEC].keymod)
 	{
-		if (iSpeedMode>1) iSpeedMode--;
-		GPU_setspeedmode(iSpeedMode);
+		SetEmulationSpeed(EMUSPEED_SLOWER);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDINC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDINC].keymod)
 	{
-		if (iSpeedMode<12) iSpeedMode++;
-		GPU_setspeedmode(iSpeedMode);
+		SetEmulationSpeed(EMUSPEED_FASTER);
 	}
 
 	if(key == EmuCommandTable[EMUCMD_FRAMECOUNTER].key
@@ -758,6 +762,8 @@ void ResetPlugins() {
 void SetEmulationSpeed(int cmd) {
 	if(cmd == EMUSPEED_TURBO)
 		GPU_setspeedmode(0);
+	else if(cmd == EMUSPEED_MAXIMUM)
+		GPU_setspeedmode(13);
 	else if(cmd == EMUSPEED_NORMAL)
 		GPU_setspeedmode(7);
 	else if(cmd == EMUSPEED_FASTEST)
