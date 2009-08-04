@@ -200,6 +200,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Movie.startWav = 1;
 			sprintf(Movie.wavFilename,"%s",argv[++i]);
 		}
+		else if (!strcmp(argv[i], "-lua")) {
+			PCSX_LoadLuaCode(argv[++i]);
+		}
 		else if (!strcmp(argv[i], "-stopcapture"))
 			sscanf (argv[++i],"%lu",&Movie.stopCapture);
 		else if (!strcmp(argv[i], "-readonly"))
