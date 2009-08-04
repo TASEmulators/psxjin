@@ -434,18 +434,27 @@ __inline static void execute() {
 	char *p;
 
 	if (!iPause || iFrameAdvance) { // emulate
-		CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
 		if (iVSyncFlag) {
-			#ifdef WIN32
-			if (iSaveStateTo) {
-				WIN32_SaveState(iSaveStateTo-1);
-				iSaveStateTo = 0;
+			if (iGpuHasUpdated) {
+				if (iSaveStateTo) {
+					#ifdef WIN32
+						WIN32_SaveState(iSaveStateTo-1);
+						iSaveStateTo = 0;
+					#endif
+				}
+				if (iFrameAdvance || iDoPauseAtVSync) {
+					iPause = 1;
+					iDoPauseAtVSync = 0;
+					iFrameAdvance = 0;
+				}
+				iGpuHasUpdated = 0;
 			}
-			#endif
+			iVSyncFlag = 0;
+			PCSX_LuaFrameBoundary();
+			iJoysToPoll = 2; //reset lag counter after Lua
 		}
-		iVSyncFlag = 0;
 
-		p =	(char*)PC_REC(psxRegs.pc);
+		p = (char*)PC_REC(psxRegs.pc);
 		if (p != NULL) recFunc = (void (**)()) (u32)p;
 		else { recError(); return; }
 

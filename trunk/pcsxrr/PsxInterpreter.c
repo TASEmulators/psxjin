@@ -40,19 +40,29 @@ static u32 branchPC;
 #endif
 
 #ifdef WIN32
-#include "Win32.h"
+#include "Win32/Win32.h"
 #define execI() \
 { \
 	u32 *code; \
-	if (!iPause) \
+	if (!iPause || iFrameAdvance) \
 	{ \
 		if (iVSyncFlag) { \
-			if (iSaveStateTo) { \
-				WIN32_SaveState(iSaveStateTo-1); \
-				iSaveStateTo = 0; \
+			if (iGpuHasUpdated) { \
+				if (iSaveStateTo) { \
+						WIN32_SaveState(iSaveStateTo-1); \
+						iSaveStateTo = 0; \
+				} \
+				if (iFrameAdvance || iDoPauseAtVSync) { \
+					iPause = 1; \
+					iDoPauseAtVSync = 0; \
+					iFrameAdvance = 0; \
+				} \
+				iGpuHasUpdated = 0; \
 			} \
+			iVSyncFlag = 0; \
+			PCSX_LuaFrameBoundary(); \
+			iJoysToPoll = 2; \
 		} \
-		iVSyncFlag = 0; \
  \
 		code = PSXM(psxRegs.pc); \
 		psxRegs.code = code == NULL ? 0 : *code; \

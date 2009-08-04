@@ -17,7 +17,7 @@ int iDoPauseAtVSync = 0; //if 1 call pause at next VSync
 int iPause = 0;          //0: keep running emulation | 1: real pause
 int iFrameAdvance = 0;   //1: advance one frame while key is down
 int iGpuHasUpdated = 0;  //has the GPUchain function been called already?
-int iVSyncFlag = 0;      //has a VSync already occured while iGpuHasUpdated==1? (because we can only save just after a VSync+GPUchain)
+int iVSyncFlag = 0;      //has a VSync already occured? (we can only save just after a VSync+iGpuHasUpdated)
 int iJoysToPoll = 0;     //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
 
 static const char szFileHeader[] = "PXM "; //movie file identifier
