@@ -1087,7 +1087,7 @@ void updateDisplay(void)                               // UPDATE DISPLAY
 			bSkipNextFrame=1;
 
 		if (!bSkipNextFrame) DoBufferSwap();                // -> to skip or not to skip
-		if (fpscount%6)                                     // -> skip 6/7 frames
+		if (fpscount%6 || iMaximumSpeed)                    // -> skip 6/7 frames
 			bSkipNextFrame = TRUE;
 		else bSkipNextFrame = FALSE;
 		fpscount++;
