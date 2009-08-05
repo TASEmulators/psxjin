@@ -19,7 +19,7 @@
 #ifndef __PSXCOMMON_H__
 #define __PSXCOMMON_H__
 
-#define PCSXRR_VERSION 10
+#define PCSXRR_VERSION 11
 
 #include <inttypes.h>
 typedef int8_t int8;
