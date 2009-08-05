@@ -12,6 +12,7 @@
   pcsx.speedmode(string mode) [mode:"normal","nothrottle","turbo","maximum"]
   pcsx.frameadvance()
   pcsx.pause()
+  pcsx.unpause()
   pcsx.framecount()
   pcsx.lagcount()
   pcsx.lagged()
