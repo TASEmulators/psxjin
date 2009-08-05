@@ -655,13 +655,8 @@ static int savestate_load(lua_State *L) {
 
 // int movie.framecount()
 //
-//   Gets the frame counter for the movie, or nil if no movie running.
+//   Gets the frame counter for the movie
 int movie_framecount(lua_State *L) {
-	if (Movie.mode == MOVIEMODE_INACTIVE) {
-		lua_pushnil(L);
-		return 1;
-	}
-	
 	lua_pushinteger(L, Movie.currentFrame);
 	return 1;
 }
@@ -707,10 +702,19 @@ int LUA_SCREEN_HEIGHT = 512;
 
 // Common code by the gui library: make sure the screen array is ready
 static void gui_prepare() {
+	int x,y;
 	if (!gui_data)
 		gui_data = (uint8 *) malloc(LUA_SCREEN_WIDTH * LUA_SCREEN_HEIGHT * 4);
-	if (gui_used != GUI_USED_SINCE_LAST_DISPLAY)
-		memset(gui_data,0,LUA_SCREEN_WIDTH * LUA_SCREEN_HEIGHT * 4);
+	if (gui_used != GUI_USED_SINCE_LAST_DISPLAY) {
+		for (y = 0; y < LUA_SCREEN_HEIGHT; y++) {
+			for (x=0; x < LUA_SCREEN_WIDTH; x++) {
+				if (gui_data[(y*LUA_SCREEN_WIDTH+x)*4+3] != 0)
+					gui_data[(y*LUA_SCREEN_WIDTH+x)*4+3] = 0;
+			}
+		}
+	}
+//		if (gui_used != GUI_USED_SINCE_LAST_DISPLAY) /* mz: 10% slower on my system */
+//			memset(gui_data,0,LUA_SCREEN_WIDTH * LUA_SCREEN_HEIGHT * 4);
 	gui_used = GUI_USED_SINCE_LAST_DISPLAY;
 }
 
