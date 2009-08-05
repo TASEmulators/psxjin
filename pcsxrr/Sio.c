@@ -727,6 +727,7 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 	fp2 = fopen("movie_mcd.tmp","wb");
 	fwrite(embMcdTmp, 1, blockSize-4, fp2);
 	fclose(fp2);
+	free(embMcdTmp);
 
 	//open temp compressed mcd file and uncompress it
 	fs = gzopen("movie_mcd.tmp", "rb");
@@ -742,6 +743,7 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 	fp2 = fopen(newmcdfile,"wb");
 	fwrite(data, 1, embMcdSize, fp2);
 	fclose(fp2);
+	free(data);
 
 	return 0;
 }

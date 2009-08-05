@@ -96,6 +96,9 @@ static const char* luaCallIDStrings [] =
 	"CALL_BEFOREEXIT",
 };
 
+// LuaWriteInform is very slow, so we'll only use it if memory.register was used in this session.
+static int usingMemoryRegister=0;
+
 
 /**
  * Resets emulator speed / pause states after script exit.
@@ -158,7 +161,7 @@ int PCSX_LuaFrameSkip() {
  * (not necessarily worth informing Lua), call this.
  */
 void PCSX_LuaWriteInform() {
-	if (!LUA || !luaRunning) return;
+	if (!LUA || !luaRunning || !usingMemoryRegister) return;
 	// Nuke the stack, just in case.
 	lua_settop(LUA,0);
 
@@ -465,6 +468,7 @@ static int memory_registerwrite(lua_State *L) {
 	else lua_pushinteger(L, psxMu8(addr));
 	lua_settable(L, -3);
 	
+	usingMemoryRegister=1;
 	return 0;
 }
 
@@ -2606,6 +2610,8 @@ void PCSX_LuaFrameBoundary() {
 int PCSX_LoadLuaCode(const char *filename) {
 	lua_State *thread;
 	int result;
+
+	usingMemoryRegister=0;
 
 	if (filename != luaScriptName)
 	{
