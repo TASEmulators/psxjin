@@ -270,6 +270,22 @@ static int pcsx_pause(lua_State *L) {
 	return lua_yield(L, 0);
 }
 
+
+// pcsx.unpause()
+static int pcsx_unpause(lua_State *L) {
+	iPause=0;
+
+	// Return control if we're midway through a frame. We can't pause here.
+	if (frameAdvanceWaiting) {
+		return 0;
+	}
+
+	// If it's on a frame boundary, we also yield.
+	frameAdvanceWaiting = TRUE;
+	return lua_yield(L, 0);
+}
+
+
 char pcsx_message_buffer[1024];
 // pcsx.message(string msg)
 //
@@ -2417,6 +2433,7 @@ static const struct luaL_reg pcsxlib [] = {
 	{"speedmode", pcsx_speedmode},
 	{"frameadvance", pcsx_frameadvance},
 	{"pause", pcsx_pause},
+	{"unpause", pcsx_unpause},
 	{"framecount", movie_framecount},
 	{"lagcount", pcsx_lagcount},
 	{"lagged", pcsx_lagged},
