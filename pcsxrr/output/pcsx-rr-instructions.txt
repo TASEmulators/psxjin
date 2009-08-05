@@ -1,10 +1,10 @@
-PCSX-RR v0.0.9
+PCSX-RR v0.1.1
 ----------------------------------------
 
 PCSX-RR is a special version of PCSX
 with many new features such as
 input rerecording, cheat support,
-RAM search, RAM watch, 
+RAM search, RAM watch,
 customizable hotkeys, etc.
 
 http://code.google.com/p/pcsxrr/
@@ -56,6 +56,9 @@ Command Line Options
 -memwatch <filename.txt>
  Automatically open and use the specified RAM watch file. Example: pcsx.exe -memwatch "tools/Harvest Moon.txt"
 
+-lua <filename.lua>
+ Automatically open and use the specified Lua script file. Example: pcsx.exe -lua "tools/Penny Racers.lua"
+
 -dumpavi <filename.avi>
  Automatically save an AVI file at the first emulated frame. Example: pcsx.exe -dumpavi mymovie.avi
 
@@ -68,6 +71,22 @@ Command Line Options
 
 What's New?
 -----------
+
+v0.1.1
+-Lua scripting.
+-Fixed a possible cause of desync in GPU_writeDataMem; only seen when frameskip was enabled (for ex. with Fast Forward). As a side effect of this, Fast Forward is now ~25% slower.
+-Screenshots are now taken correctly and they get saved as PNG.
+-Added "-lua" command line option.
+-Added "Maximum Speed", "Run Lua Script", "Stop Lua Script" and "Reload Lua Script" hotkeys. They will need to be remapped if you've used previous versions of PCSX-RR.
+-Various minor improvements in the "-RR" code.
+-My computer gets 10% slower due to the "pcsx.exe.manifest" file, so it doesn't come within the release archive anymore. You may want to remove it from your PCSX-RR folder too if you have a slow system.
+
+v0.1.0
+-PCSX ignores the CDR plugin disc-switching functionality, so that is only controlled by the core now.
+-CDR plugin is automatically closed and then opened after switching discs to force a reload of the CD ID.
+-Fixed heap corruption when movie files were outputted. (ume.drink)
+-Certain PAD plugins didn't work before; now all of them should work fine for input recording. (ume.drink)
+-Random crashes during FMVs were fixed.
 
 v0.0.9
 -Added RAM Poke.
