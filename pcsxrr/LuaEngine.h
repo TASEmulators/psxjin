@@ -26,10 +26,6 @@ int PCSX_LuaRerecordCountSkip();
 
 void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch);
 
-// Call this before writing into a buffer passed to PCSX_CheatAddRAM().
-// (That way, Lua-based memwatch will work as expected for somebody
-// used to PCSX's memwatch.)
-// *TODO*
 void PCSX_LuaWriteInform();
 
 void PCSX_LuaClearGui();

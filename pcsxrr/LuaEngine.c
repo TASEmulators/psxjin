@@ -157,7 +157,6 @@ int PCSX_LuaFrameSkip() {
  * When code determines that a write has occurred
  * (not necessarily worth informing Lua), call this.
  */
-// *TODO*
 void PCSX_LuaWriteInform() {
 	if (!LUA || !luaRunning) return;
 	// Nuke the stack, just in case.
@@ -173,7 +172,7 @@ void PCSX_LuaWriteInform() {
 		lua_pushvalue(LUA, 2);
 		lua_gettable(LUA, 4);
 		value = luaL_checkinteger(LUA, 5);
-		if (psxMs8(addr) != value)
+		if (psxMu8(addr) != value)
 		{
 			int res;
 
@@ -463,7 +462,7 @@ static int memory_registerwrite(lua_State *L) {
 	lua_getfield(L, LUA_REGISTRYINDEX, memoryValueTable);
 	lua_pushvalue(L,1);
 	if (lua_isnil(L,2)) lua_pushnil(L);
-	else lua_pushinteger(L, psxMs8(addr));
+	else lua_pushinteger(L, psxMu8(addr));
 	lua_settable(L, -3);
 	
 	return 0;

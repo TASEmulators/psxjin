@@ -189,6 +189,7 @@ void psxMemWrite8(u32 mem, u8 value) {
 #endif
 		}
 	}
+	PCSX_LuaWriteInform();
 }
 
 void psxMemWrite16(u32 mem, u16 value) {
@@ -214,6 +215,7 @@ void psxMemWrite16(u32 mem, u16 value) {
 #endif
 		}
 	}
+	PCSX_LuaWriteInform();
 }
 
 void psxMemWrite32(u32 mem, u32 value) {
@@ -270,6 +272,7 @@ void psxMemWrite32(u32 mem, u32 value) {
 			}
 		}
 	}
+	PCSX_LuaWriteInform();
 }
 
 void *psxMemPointer(u32 mem) {
