@@ -810,6 +810,7 @@ void makeVramSnapshot(void)                    // snapshot of current screen
 	}
 	fwrite(empty,0x2,1,bmpfile);
 	fclose(bmpfile);
+	free(line);
 
 	sprintf(sendThisText,"Snap saved as \"snap_%03lu.bmp\".",snapshotnr);
 	GPUdisplayText(sendThisText);
