@@ -614,7 +614,7 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 	PAD1_readPort1(&padd);
 
-	if(PCSX_LuaReadJoypad(0)) padd.buttonStatus = PCSX_LuaReadJoypad(0)^0xffff;
+	if(PCSX_LuaUsingJoypad(0)) padd.buttonStatus = PCSX_LuaReadJoypad(0)^0xffff;
 
 /* movie stuff start */
 
@@ -687,7 +687,7 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 
 	PAD2_readPort2(&padd);
 
-	if(PCSX_LuaReadJoypad(1)) padd.buttonStatus = PCSX_LuaReadJoypad(1)^0xffff;
+	if(PCSX_LuaUsingJoypad(1)) padd.buttonStatus = PCSX_LuaReadJoypad(1)^0xffff;
 
 /* movie stuff start */
 
