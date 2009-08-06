@@ -72,7 +72,7 @@ static int wasPaused = FALSE;
 static int transparencyModifier = 255;
 
 // Our joypads.
-static uint8 lua_joypads[2];
+static uint32 lua_joypads[2];
 static uint8 lua_joypads_used;
 
 static uint8 gui_enabled = TRUE;
@@ -86,7 +86,7 @@ static int numTries;
 
 // Look in pcsx.h for macros named like JOY_UP to determine the order.
 static const char *button_mappings[] = {
-	"select", "unkn1", "unkn2", "start", "up", "right", "down", "left",
+	"select", "l3", "r3", "start", "up", "right", "down", "left",
 	"l2", "r2", "l1", "r1", "triangle", "circle", "x", "square"
 };
 static const char* luaCallIDStrings [] =
@@ -2567,6 +2567,8 @@ void PCSX_LuaFrameBoundary() {
 	frameBoundary = TRUE;
 	frameAdvanceWaiting = FALSE;
 
+	lua_joypads_used = 0;
+
 	numTries = 1000;
 	result = lua_resume(thread, 0);
 	
@@ -2677,12 +2679,14 @@ int PCSX_LoadLuaCode(const char *filename) {
 	// Initialize settings
 	luaRunning = TRUE;
 	skipRerecords = FALSE;
+	transparencyModifier = 255; // opaque
+	lua_joypads_used = 0; // not used
 
 	wasPaused = iPause;
 	if (wasPaused) iPause=1;
 
 	// And run it right now. :)
-	//PCSX_LuaFrameBoundary();
+//	PCSX_LuaFrameBoundary();
 
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
 	lua_sethook(thread, PCSX_LuaHookFunction, LUA_MASKCOUNT, 10000);
@@ -2736,6 +2740,8 @@ int PCSX_LuaRunning() {
  * Returns true if Lua would like to steal the given joypad control.
  */
 int PCSX_LuaUsingJoypad(int which) {
+	if (!PCSX_LuaRunning())
+		return 0;
 	return lua_joypads_used & (1 << which);
 }
 
@@ -2747,9 +2753,14 @@ int PCSX_LuaUsingJoypad(int which) {
  * This function must not be called more than once per frame. Ideally exactly once
  * per frame (if PCSX_LuaUsingJoypad says it's safe to do so)
  */
-uint8 PCSX_LuaReadJoypad(int which) {
-	lua_joypads_used &= !(1 << which);
-	return lua_joypads[which];
+uint32 PCSX_LuaReadJoypad(int which) {
+	if (!PCSX_LuaRunning())
+		return 0;
+	if (lua_joypads_used & (1 << which)) {
+		return lua_joypads[which];
+	}
+	else
+		return 0; // disconnected
 }
 
 

@@ -19,7 +19,7 @@ void PCSX_LuaStop();
 int PCSX_LuaRunning();
 
 int PCSX_LuaUsingJoypad(int);
-uint8 PCSX_LuaReadJoypad(int);
+uint32 PCSX_LuaReadJoypad(int);
 int PCSX_LuaSpeed();
 //int PCSX_LuaFrameskip();
 int PCSX_LuaRerecordCountSkip();
