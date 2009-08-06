@@ -594,6 +594,24 @@ void PADhandleKey(int key) {
 		PCSX_ReloadLuaCode();
 	}
 
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].keymod)
+	{
+		MemSearchCommand(IDC_C_SEARCH);
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].keymod)
+	{
+		UpdateMemSearch();
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].keymod)
+	{
+		MemSearchCommand(IDC_C_RESET);
+	}
+
 	//debug stuff
 //	if(key == 'Z')
 //		gpuShowPic(); //only shows a black screen :/

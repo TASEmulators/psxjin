@@ -178,8 +178,6 @@ void PCSXSearchForChange (PCSXCheatComparisonType cmp,PCSXCheatDataSize size, ui
 	}
 	for (i = 0x200000 - l; i < 0x200000; i++)
 		BIT_CLEAR (Cheat.ALL_BITS, i);
-//	for (i = 0x10000 - l; i < 0x10000; i++)
-//		BIT_CLEAR (Cheat.SRAM_BITS, i);
 }
 
 void PCSXSearchForValue (PCSXCheatComparisonType cmp,
@@ -228,8 +226,6 @@ void PCSXSearchForValue (PCSXCheatComparisonType cmp,
 	}
 	for (i = 0x200000 - l; i < 0x200000; i++)
 		BIT_CLEAR (Cheat.ALL_BITS, i);
-//	for (i = 0x10000 - l; i < 0x10000; i++)
-//		BIT_CLEAR (Cheat.SRAM_BITS, i);
 }
 
 void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
@@ -263,8 +259,6 @@ void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
 	}
 	for (i = 0x200000 - l; i < 0x200000; i++)
 		BIT_CLEAR (Cheat.ALL_BITS, i);
-//	for (i = 0x10000 - l; i < 0x10000; i++)
-//		BIT_CLEAR (Cheat.SRAM_BITS, i);
 }
 
 #ifdef _MSC_VER_
@@ -286,10 +280,6 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 {
 	static struct ICheat* new_cheat;
 	int ret=-1;
-	static HBITMAP hBmp;
-	HDC hdc;
-	HDC hDCbmp;
-	HBITMAP hOldBmp;
 
 	switch(msg)
 	{
@@ -297,7 +287,6 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 		{
 			char buf [12];
 			new_cheat=(struct ICheat*)lParam;
-			hBmp=(HBITMAP)LoadImage(NULL, TEXT("Gary.bmp"), IMAGE_BITMAP, 0,0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 			sprintf(buf, "%06X", new_cheat->address);
 			SetDlgItemText(hDlg, IDC_NC_ADDRESS, buf);
 			switch(new_cheat->format)
@@ -397,29 +386,6 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 			}
 		}
 			return TRUE;
-		case WM_PAINT:
-		{
-		PAINTSTRUCT ps;
-		RECT r;
-		BeginPaint (hDlg, &ps);
-		if(hBmp)
-		{
-			BITMAP bmp;
-			ZeroMemory(&bmp, sizeof(BITMAP));
-			GetClientRect(hDlg, &r);
-			hdc=GetDC(hDlg);
-			hDCbmp=CreateCompatibleDC(hdc);
-			GetObject(hBmp, sizeof(BITMAP), &bmp);
-			hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
-			StretchBlt(hdc, 0,0,r.right,r.bottom,hDCbmp,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
-			SelectObject(hDCbmp, hOldBmp);
-			DeleteDC(hDCbmp);
-			ReleaseDC(hDlg, hdc);
-		}
-
-		EndPaint (hDlg, &ps);
-		}
-		return TRUE;
 	case WM_COMMAND:
 		{
 			switch(LOWORD(wParam))
@@ -499,15 +465,11 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 					}
 					PCSXApplyCheats();
 					UpdateMemWatch();
+					UpdateMemSearch();
 				}
 
 			case IDCANCEL:
 				EndDialog(hDlg, ret);
-				if(hBmp)
-				{
-					DeleteObject(hBmp);
-					hBmp=NULL;
-				}
 				return TRUE;
 			default: break;
 			}
@@ -518,15 +480,10 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 
 INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static HBITMAP hBmp;
 	static PCSXCheatDataSize bytes;
 	static int val_type;
 	static int use_entered;
 	static PCSXCheatComparisonType comp_type;
-	static RECT r;
-	static HDC hdc;
-	static HDC hDCbmp;
-	static HBITMAP hOldBmp;
 
 	switch(msg)
 	{
@@ -537,7 +494,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			int l;
 			if(val_type==0)
 				val_type=1;
-			hBmp=(HBITMAP)LoadImage(NULL, TEXT("Raptor.bmp"), IMAGE_BITMAP, 0,0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 			ListView_SetExtendedListViewStyle(GetDlgItem(hwndDlg, IDC_ADDYS), LVS_EX_FULLROWSELECT);
 
 			//defaults
@@ -644,32 +600,8 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 		case WM_DESTROY:
 		{
 			cheatSearchHWND = NULL;
-//			PCSXSaveCheatFile (PCSXGetFilename (".cht", CHEAT_DIR));
 			break;
 		}
-
-		case WM_PAINT:
-		{
-		PAINTSTRUCT ps;
-		BeginPaint (hwndDlg, &ps);
-		if(hBmp)
-		{
-			BITMAP bmp;
-			ZeroMemory(&bmp, sizeof(BITMAP));
-			GetClientRect(hwndDlg, &r);
-			hdc=GetDC(hwndDlg);
-			hDCbmp=CreateCompatibleDC(hdc);
-			GetObject(hBmp, sizeof(BITMAP), &bmp);
-			hOldBmp=(HBITMAP)SelectObject(hDCbmp, hBmp);
-			StretchBlt(hdc, 0,0,r.right,r.bottom,hDCbmp,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
-			SelectObject(hDCbmp, hOldBmp);
-			DeleteDC(hDCbmp);
-			ReleaseDC(hwndDlg, hdc);
-		}
-
-		EndPaint (hwndDlg, &ps);
-		}
-		return TRUE;
 
 		case WM_NOTIFY:
 			{
@@ -870,9 +802,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 	
 						ScanAddress(searchstr,&searchNum);
 	
-//						if (searchstr[0] != '7')
-//							break; // all searchable addresses begin with a 7
-	
 						looped = FALSE;
 	
 						// perform search
@@ -951,7 +880,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			break;
 
 		case WM_ACTIVATE:
-			ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
+			UpdateMemSearch();
 			break;
 
 		case WM_COMMAND:
@@ -1003,7 +932,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_SIGNED))
 					val_type=2;
 				else val_type=3;
-				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
+				UpdateMemSearch();
 				break;
 
 
@@ -1011,7 +940,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				{
 					// account for size
 					struct ICheat cht;
-//					int idx=-1;
 					LVITEM lvi;
 					static char buf[12]; // the following code assumes this variable is static, I think
 					ZeroMemory(&cht, sizeof(struct SCheat));
@@ -1076,7 +1004,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					int l = CheatCount(bytes);
 					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
 				}
-				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
+				UpdateMemSearch();
 				return TRUE;
 
 			case IDC_C_WATCH:
@@ -1093,10 +1021,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						AddMemWatch(buf);
 					}
 				}
-				break;
-
-			case IDC_REFRESHLIST:
-				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
 				break;
 
 			case IDC_ENTERED:
@@ -1164,8 +1088,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					GetDlgItemText(hwndDlg, IDC_VALUE_ENTER, buf, 20);
 					if(use_entered==2)
 					{
-//						ScanAddress(buf, &value);
-//						value -= 0x7E0000;
 						ScanAddress(buf,&value);
 						PCSXSearchForAddress (comp_type, bytes, value, FALSE);
 					}
@@ -1200,8 +1122,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					CopyMemory(Cheat.CRAM, Cheat.RAM, 0x200000);
 				}
 
-
-				ListView_RedrawItems(GetDlgItem(hwndDlg, IDC_ADDYS),0, 0x200000);
+				UpdateMemSearch();
 				return TRUE;
 				break;
 
@@ -1213,12 +1134,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					DestroyWindow(hwndDlg);
 				else
 					EndDialog(hwndDlg, 0);
-				if(hBmp)
-				{
-					DeleteObject(hBmp);
-					hBmp=NULL;
-				};
-				return TRUE;
 			default: break;
 			}
 		}
@@ -1243,6 +1158,15 @@ void CreateMemSearch()
 
 void UpdateMemSearch()
 {
+	if(cheatSearchHWND) {
+		HWND lv = GetDlgItem(cheatSearchHWND, IDC_ADDYS);
+		int top = ListView_GetTopIndex(lv);
+		int count = ListView_GetCountPerPage(lv)+1;
+		ListView_RedrawItems(lv, top, top+count);
+	}
+}
+
+void MemSearchCommand(int command) {
 	if(cheatSearchHWND)
-		SendMessage(cheatSearchHWND, WM_COMMAND, (WPARAM)(IDC_REFRESHLIST),(LPARAM)(NULL));
+		SendMessage(cheatSearchHWND, WM_COMMAND, (WPARAM)(command),(LPARAM)(NULL));
 }

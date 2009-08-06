@@ -80,8 +80,12 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,               0,           "VSync Advance", },
 	{ 'L',             VK_CONTROL,  "Run Lua Script", },
 	{ 0,               0,           "Stop Lua Script", },
-	{ 'L',             VK_SHIFT,    "Reload Lua Script", }
+	{ 'L',             VK_SHIFT,    "Reload Lua Script", },
+	{ 0,               0,           "RAM Search Perform", },
+	{ 0,               0,           "RAM Search Refresh", },
+	{ 0,               0,           "RAM Search Reset", }
 };
+
 static HWND hMHkeysList = NULL;
 static unsigned char *LastVal = NULL;
 static int bLastValDefined = 0;
