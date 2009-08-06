@@ -1,5 +1,8 @@
 #summary Record of changes made to PCSX-RR since v0.0.1.
 
+*v0.1.1a* ,,(2009-08-05),,
+  * Fixed the Lua scripting function "joypad.set".
+
 *v0.1.1* ,,(2009-08-05),,
   * Lua scripting.
   * Fixed a possible cause of desync in GPU_writeDataMem; only seen when frameskip was enabled (for ex. with Fast Forward). As a side effect of this, Fast Forward is now ~25% slower.
