@@ -468,7 +468,8 @@ static int memory_registerwrite(lua_State *L) {
 	else lua_pushinteger(L, psxMu8(addr));
 	lua_settable(L, -3);
 	
-	usingMemoryRegister=1;
+	if(!usingMemoryRegister)
+		usingMemoryRegister=1;
 	return 0;
 }
 

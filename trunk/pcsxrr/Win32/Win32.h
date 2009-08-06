@@ -95,6 +95,7 @@ void CreateCheatEditor();
 void CreateMemSearch();
 void UpdateMemSearch();
 void PCSXInitCheatData();
+void MemSearchCommand(int command);
 
 void WIN32_LoadState(int newState);
 void WIN32_SaveState(int newState);
