@@ -1891,7 +1891,7 @@ void WIN32_LuaRunScript() {
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=gApp.hInstance;
-	ofn.lpstrTitle="Load Memory Watch...";
+	ofn.lpstrTitle="Load Lua Script...";
 	ofn.lpstrFilter=filter;
 	nameo[0]=0;
 	ofn.lpstrFile=nameo;
