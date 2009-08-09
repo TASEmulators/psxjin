@@ -593,7 +593,7 @@ void cdrReadInterrupt() {
 	}
 
 	memcpy(cdr.Transfer, buf, 2340);
-    cdr.Stat = DataReady;
+	cdr.Stat = DataReady;
 
 #ifdef CDR_LOG
 	fprintf(emuLog, " %x:%x:%x\n", cdr.Transfer[0], cdr.Transfer[1], cdr.Transfer[2]);
@@ -1060,6 +1060,8 @@ int cdrFreeze(gzFile f, int Mode) {
 	if (Mode == 1) tmp = cdr.pTransfer - cdr.Transfer;
 	gzfreezel(&tmp);
 	if (Mode == 0) cdr.pTransfer = cdr.Transfer + tmp;
+
+	ReadTrack();
 
 	return 0;
 }
