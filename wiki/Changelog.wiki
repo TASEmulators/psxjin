@@ -1,5 +1,10 @@
 #summary Record of changes made to PCSX-RR since v0.0.1.
 
+*v0.1.2* ,,(2009-08-09),,
+  * Eliminated the major cause of desyncs that could occur when rerecording.
+  * Added a few hotkeys for Ram Search.
+  * Fixed the dialog title for WIN32_LuaRunScript().
+
 *v0.1.1a* ,,(2009-08-05),,
   * Fixed the Lua scripting function "joypad.set".
 
