@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <wingdi.h>
 
+#include <stdio.h>
+
 extern AppData gApp;
 
 static HDC hdc;
@@ -18,7 +20,7 @@ HFONT hFixedFont=NULL;
 
 static char *U8ToStr(uint8 a)
 {
- static char TempArray[8];
+ static char TempArray[16];
  TempArray[0] = '0' + a/100;
  TempArray[1] = '0' + (a%100)/10;
  TempArray[2] = '0' + (a%10);
@@ -42,9 +44,16 @@ static uint32 FastStrToU32(char* s)
 	return v;
 }
 
+static char *U32ToDecStr(uint32 a)
+{
+ static char TempArray[16];
+ sprintf(TempArray, "%010u", a);
+ return TempArray;
+}
+
 static char *U16ToDecStr(uint16 a)
 {
- static char TempArray[8];
+ static char TempArray[16];
  TempArray[0] = '0' + a/10000;
  TempArray[1] = '0' + (a%10000)/1000;
  TempArray[2] = '0' + (a%1000)/100;
@@ -55,9 +64,16 @@ static char *U16ToDecStr(uint16 a)
 }
 
 
+static char *U32ToHexStr(uint32 a)
+{
+ static char TempArray[16];
+ sprintf(TempArray, "%08X", a);
+ return TempArray;
+}
+
 static char *U16ToHexStr(uint16 a)
 {
- static char TempArray[8];
+ static char TempArray[16];
  TempArray[0] = a/4096 > 9?'A'+a/4096-10:'0' + a/4096;
  TempArray[1] = (a%4096)/256 > 9?'A'+(a%4096)/256 - 10:'0' + (a%4096)/256;
  TempArray[2] = (a%256)/16 > 9?'A'+(a%256)/16 - 10:'0' + (a%256)/16;
@@ -68,7 +84,7 @@ static char *U16ToHexStr(uint16 a)
 
 static char *U8ToHexStr(uint8 a)
 {
- static char TempArray[8];
+ static char TempArray[16];
  TempArray[0] = a/16 > 9?'A'+a/16 - 10:'0' + a/16;
  TempArray[1] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
  TempArray[2] = 0;
@@ -90,7 +106,7 @@ static int xPositions[MWNUM];
 
 struct MWRec
 {
-	int valid, twobytes, hex, sign;
+	int valid, bytes, hex, sign;
 	uint32 addr;
 };
 
@@ -111,15 +127,22 @@ void MWRec_parse(WORD ctl,int changed)
 	GetDlgItemText(hwndMemWatch,ctl,TempArray,16);
 	TempArray[15]=0;
 
-	mwrecs[changed].valid = mwrecs[changed].hex = mwrecs[changed].twobytes = mwrecs[changed].sign = 0;
+	mwrecs[changed].valid = mwrecs[changed].hex = mwrecs[changed].sign = 0;
+	mwrecs[changed].bytes = 1;
 	switch(TempArray[0])
 	{
 		case 0:
 			break;
 		case '!':
-			mwrecs[changed].twobytes=1;
 			mwrecs[changed].valid = 1;
-			mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			if (TempArray[1] == '!') {
+				mwrecs[changed].bytes = 4;
+				mwrecs[changed].addr=FastStrToU32(TempArray+2);
+			}
+			else {
+				mwrecs[changed].bytes = 2;
+				mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			}
 			break;
 		case 'x':
 			mwrecs[changed].hex = 1;
@@ -127,9 +150,16 @@ void MWRec_parse(WORD ctl,int changed)
 			mwrecs[changed].addr=FastStrToU32(TempArray+1);
 			break;
 		case 'X':
-			mwrecs[changed].hex = mwrecs[changed].twobytes = 1;
+			mwrecs[changed].hex = 1;
 			mwrecs[changed].valid = 1;
-			mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			if (TempArray[1] == 'X') {
+				mwrecs[changed].bytes = 4;
+				mwrecs[changed].addr=FastStrToU32(TempArray+2);
+			}
+			else {
+				mwrecs[changed].bytes = 2;
+				mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			}
 			break;
 		case 's':
 			mwrecs[changed].sign = 1;
@@ -137,9 +167,16 @@ void MWRec_parse(WORD ctl,int changed)
 			mwrecs[changed].addr=FastStrToU32(TempArray+1);
 			break;
 		case 'S':
-			mwrecs[changed].sign = mwrecs[changed].twobytes = 1;
+			mwrecs[changed].sign = 1;
 			mwrecs[changed].valid = 1;
-			mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			if (TempArray[1] == 'S') {
+				mwrecs[changed].bytes = 4;
+				mwrecs[changed].addr=FastStrToU32(TempArray+2);
+			}
+			else {
+				mwrecs[changed].bytes = 2;
+				mwrecs[changed].addr=FastStrToU32(TempArray+1);
+			}
 			break;
 		default:
 			mwrecs[changed].valid = 1;
@@ -165,13 +202,21 @@ void UpdateMemWatch()
 
 			if(mwrec.valid) {
 				if(mwrec.hex) {
-					if(mwrec.twobytes)
+					if(mwrec.bytes == 4)
+						text = U32ToHexStr(psxMs32(mwrec.addr));
+					else if(mwrec.bytes == 2)
 						text = U16ToHexStr(psxMs16(mwrec.addr));
 					else
 						text = U8ToHexStr(psxMs8(mwrec.addr));
 				}
 				else {
-					if(mwrec.twobytes) {
+					if(mwrec.bytes == 4) {
+						if(mwrec.sign)
+							text = IToStr(psxMs32(mwrec.addr));
+						else
+							text = U32ToDecStr(psxMs32(mwrec.addr));
+					}
+					else if(mwrec.bytes == 2) {
 						if(mwrec.sign)
 							text = IToStr(psxMs16(mwrec.addr));
 						else
@@ -185,9 +230,9 @@ void UpdateMemWatch()
 					}
 				}
 				len = strlen(text);
-				for(j=len;j<6;j++)
+				for(j=len;j<11;j++)
 					text[j] = ' ';
-				text[6] = 0;
+				text[11] = 0;
 			}
 			else
 				text = "      ";
