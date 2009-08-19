@@ -65,9 +65,6 @@ static const char *guiCallbackTable = "PCSX.GUI";
 // True if there's a thread waiting to run after a run of frame-advance.
 static int frameAdvanceWaiting = FALSE;
 
-// We save our pause status in the case of a natural death.
-static int wasPaused = FALSE;
-
 // Transparency strength. 255=opaque, 0=so transparent it's invisible
 static int transparencyModifier = 255;
 
@@ -102,13 +99,12 @@ static int usingMemoryRegister=0;
 
 /**
  * Resets emulator speed / pause states after script exit.
+ * (Actually, PCSX doesn't do any of these. They were very annoying.)
  */
 static void PCSX_LuaOnStop() {
 	luaRunning = FALSE;
 	lua_joypads_used = 0;
 	gui_used = GUI_CLEAR;
-	if (wasPaused && !iPause)
-		iPause=1;
 }
 
 
@@ -258,14 +254,8 @@ static int pcsx_frameadvance(lua_State *L) {
 //  This function MAY be called from a non-frame boundary, but the frame
 //  finishes executing anyways. In this case, the function returns immediately.
 static int pcsx_pause(lua_State *L) {
-	if (!iPause)
-		iPause=1;
+	iPause=1;
 	speedmode = SPEED_NORMAL;
-
-	// Return control if we're midway through a frame. We can't pause here.
-	if (frameAdvanceWaiting) {
-		return 0;
-	}
 
 	// If it's on a frame boundary, we also yield.
 	frameAdvanceWaiting = TRUE;
@@ -277,13 +267,6 @@ static int pcsx_pause(lua_State *L) {
 static int pcsx_unpause(lua_State *L) {
 	iPause=0;
 
-	// Return control if we're midway through a frame. We can't pause here.
-	if (frameAdvanceWaiting) {
-		return 0;
-	}
-
-	// If it's on a frame boundary, we also yield.
-	frameAdvanceWaiting = TRUE;
 	return lua_yield(L, 0);
 }
 
@@ -2683,11 +2666,8 @@ int PCSX_LoadLuaCode(const char *filename) {
 	transparencyModifier = 255; // opaque
 	lua_joypads_used = 0; // not used
 
-	wasPaused = iPause;
-	if (wasPaused) iPause=1;
-
 	// And run it right now. :)
-//	PCSX_LuaFrameBoundary();
+	PCSX_LuaFrameBoundary();
 
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
 	lua_sethook(thread, PCSX_LuaHookFunction, LUA_MASKCOUNT, 10000);
