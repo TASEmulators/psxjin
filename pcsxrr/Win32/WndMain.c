@@ -227,8 +227,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	memset(&Config, 0, sizeof(PcsxConfig));
 	strcpy(Config.Net, "Disabled");
-	strcpy(Config.PluginsDir, "plugins\\");
-	strcpy(Config.BiosDir,    "bios\\");
+	sprintf(Config.PluginsDir, "%splugins\\", szCurrentPath);
+	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
 		Config.PauseAfterPlayback = 1;
