@@ -39,7 +39,7 @@ static uint8 *XBuf;
 static int iScreenWidth,iScreenHeight;
 
 // Current working directory of the script
-static char luaCWD [256] = {0};
+static char luaCWD [_MAX_PATH] = {0};
 
 // Are we running any code right now?
 static char *luaScriptName = NULL;
@@ -2554,7 +2554,9 @@ void PCSX_LuaFrameBoundary() {
 	lua_joypads_used = 0;
 
 	numTries = 1000;
+	chdir(luaCWD);
 	result = lua_resume(thread, 0);
+	_getcwd(luaCWD, _MAX_PATH);
 	
 	if (result == LUA_YIELD) {
 		// Okay, we're fine with that.
@@ -2596,6 +2598,8 @@ void PCSX_LuaFrameBoundary() {
 int PCSX_LoadLuaCode(const char *filename) {
 	lua_State *thread;
 	int result;
+	char dir[_MAX_PATH];
+	char *slash, *backslash;
 
 	usingMemoryRegister=0;
 
@@ -2604,6 +2608,18 @@ int PCSX_LoadLuaCode(const char *filename) {
 		if (luaScriptName) free(luaScriptName);
 		luaScriptName = strdup(filename);
 	}
+
+	// Set current directory from filename (for dofile)
+	strcpy(dir, filename);
+	slash = strrchr(dir, '/');
+	backslash = strrchr(dir, '\\');
+	if (!slash || (backslash && backslash < slash))
+		slash = backslash;
+	if (slash) {
+		slash[1] = '\0';    // keep slash itself for some reasons
+		_chdir(dir);
+	}
+	_getcwd(luaCWD, _MAX_PATH);
 
 	if (!LUA) {
 		LUA = lua_open();
