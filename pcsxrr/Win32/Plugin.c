@@ -128,6 +128,7 @@ void PADhandleKey(int key) {
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
 			iLoadStateFrom=i-EMUCMD_LOADSTATE1+1;
+			return;
 		}
 	}
 
@@ -136,6 +137,7 @@ void PADhandleKey(int key) {
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
 			iSaveStateTo=i-EMUCMD_SAVESTATE1+1;
+			return;
 		}
 	}
 
@@ -148,6 +150,7 @@ void PADhandleKey(int key) {
 			if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 			sprintf(Text, "*PCSX*: State %d Selected", StatesC+1);
 			GPU_displayText(Text);
+			return;
 		}
 	}
 
@@ -155,18 +158,21 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_LOADSTATE].keymod)
 	{
 		iLoadStateFrom=StatesC+1;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SAVESTATE].key
 	&& modifiers == EmuCommandTable[EMUCMD_SAVESTATE].keymod)
 	{
 		iSaveStateTo=StatesC+1;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_MENU].key
 	&& modifiers == EmuCommandTable[EMUCMD_MENU].keymod)
 	{
 		iCallW32Gui=1;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_PAUSE].key
@@ -176,12 +182,14 @@ void PADhandleKey(int key) {
 			iDoPauseAtVSync=1;
 		else
 			iPause=0;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_FRAMEADVANCE].key
 	&& modifiers == EmuCommandTable[EMUCMD_FRAMEADVANCE].keymod)
 	{
 		iFrameAdvance=1;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_VSYNCADVANCE].key
@@ -189,6 +197,7 @@ void PADhandleKey(int key) {
 	{
 		iFrameAdvance=1;
 		iGpuHasUpdated=1;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RWTOGGLE].key
@@ -199,6 +208,7 @@ void PADhandleKey(int key) {
 			GPU_displayText("*PCSX*: Read-Only mode");
 		else
 			GPU_displayText("*PCSX*: Read+Write mode");
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].key
@@ -206,30 +216,35 @@ void PADhandleKey(int key) {
 	{
 		Movie.lagCounter=0;
 		GPU_setlagcounter(Movie.lagCounter);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SCREENSHOT].key
 	&& modifiers == EmuCommandTable[EMUCMD_SCREENSHOT].keymod)
 	{
 		GPU_makeSnapshot();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDNORMAL].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDNORMAL].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_NORMAL);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDTURBO].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDTURBO].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_TURBO);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDMAXIMUM].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDMAXIMUM].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_MAXIMUM);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_TURBOMODE].key
@@ -237,48 +252,42 @@ void PADhandleKey(int key) {
 	{
 		if (!iTurboMode) SetEmulationSpeed(EMUSPEED_TURBO);
 		iTurboMode = 1;
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDDEC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDDEC].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_SLOWER);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDINC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDINC].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_FASTER);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_FRAMECOUNTER].key
 	&& modifiers == EmuCommandTable[EMUCMD_FRAMECOUNTER].keymod)
 	{
 		GPU_showframecounter();
-	}
-
-	if(key == EmuCommandTable[EMUCMD_STARTAVI].key
-	&& modifiers == EmuCommandTable[EMUCMD_STARTAVI].keymod)
-	{
-		WIN32_StartAviRecord();
-	}
-
-	if(key == EmuCommandTable[EMUCMD_STOPAVI].key
-	&& modifiers == EmuCommandTable[EMUCMD_STOPAVI].keymod)
-	{
-		WIN32_StopAviRecord();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CONFCPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFCPU].keymod)
 	{
 		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CPUCONF), gApp.hWnd, (DLGPROC)ConfigureCpuDlgProc);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RAMWATCH].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMWATCH].keymod)
 	{
 		CreateMemWatch();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CHEATEDITOR].key
@@ -287,36 +296,42 @@ void PADhandleKey(int key) {
 		PCSXRemoveCheats();
 		CreateCheatEditor();
 		PCSXApplyCheats();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH].keymod)
 	{
 		CreateMemSearch();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RAMPOKE].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMPOKE].keymod)
 	{
 		CreateMemPoke();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CONFGPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFGPU].keymod)
 	{
 		if (GPU_configure) GPU_configure();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CONFSPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFSPU].keymod)
 	{
 		if (SPU_configure) SPU_configure();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CONFCDR].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFCDR].keymod)
 	{
 		if (CDR_configure) CDR_configure();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CONFPAD].key
@@ -324,12 +339,14 @@ void PADhandleKey(int key) {
 	{
 		if (PAD1_configure) PAD1_configure();
 		if (strcmp(Config.Pad1, Config.Pad2)) if (PAD2_configure) PAD2_configure();
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_MEMORYCARDS].key
 	&& modifiers == EmuCommandTable[EMUCMD_MEMORYCARDS].keymod)
 	{
 		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), gApp.hWnd, (DLGPROC)ConfigureMcdsDlgProc);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STARTRECORDING].key
@@ -339,6 +356,7 @@ void PADhandleKey(int key) {
 			WIN32_StartMovieRecord();
 		else
 			GPU_displayText("*PCSX*: error: Movie Already Active");
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STARTPLAYBACK].key
@@ -348,6 +366,7 @@ void PADhandleKey(int key) {
 			WIN32_StartMovieReplay(0);
 		else
 			GPU_displayText("*PCSX*: error: Movie Already Active");
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].key
@@ -359,6 +378,7 @@ void PADhandleKey(int key) {
 		}
 		else
 			GPU_displayText("*PCSX*: error: No Movie To Play");
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
@@ -373,6 +393,198 @@ void PADhandleKey(int key) {
 		}
 		else
 			GPU_displayText("*PCSX*: error: No Movie To Stop");
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_CHEATTOGLE].key
+	&& modifiers == EmuCommandTable[EMUCMD_CHEATTOGLE].keymod)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {
+			if (Movie.cheatListIncluded) {
+				MovieControl.cheats ^= 1;
+				if (!cheatsEnabled) {
+					if (MovieControl.cheats)
+						GPU_displayText("*PCSX*: Cheats Will Activate On Next Frame");
+					else
+						GPU_displayText("*PCSX*: Cheats Won't Activate On Next Frame");
+				}
+				else {
+					if (MovieControl.cheats)
+						GPU_displayText("*PCSX*: Cheats Will Deactivate On Next Frame");
+					else
+						GPU_displayText("*PCSX*: Cheats Won't Deactivate On Next Frame");
+				}
+			}
+		}
+		else {
+			cheatsEnabled ^= 1;
+			if (cheatsEnabled)
+				GPU_displayText(_("*PCSX*: Cheats Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Cheats Disabled"));
+			PCSXApplyCheats();
+		}
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
+	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {
+			MovieControl.sioIrq ^= 1;
+			if (!Config.Sio) {
+				if (MovieControl.sioIrq)
+					GPU_displayText("*PCSX*: Sio Irq Will Activate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: Sio Irq Won't Activate On Next Frame");
+			}
+			else {
+				if (MovieControl.sioIrq)
+					GPU_displayText("*PCSX*: Sio Irq Will Deactivate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: Sio Irq Won't Deactivate On Next Frame");
+			}
+		}
+		else {
+			Config.Sio ^= 0x1;
+			if (Config.Sio)
+				GPU_displayText(_("*PCSX*: Sio Irq Always Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Sio Irq Not Always Enabled"));
+		}
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
+	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {
+			MovieControl.spuIrq ^= 1;
+			if (!Config.SpuIrq) {
+				if (MovieControl.spuIrq)
+					GPU_displayText("*PCSX*: Spu Irq Will Activate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: Spu Irq Won't Activate On Next Frame");
+			}
+			else {
+				if (MovieControl.spuIrq)
+					GPU_displayText("*PCSX*: Spu Irq Will Deactivate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: Spu Irq Won't Deactivate On Next Frame");
+			}
+		}
+		else {
+			Config.SpuIrq ^= 0x1;
+			if (Config.SpuIrq)
+				GPU_displayText(_("*PCSX*: Spu Irq Always Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Spu Irq Not Always Enabled"));
+		}
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RCNTFIX].key
+	&& modifiers == EmuCommandTable[EMUCMD_RCNTFIX].keymod)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {
+			MovieControl.RCntFix ^= 1;
+			if (!Config.RCntFix) {
+				if (MovieControl.RCntFix)
+					GPU_displayText("*PCSX*: PE2 Fix Will Activate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: PE2 Fix Won't Activate On Next Frame");
+			}
+			else {
+				if (MovieControl.RCntFix)
+					GPU_displayText("*PCSX*: PE2 Fix Will Deactivate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: PE2 Fix Won't Deactivate On Next Frame");
+			}
+		}
+		else {
+			Config.RCntFix ^= 0x1;
+			if (Config.RCntFix)
+				GPU_displayText(_("*PCSX*: Parasite Eve 2 Fix Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Parasite Eve 2 Fix Disabled"));
+		}
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_VSYNCWA].key
+	&& modifiers == EmuCommandTable[EMUCMD_VSYNCWA].keymod)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {
+			MovieControl.VSyncWA ^= 1;
+			if (!Config.VSyncWA) {
+				if (MovieControl.VSyncWA)
+					GPU_displayText("*PCSX*: RE 2/3 Fix Will Activate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: RE 2/3 Fix Won't Activate On Next Frame");
+			}
+			else {
+				if (MovieControl.VSyncWA)
+					GPU_displayText("*PCSX*: RE 2/3 Fix Will Deactivate On Next Frame");
+				else
+					GPU_displayText("*PCSX*: RE 2/3 Fix Won't Deactivate On Next Frame");
+			}
+		}
+		else {
+			Config.VSyncWA ^= 0x1;
+			if (Config.VSyncWA)
+				GPU_displayText(_("*PCSX*: Resident Evil 2/3 Fix Enabled"));
+			else
+				GPU_displayText(_("*PCSX*: Resident Evil 2/3 Fix Disabled"));
+		}
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_LUA_RUN].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_RUN].keymod)
+	{
+		if(!PCSX_LuaRunning())
+			WIN32_LuaRunScript();
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_LUA_STOP].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_STOP].keymod)
+	{
+		if(PCSX_LuaRunning()) {
+			PCSX_LuaStop();
+			EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_ENABLED);
+			EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
+			EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
+		}
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_LUA_RELOAD].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_RELOAD].keymod)
+	{
+		PCSX_ReloadLuaCode();
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].keymod)
+	{
+		MemSearchCommand(IDC_C_SEARCH);
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].keymod)
+	{
+		UpdateMemSearch();
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].key
+	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].keymod)
+	{
+		MemSearchCommand(IDC_C_RESET);
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RESET].key
@@ -396,6 +608,7 @@ void PADhandleKey(int key) {
 			Running = 1;
 			psxCpu->Execute();
 		}
+		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_CDCASE].key
@@ -430,199 +643,22 @@ void PADhandleKey(int key) {
 					SysMessage(_("Could not load Cdrom"));
 			}
 		}
+		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_CHEATTOGLE].key
-	&& modifiers == EmuCommandTable[EMUCMD_CHEATTOGLE].keymod)
+	if(key == EmuCommandTable[EMUCMD_STARTAVI].key
+	&& modifiers == EmuCommandTable[EMUCMD_STARTAVI].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			if (Movie.cheatListIncluded) {
-				MovieControl.cheats ^= 1;
-				if (!cheatsEnabled) {
-					if (MovieControl.cheats)
-						GPU_displayText("*PCSX*: Cheats Will Activate On Next Frame");
-					else
-						GPU_displayText("*PCSX*: Cheats Won't Activate On Next Frame");
-				}
-				else {
-					if (MovieControl.cheats)
-						GPU_displayText("*PCSX*: Cheats Will Deactivate On Next Frame");
-					else
-						GPU_displayText("*PCSX*: Cheats Won't Deactivate On Next Frame");
-				}
-			}
-		}
-		else {
-			cheatsEnabled ^= 1;
-			if (cheatsEnabled)
-				GPU_displayText(_("*PCSX*: Cheats Enabled"));
-			else
-				GPU_displayText(_("*PCSX*: Cheats Disabled"));
-			PCSXApplyCheats();
-		}
+		WIN32_StartAviRecord();
+		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
-	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
+	if(key == EmuCommandTable[EMUCMD_STOPAVI].key
+	&& modifiers == EmuCommandTable[EMUCMD_STOPAVI].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.sioIrq ^= 1;
-			if (!Config.Sio) {
-				if (MovieControl.sioIrq)
-					GPU_displayText("*PCSX*: Sio Irq Will Activate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Sio Irq Won't Activate On Next Frame");
-			}
-			else {
-				if (MovieControl.sioIrq)
-					GPU_displayText("*PCSX*: Sio Irq Will Deactivate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Sio Irq Won't Deactivate On Next Frame");
-			}
-		}
-		else {
-			Config.Sio ^= 0x1;
-			if (Config.Sio)
-				GPU_displayText(_("*PCSX*: Sio Irq Always Enabled"));
-			else
-				GPU_displayText(_("*PCSX*: Sio Irq Not Always Enabled"));
-		}
+		WIN32_StopAviRecord();
+		return;
 	}
-
-	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
-	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
-	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.spuIrq ^= 1;
-			if (!Config.SpuIrq) {
-				if (MovieControl.spuIrq)
-					GPU_displayText("*PCSX*: Spu Irq Will Activate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Spu Irq Won't Activate On Next Frame");
-			}
-			else {
-				if (MovieControl.spuIrq)
-					GPU_displayText("*PCSX*: Spu Irq Will Deactivate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Spu Irq Won't Deactivate On Next Frame");
-			}
-		}
-		else {
-			Config.SpuIrq ^= 0x1;
-			if (Config.SpuIrq)
-				GPU_displayText(_("*PCSX*: Spu Irq Always Enabled"));
-			else
-				GPU_displayText(_("*PCSX*: Spu Irq Not Always Enabled"));
-		}
-	}
-
-	if(key == EmuCommandTable[EMUCMD_RCNTFIX].key
-	&& modifiers == EmuCommandTable[EMUCMD_RCNTFIX].keymod)
-	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.RCntFix ^= 1;
-			if (!Config.RCntFix) {
-				if (MovieControl.RCntFix)
-					GPU_displayText("*PCSX*: PE2 Fix Will Activate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: PE2 Fix Won't Activate On Next Frame");
-			}
-			else {
-				if (MovieControl.RCntFix)
-					GPU_displayText("*PCSX*: PE2 Fix Will Deactivate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: PE2 Fix Won't Deactivate On Next Frame");
-			}
-		}
-		else {
-			Config.RCntFix ^= 0x1;
-			if (Config.RCntFix)
-				GPU_displayText(_("*PCSX*: Parasite Eve 2 Fix Enabled"));
-			else
-				GPU_displayText(_("*PCSX*: Parasite Eve 2 Fix Disabled"));
-		}
-	}
-
-	if(key == EmuCommandTable[EMUCMD_VSYNCWA].key
-	&& modifiers == EmuCommandTable[EMUCMD_VSYNCWA].keymod)
-	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.VSyncWA ^= 1;
-			if (!Config.VSyncWA) {
-				if (MovieControl.VSyncWA)
-					GPU_displayText("*PCSX*: RE 2/3 Fix Will Activate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: RE 2/3 Fix Won't Activate On Next Frame");
-			}
-			else {
-				if (MovieControl.VSyncWA)
-					GPU_displayText("*PCSX*: RE 2/3 Fix Will Deactivate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: RE 2/3 Fix Won't Deactivate On Next Frame");
-			}
-		}
-		else {
-			Config.VSyncWA ^= 0x1;
-			if (Config.VSyncWA)
-				GPU_displayText(_("*PCSX*: Resident Evil 2/3 Fix Enabled"));
-			else
-				GPU_displayText(_("*PCSX*: Resident Evil 2/3 Fix Disabled"));
-		}
-	}
-
-	if(key == EmuCommandTable[EMUCMD_LUA_RUN].key
-	&& modifiers == EmuCommandTable[EMUCMD_LUA_RUN].keymod)
-	{
-		if(!PCSX_LuaRunning())
-			WIN32_LuaRunScript();
-	}
-
-	if(key == EmuCommandTable[EMUCMD_LUA_STOP].key
-	&& modifiers == EmuCommandTable[EMUCMD_LUA_STOP].keymod)
-	{
-		if(PCSX_LuaRunning()) {
-			PCSX_LuaStop();
-			EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_ENABLED);
-			EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
-			EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
-		}
-	}
-
-	if(key == EmuCommandTable[EMUCMD_LUA_RELOAD].key
-	&& modifiers == EmuCommandTable[EMUCMD_LUA_RELOAD].keymod)
-	{
-		PCSX_ReloadLuaCode();
-	}
-
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].keymod)
-	{
-		MemSearchCommand(IDC_C_SEARCH);
-	}
-
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].keymod)
-	{
-		UpdateMemSearch();
-	}
-
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].keymod)
-	{
-		MemSearchCommand(IDC_C_RESET);
-	}
-
-	//debug stuff
-//	if(key == 'Z')
-//		gpuShowPic(); //only shows a black screen :/
-//	if(key == 'C') {
-//		SysPrintf("CD-ROM Label: %.32s\n", CdromLabel);
-//		SysPrintf("CD-ROM ID: %.9s\n", CdromId);
-//	}
-//	if(key == 'X') {
-//		CheckCdrom();
-//		LoadCdrom();
-//	}
 }
 
 void CALLBACK SPUirq(void);
