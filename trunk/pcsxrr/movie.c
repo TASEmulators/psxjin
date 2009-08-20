@@ -572,7 +572,6 @@ void MOV_ProcessControlFlags() {
 int MovieFreeze(gzFile f, int Mode) {
 	unsigned long bufSize = 0;
 	unsigned long buttonToSend = 0;
-//SysPrintf("Mode %d - %d/%d\n",Mode,Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
 
 	//saving state
 	if (Mode == 1)
@@ -581,6 +580,11 @@ int MovieFreeze(gzFile f, int Mode) {
 	//saving/loading state
 	gzfreezel(&Movie.currentFrame);
 	gzfreezel(&Movie.lagCounter);
+
+	if (Movie.mode == MOVIEMODE_INACTIVE)
+		return 0;
+
+	//saving/loading state
 	gzfreezel(&cdOpenCase);
 	gzfreezel(&cheatsEnabled);
 	gzfreezel(&Movie.irqHacksIncluded);
@@ -612,6 +616,5 @@ int MovieFreeze(gzFile f, int Mode) {
 		GPU_inputdisplay(buttonToSend);
 	}
 
-//SysPrintf("Mode %d - %d/%d\n---\n",Mode,Movie.currentFrame,((Movie.inputBufferPtr-Movie.inputBuffer)/Movie.bytesPerFrame));
 	return 0;
 }
