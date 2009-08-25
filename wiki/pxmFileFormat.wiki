@@ -34,8 +34,19 @@
 024 4-byte unsigned long: offset to the cheat list inside file
 028 4-byte unsigned long: offset to the CD-ROM IDs inside file
 02C 4-byte unsigned long: offset to the controller data inside file
-030 4-byte unsigned long: string length of author's name
+030 4-byte unsigned long: string length of author name
 034 string: name of the author
+}}}
+
+=== Controller Types ===
+{{{
+01 Mouse
+02 Negcon
+03 Konami Gun
+04 Standard
+05 Analog Joystick
+06 Namco Guncon
+07 Analog Controller
 }}}
 
 == Savestate ==
@@ -56,17 +67,6 @@ After the cheat list comes the CD-ROM ID chunk:
 
 == Controller Data ==
 After the CD-ROM IDs, comes the controller data.
-
-=== Controller Types ===
-{{{
-01 Mouse
-02 Negcon
-03 Konami Gun
-04 Standard
-05 Analog Joystick
-06 Namco Guncon
-07 Analog Controller
-}}}
 
 === Bytes per Frame ===
 {{{
@@ -101,7 +101,7 @@ The corresponding bytes indicate which buttons are pressed at each frame for eac
     bit 11: R1
     bit 12: Triangle
     bit 13: Circle
-    bit 14: X
+    bit 14: Cross
     bit 15: Square
 }}}
 
