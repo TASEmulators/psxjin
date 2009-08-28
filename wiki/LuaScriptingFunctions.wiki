@@ -51,6 +51,7 @@
         .read
   joypad.set(int whichcontroller, table buttons)
         .write
+[table keys: "select", "l3", "r3", "start", "up", "right", "down", "left", "l2", "r2", "l1", "r1", "triangle", "circle", "x", "square"]
 
 = SAVESTATE =
   savestate.create(int which = nil)
