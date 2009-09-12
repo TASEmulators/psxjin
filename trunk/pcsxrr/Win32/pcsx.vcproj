@@ -16,7 +16,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
+			OutputDirectory="..\output"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../;./;./includes"
+				AdditionalIncludeDirectories="../;./;./includes;lua\lua-5.1.4\src;libpng-1.0.50"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib lua-5.1.4-x86.lib"
-				OutputFile=".\Debug/pcsx.exe"
+				OutputFile="..\output/pcsx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib"
@@ -151,7 +151,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../;./;./includes"
+				AdditionalIncludeDirectories="../;./;./includes;lua\lua-5.1.4\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
