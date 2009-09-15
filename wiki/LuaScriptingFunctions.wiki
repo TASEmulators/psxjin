@@ -1,4 +1,4 @@
-#PCSX-rr Lua Scripting Function List
+#summary PCSX-rr Lua Scripting Function List
 
 See also [http://www.lua.org/manual/5.1/ Lua manual].
 
