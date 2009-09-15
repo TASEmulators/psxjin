@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="gpuPeopsSoft"
+	Name="gpuTASsoft"
 	ProjectGUID="{0ACFB669-4FE3-435F-9459-8F52217A8368}"
 	RootNamespace="gpuPeopsSoft"
 	>
@@ -74,12 +74,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ddraw.lib dxguid.lib winmm.lib vfw32.lib ..\..\win32\$(ConfigurationName)\libpng.lib ..\..\win32\includes\zdll.lib"
-				OutputFile=".\Debug/gpuPeopsSoft.dll"
+				OutputFile="..\..\output\plugins\gpuTASsoft.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\win32\directx"
 				ModuleDefinitionFile=".\gpuPeopsSoft.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug/gpuPeopsSoft.pdb"
+				ProgramDatabaseFile="$(OutDir)/gpuTASsoft.pdb"
 				SubSystem="2"
 				ImportLibrary=".\Debug/gpuPeopsSoft.lib"
 				TargetMachine="1"
@@ -178,7 +179,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\win32\directx"
 				ModuleDefinitionFile=".\gpuPeopsSoft.def"
-				ProgramDatabaseFile=".\Release/gpuPeopsSoft.pdb"
+				ProgramDatabaseFile="$(OutDir)/gpuTASsoft.pdb"
 				SubSystem="2"
 				ImportLibrary=".\Release/gpuPeopsSoft.lib"
 				TargetMachine="1"
@@ -351,7 +352,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq2x16.asm -o &quot;$(IntDir)&quot;\hq2x16.obj"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq2x16.asm -o &quot;$(IntDir)&quot;\hq2x16.obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -373,7 +374,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq2x32.asm -o &quot;$(IntDir)&quot;\hq2x32.obj"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq2x32.asm -o &quot;$(IntDir)&quot;\hq2x32.obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -395,7 +396,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq3x16.asm -o &quot;$(IntDir)&quot;\hq3x16.obj"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq3x16.asm -o &quot;$(IntDir)&quot;\hq3x16.obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -417,7 +418,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq3x32.asm -o &quot;$(IntDir)&quot;\hq3x32.obj"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq3x32.asm -o &quot;$(IntDir)&quot;\hq3x32.obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -439,7 +440,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="..\..\win32\nasmw.exe -f win32 -D__WIN32__ -D__i386__ $(InputPath) -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="..\..\win32\nasmw.exe -f win32 -D__WIN32__ -D__i386__ $(InputPath) -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
