@@ -391,6 +391,14 @@ static int recInit() {
 		SysMessage("Error allocating memory"); return -1;
 	}
 
+	#ifdef WIN32
+	{
+		DWORD ass;
+		VirtualProtect(recMem,RECMEM_SIZE,PAGE_EXECUTE_READWRITE,&ass);
+	}
+	#endif
+
+
 	for (i=0; i<0x80; i++) psxRecLUT[i + 0x0000] = (u32)&recRAM[(i & 0x1f) << 16];
 	memcpy(psxRecLUT + 0x8000, psxRecLUT, 0x80 * 4);
 	memcpy(psxRecLUT + 0xa000, psxRecLUT, 0x80 * 4);
