@@ -24,6 +24,9 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <fcntl.h>
+#include <io.h>
+
 #include "resource.h"
 #include "AboutDlg.h"
 
@@ -171,6 +174,72 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 	return argv;
 }
 
+void OpenConsole() 
+{
+	COORD csize;
+	CONSOLE_SCREEN_BUFFER_INFO csbiInfo; 
+	SMALL_RECT srect;
+	char buf[256];
+	BOOL attached = FALSE;
+	HMODULE lib;
+
+	//dont do anything if we're already attached
+	if (hConsole) return;
+
+	//attach to an existing console (if we can; this is circuitous because AttachConsole wasnt added until XP)
+	//remember to abstract this late bound function notion if we end up having to do this anywhere else
+
+	lib = LoadLibrary("kernel32.dll");
+
+	if(lib)
+	{
+		typedef BOOL (WINAPI *_TAttachConsole)(DWORD dwProcessId);
+		_TAttachConsole _AttachConsole  = (_TAttachConsole)GetProcAddress(lib,"AttachConsole");
+		if(_AttachConsole)
+		{
+			if(_AttachConsole(-1))
+				attached = TRUE;
+		}
+		FreeLibrary(lib);
+	}
+
+	//if we failed to attach, then alloc a new console
+	if(!attached)
+	{
+		AllocConsole();
+	}
+
+	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	//redirect stdio
+	{
+		FILE *fp;
+		long lStdHandle = (long)hConsole;
+		int hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+		if(hConHandle == -1)
+			return; //this fails from a visual studio command prompt
+		
+		fp = _fdopen( hConHandle, "w" );
+		*stdout = *fp;
+		//and stderr
+		*stderr = *fp;
+	}
+
+	memset(buf,0,256);
+	sprintf(buf,"%s OUTPUT", "Psx Output");
+	SetConsoleTitle(TEXT(buf));
+	csize.X = 60;
+	csize.Y = 800;
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), csize);
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbiInfo);
+	srect = csbiInfo.srWindow;
+	srect.Right = srect.Left + 99;
+	srect.Bottom = srect.Top + 64;
+	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &srect);
+	SetConsoleCP(GetACP());
+	SetConsoleOutputCP(GetACP());
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	char runcd=0;
 	char loadMovie=0;
@@ -308,12 +377,6 @@ void UpdateMenuSlots() {
 	}
 }
 
-void OpenConsole() {
-	if (hConsole) return;
-	AllocConsole();
-	SetConsoleTitle("Psx Output");
-	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-}
 
 void CloseConsole() {
 	FreeConsole(); hConsole = NULL;
