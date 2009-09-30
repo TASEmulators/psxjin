@@ -26,6 +26,12 @@
 #include "PsxCommon.h"
 #include "plugins.h"
 
+// global variables
+char CdromId[10];
+char CdromLabel[33];
+PcsxConfig Config;
+FILE *emuLog;
+
 int Log = 0;
 
 char *LabelAuthors = { N_(

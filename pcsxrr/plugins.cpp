@@ -42,6 +42,141 @@
     if (checkerr == 2) { err = SysLibError(); if (err != NULL) errval = 1; }
 #endif
 
+START_EXTERN_C
+
+//Gpu function pointers
+GPUupdateLace       GPU_updateLace;
+GPUinit             GPU_init;
+GPUshutdown         GPU_shutdown; 
+GPUconfigure        GPU_configure;
+GPUtest             GPU_test;
+GPUabout            GPU_about;
+GPUopen             GPU_open;
+GPUclose            GPU_close;
+GPUreadStatus       GPU_readStatus;
+GPUreadData         GPU_readData;
+GPUreadDataMem      GPU_readDataMem;
+GPUwriteStatus      GPU_writeStatus; 
+GPUwriteData        GPU_writeData;
+GPUwriteDataMem     GPU_writeDataMem;
+GPUdmaChain         GPU_dmaChain;
+GPUkeypressed       GPU_keypressed;
+GPUdisplayText      GPU_displayText;
+GPUmakeSnapshot     GPU_makeSnapshot;
+GPUfreeze           GPU_freeze;
+GPUgetScreenPic     GPU_getScreenPic;
+GPUshowScreenPic    GPU_showScreenPic;
+GPUclearDynarec     GPU_clearDynarec;
+GPUsetframelimit    GPU_setframelimit;
+GPUsetframecounter  GPU_setframecounter;
+GPUsetlagcounter    GPU_setlagcounter;
+GPUinputdisplay     GPU_inputdisplay;
+GPUupdateframe      GPU_updateframe;
+GPUsetcurrentmode   GPU_setcurrentmode;
+GPUsetspeedmode     GPU_setspeedmode;
+GPUshowframecounter GPU_showframecounter;
+GPUstartAvi         GPU_startAvi;
+GPUstopAvi          GPU_stopAvi;
+GPUsendFpLuaGui     GPU_sendFpLuaGui;
+
+//cd rom function pointers 
+CDRinit               CDR_init;
+CDRshutdown           CDR_shutdown;
+CDRopen               CDR_open;
+CDRclose              CDR_close; 
+CDRtest               CDR_test;
+CDRgetTN              CDR_getTN;
+CDRgetTD              CDR_getTD;
+CDRreadTrack          CDR_readTrack;
+CDRgetBuffer          CDR_getBuffer;
+CDRplay               CDR_play;
+CDRstop               CDR_stop;
+CDRgetStatus          CDR_getStatus;
+CDRgetDriveLetter     CDR_getDriveLetter;
+CDRgetBufferSub       CDR_getBufferSub;
+CDRconfigure          CDR_configure;
+CDRabout              CDR_about;
+
+//SPU POINTERS
+SPUconfigure        SPU_configure;
+SPUabout            SPU_about;
+SPUinit             SPU_init;
+SPUshutdown         SPU_shutdown;
+SPUtest             SPU_test;
+SPUopen             SPU_open;
+SPUclose            SPU_close;
+SPUplaySample       SPU_playSample;
+SPUstartChannels1   SPU_startChannels1;
+SPUstartChannels2   SPU_startChannels2;
+SPUstopChannels1    SPU_stopChannels1;
+SPUstopChannels2    SPU_stopChannels2;
+SPUputOne           SPU_putOne;
+SPUgetOne           SPU_getOne;
+SPUsetAddr          SPU_setAddr;
+SPUsetPitch         SPU_setPitch;
+SPUsetVolumeL       SPU_setVolumeL;
+SPUsetVolumeR       SPU_setVolumeR;
+SPUwriteRegister    SPU_writeRegister;
+SPUreadRegister     SPU_readRegister;
+SPUwriteDMA         SPU_writeDMA;
+SPUreadDMA          SPU_readDMA;
+SPUwriteDMAMem      SPU_writeDMAMem;
+SPUreadDMAMem       SPU_readDMAMem;
+SPUplayADPCMchannel SPU_playADPCMchannel;
+SPUfreeze           SPU_freeze;
+SPUregisterCallback SPU_registerCallback;
+SPUasync            SPU_async;
+SPUstartWav         SPU_startWav;
+SPUstopWav          SPU_stopWav;
+
+//PAD POINTERS
+PADconfigure        PAD1_configure;
+PADabout            PAD1_about;
+PADinit             PAD1_init;
+PADshutdown         PAD1_shutdown;
+PADtest             PAD1_test;
+PADopen             PAD1_open;
+PADclose            PAD1_close;
+PADquery            PAD1_query;
+PADreadPort1        PAD1_readPort1;
+PADkeypressed       PAD1_keypressed;
+PADstartPoll        PAD1_startPoll;
+PADpoll             PAD1_poll;
+PADsetSensitive     PAD1_setSensitive;
+PADconfigure        PAD2_configure;
+PADabout            PAD2_about;
+PADinit             PAD2_init;
+PADshutdown         PAD2_shutdown;
+PADtest             PAD2_test;
+PADopen             PAD2_open;
+PADclose            PAD2_close;
+PADquery            PAD2_query;
+PADreadPort2        PAD2_readPort2;
+PADkeypressed       PAD2_keypressed;
+PADstartPoll        PAD2_startPoll;
+PADpoll             PAD2_poll;
+PADsetSensitive     PAD2_setSensitive;
+
+// NET function pointers 
+NETinit               NET_init;
+NETshutdown           NET_shutdown;
+NETopen               NET_open;
+NETclose              NET_close; 
+NETtest               NET_test;
+NETconfigure          NET_configure;
+NETabout              NET_about;
+NETpause              NET_pause;
+NETresume             NET_resume;
+NETqueryPlayer        NET_queryPlayer;
+NETsendData           NET_sendData;
+NETrecvData           NET_recvData;
+NETsendPadData        NET_sendPadData;
+NETrecvPadData        NET_recvPadData;
+NETsetInfo            NET_setInfo;
+NETkeypressed         NET_keypressed;
+
+END_EXTERN_C
+
 static const char *err;
 static int errval;
 
@@ -81,7 +216,7 @@ long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 		GPU_writeData(0xa0000000);
 		GPU_writeData(0x00000000);
 		GPU_writeData(0x02000400);
-		GPU_writeDataMem((unsigned long*)pF->psxVRam, 0x100000/4);
+		GPU_writeDataMem((u32*)pF->psxVRam, 0x100000/4);
 		GPU_writeStatus(val);
 
 		val = pF->ulStatus;
@@ -109,7 +244,7 @@ long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 		GPU_writeData(0xc0000000);
 		GPU_writeData(0x00000000);
 		GPU_writeData(0x02000400);
-		GPU_readDataMem((unsigned long*)pF->psxVRam, 0x100000/4);
+		GPU_readDataMem((u32*)pF->psxVRam, 0x100000/4);
 		GPU_writeStatus(val);
 
 		pF->ulStatus = GPU_readStatus();

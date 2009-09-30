@@ -663,7 +663,7 @@ void PADhandleKey(int key) {
 
 void CALLBACK SPUirq(void);
 
-char charsTable[4] = { "|/-\\" };
+char charsTable[4] = { '|', '/', '-', '\\' };
 
 BOOL CALLBACK ConnectDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	char str[256];

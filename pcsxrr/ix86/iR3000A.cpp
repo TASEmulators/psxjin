@@ -71,12 +71,12 @@ static iRegisters iRegsS[32];
 #define IsConst(reg)  (iRegs[reg].state == ST_CONST)
 #define IsMapped(reg) (iRegs[reg].state == ST_MAPPED)
 
-static void (*recBSC[64])();
-static void (*recSPC[64])();
-static void (*recREG[32])();
-static void (*recCP0[32])();
-static void (*recCP2[64])();
-static void (*recCP2BSC[32])();
+extern void (*recBSC[64])();
+extern void (*recSPC[64])();
+extern void (*recREG[32])();
+extern void (*recCP0[32])();
+extern void (*recCP2[64])();
+extern void (*recCP2BSC[32])();
 
 
 static void MapConst(int reg, u32 _const) {

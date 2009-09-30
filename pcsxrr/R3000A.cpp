@@ -22,6 +22,10 @@
 
 #include "PsxCommon.h"
 
+// global variables
+R3000Acpu *psxCpu;
+psxRegisters psxRegs;
+
 int psxInit() {
 
 	psxCpu = &psxInt;

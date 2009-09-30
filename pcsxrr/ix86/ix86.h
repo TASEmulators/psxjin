@@ -40,13 +40,13 @@
 #define X86EFLAG_3DNOWEXT	0x40000000
 #define X86EFLAG_3DNOW		0x80000000
 
-s8  x86ID[16];	// Vendor ID
-u32 x86Family;	// Processor Family
-u32 x86Model;	// Processor Model
-u32 x86PType;	// Processor Type
-u32 x86StepID;	// Stepping ID
-u32 x86Flags;	// Feature Flags
-u32 x86EFlags;	// Extended Feature Flags
+extern s8  x86ID[16];	// Vendor ID
+extern u32 x86Family;	// Processor Family
+extern u32 x86Model;	// Processor Model
+extern u32 x86PType;	// Processor Type
+extern u32 x86StepID;	// Stepping ID
+extern u32 x86Flags;	// Feature Flags
+extern u32 x86EFlags;	// Extended Feature Flags
 
 /* general defines */
 #define write8(val)  *(u8 *)x86Ptr = val; x86Ptr++;
@@ -82,9 +82,9 @@ u32 x86EFlags;	// Extended Feature Flags
 #define XMM7 7
 
 
-s8  *x86Ptr;
-u8  *j8Ptr[32];
-u32 *j32Ptr[32];
+extern s8  *x86Ptr;
+extern u8  *j8Ptr[32];
+extern u32 *j32Ptr[32];
 
 void x86Init();
 void x86SetPtr(char *ptr);

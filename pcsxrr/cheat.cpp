@@ -4,6 +4,9 @@
 #include "Win32.h"
 #endif
 
+// global variables
+struct SCheatData Cheat;
+
 void PCSXRemoveCheat (uint32 which1)
 {
 //	if (Cheat.c [which1].saved) {

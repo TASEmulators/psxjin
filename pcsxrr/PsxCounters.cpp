@@ -23,6 +23,10 @@
 #include "Win32/Win32.h"
 #endif
 
+// global variables
+psxCounter psxCounters[5];
+unsigned long psxNextCounter, psxNextsCounter;
+
 static int cnts = 4;
 
 static void psxRcntUpd(unsigned long index) {
