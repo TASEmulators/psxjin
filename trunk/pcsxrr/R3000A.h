@@ -32,7 +32,7 @@ typedef struct {
 	void (*Shutdown)();
 } R3000Acpu;
 
-R3000Acpu *psxCpu;
+extern R3000Acpu *psxCpu;
 extern R3000Acpu psxInt;
 #if defined(__i386__) || defined(__sh__)
 extern R3000Acpu psxRec;
@@ -133,7 +133,7 @@ typedef struct {
 	u32 intCycle[32];
 } psxRegisters;
 
-psxRegisters psxRegs;
+extern psxRegisters psxRegs;
 
 #define _i32(x) (long)x
 #define _u32(x) x

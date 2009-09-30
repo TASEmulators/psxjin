@@ -34,7 +34,7 @@ enum CheatStatus{
 	Modified
 };
 
-struct SCheatData Cheat;
+extern struct SCheatData Cheat;
 
 #define ITEM_QUERY(a, b, c, d, e)  ZeroMemory(&a, sizeof(LV_ITEM)); \
         a.iItem= ListView_GetSelectionMark(GetDlgItem(hwndDlg, b)); \

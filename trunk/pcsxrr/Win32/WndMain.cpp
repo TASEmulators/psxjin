@@ -38,6 +38,16 @@
 #include "../movie.h"
 #include "../Win32/movie.h"
 
+// global variables
+AppData gApp;
+HANDLE hConsole;
+long LoadCdBios;
+char cfgfile[256];
+int Running;
+char PcsxDir[256];
+
+extern int OpenPlugins(HWND hWnd);
+
 int iSaveStateTo;
 int iLoadStateFrom;
 int iCallW32Gui;
@@ -1191,9 +1201,9 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 					int i, xor = 0, j;
 					unsigned char *data, *ptr;
 
-					Edit_GetText(GetDlgItem(hW,IDC_MCD1), str, 256);
+					Edit_GetText(GetDlgItem(hW,IDC_MCD1), (LPSTR) str, 256);
 					i = ListView_GetSelectionMark(GetDlgItem(mcdDlg, IDC_LIST1));
-					data = Mcd1Data;
+					data = (unsigned char*) Mcd1Data;
 
 					i++;
 
@@ -1211,9 +1221,9 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 					} else { return TRUE; }
 
 					for (j=0; j<127; j++) xor^=*ptr++;
-					*ptr = xor;
+					*ptr = (unsigned) xor;
 
-					SaveMcd(str, data, i * 128, 128);
+					SaveMcd(str, (char*) data, i * 128, 128);
 					UpdateMcdDlg();
 				}
 
@@ -1225,9 +1235,9 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 					int i, xor = 0, j;
 					unsigned char *data, *ptr;
 
-					Edit_GetText(GetDlgItem(hW,IDC_MCD2), str, 256);
+					Edit_GetText(GetDlgItem(hW,IDC_MCD2), (LPSTR) str, 256);
 					i = ListView_GetSelectionMark(GetDlgItem(mcdDlg, IDC_LIST2));
-					data = Mcd2Data;
+					data = (unsigned char*) Mcd2Data;
 
 					i++;
 
@@ -1245,9 +1255,9 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 					} else { return TRUE; }
 
 					for (j=0; j<127; j++) xor^=*ptr++;
-					*ptr = xor;
+					*ptr = (unsigned) xor;
 
-					SaveMcd(str, data, i * 128, 128);
+					SaveMcd(str, (char*) data, i * 128, 128);
 					UpdateMcdDlg();
 				}
 
@@ -1906,7 +1916,7 @@ INT_PTR CALLBACK DlgMemPoke(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			memPokeHWND = NULL;
 			GetDlgItemText(hDlg, IDC_NC_ADDRESS, bufPokeAddress, 7);
 			GetDlgItemText(hDlg, IDC_NC_NEWVAL, bufPokeNewval, 7);
-			break;
+			return TRUE;
 		}
 		case WM_COMMAND: {
 			switch(LOWORD(wParam)) {

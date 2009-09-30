@@ -22,6 +22,9 @@
 //THIS ALL IS FOR THE CDROM REGISTERS HANDLING
 #include "PsxCommon.h"
 
+// global variables
+cdrStruct cdr;
+
 #define CdlSync         0
 #define CdlNop	        1
 #define CdlSetloc		2

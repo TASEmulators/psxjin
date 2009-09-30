@@ -10,12 +10,12 @@
 #include <sys/wait.h>
 #endif
 
-
-
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-#include <lstate.h>
+extern "C" {
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
+	#include <lstate.h>
+}
 
 #include "PsxCommon.h"
 #ifdef WIN32

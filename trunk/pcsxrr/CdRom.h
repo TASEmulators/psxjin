@@ -76,7 +76,7 @@ typedef struct {
 	char Unused[4083];
 } cdrStruct;
 
-cdrStruct cdr;
+extern cdrStruct cdr;
 
 void cdrReset();
 void cdrInterrupt();

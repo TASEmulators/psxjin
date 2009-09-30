@@ -30,6 +30,16 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 
+#if defined(__cplusplus) || defined(c_plusplus)
+#define EXTERN_C extern "C"
+#define START_EXTERN_C extern "C" {
+#define END_EXTERN_C }
+#else
+#define EXTERN_C extern
+#define START_EXTERN_C
+#define END_EXTERN_C
+#endif
+
 #include "System.h"
 #if defined(__DREAMCAST__)
 #include <zlib/zlib.h>
@@ -125,7 +135,7 @@ typedef struct {
 	long PauseAfterPlayback;
 } PcsxConfig;
 
-PcsxConfig Config;
+extern PcsxConfig Config;
 
 extern long LoadCdBios;
 extern int StatesC;

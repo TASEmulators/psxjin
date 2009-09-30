@@ -43,18 +43,18 @@
 #define strcasecmp _stricmp
 #endif
 
-AppData gApp;
-HANDLE hConsole;
+extern AppData gApp;
+extern HANDLE hConsole;
 
-long LoadCdBios;
+extern long LoadCdBios;
 extern int StatesC;
 extern int AccBreak;
 extern int NeedReset;
 extern int ConfPlug;
 extern int CancelQuit;
-char cfgfile[256];
-int Running;
-char PcsxDir[256];
+extern char cfgfile[256];
+extern int Running;
+extern char PcsxDir[256];
 
 LRESULT WINAPI MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);

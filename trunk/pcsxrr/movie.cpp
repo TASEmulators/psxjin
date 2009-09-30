@@ -6,7 +6,7 @@
 
 #ifdef WIN32
 #include <windows.h>
-#include "Win32/movie.h"
+#include "Win32/moviewin.h"
 #endif
 
 struct MovieType Movie;

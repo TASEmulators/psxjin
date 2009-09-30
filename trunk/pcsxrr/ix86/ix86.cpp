@@ -9,6 +9,18 @@
 
 #include "ix86.h"
 
+// global variables
+s8  x86ID[16];	// Vendor ID
+u32 x86Family;	// Processor Family
+u32 x86Model;	// Processor Model
+u32 x86PType;	// Processor Type
+u32 x86StepID;	// Stepping ID
+u32 x86Flags;	// Feature Flags
+u32 x86EFlags;	// Extended Feature Flags
+s8  *x86Ptr;
+u8  *j8Ptr[32];
+u32 *j32Ptr[32];
+
 static s32 iCpuId(s32 cmd, u32 *regs) {
 	int flag;
 

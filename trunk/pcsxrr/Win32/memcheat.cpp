@@ -128,8 +128,8 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 		ListView_InsertColumn(GetDlgItem(hwndDlg,IDC_CHEAT_LIST),    2,   &col);
 
-		ct.index=malloc(sizeof(int)*Cheat.num_cheats);
-		ct.state=malloc(sizeof(DWORD)*Cheat.num_cheats);
+		ct.index=(int*)malloc(sizeof(int)*Cheat.num_cheats);
+		ct.state=(DWORD*)malloc(sizeof(DWORD)*Cheat.num_cheats);
 
 		for(counter=0; counter<Cheat.num_cheats; counter++)
 		{
@@ -556,8 +556,8 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				}
 
 				PCSXLoadCheatFile(nameo);
-				ct.index=malloc(sizeof(int)*Cheat.num_cheats);
-				ct.state=malloc(sizeof(DWORD)*Cheat.num_cheats);
+				ct.index=(int*)malloc(sizeof(int)*Cheat.num_cheats);
+				ct.state=(DWORD*)malloc(sizeof(DWORD)*Cheat.num_cheats);
 
 				for(counter=0; counter<Cheat.num_cheats; counter++)
 				{

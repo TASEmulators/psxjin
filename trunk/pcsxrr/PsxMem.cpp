@@ -21,6 +21,13 @@
 
 #include "PsxCommon.h"
 
+// global variables
+s8 *psxM;
+s8 *psxP;
+s8 *psxR;
+s8 *psxH;
+u32 *psxMemWLUT;
+u32 *psxMemRLUT;
 
 int psxMemInit() {
 	int i;

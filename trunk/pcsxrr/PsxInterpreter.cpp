@@ -39,106 +39,106 @@ static u32 branchPC;
 #define debugI()
 #endif
 
+// Subsets
+extern void (*psxBSC[64])();
+extern void (*psxSPC[64])();
+extern void (*psxREG[32])();
+extern void (*psxCP0[32])();
+extern void (*psxCP2[64])();
+extern void (*psxCP2BSC[32])();
+
 #ifdef WIN32
 #include "Win32/Win32.h"
-#define execI() \
-{ \
-	u32 *code; \
-	if (!iPause || iFrameAdvance) \
-	{ \
-		if (iVSyncFlag) { \
-			if (iGpuHasUpdated) { \
-				if (iSaveStateTo) { \
-						WIN32_SaveState(iSaveStateTo-1); \
-						iSaveStateTo = 0; \
-				} \
-				if (iFrameAdvance || iDoPauseAtVSync) { \
-					iPause = 1; \
-					iDoPauseAtVSync = 0; \
-					iFrameAdvance = 0; \
-				} \
-				iGpuHasUpdated = 0; \
-			} \
-			iVSyncFlag = 0; \
-			PCSX_LuaFrameBoundary(); \
-			iJoysToPoll = 2; \
-		} \
- \
-		code = PSXM(psxRegs.pc); \
-		psxRegs.code = code == NULL ? 0 : *code; \
-		debugI(); \
-		psxRegs.pc+= 4; psxRegs.cycle++; \
-		psxBSC[psxRegs.code >> 26](); \
-	} \
-	else { \
-		char modeFlags = 0; \
-		modeFlags |= MODE_FLAG_PAUSED; \
-		if (Movie.mode == MOVIEMODE_RECORD) \
-			modeFlags |= MODE_FLAG_RECORD; \
-		if (Movie.mode == MOVIEMODE_PLAY) \
-			modeFlags |= MODE_FLAG_REPLAY; \
-		GPU_setcurrentmode(modeFlags); \
- \
-		GPU_updateframe(); \
-		SysUpdate(); \
- \
-		if (iSaveStateTo) { \
-			WIN32_SaveState(iSaveStateTo-1); \
-			iSaveStateTo = 0; \
-		} \
-	} \
-	if (iLoadStateFrom) { \
-		WIN32_LoadState(iLoadStateFrom-1); \
-		iLoadStateFrom = 0; \
-	} \
-	if (iCallW32Gui) { \
-		iCallW32Gui=0; \
-		Running = 0; \
-		iPause = 0; \
-		if (Movie.mode == MOVIEMODE_RECORD) \
-			MOV_WriteMovieFile(); \
-		if (Movie.capture) \
-			WIN32_StopAviRecord(); \
-		ClosePlugins(); \
-		SysRunGui(); \
-	} \
+void inline execI()
+{
+	u32 *code;
+	if (!iPause || iFrameAdvance)
+	{
+		if (iVSyncFlag) {
+			if (iGpuHasUpdated) {
+				if (iSaveStateTo) {
+						WIN32_SaveState(iSaveStateTo-1);
+						iSaveStateTo = 0;
+				}
+				if (iFrameAdvance || iDoPauseAtVSync) {
+					iPause = 1;
+					iDoPauseAtVSync = 0;
+					iFrameAdvance = 0;
+				}
+				iGpuHasUpdated = 0;
+			}
+			iVSyncFlag = 0;
+			PCSX_LuaFrameBoundary();
+			iJoysToPoll = 2;
+		}
+
+		code = PSXM(psxRegs.pc);
+		psxRegs.code = code == NULL ? 0 : *code;
+		debugI();
+		psxRegs.pc+= 4; psxRegs.cycle++;
+		psxBSC[psxRegs.code >> 26]();
+	}
+	else {
+		char modeFlags = 0;
+		modeFlags |= MODE_FLAG_PAUSED;
+		if (Movie.mode == MOVIEMODE_RECORD)
+			modeFlags |= MODE_FLAG_RECORD;
+		if (Movie.mode == MOVIEMODE_PLAY)
+			modeFlags |= MODE_FLAG_REPLAY;
+		GPU_setcurrentmode(modeFlags);
+
+		GPU_updateframe();
+		SysUpdate();
+
+		if (iSaveStateTo) {
+			WIN32_SaveState(iSaveStateTo-1);
+			iSaveStateTo = 0;
+		}
+	}
+	if (iLoadStateFrom) {
+		WIN32_LoadState(iLoadStateFrom-1);
+		iLoadStateFrom = 0;
+	}
+	if (iCallW32Gui) {
+		iCallW32Gui=0;
+		Running = 0;
+		iPause = 0;
+		if (Movie.mode == MOVIEMODE_RECORD)
+			MOV_WriteMovieFile();
+		if (Movie.capture)
+			WIN32_StopAviRecord();
+		ClosePlugins();
+		SysRunGui();
+	}
 }
 
 #else
-#define execI() \
-{ \
-	if (!iPause)	\
-	{ \
-		iVSyncFlag = 0; \
-		u32 *code = PSXM(psxRegs.pc); \
-		psxRegs.code = code == NULL ? 0 : *code; \
-		debugI(); \
-		psxRegs.pc+= 4; psxRegs.cycle++; \
-		psxBSC[psxRegs.code >> 26](); \
-	} \
-	else	\
-	{	\
-		char modeFlags = 0; \
-		modeFlags |= MODE_FLAG_PAUSED; \
-		if (Movie.mode == MOVIEMODE_RECORD) \
-			modeFlags |= MODE_FLAG_RECORD; \
-		if (Movie.mode == MOVIEMODE_PLAY) \
-			modeFlags |= MODE_FLAG_REPLAY; \
-		GPU_setcurrentmode(modeFlags); \
- \
-		GPU_updateframe(); \
-		SysUpdate(); \
-	}	\
+void inline execI()
+{
+	if (!iPause)
+	{
+		iVSyncFlag = 0;
+		u32 *code = PSXM(psxRegs.pc);
+		psxRegs.code = code == NULL ? 0 : *code;
+		debugI();
+		psxRegs.pc+= 4; psxRegs.cycle++;
+		psxBSC[psxRegs.code >> 26]();
+	}
+	else
+	{
+		char modeFlags = 0;
+		modeFlags |= MODE_FLAG_PAUSED;
+		if (Movie.mode == MOVIEMODE_RECORD)
+			modeFlags |= MODE_FLAG_RECORD;
+		if (Movie.mode == MOVIEMODE_PLAY)
+			modeFlags |= MODE_FLAG_REPLAY;
+		GPU_setcurrentmode(modeFlags);
+
+		GPU_updateframe();
+		SysUpdate();
+	}
 }
 #endif
-
-// Subsets
-void (*psxBSC[64])();
-void (*psxSPC[64])();
-void (*psxREG[32])();
-void (*psxCP0[32])();
-void (*psxCP2[64])();
-void (*psxCP2BSC[32])();
 
 static void delayRead(int reg, u32 bpc) {
 	u32 rold, rnew;

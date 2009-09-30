@@ -1172,7 +1172,7 @@ void psxBios_HookEntryInt() { // 19
 	PSXBIOS_LOG("psxBios_%s\n", biosB0n[0x19]);
 #endif
 
-	jmp_int = (u32*)Ra0;
+	jmp_int = (unsigned long*)Ra0;
 	pc0 = ra;
 }
 
@@ -2000,7 +2000,7 @@ void psxBiosInit() {
 
 	base = 0x1000;
 	size = sizeof(EvCB) * 32;
-	Event = (void *)&psxR[base]; base+= size*6;
+	Event = (EvCB *)(&psxR[base]); base+= size*6;
 	memset(Event, 0, size * 6);
 	HwEV = Event;
 	EvEV = Event + 32;
