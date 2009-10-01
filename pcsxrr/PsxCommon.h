@@ -19,8 +19,6 @@
 #ifndef __PSXCOMMON_H__
 #define __PSXCOMMON_H__
 
-#define PCSXRR_VERSION 12
-
 #include <inttypes.h>
 typedef int8_t int8;
 typedef int16_t int16;

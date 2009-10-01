@@ -27,6 +27,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="defaultconfig\SubWCRev.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -49,7 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng"
+				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -128,6 +129,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="defaultconfig\SubWCRev.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -156,7 +158,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng"
+				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -238,6 +240,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="defaultconfig\SubWCRev.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -266,7 +269,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng"
+				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
