@@ -651,6 +651,20 @@ void RemoveWatch(int watchIndex)
 	WatchCount--;
 }
 
+void RefreshWatchListSelectedItemControlStatus(HWND hDlg)
+{
+	static int prevSelIndex=-1;
+	int selIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_RAMLIST));
+	if(selIndex != prevSelIndex)
+	{
+		if(selIndex == -1 || prevSelIndex == -1)
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_C_ADDCHEAT), (selIndex != -1) ? TRUE : FALSE);
+		}
+		prevSelIndex = selIndex;
+	}
+}
+
 LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets info for a RAM Watch, and then inserts it into the Watch List
 {
 	RECT r;
@@ -916,6 +930,16 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					LPNMHDR lP = (LPNMHDR) lParam;
 					switch (lP->code)
 					{
+						case LVN_ITEMCHANGED: // selection changed event
+						{
+							NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)lP;
+							if(pNMListView->uNewState & LVIS_FOCUSED)
+							{
+								// disable buttons that we don't have the right number of selected items for
+								RefreshWatchListSelectedItemControlStatus(hDlg);
+							}
+						}	break;
+
 						case LVN_GETDISPINFO:
 						{
 							LV_DISPINFO *Item = (LV_DISPINFO *)lParam;

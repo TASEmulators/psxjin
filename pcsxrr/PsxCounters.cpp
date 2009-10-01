@@ -21,6 +21,8 @@
 #include "PsxCommon.h"
 #ifdef WIN32
 #include "Win32/Win32.h"
+#include "Win32/ram_search.h"
+#include "Win32/ramwatch.h"
 #endif
 
 // global variables
@@ -222,6 +224,7 @@ GPU_setcurrentmode(modeFlags);
 // update WIN32 tools
 #ifdef WIN32
 	PCSXApplyCheats();
+	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	UpdateMemWatch();
 //		UpdateMemSearch();
 #endif

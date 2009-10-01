@@ -30,6 +30,8 @@
 #include "Win32.h"
 #include "resource.h"
 #include "maphkeys.h"
+#include "ram_search.h"
+#include "ramwatch.h"
 
 extern int iTurboMode;
 int iSpeedMode = 7;
@@ -102,6 +104,7 @@ void WIN32_LoadState(int newState) {
 		Movie.mode = previousMode;
 	}
 	GPU_displayText(Text);
+	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	UpdateMemWatch();
 }
 

@@ -47,7 +47,13 @@
 
 static inline u8* HardwareToSoftwareAddress(HWAddressType address)
 {
-	return NULL; // TODO
+	//if (!ROM_is_not_loaded)
+	//	return NULL;
+
+	if (address >= 0x000000 && address < 0x200000)
+		return (u8*) &psxM[address];
+	else
+		return NULL;
 }
 
 
@@ -948,22 +954,40 @@ bool IsSatisfied(int itemIndex)
 
 
 
-unsigned int ReadValueAtSoftwareAddress(const unsigned char* address, unsigned int size)
+unsigned int ReadValueAtSoftwareAddress(const unsigned char* address, unsigned int size, int byteSwapped = false)
 {
 	unsigned int value = 0;
-	if(address)
+	if(!byteSwapped)
 	{
 		// assumes we're little-endian
 		memcpy(&value, address, size);
 	}
+	else
+	{
+		// byte-swap and convert to current endianness at the same time
+		for(unsigned int i = 0; i < size; i++)
+		{
+			value <<= 8;
+			value |= *((unsigned char*)((intptr_t)address++^1));
+		}
+	}
 	return value;
 }
-void WriteValueAtSoftwareAddress(unsigned char* address, unsigned int value, unsigned int size)
+void WriteValueAtSoftwareAddress(unsigned char* address, unsigned int value, unsigned int size, int byteSwapped = false)
 {
-	if(address)
+	if(!byteSwapped)
 	{
 		// assumes we're little-endian
 		memcpy(address, &value, size);
+	}
+	else
+	{
+		// write as big endian
+		for(int i = size-1; i >= 0; i--)
+		{
+			address[i] = value & 0xFF;
+			value >>= 8;
+		}
 	}
 }
 unsigned int ReadValueAtHardwareAddress(HWAddressType address, unsigned int size)
