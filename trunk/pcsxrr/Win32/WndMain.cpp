@@ -31,6 +31,7 @@
 #include "resource.h"
 #include "AboutDlg.h"
 
+#include "../version.h"
 #include "PsxCommon.h"
 #include "plugin.h"
 #include "Debug.h"
@@ -1646,7 +1647,6 @@ void CreateMainMenu() {
 }
 
 void CreateMainWindow(int nCmdShow) {
-	char szPcsxVersion[32];
 	WNDCLASS wc;
 	HWND hWnd;
 	HBRUSH hBrush;
@@ -1667,10 +1667,8 @@ void CreateMainWindow(int nCmdShow) {
 	RegisterClass(&wc);
 
 
-	sprintf(szPcsxVersion,"%3.3d",PCSXRR_VERSION);
-	sprintf(szPcsxVersion,"PCSX-RR v%c.%c.%c",szPcsxVersion[0],szPcsxVersion[1],szPcsxVersion[2]);
 	hWnd = CreateWindow("PCSX Main",
-						szPcsxVersion,
+						PCSXRR_NAME_AND_VERSION,
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						20,
 						20,
