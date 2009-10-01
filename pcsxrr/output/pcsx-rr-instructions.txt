@@ -1,4 +1,4 @@
-PCSX-RR v0.1.1
+PCSX-RR v0.1.2
 ----------------------------------------
 
 PCSX-RR is a special version of PCSX
@@ -71,6 +71,11 @@ Command Line Options
 
 What's New?
 -----------
+
+v0.1.2
+-Eliminated the major cause of desyncs that could occur when rerecording.
+-Added a few hotkeys for Ram Search.
+-Fixed the dialog title for WIN32_LuaRunScript(). 
 
 v0.1.1
 -Lua scripting.
