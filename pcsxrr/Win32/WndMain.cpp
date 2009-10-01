@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <assert.h>
 
 #include <fcntl.h>
 #include <io.h>
@@ -37,6 +38,8 @@
 #include "../cheat.h"
 #include "../movie.h"
 #include "moviewin.h"
+#include "ram_search.h"
+#include "ramwatch.h"
 
 // global variables
 AppData gApp;
@@ -344,15 +347,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return 0;
 }
 
-void RunGui() {
+void RunMessageLoop() {
 	MSG msg;
 
-	for (;;) {
-		if(PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+	while(PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	{
+		if(GetMessage(&msg, NULL, 0, 0) > 0)
+		{
+			if (RamWatchHWnd && IsDialogMessage(RamWatchHWnd, &msg))
+			{
+				if(msg.message == WM_KEYDOWN) // send keydown messages to the dialog (for accelerators, and also needed for the Alt key to work)
+					SendMessage(RamWatchHWnd, msg.message, msg.wParam, msg.lParam);
+				continue;
+			}
+			if (RamSearchHWnd && IsDialogMessage(RamSearchHWnd, &msg))
+				continue;
+
+			//if(!TranslateAccelerator(gApp.hWnd,hAccel,&msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
 	}
+}
+
+void RunGui() {
+	for(;;) RunMessageLoop();
 }
 
 void RestoreWindow() {
@@ -670,6 +691,31 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_CONFIGURATION_MAPHOTKEYS:
 						MHkeysCreate();
+					return TRUE;
+
+				case ID_RAM_SEARCH:
+					if(!RamSearchHWnd)
+					{
+						reset_address_info();
+						RamSearchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+					}
+					else
+						SetForegroundWindow(RamSearchHWnd);
+					return TRUE;
+
+				case ID_RAM_WATCH:
+					if(!RamWatchHWnd)
+					{
+						RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+
+if(!RamWatchHWnd){
+
+DWORD dwerr = GetLastError();
+						assert(false);
+}
+					}
+					else
+						SetForegroundWindow(RamWatchHWnd);
 					return TRUE;
 
 				case ID_CONFIGURATION_MEMWATCH:
@@ -1579,9 +1625,11 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Tools"));
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("RAM &Watch"), ID_CONFIGURATION_MEMWATCH);
+	ADDMENUITEM(0, _("RAM &Watch"), ID_RAM_WATCH);
+	ADDMENUITEM(0, _("RAM &Watch (Old)"), ID_CONFIGURATION_MEMWATCH);
 	ADDMENUITEM(0, _("RAM &Poke"), ID_CONFIGURATION_MEMPOKE);
-	ADDMENUITEM(0, _("RAM &Search"), ID_CONFIGURATION_MEMSEARCH);
+	ADDMENUITEM(0, _("RAM &Search"), ID_RAM_SEARCH);
+	ADDMENUITEM(0, _("RAM &Search (Old)"), ID_CONFIGURATION_MEMSEARCH);
 	ADDMENUITEM(0, _("&Cheat Editor"), ID_CONFIGURATION_CHEATS);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
@@ -1755,12 +1803,7 @@ void SysCloseLibrary(void *lib) {
 }
 
 void SysUpdate() {
-	MSG msg;
-
-	while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
+	RunMessageLoop();
 }
 
 void SysRunGui() {

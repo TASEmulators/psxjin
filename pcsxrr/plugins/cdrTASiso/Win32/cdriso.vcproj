@@ -72,18 +72,18 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1032"
+				Culture="0"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2005-x86-Release.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\cdrTASiso.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2-1.0.5"
+				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile=".\cdriso.def"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -171,19 +171,19 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1032"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="0"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2005-x86-Debug.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2008-x86-Debug.lib"
 				OutputFile="$(OutDir)\cdrTASiso.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2-1.0.5"
+				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile=".\cdriso.def"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -274,18 +274,18 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1032"
+				Culture="0"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2005-x86-Release.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\cdrTASiso.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2-1.0.5"
+				AdditionalLibraryDirectories=".\includes;..\..\..\win32\libbzip2"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile=".\cdriso.def"
 				GenerateDebugInformation="true"
