@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\output\plugins"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(ProjectDir)..\..\output\plugins"
+			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -48,15 +48,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\win32\directx;&quot;..\..\win32\libpng-1.0.50&quot;;..\..\win32\includes"
+				AdditionalIncludeDirectories="..\..\win32\directx;..\..\win32\zlib;..\..\win32\libpng;..\..\win32\includes"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug/gpuPeopsSoft.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\vc80.pdb"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -74,18 +74,18 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ddraw.lib dxguid.lib winmm.lib vfw32.lib ..\..\win32\$(ConfigurationName)\libpng.lib ..\..\win32\includes\zdll.lib"
-				OutputFile="..\..\output\plugins\gpuTASsoft.dll"
+				AdditionalDependencies="ddraw.lib dxguid.lib winmm.lib vfw32.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				OutputFile="$(OutDir)\gpuTASsoft.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\win32\directx"
+				AdditionalLibraryDirectories="..\..\win32\directx;..\..\win32\zlib;..\..\win32\libpng"
 				ModuleDefinitionFile=".\gpuPeopsSoft.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/gpuTASsoft.pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=""
+				ImportLibrary="$(IntDir)\gpuPeopsSoft.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -114,12 +114,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\output\plugins"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(ProjectDir)..\..\output\plugins"
+			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -144,18 +145,20 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
+				Optimization="3"
+				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\..\win32\directx;&quot;..\..\win32\libpng-1.0.50&quot;;..\..\win32\includes"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				AdditionalIncludeDirectories="..\..\win32\directx;..\..\win32\zlib;..\..\win32\libpng;..\..\win32\includes"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__i386__"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/gpuPeopsSoft.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\vc80.pdb"
 				BrowseInformation="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
@@ -173,17 +176,124 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ddraw.lib dxguid.lib winmm.lib vfw32.lib ..\..\win32\$(ConfigurationName)\libpng.lib ..\..\win32\includes\zdll.lib"
-				OutputFile="..\..\output\plugins\gpuTASsoft.dll"
+				AdditionalDependencies="ddraw.lib dxguid.lib winmm.lib vfw32.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				OutputFile="$(OutDir)\gpuTASsoft.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\win32\directx"
+				AdditionalLibraryDirectories="..\..\win32\directx;..\..\win32\zlib;..\..\win32\libpng"
 				ModuleDefinitionFile=".\gpuPeopsSoft.def"
-				ProgramDatabaseFile="$(OutDir)/gpuTASsoft.pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Release/gpuPeopsSoft.lib"
+				ImportLibrary="$(IntDir)\gpuPeopsSoft.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile=".\Release/gpuPeopsSoft.bsc"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release FastBuild|Win32"
+			OutputDirectory="$(ProjectDir)..\..\output\plugins"
+			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			WholeProgramOptimization="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Release/gpuPeopsSoft.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				AdditionalIncludeDirectories="..\..\win32\directx;..\..\win32\zlib;..\..\win32\libpng;..\..\win32\includes"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__i386__"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\vc80.pdb"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1031"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ddraw.lib dxguid.lib winmm.lib vfw32.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				OutputFile="$(OutDir)\gpuTASsoft.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\win32\directx;..\..\win32\zlib;..\..\win32\libpng"
+				ModuleDefinitionFile=".\gpuPeopsSoft.def"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\gpuPeopsSoft.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -238,6 +348,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="draw.c"
@@ -252,6 +370,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -278,6 +404,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="fpsewp.c"
@@ -292,6 +426,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -318,6 +460,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="gpuPeopsSoft.c"
@@ -332,6 +482,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -364,6 +522,15 @@
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq2x16.asm -o &quot;$(IntDir)&quot;\hq2x16.obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="hq2x32.asm"
@@ -379,6 +546,15 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq2x32.asm -o &quot;$(IntDir)&quot;\hq2x32.obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
@@ -408,6 +584,15 @@
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq3x16.asm -o &quot;$(IntDir)&quot;\hq3x16.obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="hq3x32.asm"
@@ -423,6 +608,15 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\win32\nasmw.exe -O9999 -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ hq3x32.asm -o &quot;$(IntDir)&quot;\hq3x32.obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
@@ -452,6 +646,15 @@
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\win32\nasmw.exe -f win32 -D__WIN32__ -D__i386__ $(InputPath) -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="key.c"
@@ -466,6 +669,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -492,6 +703,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="prim.c"
@@ -506,6 +725,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -532,6 +759,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="soft.c"
@@ -552,6 +787,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="zn.c"
@@ -566,6 +809,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -660,6 +911,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
 					>
 					<Tool
 						Name="VCResourceCompilerTool"
