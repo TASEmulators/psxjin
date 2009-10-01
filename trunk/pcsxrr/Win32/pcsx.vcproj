@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\..\output"
-			IntermediateDirectory="$(SolutionDir)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\output"
+			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -49,10 +49,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;libpng-1.0.50"
+				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				StructMemberAlignment="5"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				AssemblerListingLocation="$(IntDir)\"
 				ObjectFile="$(IntDir)\"
@@ -76,11 +77,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib lua-5.1.4-x86.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes;./lua/lib"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="2"
@@ -115,8 +116,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\..\output"
-			IntermediateDirectory="$(SolutionDir)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)..\output"
+			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -154,7 +155,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;libpng-1.0.50"
+				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -183,11 +184,121 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib zdll.lib lua-5.1.4-x86.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes;./lua/lib"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile=".\Release/pcsx.bsc"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="xcopy /y /d &quot;$(ProjectDir)\dll\*.dll&quot; &quot;$(OutDir)&quot;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release FastBuild|Win32"
+			OutputDirectory="$(ProjectDir)..\output"
+			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			WholeProgramOptimization="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Release/pcsx.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zm200 "
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				StructMemberAlignment="5"
+				EnableFunctionLevelLinking="true"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\vc80.pdb"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				CompileAs="0"
+				DisableSpecificWarnings="4996"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1032"
+				AdditionalIncludeDirectories=""
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				OutputFile="$(OutDir)\pcsx.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -465,7 +576,7 @@
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						CompileAs="1"
+						CompileAs="0"
 					/>
 				</FileConfiguration>
 			</File>

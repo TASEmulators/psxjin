@@ -36,7 +36,7 @@
 #include "Win32.h"
 #include "../cheat.h"
 #include "../movie.h"
-#include "../Win32/movie.h"
+#include "moviewin.h"
 
 // global variables
 AppData gApp;
