@@ -700,13 +700,13 @@ BOOL CALLBACK ConnectDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 int NetOpened = 0;
 
-int OpenPlugins(HWND hWnd) {
+bool OpenPlugins(HWND hWnd) {
 	int ret;
 
 	GPU_clearDynarec(clearDynarec);
 
 	ret = CDR_open();
-	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return -1; }
+	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return false; }
 
 	SetCurrentDirectory(PcsxDir);
 	if (Config.UseNet && NetOpened == 0) {
@@ -753,19 +753,19 @@ int OpenPlugins(HWND hWnd) {
 	}
 
 	ret = GPU_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return -1; }
+	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
 	ret = SPU_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return -1; }
+	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
 	SPU_registerCallback(SPUirq);
 	ret = PAD1_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); return -1; }
+	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); return false; }
 	ret = PAD2_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); return -1; }
+	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); return false; }
 
 	SetCurrentDirectory(PcsxDir);
 //	ShowCursor(FALSE);
 	GPU_sendFpLuaGui(PCSX_LuaGui);
-	return 0;
+	return true;
 }
 
 void ClosePlugins() {

@@ -50,7 +50,7 @@ char cfgfile[256];
 int Running;
 char PcsxDir[256];
 
-extern int OpenPlugins(HWND hWnd);
+extern bool OpenPlugins(HWND hWnd);
 
 int iSaveStateTo;
 int iLoadStateFrom;
@@ -609,8 +609,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_RUN_CD:
 					LoadCdBios = 0;
+
+					if(!OpenPlugins(hWnd)) return FALSE;
+					
 					SetMenu(hWnd, NULL);
-					OpenPlugins(hWnd);
 					SysReset();
 					NeedReset = 0;
 					CheckCdrom();
