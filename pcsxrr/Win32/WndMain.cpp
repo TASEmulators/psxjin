@@ -710,12 +710,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					if(!RamWatchHWnd)
 					{
 						RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
-
-if(!RamWatchHWnd){
-
-DWORD dwerr = GetLastError();
-						assert(false);
-}
 					}
 					else
 						SetForegroundWindow(RamWatchHWnd);
