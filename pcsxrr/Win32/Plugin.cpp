@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdio.h>
+#include <string>
 #include "../plugins.h"
 #include "../PsxCommon.h"
 #include "../movie.h"
@@ -333,7 +334,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CONFCDR].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFCDR].keymod)
 	{
-		if (CDR_configure) CDR_configure();
+		CDRconfigure();
 		return;
 	}
 
@@ -639,8 +640,8 @@ void PADhandleKey(int key) {
 			}
 			else {
 				GPU_displayText(_("*PCSX*: CD Case Closed"));
-				CDR_close();
-				CDR_open();
+				CDRclose();
+				CDRopen();
 				CheckCdrom();
 				if (LoadCdrom() == -1)
 					SysMessage(_("Could not load Cdrom"));
@@ -705,7 +706,7 @@ bool OpenPlugins(HWND hWnd) {
 
 	GPU_clearDynarec(clearDynarec);
 
-	ret = CDR_open();
+	ret = CDRopen();
 	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return false; }
 
 	SetCurrentDirectory(PcsxDir);
@@ -755,7 +756,7 @@ bool OpenPlugins(HWND hWnd) {
 	ret = GPU_open(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
 	ret = SPUopen(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return -1; }
+	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
 	ret = PAD1_open(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); return false; }
 	ret = PAD2_open(hWnd);
@@ -771,7 +772,7 @@ void ClosePlugins() {
 	int ret;
 
 	UpdateMenuSlots();
-	ret = CDR_close();
+	ret = CDRclose();
 	if (ret < 0) { SysMessage (_("Error Closing CDR Plugin")); return; }
 	ret = GPU_close();
 	if (ret < 0) { SysMessage (_("Error Closing GPU Plugin")); return; }
@@ -788,14 +789,14 @@ void ClosePlugins() {
 void ResetPlugins() {
 	int ret;
 
-	CDR_shutdown();
+	CDRshutdown();
 	GPU_shutdown();
 	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
 	if (Config.UseNet) NET_shutdown(); 
 
-	ret = CDR_init();
+	ret = CDRinit();
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }
 	ret = GPU_init();
 	if (ret != 0) { SysMessage (_("GPUinit error: %d"), ret); return; }

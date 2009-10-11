@@ -533,8 +533,8 @@ void MOV_ProcessControlFlags() {
 			#endif
 		}
 		else {
-			CDR_close();
-			CDR_open();
+			CDRclose();
+			CDRopen();
 			CheckCdrom();
 			if (LoadCdrom() == -1)
 				SysMessage(_("Could not load Cdrom"));

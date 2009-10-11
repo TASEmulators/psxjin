@@ -137,8 +137,8 @@ void mmssdd( char *b, char *p )
 	time[0] = itob(time[0]); time[1] = itob(time[1]); time[2] = itob(time[2]);
 
 #define READTRACK() \
-	if (CDR_readTrack(time) == -1) return -1; \
-	buf = CDR_getBuffer(); if (buf == NULL) return -1;
+	if (CDRreadTrack(time) == -1) return -1; \
+	buf = CDRgetBuffer(); if (buf == NULL) return -1;
 
 #define READDIR(_dir) \
 	READTRACK(); \

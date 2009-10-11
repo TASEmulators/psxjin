@@ -50,7 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig"
+				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -78,11 +78,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -158,7 +158,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig"
+				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -187,11 +187,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib  directx/dxerr8.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -269,7 +269,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig"
+				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -298,11 +298,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib  directx/dxerr8.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -798,6 +798,34 @@
 				RelativePath="..\spu\stdafx.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="iso"
+			>
+			<File
+				RelativePath="..\iso\cdriso.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\iso\cdriso.h"
+				>
+			</File>
+			<Filter
+				Name="Win32"
+				>
+				<File
+					RelativePath="..\iso\Win32\afxres.h"
+					>
+				</File>
+				<File
+					RelativePath="..\iso\Win32\Config.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\iso\Win32\Win32.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="Cdrom02.ico"

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 
-#include "cdriso.h"
+#include "../cdriso.h"
 
 #define GetKeyV(name, var, s, t) \
 	size = s; type = t; \

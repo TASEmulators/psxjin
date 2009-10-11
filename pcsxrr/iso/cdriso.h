@@ -1,3 +1,9 @@
+#ifndef _CDRISO_H_
+#define _CDRISO_H_
+
+#include <string>
+
+extern std::string CDR_iso_fileToOpen;
 
 #ifdef __LINUX__
 typedef void *HWND;
@@ -6,9 +12,9 @@ typedef void *HWND;
 
 #define VERBOSE 1
 
-char IsoFile[256];
+extern char IsoFile[256];
 #define DEV_DEF		""
-char CdDev[256];
+extern char CdDev[256];
 #define CDDEV_DEF	"/dev/cdrom"
 extern FILE *cdHandle;
 
@@ -20,12 +26,12 @@ extern FILE *cdHandle;
 
 #define MSF2SECT(m,s,f)	(((m)*60+(s)-2)*75+(f))
 
-unsigned char cdbuffer[CD_FRAMESIZE_RAW * 10];
-unsigned char *pbuffer;
+extern unsigned char cdbuffer[CD_FRAMESIZE_RAW * 10];
+extern unsigned char *pbuffer;
 
-int Zmode; // 1 Z - 2 bz2
-int fmode;						// 0 - file / 1 - Zfile
-char *Ztable;
+extern int Zmode; // 1 Z - 2 bz2
+extern int fmode;						// 0 - file / 1 - Zfile
+extern char *Ztable;
 
 extern char *methods[];
 
@@ -33,25 +39,25 @@ void UpdateZmode();
 void CfgOpenFile();
 void SysMessage(char *fmt, ...);
 
-long CALLBACK CDRinit(void);
-long CALLBACK CDRshutdown(void);
-long CALLBACK CDRopen(void);
-long CALLBACK CDRclose(void);
-long CALLBACK CDRgetTN(unsigned char *);
-long CALLBACK CDRgetTD(unsigned char , unsigned char *);
-long CALLBACK CDRreadTrack(unsigned char *);
-unsigned char * CALLBACK CDRgetBuffer(void);
-long CALLBACK CDRconfigure(void);
-long CALLBACK CDRtest(void);
-void CALLBACK CDRabout(void);
-long CALLBACK CDRplay(unsigned char *);
-long CALLBACK CDRstop(void);
+long CDRinit(void);
+long CDRshutdown(void);
+long CDRopen(void);
+long CDRclose(void);
+long CDRgetTN(unsigned char *);
+long CDRgetTD(unsigned char , unsigned char *);
+long CDRreadTrack(unsigned char *);
+unsigned char * CDRgetBuffer(void);
+long CDRconfigure(void);
+long CDRtest(void);
+void CDRabout(void);
+long CDRplay(unsigned char *);
+long CDRstop(void);
 struct CdrStat {
 	unsigned long Type;
 	unsigned long Status;
 	unsigned char Time[3];
 };
-long CALLBACK CDRgetStatus(struct CdrStat *);
+long CDRgetStatus(struct CdrStat *);
 struct SubQ {
 	char res0[11];
 	unsigned char ControlAndADR;
@@ -62,4 +68,6 @@ struct SubQ {
 	unsigned char AbsoluteAddress[3];
 	char res1[72];
 };
-unsigned char* CALLBACK CDRgetBufferSub(void);
+unsigned char* CDRgetBufferSub(void);
+
+#endif _CDRISO_H_

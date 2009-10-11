@@ -35,6 +35,8 @@ typedef void* HWND;
 #include "PsxCommon.h"
 #include "Decode_XA.h"
 
+#include "iso/cdriso.h"
+
 int  LoadPlugins();
 void ReleasePlugins();
 int  OpenPlugins();
@@ -165,55 +167,55 @@ extern GPUstopAvi          GPU_stopAvi;
 extern GPUsendFpLuaGui     GPU_sendFpLuaGui;
 
 //cd rom plugin ;)
-typedef long (CALLBACK* CDRinit)(void);
-typedef long (CALLBACK* CDRshutdown)(void);
-typedef long (CALLBACK* CDRopen)(void);
-typedef long (CALLBACK* CDRclose)(void);
-typedef long (CALLBACK* CDRgetTN)(unsigned char *);
-typedef long (CALLBACK* CDRgetTD)(unsigned char , unsigned char *);
-typedef long (CALLBACK* CDRreadTrack)(unsigned char *);
-typedef unsigned char * (CALLBACK* CDRgetBuffer)(void);
-typedef long (CALLBACK* CDRconfigure)(void);
-typedef long (CALLBACK* CDRtest)(void);
-typedef void (CALLBACK* CDRabout)(void);
-typedef long (CALLBACK* CDRplay)(unsigned char *);
-typedef long (CALLBACK* CDRstop)(void);
-struct CdrStat {
-	unsigned long Type;
-	unsigned long Status;
-	unsigned char Time[3];
-};
-typedef long (CALLBACK* CDRgetStatus)(struct CdrStat *);
-typedef char* (CALLBACK* CDRgetDriveLetter)(void);
-struct SubQ {
-	char res0[11];
-	unsigned char ControlAndADR;
-	unsigned char TrackNumber;
-	unsigned char IndexNumber;
-	unsigned char TrackRelativeAddress[3];
-	unsigned char Filler;
-	unsigned char AbsoluteAddress[3];
-	char res1[72];
-};
-typedef unsigned char* (CALLBACK* CDRgetBufferSub)(void);
+//typedef long (CALLBACK* CDRinit)(void);
+//typedef long (CALLBACK* CDRshutdown)(void);
+//typedef long (CALLBACK* CDRopen)(void);
+//typedef long (CALLBACK* CDRclose)(void);
+//typedef long (CALLBACK* CDRgetTN)(unsigned char *);
+//typedef long (CALLBACK* CDRgetTD)(unsigned char , unsigned char *);
+//typedef long (CALLBACK* CDRreadTrack)(unsigned char *);
+//typedef unsigned char * (CALLBACK* CDRgetBuffer)(void);
+//typedef long (CALLBACK* CDRconfigure)(void);
+//typedef long (CALLBACK* CDRtest)(void);
+//typedef void (CALLBACK* CDRabout)(void);
+//typedef long (CALLBACK* CDRplay)(unsigned char *);
+//typedef long (CALLBACK* CDRstop)(void);
+//struct CdrStat {
+//	unsigned long Type;
+//	unsigned long Status;
+//	unsigned char Time[3];
+//};
+//typedef long (CALLBACK* CDRgetStatus)(struct CdrStat *);
+//typedef char* (CALLBACK* CDRgetDriveLetter)(void);
+//struct SubQ {
+//	char res0[11];
+//	unsigned char ControlAndADR;
+//	unsigned char TrackNumber;
+//	unsigned char IndexNumber;
+//	unsigned char TrackRelativeAddress[3];
+//	unsigned char Filler;
+//	unsigned char AbsoluteAddress[3];
+//	char res1[72];
+//};
+//typedef unsigned char* (CALLBACK* CDRgetBufferSub)(void);
 
 //cd rom function pointers 
-extern CDRinit               CDR_init;
-extern CDRshutdown           CDR_shutdown;
-extern CDRopen               CDR_open;
-extern CDRclose              CDR_close; 
-extern CDRtest               CDR_test;
-extern CDRgetTN              CDR_getTN;
-extern CDRgetTD              CDR_getTD;
-extern CDRreadTrack          CDR_readTrack;
-extern CDRgetBuffer          CDR_getBuffer;
-extern CDRplay               CDR_play;
-extern CDRstop               CDR_stop;
-extern CDRgetStatus          CDR_getStatus;
-extern CDRgetDriveLetter     CDR_getDriveLetter;
-extern CDRgetBufferSub       CDR_getBufferSub;
-extern CDRconfigure          CDR_configure;
-extern CDRabout              CDR_about;
+//extern CDRinit               CDR_init;
+//extern CDRshutdown           CDR_shutdown;
+//extern CDRopen               CDR_open;
+//extern CDRclose              CDR_close; 
+//extern CDRtest               CDR_test;
+//extern CDRgetTN              CDR_getTN;
+//extern CDRgetTD              CDR_getTD;
+//extern CDRreadTrack          CDR_readTrack;
+//extern CDRgetBuffer          CDR_getBuffer;
+//extern CDRplay               CDR_play;
+//extern CDRstop               CDR_stop;
+//extern CDRgetStatus          CDR_getStatus;
+//extern CDRgetDriveLetter     CDR_getDriveLetter;
+//extern CDRgetBufferSub       CDR_getBufferSub;
+//extern CDRconfigure          CDR_configure;
+//extern CDRabout              CDR_about;
 
 typedef long (CALLBACK* PADconfigure)(void);
 typedef void (CALLBACK* PADabout)(void);
@@ -316,9 +318,9 @@ extern NETkeypressed         NET_keypressed;
 
 END_EXTERN_C
 
-int LoadCDRplugin(char *CDRdll);
+//int LoadCDRplugin(char *CDRdll);
 int LoadGPUplugin(char *GPUdll);
-int LoadSPUplugin(char *SPUdll);
+//int LoadSPUplugin(char *SPUdll);
 int LoadPAD1plugin(char *PAD1dll);
 int LoadPAD2plugin(char *PAD2dll);
 int LoadNETplugin(char *NETdll);

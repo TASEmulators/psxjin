@@ -8,8 +8,8 @@
 #include <zlib.h>
 #include <bzlib.h>
 
-#include "Config.h"
-#include "cdriso.h"
+#include "../Config.h"
+#include "../cdriso.h"
 #include "resource.h"
 
 HINSTANCE hInst;
@@ -22,15 +22,15 @@ HWND hIsoFile;
 HWND hMethod;
 int stop;
 
-void SysMessage(char *fmt, ...) {
-	va_list list;
-	char tmp[512];
-
-	va_start(list,fmt);
-	vsprintf(tmp,fmt,list);
-	va_end(list);
-	MessageBox(0, tmp, "cdriso Msg", 0);
-}
+void SysMessage(char *fmt, ...);
+//	va_list list;
+//	char tmp[512];
+//
+//	va_start(list,fmt);
+//	vsprintf(tmp,fmt,list);
+//	va_end(list);
+//	MessageBox(0, tmp, "cdriso Msg", 0);
+//}
 
 int _GetFile(char *out) {
 	OPENFILENAME ofn;
@@ -74,15 +74,16 @@ void UpdZmode() {
 	else Zmode = 2;
 }
 
+void SysUpdate();
 
-void SysUpdate() {
-    MSG msg;
-
-	while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-}
+//void SysUpdate() {
+//    MSG msg;
+//
+//	while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
+//		TranslateMessage(&msg);
+//		DispatchMessage(&msg);
+//	}
+//}
 
 void OnCompress() {
 	struct stat buf;
@@ -135,7 +136,7 @@ void OnCompress() {
 
 		size = CD_FRAMESIZE_RAW * blocks * 2;
 		if (Zmode == 1) compress(Zbuf, &size, cdbuffer, ret);
-		else BZ2_bzBuffToBuffCompress(Zbuf, (unsigned int*)&size, cdbuffer, ret, 1, 0, 30);
+		else BZ2_bzBuffToBuffCompress((char*)Zbuf, (unsigned int*)&size, (char*)cdbuffer, ret, 1, 0, 30);
 
 		fwrite(&c, 1, 4, f);
 		if (Zmode == 1) fwrite(&size, 1, 2, f);
@@ -233,7 +234,7 @@ void OnDecompress() {
 
 		size = CD_FRAMESIZE_RAW * blocks;
 		if (Zmode == 1) uncompress(cdbuffer, &size, Zbuf, ssize);
-		else BZ2_bzBuffToBuffDecompress(cdbuffer, (unsigned int*)&size, Zbuf, ssize, 0, 0);
+		else BZ2_bzBuffToBuffDecompress((char*)cdbuffer, (unsigned int*)&size, (char*)Zbuf, ssize, 0, 0);
 
 		fwrite(cdbuffer, 1, size, f);
 
@@ -256,7 +257,7 @@ void OnDecompress() {
 	if (!stop) SysMessage("Iso Image Decompressed OK");
 }
 
-BOOL CALLBACK ConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static BOOL CALLBACK IsoConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	int i;
 
 	switch(uMsg) {
@@ -311,40 +312,10 @@ BOOL CALLBACK ConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-long CALLBACK CDRconfigure() {
+long CDRconfigure() {
     DialogBox(hInst,
-              MAKEINTRESOURCE(IDD_CONFIG),
+              MAKEINTRESOURCE(IDD_ISOCONFIG),
               GetActiveWindow(),  
-              (DLGPROC)ConfigureDlgProc);
+              (DLGPROC)IsoConfigureDlgProc);
 	return 0;
 }
-
-BOOL CALLBACK AboutDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			return TRUE;
-
-		case WM_COMMAND:
-			switch(LOWORD(wParam)) {
-				case IDOK:
-					EndDialog(hW, FALSE);
-					return TRUE;
-			}
-	}
-	return FALSE;
-}
-
-void CALLBACK CDRabout() {
-    DialogBox(hInst,
-              MAKEINTRESOURCE(IDD_ABOUT),
-              GetActiveWindow(),  
-              (DLGPROC)AboutDlgProc);
-}
-
-BOOL APIENTRY DllMain(HANDLE hModule,                  // DLL INIT
-                      DWORD  dwReason, 
-                      LPVOID lpReserved) {
-	hInst = (HINSTANCE)hModule;
-	return TRUE;                                          // very quick :)
-}
-
