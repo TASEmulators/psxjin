@@ -188,82 +188,83 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 	return argv;
 }
 
-void OpenConsole() 
-{
-	COORD csize;
-	CONSOLE_SCREEN_BUFFER_INFO csbiInfo; 
-	SMALL_RECT srect;
-	char buf[256];
-	BOOL attached = FALSE;
-	HMODULE lib;
+//void OpenConsole() 
+//{
+//	COORD csize;
+//	CONSOLE_SCREEN_BUFFER_INFO csbiInfo; 
+//	SMALL_RECT srect;
+//	char buf[256];
+//
+//	//dont do anything if we're already attached
+//	if (hConsole) return;
+//
+//	//attach to an existing console (if we can; this is circuitous because AttachConsole wasnt added until XP)
+//	//remember to abstract this late bound function notion if we end up having to do this anywhere else
+//	bool attached = false;
+//	HMODULE lib = LoadLibrary("kernel32.dll");
+//	if(lib)
+//	{
+//		typedef BOOL (WINAPI *_TAttachConsole)(DWORD dwProcessId);
+//		_TAttachConsole _AttachConsole  = (_TAttachConsole)GetProcAddress(lib,"AttachConsole");
+//		if(_AttachConsole)
+//		{
+//			if(_AttachConsole(-1))
+//				attached = true;
+//		}
+//		FreeLibrary(lib);
+//	}
+//
+//	//if we failed to attach, then alloc a new console
+//	if(!attached)
+//	{
+//		AllocConsole();
+//	}
+//
+//	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+//
+//	//redirect stdio
+//	long lStdHandle = (long)hConsole;
+//	int hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+//	if(hConHandle == -1)
+//		return; //this fails from a visual studio command prompt
+//	
+//	FILE *fp = _fdopen( hConHandle, "w" );
+//	*stdout = *fp;
+//	//and stderr
+//	*stderr = *fp;
+//
+//	memset(buf,0,256);
+//	sprintf(buf,"pcsx-rr OUTPUT");
+//	SetConsoleTitle(TEXT(buf));
+//	csize.X = 60;
+//	csize.Y = 800;
+//	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), csize);
+//	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbiInfo);
+//	srect = csbiInfo.srWindow;
+//	srect.Right = srect.Left + 99;
+//	srect.Bottom = srect.Top + 64;
+//	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &srect);
+//	SetConsoleCP(GetACP());
+//	SetConsoleOutputCP(GetACP());
+//	if(attached) printf("\n");
+//	printf("pcsx-rr\n");
+//	printf("- compiled: %s %s\n\n",__DATE__,__TIME__);
+//}
 
-	//dont do anything if we're already attached
-	if (hConsole) return;
-
-	//attach to an existing console (if we can; this is circuitous because AttachConsole wasnt added until XP)
-	//remember to abstract this late bound function notion if we end up having to do this anywhere else
-
-	lib = LoadLibrary("kernel32.dll");
-
-	if(lib)
-	{
-		typedef BOOL (WINAPI *_TAttachConsole)(DWORD dwProcessId);
-		_TAttachConsole _AttachConsole  = (_TAttachConsole)GetProcAddress(lib,"AttachConsole");
-		if(_AttachConsole)
-		{
-			if(_AttachConsole(-1))
-				attached = TRUE;
-		}
-		FreeLibrary(lib);
-	}
-
-	//if we failed to attach, then alloc a new console
-	if(!attached)
-	{
-		AllocConsole();
-	}
-
-	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	//redirect stdio
-	{
-		FILE *fp;
-		long lStdHandle = (long)hConsole;
-		int hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-		if(hConHandle == -1)
-			return; //this fails from a visual studio command prompt
-		
-		fp = _fdopen( hConHandle, "w" );
-		*stdout = *fp;
-		//and stderr
-		*stderr = *fp;
-	}
-
-	memset(buf,0,256);
-	sprintf(buf,"%s OUTPUT", "Psx Output");
-	SetConsoleTitle(TEXT(buf));
-	csize.X = 60;
-	csize.Y = 800;
-	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), csize);
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbiInfo);
-	srect = csbiInfo.srWindow;
-	srect.Right = srect.Left + 99;
-	srect.Bottom = srect.Top + 64;
-	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &srect);
-	SetConsoleCP(GetACP());
-	SetConsoleOutputCP(GetACP());
-}
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int main(int argc, char **argv) {
 	char runcd=0;
 	char loadMovie=0;
-	int i, argc;
-	PCHAR *argv;
+	int i;
+		//argc;
+	//PCHAR *argv;
+
+	//OpenConsole();
 
 	printf ("PCSX\n");
 	strcpy(cfgfile, "Software\\PCSX-RR");
 
-	argv = CommandLineToArgvA(GetCommandLine(), &argc);
+	//argv = CommandLineToArgvA(GetCommandLine(), &argc);
 	if( argc > 1 )
 	for( i=1; i < argc; i++ ) {
 //		MessageBox( NULL, argv[i], "Argument list", MB_ICONINFORMATION );
@@ -302,7 +303,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	GetCurrentPath();
 
-	gApp.hInstance = hInstance;
+	gApp.hInstance = GetModuleHandle(NULL);
 
 	Running=0;
 
@@ -331,7 +332,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	if (SysInit() == -1) return 1;
 
-	CreateMainWindow(nCmdShow);
+	CreateMainWindow(SW_SHOW);
 
 	PCSXInitCheatData();
 
@@ -680,7 +681,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_CONFIGURATION_SOUND:
-					if (SPU_configure) SPU_configure();
+					SPUconfigure();
 					return TRUE;
 
 				case ID_CONFIGURATION_CONTROLLERS:
@@ -1429,8 +1430,8 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 					EndDialog(hW,TRUE);
 
-					if (Config.PsxOut) OpenConsole();
-					else CloseConsole();
+					//if (Config.PsxOut) OpenConsole();
+					//else CloseConsole();
 
 					return TRUE;
 			}
@@ -1704,7 +1705,8 @@ HANDLE lFind;
 int lFirst;
 
 int SysInit() {
-	if (Config.PsxOut) OpenConsole();
+	//if (Config.PsxOut) 
+		//OpenConsole();
 
 	if (psxInit() == -1) return -1;
 
@@ -1924,7 +1926,7 @@ void WIN32_StartAviRecord()
 	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	GPU_startAvi(Movie.aviFilename);
-	SPU_startWav(Movie.wavFilename);
+	SPUstartWav(Movie.wavFilename);
 	if (NeedReset) { SysReset(); NeedReset = 0; }
 	Running = 1;
 	psxCpu->Execute();
@@ -1935,7 +1937,7 @@ void WIN32_StopAviRecord()
 	if (!Movie.capture)
 		return;
 	GPU_stopAvi();
-	SPU_stopWav();
+	SPUstopWav();
 	Movie.capture = 0;
 	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_ENABLED);
 }

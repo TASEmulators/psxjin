@@ -33,16 +33,17 @@
 //
 //*************************************************************************//
 
-#include "stdafx.h"
+#include "adsr.h"
 
-#define _IN_ADSR
+static const unsigned long int TableDisp[] =
+{
+	-0x18+0+32,-0x18+4+32,-0x18+6+32,-0x18+8+32,       // release/decay
+	-0x18+9+32,-0x18+10+32,-0x18+11+32,-0x18+12+32,
 
-// will be included from spu.c
-#ifdef _IN_SPU
+	-0x1B+0+32,-0x1B+4+32,-0x1B+6+32,-0x1B+8+32,       // sustain
+	-0x1B+9+32,-0x1B+10+32,-0x1B+11+32,-0x1B+12+32,
+};
 
-////////////////////////////////////////////////////////////////////////
-// ADSR func
-////////////////////////////////////////////////////////////////////////
 
 static unsigned long int RateTable[160];
 
@@ -77,32 +78,23 @@ void InitADSR(void)                                    // INIT ADSR
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE void StartADSR(SPUCHAN * pChannel)              // MIX ADSR
+void StartADSR(SPU_chan * pChannel)              // MIX ADSR
 {
-	pChannel->ADSRX.lVolume=1;                            // and init some adsr vars
-	pChannel->ADSRX.State=0;
-	pChannel->ADSRX.EnvelopeVol=0;
+	pChannel->ADSR.lVolume=1;                            // and init some adsr vars
+	pChannel->ADSR.State=0;
+	pChannel->ADSR.EnvelopeVol=0;
 }
 
 ////////////////////////////////////////////////////////////////////////
 
-static const unsigned long int TableDisp[] =
-{
-	-0x18+0+32,-0x18+4+32,-0x18+6+32,-0x18+8+32,       // release/decay
-	-0x18+9+32,-0x18+10+32,-0x18+11+32,-0x18+12+32,
-
-	-0x1B+0+32,-0x1B+4+32,-0x1B+6+32,-0x1B+8+32,       // sustain
-	-0x1B+9+32,-0x1B+10+32,-0x1B+11+32,-0x1B+12+32,
-};
-
-INLINE int MixADSR(SPUCHAN *ch)
+int MixADSR(SPU_chan *ch)
 {
 	unsigned long int disp;
-	signed long int EnvelopeVol = ch->ADSRX.EnvelopeVol;
+	signed long int EnvelopeVol = ch->ADSR.EnvelopeVol;
 
-	if (ch->bStop)                                 // should be stopped:
+	if (ch->status == CHANSTATUS_KEYOFF)                                 // should be stopped:
 	{                                                    // do release
-		if (ch->ADSRX.ReleaseModeExp)
+		if (ch->ADSR.ReleaseModeExp)
 		{
 			disp = TableDisp[(EnvelopeVol>>28)&0x7];
 		}
@@ -110,68 +102,70 @@ INLINE int MixADSR(SPUCHAN *ch)
 		{
 			disp=-0x0C+32;
 		}
-		EnvelopeVol-=RateTable[ch->ADSRX.ReleaseRate + disp];
+		EnvelopeVol-=RateTable[ch->ADSR.ReleaseRate + disp];
 
 		if (EnvelopeVol<0)
 		{
 			EnvelopeVol=0;
-			ch->bOn=0;
+			ch->status = CHANSTATUS_STOPPED;
+			printf("[%02d] ADSR r kill\n",ch->ch);
+			//ch->bOn=0;
 		}
 
-		ch->ADSRX.EnvelopeVol=EnvelopeVol;
-		ch->ADSRX.lVolume=(EnvelopeVol>>=21);
+		ch->ADSR.EnvelopeVol=EnvelopeVol;
+		ch->ADSR.lVolume=(EnvelopeVol>>=21);
 		return EnvelopeVol;
 	}
 	else                                                  // not stopped yet?
 	{
-		if (ch->ADSRX.State==0)                      // -> attack
+		if (ch->ADSR.State==0)                      // -> attack
 		{
 			disp = -0x10+32;
-			if (ch->ADSRX.AttackModeExp)
+			if (ch->ADSR.AttackModeExp)
 			{
 				if (EnvelopeVol>=0x60000000)
 					disp = -0x18+32;
 			}
-			EnvelopeVol+=RateTable[ch->ADSRX.AttackRate+disp];
+			EnvelopeVol+=RateTable[ch->ADSR.AttackRate+disp];
 
 			if (EnvelopeVol<0)
 			{
 				EnvelopeVol=0x7FFFFFFF;
-				ch->ADSRX.State=1;
+				ch->ADSR.State=1;
 			}
 
-			ch->ADSRX.EnvelopeVol=EnvelopeVol;
-			ch->ADSRX.lVolume=(EnvelopeVol>>=21);
+			ch->ADSR.EnvelopeVol=EnvelopeVol;
+			ch->ADSR.lVolume=(EnvelopeVol>>=21);
 			return EnvelopeVol;
 		}
 		//--------------------------------------------------//
-		if (ch->ADSRX.State==1)                      // -> decay
+		if (ch->ADSR.State==1)                      // -> decay
 		{
 			disp = TableDisp[(EnvelopeVol>>28)&0x7];
-			EnvelopeVol-=RateTable[ch->ADSRX.DecayRate+disp];
+			EnvelopeVol-=RateTable[ch->ADSR.DecayRate+disp];
 
 			if (EnvelopeVol<0) EnvelopeVol=0;
-			if (EnvelopeVol <= ch->ADSRX.SustainLevel)
+			if (EnvelopeVol <= ch->ADSR.SustainLevel)
 			{
-				ch->ADSRX.State=2;
+				ch->ADSR.State=2;
 			}
 
-			ch->ADSRX.EnvelopeVol=EnvelopeVol;
-			ch->ADSRX.lVolume=(EnvelopeVol>>=21);
+			ch->ADSR.EnvelopeVol=EnvelopeVol;
+			ch->ADSR.lVolume=(EnvelopeVol>>=21);
 			return EnvelopeVol;
 		}
 		//--------------------------------------------------//
-		if (ch->ADSRX.State==2)                      // -> sustain
+		if (ch->ADSR.State==2)                      // -> sustain
 		{
-			if (ch->ADSRX.SustainIncrease)
+			if (ch->ADSR.SustainIncrease)
 			{
 				disp = -0x10+32;
-				if (ch->ADSRX.SustainModeExp)
+				if (ch->ADSR.SustainModeExp)
 				{
 					if (EnvelopeVol>=0x60000000)
 						disp = -0x18+32;
 				}
-				EnvelopeVol+=RateTable[ch->ADSRX.SustainRate+disp];
+				EnvelopeVol+=RateTable[ch->ADSR.SustainRate+disp];
 
 				if (EnvelopeVol<0)
 				{
@@ -180,7 +174,7 @@ INLINE int MixADSR(SPUCHAN *ch)
 			}
 			else
 			{
-				if (ch->ADSRX.SustainModeExp)
+				if (ch->ADSR.SustainModeExp)
 				{
 					disp = TableDisp[((EnvelopeVol>>28)&0x7)+8];
 				}
@@ -188,22 +182,21 @@ INLINE int MixADSR(SPUCHAN *ch)
 				{
 					disp=-0x0F+32;
 				}
-				EnvelopeVol-=RateTable[ch->ADSRX.SustainRate+disp];
+				EnvelopeVol-=RateTable[ch->ADSR.SustainRate+disp];
 
 				if (EnvelopeVol<0)
 				{
 					EnvelopeVol=0;
 				}
 			}
-			ch->ADSRX.EnvelopeVol=EnvelopeVol;
-			ch->ADSRX.lVolume=(EnvelopeVol>>=21);
+			ch->ADSR.EnvelopeVol=EnvelopeVol;
+			ch->ADSR.lVolume=(EnvelopeVol>>=21);
 			return EnvelopeVol;
 		}
 	}
 	return 0;
 }
 
-#endif
 
 /*
 James Higgs ADSR investigations:

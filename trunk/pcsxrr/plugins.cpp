@@ -97,38 +97,6 @@ CDRgetBufferSub       CDR_getBufferSub;
 CDRconfigure          CDR_configure;
 CDRabout              CDR_about;
 
-//SPU POINTERS
-SPUconfigure        SPU_configure;
-SPUabout            SPU_about;
-SPUinit             SPU_init;
-SPUshutdown         SPU_shutdown;
-SPUtest             SPU_test;
-SPUopen             SPU_open;
-SPUclose            SPU_close;
-SPUplaySample       SPU_playSample;
-SPUstartChannels1   SPU_startChannels1;
-SPUstartChannels2   SPU_startChannels2;
-SPUstopChannels1    SPU_stopChannels1;
-SPUstopChannels2    SPU_stopChannels2;
-SPUputOne           SPU_putOne;
-SPUgetOne           SPU_getOne;
-SPUsetAddr          SPU_setAddr;
-SPUsetPitch         SPU_setPitch;
-SPUsetVolumeL       SPU_setVolumeL;
-SPUsetVolumeR       SPU_setVolumeR;
-SPUwriteRegister    SPU_writeRegister;
-SPUreadRegister     SPU_readRegister;
-SPUwriteDMA         SPU_writeDMA;
-SPUreadDMA          SPU_readDMA;
-SPUwriteDMAMem      SPU_writeDMAMem;
-SPUreadDMAMem       SPU_readDMAMem;
-SPUplayADPCMchannel SPU_playADPCMchannel;
-SPUfreeze           SPU_freeze;
-SPUregisterCallback SPU_registerCallback;
-SPUasync            SPU_async;
-SPUstartWav         SPU_startWav;
-SPUstopWav          SPU_stopWav;
-
 //PAD POINTERS
 PADconfigure        PAD1_configure;
 PADabout            PAD1_about;
@@ -411,259 +379,48 @@ int LoadCDRplugin(char *CDRdll) {
 	return 0;
 }
 
-void *hSPUDriver;
-
-long CALLBACK SPU__configure(void) { return 0; }
-void CALLBACK SPU__about(void) {}
-long CALLBACK SPU__test(void) { return 0; }
-
-unsigned short regArea[10000];
-unsigned short spuCtrl,spuStat,spuIrq;
-unsigned long spuAddr;
-
-void CALLBACK SPU__writeRegister(unsigned long add,unsigned short value) { // Old Interface
-	unsigned long r=add&0xfff;
-	regArea[(r-0xc00)/2] = value;
-
-	if(r>=0x0c00 && r<0x0d80) {
-		unsigned char ch=(r>>4)-0xc0;
-		switch(r&0x0f) {//switch voices
-			case 0:  //left volume
-				SPU_setVolumeL(ch,value);
-				return;
-			case 2: //right volume
-				SPU_setVolumeR(ch,value);
-				return;
-			case 4:  //frequency
-				SPU_setPitch(ch,value);
-				return;
-			case 6://start address
-				SPU_setAddr(ch,value);
-				return;
-     //------------------------------------------------// level
-//     			case 8:
-//       			s_chan[ch].ADSRX.AttackModeExp  = (val&0x8000)?TRUE:FALSE;
-//       			s_chan[ch].ADSRX.AttackRate     = (float)((val>>8) & 0x007f)*1000.0f/240.0f;
-//       			s_chan[ch].ADSRX.DecayRate      = (float)((val>>4) & 0x000f)*1000.0f/240.0f;
-//      			s_chan[ch].ADSRX.SustainLevel   = (float)((val)    & 0x000f);
-
-//       			return;
-//     			case 10:
-//       			s_chan[ch].ADSRX.SustainModeExp = (val&0x8000)?TRUE:FALSE;
-//       			s_chan[ch].ADSRX.ReleaseModeExp = (val&0x0020)?TRUE:FALSE;
-//       			s_chan[ch].ADSRX.SustainRate    = ((float)((val>>6) & 0x007f))*R_SUSTAIN;
-//       			s_chan[ch].ADSRX.ReleaseRate    = ((float)((val)    & 0x001f))*R_RELEASE;
-//       			if(val & 0x4000) s_chan[ch].ADSRX.SustainModeDec=-1.0f;
-//       			else             s_chan[ch].ADSRX.SustainModeDec=1.0f;
-//       			return;
-//     			case 12:
-//       			return;
-//     			case 14:                                    
-//       			s_chan[ch].pRepeat=spuMemC+((unsigned long) val<<3);
-//       			return;
-		}
-    		return;
-	}
-
-	switch(r) {
-		case H_SPUaddr://SPU-memory address
-					spuAddr = (unsigned long) value<<3;
-		//	spuAddr=value * 8;
-					return;
-		case H_SPUdata://DATA to SPU
-//      		spuMem[spuAddr/2] = value;
-//         		spuAddr+=2;
-//        		if(spuAddr>0x7ffff) spuAddr=0;
-					SPU_putOne(spuAddr,value);
-					spuAddr+=2;
-					return;
-		case H_SPUctrl://SPU control 1
-					spuCtrl=value;
-					return;
-		case H_SPUstat://SPU status
-					spuStat=value & 0xf800;
-					return;
-		case H_SPUirqAddr://SPU irq
-					spuIrq = value;
-					return;
-		case H_SPUon1://start sound play channels 0-16
-					SPU_startChannels1(value);
-					return;
-		case H_SPUon2://start sound play channels 16-24
-					SPU_startChannels2(value);
-					return;
-		case H_SPUoff1://stop sound play channels 0-16
-					SPU_stopChannels1(value);
-					return;
-		case H_SPUoff2://stop sound play channels 16-24
-					SPU_stopChannels2(value);
-					return;		
-	}
-}
-
-unsigned short CALLBACK SPU__readRegister(unsigned long add) {
-	switch(add&0xfff) {// Old Interface
-		case H_SPUctrl://spu control
-					return spuCtrl;
-		case H_SPUstat://spu status
-					return spuStat;
-		case H_SPUaddr://SPU-memory address
-					return (unsigned short)(spuAddr>>3);
-		case H_SPUdata://DATA to SPU
-					spuAddr+=2;
-//        		if(spuAddr>0x7ffff) spuAddr=0;
-//        		return spuMem[spuAddr/2];
-					return SPU_getOne(spuAddr);
-		case H_SPUirqAddr://spu irq
-					return spuIrq;
-		//case H_SPUIsOn1:
-					//return IsSoundOn(0,16);
-		//case H_SPUIsOn2:
-					//return IsSoundOn(16,24);
-	}
-	return regArea[((add&0xfff)-0xc00)/2];
-}
-
-void CALLBACK SPU__writeDMA(unsigned short val) {
-	SPU_putOne(spuAddr, val);
-	spuAddr += 2;
-	if (spuAddr > 0x7ffff) spuAddr = 0;
-}
-
-unsigned short CALLBACK SPU__readDMA(void) {
-	unsigned short tmp = SPU_getOne(spuAddr);
-	spuAddr += 2;
-	if (spuAddr > 0x7ffff) spuAddr = 0;
-	return tmp;
-}
-
-void CALLBACK SPU__writeDMAMem(unsigned short *pMem, int iSize) {
-	while (iSize > 0) {
-		SPU_writeDMA(*pMem);
-		iSize--;
-		pMem++;
-	}		
-}
-
-void CALLBACK SPU__readDMAMem(unsigned short *pMem, int iSize) {
-	while (iSize > 0) {
-		*pMem = SPU_readDMA();
-		iSize--;
-		pMem++;
-	}		
-}
-
-void CALLBACK SPU__playADPCMchannel(xa_decode_t *xap) {}
-
-long CALLBACK SPU__freeze(unsigned long ulFreezeMode, SPUFreeze_t *pF) {
-	if (ulFreezeMode == 2) {
-		memset(pF, 0, 16);
-		strcpy((char *)pF->PluginName, "Pcsx");
-		pF->PluginVersion = 1;
-		pF->Size = 0x200 + 0x80000 + 16 + sizeof(xa_decode_t);
-
-		return 1;
-	}
-	if (ulFreezeMode == 1) {
-		unsigned long addr;
-		unsigned short val;
-
-		val = SPU_readRegister(0x1f801da6);
-		SPU_writeRegister(0x1f801da6, 0);
-		SPU_readDMAMem((unsigned short *)pF->SPURam, 0x80000/2);
-		SPU_writeRegister(0x1f801da6, val);
-
-		for (addr = 0x1f801c00; addr < 0x1f801e00; addr+=2) {
-			if (addr == 0x1f801da8) { pF->SPUPorts[addr - 0x1f801c00] = 0; continue; }
-			pF->SPUPorts[addr - 0x1f801c00] = SPU_readRegister(addr);
-		}
-
-		return 1;
-	}
-	if (ulFreezeMode == 0) {
-		unsigned long addr;
-		unsigned short val;
-		unsigned short *regs = (unsigned short *)pF->SPUPorts;
-
-		val = SPU_readRegister(0x1f801da6);
-		SPU_writeRegister(0x1f801da6, 0);
-		SPU_writeDMAMem((unsigned short *)pF->SPURam, 0x80000/2);
-		SPU_writeRegister(0x1f801da6, val);
-
-		for (addr = 0x1f801c00; addr < 0x1f801e00; addr+=2) {
-			if (addr == 0x1f801da8) { regs++; continue; }
-			SPU_writeRegister(addr, *(regs++));
-		}
-
-		return 1;
-	}
-
-	return 0;
-}
-
-void CALLBACK SPU__registerCallback(void (CALLBACK *callback)(void)) {}
-void CALLBACK SPU__startWav(char* filename) {}
-void CALLBACK SPU__stopWav(void) {}
-
-#define LoadSpuSym1(dest, name) \
-	LoadSym(SPU_##dest, SPU##dest, name, 1);
-
-#define LoadSpuSym2(dest, name) \
-	LoadSym(SPU_##dest, SPU##dest, name, 2);
-
-#define LoadSpuSym0(dest, name) \
-	LoadSym(SPU_##dest, SPU##dest, name, 0); \
-	if (SPU_##dest == NULL) SPU_##dest = (SPU##dest) SPU__##dest;
-
-#define LoadSpuSymE(dest, name) \
-	LoadSym(SPU_##dest, SPU##dest, name, errval); \
-	if (SPU_##dest == NULL) SPU_##dest = (SPU##dest) SPU__##dest;
-
-#define LoadSpuSymN(dest, name) \
-	LoadSym(SPU_##dest, SPU##dest, name, 0); \
-
-int LoadSPUplugin(char *SPUdll) {
-	void *drv;
-
-	hSPUDriver = SysLoadLibrary(SPUdll);
-	if (hSPUDriver == NULL) {
-		SPU_configure = NULL;
-		SysMessage (_("Could not open SPU plugin %s"), SPUdll); return -1;
-	}
-	drv = hSPUDriver;
-	LoadSpuSym1(init, "SPUinit");
-	LoadSpuSym1(shutdown, "SPUshutdown");
-	LoadSpuSym1(open, "SPUopen");
-	LoadSpuSym1(close, "SPUclose");
-	LoadSpuSym0(configure, "SPUconfigure");
-	LoadSpuSym0(about, "SPUabout");
-	LoadSpuSym0(test, "SPUtest");
-	errval = 0;
-	LoadSpuSym2(startChannels1, "SPUstartChannels1");
-	LoadSpuSym2(startChannels2, "SPUstartChannels2");
-	LoadSpuSym2(stopChannels1, "SPUstopChannels1");
-	LoadSpuSym2(stopChannels2, "SPUstopChannels2");
-	LoadSpuSym2(putOne, "SPUputOne");
-	LoadSpuSym2(getOne, "SPUgetOne");
-	LoadSpuSym2(setAddr, "SPUsetAddr");
-	LoadSpuSym2(setPitch, "SPUsetPitch");
-	LoadSpuSym2(setVolumeL, "SPUsetVolumeL");
-	LoadSpuSym2(setVolumeR, "SPUsetVolumeR");
-	LoadSpuSymE(writeRegister, "SPUwriteRegister");
-	LoadSpuSymE(readRegister, "SPUreadRegister");		
-	LoadSpuSymE(writeDMA, "SPUwriteDMA");
-	LoadSpuSymE(readDMA, "SPUreadDMA");
-	LoadSpuSym0(writeDMAMem, "SPUwriteDMAMem");
-	LoadSpuSym0(readDMAMem, "SPUreadDMAMem");
-	LoadSpuSym0(playADPCMchannel, "SPUplayADPCMchannel");
-	LoadSpuSym0(freeze, "SPUfreeze");
-	LoadSpuSym0(registerCallback, "SPUregisterCallback");
-	LoadSpuSymN(async, "SPUasync");
-	LoadSpuSymN(startWav, "SPUstartWav");
-	LoadSpuSymN(stopWav, "SPUstopWav");
-
-	return 0;
-}
+//int LoadSPUplugin(char *SPUdll) {
+//	void *drv;
+//
+//	hSPUDriver = SysLoadLibrary(SPUdll);
+//	if (hSPUDriver == NULL) {
+//		SPU_configure = NULL;
+//		SysMessage (_("Could not open SPU plugin %s"), SPUdll); return -1;
+//	}
+//	drv = hSPUDriver;
+//	LoadSpuSym1(init, "SPUinit");
+//	LoadSpuSym1(shutdown, "SPUshutdown");
+//	LoadSpuSym1(open, "SPUopen");
+//	LoadSpuSym1(close, "SPUclose");
+//	LoadSpuSym0(configure, "SPUconfigure");
+//	LoadSpuSym0(about, "SPUabout");
+//	LoadSpuSym0(test, "SPUtest");
+//	errval = 0;
+//	LoadSpuSym2(startChannels1, "SPUstartChannels1");
+//	LoadSpuSym2(startChannels2, "SPUstartChannels2");
+//	LoadSpuSym2(stopChannels1, "SPUstopChannels1");
+//	LoadSpuSym2(stopChannels2, "SPUstopChannels2");
+//	LoadSpuSym2(putOne, "SPUputOne");
+//	LoadSpuSym2(getOne, "SPUgetOne");
+//	LoadSpuSym2(setAddr, "SPUsetAddr");
+//	LoadSpuSym2(setPitch, "SPUsetPitch");
+//	LoadSpuSym2(setVolumeL, "SPUsetVolumeL");
+//	LoadSpuSym2(setVolumeR, "SPUsetVolumeR");
+//	LoadSpuSymE(writeRegister, "SPUwriteRegister");
+//	LoadSpuSymE(readRegister, "SPUreadRegister");		
+//	LoadSpuSymE(writeDMA, "SPUwriteDMA");
+//	LoadSpuSymE(readDMA, "SPUreadDMA");
+//	LoadSpuSym0(writeDMAMem, "SPUwriteDMAMem");
+//	LoadSpuSym0(readDMAMem, "SPUreadDMAMem");
+//	LoadSpuSym0(playADPCMchannel, "SPUplayADPCMchannel");
+//	LoadSpuSym0(freeze, "SPUfreeze");
+//	LoadSpuSym0(registerCallback, "SPUregisterCallback");
+//	LoadSpuSymN(async, "SPUasync");
+//	LoadSpuSymN(startWav, "SPUstartWav");
+//	LoadSpuSymN(stopWav, "SPUstopWav");
+//
+//	return 0;
+//}
 
 
 void *hPAD1Driver;
@@ -948,8 +705,6 @@ int LoadPlugins() {
 	if (LoadCDRplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Gpu);
 	if (LoadGPUplugin(Plugin) == -1) return -1;
-	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Spu);
-	if (LoadSPUplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad1);
 	if (LoadPAD1plugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad2);
@@ -966,7 +721,7 @@ int LoadPlugins() {
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
 	ret = GPU_init();
 	if (ret < 0) { SysMessage (_("GPUinit error: %d"), ret); return -1; }
-	ret = SPU_init();
+	ret = SPUinit();
 	if (ret < 0) { SysMessage (_("SPUinit error: %d"), ret); return -1; }
 	ret = PAD1_init(1);
 	if (ret < 0) { SysMessage (_("PAD1init error: %d"), ret); return -1; }
@@ -981,7 +736,7 @@ int LoadPlugins() {
 }
 
 void ReleasePlugins() {
-	if (hCDRDriver  == NULL || hGPUDriver  == NULL || hSPUDriver == NULL ||
+	if (hCDRDriver  == NULL || hGPUDriver  == NULL ||
 		hPAD1Driver == NULL || hPAD2Driver == NULL) return;
 
 	if (Config.UseNet) {
@@ -992,14 +747,13 @@ void ReleasePlugins() {
 
 	CDR_shutdown();
 	GPU_shutdown();
-	SPU_shutdown();
+	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
 	if (Config.UseNet && hNETDriver != NULL) NET_shutdown(); 
 
 	SysCloseLibrary(hCDRDriver); hCDRDriver = NULL;
 	SysCloseLibrary(hGPUDriver); hGPUDriver = NULL;
-	SysCloseLibrary(hSPUDriver); hSPUDriver = NULL;
 	SysCloseLibrary(hPAD1Driver); hPAD1Driver = NULL;
 	SysCloseLibrary(hPAD2Driver); hPAD2Driver = NULL;
 	if (Config.UseNet && hNETDriver != NULL) {

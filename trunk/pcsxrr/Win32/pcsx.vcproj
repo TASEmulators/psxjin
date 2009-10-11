@@ -78,14 +78,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
-				SubSystem="2"
+				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -187,7 +187,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib  directx/dxerr8.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -298,14 +298,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib  directx/dxerr8.lib"
 				OutputFile="$(OutDir)\pcsx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="1"
@@ -452,10 +452,6 @@
 			</File>
 			<File
 				RelativePath="..\Sio.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Spu.cpp"
 				>
 			</File>
 			<File
@@ -692,6 +688,114 @@
 			</File>
 			<File
 				RelativePath="..\Docs\ToDo.txt"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="spu"
+			>
+			<File
+				RelativePath="..\spu\adsr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\adsr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\cfg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\cfg.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\changelog.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\dma.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\dma.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\dsound.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\dsoundoss.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\externals.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\freeze.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\gauss_i.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\psemu.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\psemuxa.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\record.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\record.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\registers.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\registers.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\regs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\resource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\reverb.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\reverb.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\spu.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\spu.h"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\stdafx.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\stdafx.h"
 				>
 			</File>
 		</Filter>

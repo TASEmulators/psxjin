@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by pcsx.rc
 //
 #define IDS_TITLE                       1
@@ -14,7 +14,10 @@
 #define IDD_CONNECT                     109
 #define IDD_REPLAYINP                   110
 #define IDD_RECORDINP                   111
+#define IDD_CFGDIALOG                   112
+#define IDD_CFGDLG                      112
 #define SPLASH_LOGO                     113
+#define IDD_RECORD                      113
 #define IDD_GPREGS                      114
 #define IDD_CP0REGS                     115
 #define IDD_COP2D                       116
@@ -28,46 +31,65 @@
 #define IDD_PROMPT                      140
 #define IDR_RWACCELERATOR               141
 #define IDC_EDIT2                       1001
+#define MW_ADDR00                       1001
 #define IDC_MCD2                        1004
+#define MW_ADDR01                       1004
 #define IDC_ASMCHECK1                   1005
 #define IDC_MCD1                        1005
+#define IDC_ENABXA                      1005
 #define IDC_MCDSEL1                     1006
+#define IDC_XAPITCH                     1006
 #define IDC_STEP                        1007
 #define IDC_MCDSEL2                     1007
 #define IDC_XA                          1007
+#define MW_ADDR02                       1007
 #define IDC_SIO                         1008
+#define IDC_USEREVERB                   1008
 #define IDC_SKIP                        1009
 #define IDC_MDEC                        1009
+#define IDC_VOLUME                      1009
 #define IDC_RESET                       1010
 #define IDC_PSXAUTO                     1010
+#define MW_ADDR03                       1010
+#define IDC_IRQWAIT                     1010
 #define IDC_GO                          1011
 #define IDC_PSXTYPES                    1011
+#define IDC_NODESYNCMODE                1011
 #define IDC_BREAK                       1012
 #define IDC_DISCPUQKEYS                 1012
 #define IDC_QKEYS                       1012
+#define IDC_INTERPOL                    1012
 #define IDC_EDIT1                       1013
 #define IDC_CDDA                        1013
+#define MW_ADDR04                       1013
+#define IDC_RECORDMODE                  1013
 #define IDC_CLOSE                       1014
 #define IDC_PCSX_ABOUT_TEXT             1014
 #define IDC_PSXOUT                      1014
+#define IDC_DISSTEREO                   1014
 #define IDC_ASM_SCROLL                  1015
 #define IDC_CPU                         1015
+#define IDC_IRQDECODE                   1015
 #define IDC_ASMCHECK2                   1016
 #define IDC_SPUIRQ                      1016
+#define MW_ADDR05                       1016
 #define IDC_ASMCHECK3                   1017
 #define IDC_MDEC2                       1017
 #define IDC_CDTIMING                    1017
 #define IDC_ASMCHECK4                   1018
 #define IDC_ASMCHECK5                   1019
 #define IDC_RELOAD1                     1019
+#define MW_ADDR06                       1019
 #define IDC_CP07                        1020
 #define IDC_ASMCHECK6                   1020
 #define IDC_RELOAD2                     1020
+#define IDC_USETIMER                    1020
 #define IDC_ASMCHECK7                   1021
 #define IDC_COPYTO2                     1021
 #define IDC_ASMCHECK8                   1022
 #define IDC_COPYTO1                     1022
 #define IDC_RCNTFIX                     1022
+#define MW_ADDR07                       1022
 #define IDC_ASMCHECK9                   1023
 #define IDC_PASTE                       1023
 #define IDC_CONFIGNET                   1023
@@ -78,6 +100,7 @@
 #define IDC_ASMCHECK11                  1025
 #define IDC_DELETE2                     1025
 #define IDC_ABOUTNET                    1025
+#define MW_ADDR08                       1025
 #define IDC_ASMCHECK12                  1026
 #define IDC_LISTNET                     1026
 #define IDC_LIST1                       1027
@@ -86,12 +109,14 @@
 #define IDC_ASMCHECK14                  1028
 #define IDC_LIST2                       1028
 #define IDC_CONNECTSTR                  1028
+#define MW_ADDR09                       1028
 #define IDC_ASMCHECK15                  1029
 #define IDC_PCSX_ABOUT_AUTHORS          1029
 #define IDC_ASMCHECK16                  1030
 #define IDC_PCSX_ABOUT_GREETS           1030
 #define IDC_ASMCHECK17                  1031
 #define IDC_SELPSX                      1031
+#define MW_ADDR10                       1031
 #define IDC_ASMCHECK18                  1032
 #define IDC_MISCOPT                     1032
 #define IDC_ASMCHECK19                  1033
@@ -99,6 +124,7 @@
 #define IDC_CP021                       1034
 #define IDC_ASMCHECK20                  1034
 #define IDC_FIRSTCONTROLLER             1034
+#define MW_ADDR11                       1034
 #define IDC_CP022                       1035
 #define IDC_ASMCHECK21                  1035
 #define IDC_SECONDCONTROLLER            1035
@@ -108,48 +134,60 @@
 #define IDC_CP024                       1037
 #define IDC_ASMCHECK23                  1037
 #define IDC_CDROM                       1037
+#define MW_ADDR12                       1037
 #define IDC_CP025                       1038
 #define IDC_ASMCHECK24                  1038
 #define IDC_BIOS                        1038
 #define IDC_NETPLAY                     1039
 #define IDC_NETPLAYNOTE                 1040
+#define MW_ADDR13                       1040
 #define IDC_FRAMEMCD1                   1041
 #define IDC_FRAMEMCD2                   1042
+#define MW_ADDR14                       1043
 #define IDC_CP031                       1044
+#define MW_ADDR15                       1046
 #define IDC_GPR0                        1047
 #define IDC_GPR1                        1048
 #define IDC_GPR2                        1049
+#define MW_ADDR16                       1049
 #define IDC_GPR3                        1050
 #define IDC_GPR4                        1051
 #define IDC_GPR5                        1052
 #define IDC_LISTGPU                     1052
+#define MW_ADDR17                       1052
 #define IDC_GPR6                        1053
 #define IDC_LISTSPU                     1053
 #define IDC_GPR7                        1054
 #define IDC_LISTCDR                     1054
 #define IDC_GPR8                        1055
 #define IDC_LISTBIOS                    1055
+#define MW_ADDR18                       1055
 #define IDC_GPR9                        1056
 #define IDC_CONFIGGPU                   1056
 #define IDC_GPR10                       1057
 #define IDC_TESTGPU                     1057
 #define IDC_ABOUTGPU                    1058
+#define MW_ADDR19                       1058
 #define IDC_CONFIGSPU                   1059
 #define IDC_TESTSPU                     1060
 #define IDC_ABOUTSPU                    1061
+#define MW_ADDR20                       1061
 #define IDC_CONFIGCDR                   1062
 #define IDC_GPR11                       1063
 #define IDC_TESTCDR                     1063
 #define IDC_ABOUTCDR                    1064
+#define MW_ADDR21                       1064
 #define IDC_COMBODRIVE                  1065
 #define IDC_LISTPAD1                    1066
 #define IDC_CONFIGPAD1                  1067
+#define MW_ADDR22                       1067
 #define IDC_GPR12                       1068
 #define IDC_TESTPAD1                    1068
 #define IDC_GPR13                       1069
 #define IDC_ABOUTPAD1                   1069
 #define IDC_GPR14                       1070
 #define IDC_LISTPAD2                    1070
+#define MW_ADDR23                       1070
 #define IDC_GPR15                       1071
 #define IDC_CONFIGPAD2                  1071
 #define IDC_GPR16                       1072
@@ -215,7 +253,9 @@
 #define IDC_COP2D14                     1132
 #define IDC_COP2D15                     1133
 #define IDC_COP2D16                     1134
+#define IDC_WAVFILE                     1134
 #define IDC_COP2D17                     1135
+#define IDC_RECORD                      1135
 #define IDC_COP2D18                     1136
 #define IDC_COP2D19                     1137
 #define IDC_COP2D20                     1138
@@ -390,10 +430,7 @@
 #define IDC_SAVE_CHEATS                 40074
 #define IDD_CHEAT_SEARCH                40075
 #define IDC_ADDYS                       40076
-//#define IDC_C_SEARCH                    40077
 #define IDC_C_ADD                       40078
-//#define IDC_C_RESET                     40079
-//#define IDC_1_BYTE                      40080
 #define IDC_2_BYTE                      40081
 #define IDC_3_BYTE                      40082
 #define IDC_4_BYTE                      40083
@@ -407,11 +444,7 @@
 #define IDC_PREV                        40091
 #define IDC_ENTERED                     40092
 #define IDC_ENTEREDADDRESS              40093
-//#define IDC_UNSIGNED                    40094
-//#define IDC_SIGNED                      40095
-//#define IDC_HEX                         40096
 #define IDC_VALUE_ENTER                 40097
-//#define IDC_C_WATCH                     40098
 #define IDC_C_CLEARWATCH                40099
 #define IDC_C_LOADWATCH                 40100
 #define IDC_C_SAVEWATCH                 40101
@@ -440,36 +473,6 @@
 #define ID_RAM_WATCH                    40124
 #define RW_MENU_FIRST_RECENT_FILE       40130
 #define RW_MENU_LAST_RECENT_FILE        40150
-
-#define MW_ADDR00                       1001
-#define MW_ADDR01                       1004
-#define MW_ADDR02                       1007
-#define MW_ADDR03                       1010
-#define MW_ADDR04                       1013
-#define MW_ADDR05                       1016
-#define MW_ADDR06                       1019
-#define MW_ADDR07                       1022
-#define MW_ADDR08                       1025
-#define MW_ADDR09                       1028
-#define MW_ADDR10                       1031
-#define MW_ADDR11                       1034
-#define MW_ADDR12                       1037
-#define MW_ADDR13                       1040
-#define MW_ADDR14                       1043
-#define MW_ADDR15                       1046
-#define MW_ADDR16                       1049
-#define MW_ADDR17                       1052
-#define MW_ADDR18                       1055
-#define MW_ADDR19                       1058
-#define MW_ADDR20                       1061
-#define MW_ADDR21                       1064
-#define MW_ADDR22                       1067
-#define MW_ADDR23                       1070
-
-#ifndef IDC_STATIC
-#define IDC_STATIC                      (-1)
-#endif
-// why we have such a bunch of IDC_STATIC junks?
 #define IDC_STATIC1                     50001
 #define IDC_STATIC2                     50002
 #define IDC_STATIC3                     50003
@@ -482,12 +485,13 @@
 #define IDC_STATIC10                    50010
 #define IDC_STATIC11                    50011
 #define IDC_STATIC12                    50012
+#define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        110
+#define _APS_NEXT_RESOURCE_VALUE        114
 #define _APS_NEXT_COMMAND_VALUE         40044
 #define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101

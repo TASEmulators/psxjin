@@ -46,17 +46,18 @@
 // freeze structs
 ////////////////////////////////////////////////////////////////////////
 
-typedef struct
+struct SPUFreeze_t
 {
 	char          szSPUName[8];
 	unsigned long ulFreezeVersion;
 	unsigned long ulFreezeSize;
 	unsigned char cSPUPort[0x200];
 	unsigned char cSPURam[0x80000];
+	u32 spuAddr;
 	xa_decode_t   xaS;
-} SPUFreeze_t;
+};
 
-typedef struct
+struct SPUOSSFreeze_t
 {
 	unsigned short  spuIrq;
 	unsigned long   pSpuIrq;
@@ -67,7 +68,7 @@ typedef struct
 
 	SPUCHAN  s_chan[MAXCHAN];
 
-} SPUOSSFreeze_t;
+};
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -78,7 +79,7 @@ void LoadStateUnknown(SPUFreeze_t * pF);               // unknown format
 // SPUFREEZE: called by main emu on savestate load/save
 ////////////////////////////////////////////////////////////////////////
 
-long CALLBACK SPUfreeze(unsigned long ulFreezeMode,SPUFreeze_t * pF)
+long SPUfreeze(unsigned long ulFreezeMode,SPUFreeze_t * pF)
 {
 	int i;
 	SPUOSSFreeze_t * pFO;
@@ -100,6 +101,7 @@ long CALLBACK SPUfreeze(unsigned long ulFreezeMode,SPUFreeze_t * pF)
 
 		memcpy(pF->cSPURam,spuMem,0x80000);                 // copy common infos
 		memcpy(pF->cSPUPort,regArea,0x200);
+		pF->spuAddr = spuAddr;
 
 		if (xapGlobal && XAPlay!=XAFeed)                    // some xa
 		{
@@ -141,6 +143,8 @@ long CALLBACK SPUfreeze(unsigned long ulFreezeMode,SPUFreeze_t * pF)
 
 	memcpy(spuMem,pF->cSPURam,0x80000);                   // get ram
 	memcpy(regArea,pF->cSPUPort,0x200);
+
+	spuAddr = pF->spuAddr;
 
 	if (pF->xaS.nsamples<=4032)                           // start xa again
 		SPUplayADPCMchannel(&pF->xaS);

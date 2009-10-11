@@ -355,7 +355,8 @@ void ConfigureGPU(HWND hW) {
 }
 
 void ConfigureSPU(HWND hW) {
-	ConfPlugin(SPUconfigure, IDC_LISTSPU, "SPUconfigure");
+	//ConfPlugin(SPUconfigure, IDC_LISTSPU, "SPUconfigure");
+	SPUconfigure();
 }
 
 void ConfigureCDR(HWND hW) {
@@ -379,9 +380,9 @@ void AboutGPU(HWND hW) {
 	ConfPlugin(GPUabout, IDC_LISTGPU, "GPUabout");
 }
 
-void AboutSPU(HWND hW) {
-	ConfPlugin(SPUabout, IDC_LISTSPU, "SPUabout");
-}
+//void AboutSPU(HWND hW) {
+//	ConfPlugin(SPUabout, IDC_LISTSPU, "SPUabout");
+//}
 
 void AboutCDR(HWND hW) {
 	ConfPlugin(CDRabout, IDC_LISTCDR, "CDRabout");
@@ -424,9 +425,9 @@ void TestGPU(HWND hW) {
 	TestPlugin(GPUtest, IDC_LISTGPU, "GPUtest");
 }
 
-void TestSPU(HWND hW) {
-	TestPlugin(SPUtest, IDC_LISTSPU, "SPUtest");
-}
+//void TestSPU(HWND hW) {
+//	TestPlugin(SPUtest, IDC_LISTSPU, "SPUtest");
+//}
 
 void TestCDR(HWND hW) {
 	TestPlugin(CDRtest, IDC_LISTCDR, "CDRtest");
@@ -509,13 +510,13 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
        			case IDC_CONFIGPAD2: ConfigurePAD2(hW); return TRUE;
 
 				case IDC_TESTGPU:    TestGPU(hW);   return TRUE;
-				case IDC_TESTSPU:    TestSPU(hW);   return TRUE;
+				//case IDC_TESTSPU:    TestSPU(hW);   return TRUE;
 				case IDC_TESTCDR:    TestCDR(hW);   return TRUE;
 				case IDC_TESTPAD1:   TestPAD1(hW);  return TRUE;
 				case IDC_TESTPAD2:   TestPAD2(hW);  return TRUE;
 
 				case IDC_ABOUTGPU:   AboutGPU(hW);  return TRUE;
-				case IDC_ABOUTSPU:   AboutSPU(hW);  return TRUE;
+				//case IDC_ABOUTSPU:   AboutSPU(hW);  return TRUE;
                 case IDC_ABOUTCDR:   AboutCDR(hW);  return TRUE;
     	        case IDC_ABOUTPAD1:  AboutPAD1(hW); return TRUE;
     		    case IDC_ABOUTPAD2:  AboutPAD2(hW); return TRUE;

@@ -33,12 +33,10 @@
 //
 //*************************************************************************//
 
-#include "stdafx.h"
-
-#define _IN_REVERB
-
-// will be included from spu.c
-#ifdef _IN_SPU
+#include "reverb.h"
+#include "spu.h"
+#include "PsxCommon.h"
+#include "externals.h"
 
 ////////////////////////////////////////////////////////////////////////
 // globals
@@ -52,6 +50,8 @@ int *          sRVBStart     = 0;
 int            iReverbOff    = -1;                          // some delay factor for reverb
 int            iReverbRepeat = 0;
 int            iReverbNum    = 1;
+
+REVERBInfo      rvb;
 
 ////////////////////////////////////////////////////////////////////////
 // SET REVERB
@@ -118,7 +118,7 @@ void SetREVERB(unsigned short val)
 // START REVERB
 ////////////////////////////////////////////////////////////////////////
 
-INLINE void StartREVERB(SPUCHAN * pChannel)
+void StartREVERB(SPU_chan * pChannel)
 {
 	if (pChannel->bReverb && (spuCtrl&0x80))              // reverb possible?
 	{
@@ -139,26 +139,47 @@ INLINE void StartREVERB(SPUCHAN * pChannel)
 // HELPER FOR NEILL'S REVERB: re-inits our reverb mixing buf
 ////////////////////////////////////////////////////////////////////////
 
-INLINE void InitREVERB(void)
+void InitREVERB(void)
 {
-	if (iUseReverb==2)
-	{
-		memset(sRVBStart,0,NSSIZE*2*4);
-	}
+	memset((void *)&rvb,0,sizeof(REVERBInfo));
+
+	//if (iUseReverb==1) i=88200*2;
+	//else              i=NSSIZE*2;
+	const int rvbBufSize = 88200*2;
+
+	sRVBStart = (int *)malloc(rvbBufSize*4);                       // alloc reverb buffer
+	memset(sRVBStart,0,rvbBufSize*4);
+	sRVBEnd  = sRVBStart + rvbBufSize;
+	sRVBPlay = sRVBStart;
+	iReverbOff=-1;
+
+	//why not always do this??
+	//if (iUseReverb==2)
+	memset(sRVBStart,0,NSSIZE*2*4);
+
 }
 
-////////////////////////////////////////////////////////////////////////
-// STORE REVERB
-////////////////////////////////////////////////////////////////////////
+void ShutdownREVERB()
+{
+	free(sRVBStart);                                      // free reverb buffer
+	sRVBStart=0;
+}
 
-INLINE void StoreREVERB(SPUCHAN * pChannel,int ns)
+void REVERB_initSample() {
+	*(sRVBStart)  =0;                            // -> we mix all active reverb channels into an extra buffer
+	*(sRVBStart+1)=0;
+}
+
+void StoreREVERB(SPU_chan* pChannel,s32 ns,s32 left, s32 right)
 {
 	if (iUseReverb==0) return;
 	else
 		if (iUseReverb==2) // -------------------------------- // Neil's reverb
 		{
-			const int iRxl=(pChannel->sval*pChannel->iLeftVolume)/0x4000;
-			const int iRxr=(pChannel->sval*pChannel->iRightVolume)/0x4000;
+			/*const s32 iRxl=(pChannel->sval*pChannel->iLeftVolume)/0x4000;
+			const s32 iRxr=(pChannel->sval*pChannel->iRightVolume)/0x4000;*/
+			const s32 iRxl=left;
+			const s32 iRxr=right;
 
 			ns<<=1;
 
@@ -172,8 +193,10 @@ INLINE void StoreREVERB(SPUCHAN * pChannel,int ns)
 
 			// we use the half channel volume (/0x8000) for the first reverb effects, quarter for next and so on
 
-			int iRxl=(pChannel->sval*pChannel->iLeftVolume)/0x8000;
-			int iRxr=(pChannel->sval*pChannel->iRightVolume)/0x8000;
+			//int iRxl=(pChannel->sval*pChannel->iLeftVolume)/0x8000;
+			//int iRxr=(pChannel->sval*pChannel->iRightVolume)/0x8000;
+			s32 iRxl=left/2;
+			s32 iRxr=right/2;
 
 			for (iRn=1;iRn<=pChannel->iRVBNum;iRn++,iRr+=pChannel->iRVBRepeat,iRxl/=2,iRxr/=2)
 			{
@@ -226,7 +249,7 @@ INLINE void s_buffer1(int iOff,int iVal)                // set_buffer (+1 sample
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE int MixREVERBLeft(int ns)
+int MixREVERBLeft(int ns)
 {
 	if (iUseReverb==0) return 0;
 	else
@@ -322,7 +345,7 @@ INLINE int MixREVERBLeft(int ns)
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE int MixREVERBRight(void)
+int MixREVERBRight()
 {
 	if (iUseReverb==0) return 0;
 	else
@@ -343,7 +366,6 @@ INLINE int MixREVERBRight(void)
 
 ////////////////////////////////////////////////////////////////////////
 
-#endif
 
 /*
 -----------------------------------------------------------------------------

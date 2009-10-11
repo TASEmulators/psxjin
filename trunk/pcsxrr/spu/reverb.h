@@ -1,5 +1,5 @@
 /***************************************************************************
-                            dma.h  -  description
+                          reverb.h  -  description
                              -------------------
     begin                : Wed May 15 2002
     copyright            : (C) 2002 by Pete Bernert
@@ -24,8 +24,18 @@
 //
 //*************************************************************************//
 
+#ifndef _REVERB_H_
+#define _REVERB_H_
 
-unsigned short CALLBACK SPUreadDMA(void);
-void CALLBACK SPUreadDMAMem(unsigned short * pusPSXMem,int iSize);
-void CALLBACK SPUwriteDMA(unsigned short val);
-void CALLBACK SPUwriteDMAMem(unsigned short * pusPSXMem,int iSize);
+#include "spu.h"
+
+void InitREVERB();
+void ShutdownREVERB();
+void SetREVERB(unsigned short val);
+void StartREVERB(SPU_chan* pChannel);
+void StoreREVERB(SPU_chan* pChannel,s32 ns,s32 left, s32 right);
+s32 MixREVERBLeft(int ns);
+s32 MixREVERBRight();
+void REVERB_initSample();
+
+#endif //_REVERB_H_

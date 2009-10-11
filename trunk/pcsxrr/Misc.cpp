@@ -471,11 +471,11 @@ int SaveState(char *file) {
 
 	// spu
 	spufP = (SPUFreeze_t *) malloc(16);
-	SPU_freeze(2, spufP);
-	Size = spufP->Size; gzwrite(f, &Size, 4);
+	SPUfreeze(2, (SPUFreeze_t*)spufP);
+	Size = ((FreezeStub_t*)spufP)->Size; gzwrite(f, &Size, 4);
 	free(spufP);
 	spufP = (SPUFreeze_t *) malloc(Size);
-	SPU_freeze(1, spufP);
+	SPUfreeze(1, spufP);
 	gzwrite(f, spufP, Size);
 	free(spufP);
 
@@ -527,7 +527,7 @@ int LoadState(char *file) {
 	gzread(f, &Size, 4);
 	spufP = (SPUFreeze_t *) malloc (Size);
 	gzread(f, spufP, Size);
-	SPU_freeze(0, spufP);
+	SPUfreeze(0, spufP);
 	free(spufP);
 
 	sioFreeze(f, 0);
@@ -595,11 +595,11 @@ int SaveStateEmbed(char *file) {
 
 	// spu
 	spufP = (SPUFreeze_t *) malloc(16);
-	SPU_freeze(2, spufP);
-	Size = spufP->Size; gzwrite(f, &Size, 4);
+	SPUfreeze(2, (SPUFreeze_t*)spufP);
+	Size = ((FreezeStub_t*)spufP)->Size; gzwrite(f, &Size, 4);
 	free(spufP);
 	spufP = (SPUFreeze_t *) malloc(Size);
-	SPU_freeze(1, spufP);
+	SPUfreeze(1, spufP);
 	gzwrite(f, spufP, Size);
 	free(spufP);
 
@@ -663,7 +663,7 @@ int LoadStateEmbed(char *file) {
 	gzread(f, &Size, 4);
 	spufP = (SPUFreeze_t *) malloc (Size);
 	gzread(f, spufP, Size);
-	SPU_freeze(0, spufP);
+	SPUfreeze(0, spufP);
 	free(spufP);
 
 	sioFreeze(f, 0);

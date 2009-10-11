@@ -92,13 +92,15 @@ void psxRcntInit() {
 	psxCounters[3].target = 1;
 	psxUpdateVSyncRate();
 
-	if (SPU_async != NULL) {
+	//if (SPUasync != NULL) {
 		cnts = 5;
 
 		psxCounters[4].rate = 768 * 64;
 		psxCounters[4].target = 1;
 		psxCounters[4].mode = 0x58;
-	} else cnts = 4;
+	//}
+	//else 
+	//	cnts = 4;
 
 	psxRcntUpd(0); psxRcntUpd(1); psxRcntUpd(2); psxRcntUpd(3);
 	psxRcntSet();
@@ -145,7 +147,7 @@ if ( (Movie.startAvi) || (Movie.startWav) ) {
 	if (Movie.startAvi)
 		GPU_startAvi(Movie.aviFilename);
 	if (Movie.startWav)
-		SPU_startWav(Movie.wavFilename);
+		SPUstartWav(Movie.wavFilename);
 	Movie.startAvi = 0;
 	Movie.startWav = 0;
 	Movie.capture = 1;
@@ -154,7 +156,7 @@ if ( (Movie.startAvi) || (Movie.startWav) ) {
 // stop capture?
 if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
 	GPU_stopAvi();
-	SPU_stopWav();
+	SPUstopWav();
 	Movie.capture = 0;
 }
 
@@ -255,7 +257,7 @@ CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 
 	if (cnts >= 5) {
 		if ((psxRegs.cycle - psxCounters[4].sCycle) >= psxCounters[4].Cycle) {
-			SPU_async((psxRegs.cycle - psxCounters[4].sCycle) * BIAS);
+			SPUasync((psxRegs.cycle - psxCounters[4].sCycle) * BIAS);
 			psxRcntReset(4);
 		}
 	}

@@ -326,7 +326,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CONFSPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFSPU].keymod)
 	{
-		if (SPU_configure) SPU_configure();
+		SPUconfigure();
 		return;
 	}
 
@@ -754,9 +754,8 @@ bool OpenPlugins(HWND hWnd) {
 
 	ret = GPU_open(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
-	ret = SPU_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
-	SPU_registerCallback(SPUirq);
+	ret = SPUopen(hWnd);
+	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return -1; }
 	ret = PAD1_open(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); return false; }
 	ret = PAD2_open(hWnd);
@@ -776,8 +775,6 @@ void ClosePlugins() {
 	if (ret < 0) { SysMessage (_("Error Closing CDR Plugin")); return; }
 	ret = GPU_close();
 	if (ret < 0) { SysMessage (_("Error Closing GPU Plugin")); return; }
-	ret = SPU_close();
-	if (ret < 0) { SysMessage (_("Error Closing SPU Plugin")); return; }
 	ret = PAD1_close();
 	if (ret < 0) { SysMessage (_("Error Closing PAD1 Plugin")); return; }
 	ret = PAD2_close();
@@ -793,7 +790,7 @@ void ResetPlugins() {
 
 	CDR_shutdown();
 	GPU_shutdown();
-	SPU_shutdown();
+	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
 	if (Config.UseNet) NET_shutdown(); 
@@ -802,7 +799,7 @@ void ResetPlugins() {
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }
 	ret = GPU_init();
 	if (ret != 0) { SysMessage (_("GPUinit error: %d"), ret); return; }
-	ret = SPU_init();
+	ret = SPUinit();
 	if (ret != 0) { SysMessage (_("SPUinit error: %d"), ret); return; }
 	ret = PAD1_init(1);
 	if (ret != 0) { SysMessage (_("PAD1init error: %d"), ret); return; }
