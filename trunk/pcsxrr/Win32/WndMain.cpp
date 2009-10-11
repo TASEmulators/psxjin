@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <string>
 
 #include <fcntl.h>
 #include <io.h>
@@ -265,13 +266,14 @@ int main(int argc, char **argv) {
 	strcpy(cfgfile, "Software\\PCSX-RR");
 
 	//argv = CommandLineToArgvA(GetCommandLine(), &argc);
+	int runcdarg=-2;
 	if( argc > 1 )
 	for( i=1; i < argc; i++ ) {
 //		MessageBox( NULL, argv[i], "Argument list", MB_ICONINFORMATION );
 		if (!strcmp(argv[i], "-runcd"))
-			runcd = 1;
+		{ runcd = 1; runcdarg = i; }
 		else if (!strcmp(argv[i], "-runcdbios"))
-			runcd = 2;
+		{ runcd = 2; runcdarg = i; }
 		else if (!strcmp(argv[i], "-play")) {
 			loadMovie = 1;
 			sprintf(szMovieToLoad,"%s",argv[++i]);
@@ -298,6 +300,9 @@ int main(int argc, char **argv) {
 				sprintf(errorMessage, "RAM Watch file \"%s\" doesn't exist.",argv[i]);
 				MessageBox(NULL, errorMessage, NULL, MB_ICONERROR);
 			}
+		} else if(i==runcdarg+1)
+		{
+			CDR_iso_fileToOpen = argv[i];
 		}
 	}
 
@@ -680,6 +685,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					if (GPU_configure) GPU_configure();
 					return TRUE;
 
+				case ID_CONFIGURATION_CDROM:
+					CDRconfigure();
+					return TRUE;
+
 				case ID_CONFIGURATION_SOUND:
 					SPUconfigure();
 					return TRUE;
@@ -687,10 +696,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_CONFIGURATION_CONTROLLERS:
 					if (PAD1_configure) PAD1_configure();
 					if (strcmp(Config.Pad1, Config.Pad2)) if (PAD2_configure) PAD2_configure();
-					return TRUE;
-
-				case ID_CONFIGURATION_CDROM:
-						if (CDR_configure) CDR_configure();
 					return TRUE;
 
 				case ID_CONFIGURATION_MAPHOTKEYS:

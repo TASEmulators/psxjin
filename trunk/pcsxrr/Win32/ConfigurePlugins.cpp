@@ -360,7 +360,8 @@ void ConfigureSPU(HWND hW) {
 }
 
 void ConfigureCDR(HWND hW) {
-	ConfPlugin(CDRconfigure, IDC_LISTCDR, "CDRconfigure");
+	//ConfPlugin(CDRconfigure, IDC_LISTCDR, "CDRconfigure");
+	CDRconfigure();
 }
 
 void ConfigureNET(HWND hW) {
@@ -384,9 +385,9 @@ void AboutGPU(HWND hW) {
 //	ConfPlugin(SPUabout, IDC_LISTSPU, "SPUabout");
 //}
 
-void AboutCDR(HWND hW) {
-	ConfPlugin(CDRabout, IDC_LISTCDR, "CDRabout");
-}
+//void AboutCDR(HWND hW) {
+//	ConfPlugin(CDRabout, IDC_LISTCDR, "CDRabout");
+//}
 
 void AboutNET(HWND hW) {
 	ConfPlugin(NETabout, IDC_LISTNET, "NETabout");
@@ -429,9 +430,9 @@ void TestGPU(HWND hW) {
 //	TestPlugin(SPUtest, IDC_LISTSPU, "SPUtest");
 //}
 
-void TestCDR(HWND hW) {
-	TestPlugin(CDRtest, IDC_LISTCDR, "CDRtest");
-}
+//void TestCDR(HWND hW) {
+//	TestPlugin(CDRtest, IDC_LISTCDR, "CDRtest");
+//}
 
 void TestNET(HWND hW) {
 	TestPlugin(NETtest, IDC_LISTNET, "NETtest");
@@ -505,19 +506,21 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 			switch(LOWORD(wParam)) {
 				case IDC_CONFIGGPU:  ConfigureGPU(hW); return TRUE;
        			case IDC_CONFIGSPU:  ConfigureSPU(hW); return TRUE;
-       			case IDC_CONFIGCDR:  ConfigureCDR(hW); return TRUE;
+       			case IDC_CONFIGCDR:  
+					ConfigureCDR(hW); 
+					return TRUE;
        			case IDC_CONFIGPAD1: ConfigurePAD1(hW); return TRUE;
        			case IDC_CONFIGPAD2: ConfigurePAD2(hW); return TRUE;
 
 				case IDC_TESTGPU:    TestGPU(hW);   return TRUE;
 				//case IDC_TESTSPU:    TestSPU(hW);   return TRUE;
-				case IDC_TESTCDR:    TestCDR(hW);   return TRUE;
+				//case IDC_TESTCDR:    TestCDR(hW);   return TRUE;
 				case IDC_TESTPAD1:   TestPAD1(hW);  return TRUE;
 				case IDC_TESTPAD2:   TestPAD2(hW);  return TRUE;
 
 				case IDC_ABOUTGPU:   AboutGPU(hW);  return TRUE;
 				//case IDC_ABOUTSPU:   AboutSPU(hW);  return TRUE;
-                case IDC_ABOUTCDR:   AboutCDR(hW);  return TRUE;
+                //case IDC_ABOUTCDR:   AboutCDR(hW);  return TRUE;
     	        case IDC_ABOUTPAD1:  AboutPAD1(hW); return TRUE;
     		    case IDC_ABOUTPAD2:  AboutPAD2(hW); return TRUE;
 

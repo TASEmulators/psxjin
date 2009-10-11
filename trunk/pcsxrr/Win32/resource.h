@@ -4,6 +4,7 @@
 //
 #define IDS_TITLE                       1
 #define W_OK                            2
+#define IDOK2                           3
 #define IDR_MENU1                       101
 #define IDI_APP_ICON                    102
 #define IDD_MCDCONF                     102
@@ -14,11 +15,11 @@
 #define IDD_CONNECT                     109
 #define IDD_REPLAYINP                   110
 #define IDD_RECORDINP                   111
-#define IDD_CFGDIALOG                   112
 #define IDD_CFGDLG                      112
 #define SPLASH_LOGO                     113
 #define IDD_RECORD                      113
 #define IDD_GPREGS                      114
+#define IDD_ISOCONFIG                   114
 #define IDD_CP0REGS                     115
 #define IDD_COP2D                       116
 #define IDD_COP2C                       117
@@ -30,15 +31,22 @@
 #define IDD_EDITWATCH                   139
 #define IDD_PROMPT                      140
 #define IDR_RWACCELERATOR               141
+#define IDC_ISOFILE                     1000
 #define IDC_EDIT2                       1001
 #define MW_ADDR00                       1001
+#define IDC_SELECTISO                   1001
+#define IDC_COMPRESSISO                 1002
+#define IDC_DECOMPRESSISO               1003
 #define IDC_MCD2                        1004
 #define MW_ADDR01                       1004
+#define IDC_METHOD                      1004
 #define IDC_ASMCHECK1                   1005
 #define IDC_MCD1                        1005
 #define IDC_ENABXA                      1005
+#define IDC_PROGRESS                    1005
 #define IDC_MCDSEL1                     1006
 #define IDC_XAPITCH                     1006
+#define IDC_STOP                        1006
 #define IDC_STEP                        1007
 #define IDC_MCDSEL2                     1007
 #define IDC_XA                          1007
@@ -491,7 +499,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        114
+#define _APS_NEXT_RESOURCE_VALUE        115
 #define _APS_NEXT_COMMAND_VALUE         40044
 #define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101

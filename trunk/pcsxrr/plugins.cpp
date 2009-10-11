@@ -80,22 +80,22 @@ GPUstopAvi          GPU_stopAvi;
 GPUsendFpLuaGui     GPU_sendFpLuaGui;
 
 //cd rom function pointers 
-CDRinit               CDR_init;
-CDRshutdown           CDR_shutdown;
-CDRopen               CDR_open;
-CDRclose              CDR_close; 
-CDRtest               CDR_test;
-CDRgetTN              CDR_getTN;
-CDRgetTD              CDR_getTD;
-CDRreadTrack          CDR_readTrack;
-CDRgetBuffer          CDR_getBuffer;
-CDRplay               CDR_play;
-CDRstop               CDR_stop;
-CDRgetStatus          CDR_getStatus;
-CDRgetDriveLetter     CDR_getDriveLetter;
-CDRgetBufferSub       CDR_getBufferSub;
-CDRconfigure          CDR_configure;
-CDRabout              CDR_about;
+//CDRinit               CDR_init;
+//CDRshutdown           CDR_shutdown;
+//CDRopen               CDR_open;
+//CDRclose              CDR_close; 
+//CDRtest               CDR_test;
+//CDRgetTN              CDR_getTN;
+//CDRgetTD              CDR_getTD;
+//CDRreadTrack          CDR_readTrack;
+//CDRgetBuffer          CDR_getBuffer;
+//CDRplay               CDR_play;
+//CDRstop               CDR_stop;
+//CDRgetStatus          CDR_getStatus;
+//CDRgetDriveLetter     CDR_getDriveLetter;
+//CDRgetBufferSub       CDR_getBufferSub;
+//CDRconfigure          CDR_configure;
+//CDRabout              CDR_about;
 
 //PAD POINTERS
 PADconfigure        PAD1_configure;
@@ -315,10 +315,11 @@ int LoadGPUplugin(char *GPUdll) {
 
 void *hCDRDriver;
 
-long CALLBACK CDR__play(unsigned char *sector) { return 0; }
-long CALLBACK CDR__stop(void) { return 0; }
+long CDR__play(unsigned char *sector) { return 0; }
+long CDR__stop(void) { return 0; }
 
-long CALLBACK CDR__getStatus(struct CdrStat *stat) {
+long CDRgetStatus(struct CdrStat *stat) {
+//long CDR__getStatus(struct CdrStat *stat) {
 	if (cdOpenCase < 0)
 		stat->Status = 0x10;
 	else
@@ -334,11 +335,12 @@ unsigned long CDR_fakeStatus() {
 		return 0;
 }
 
-char* CALLBACK CDR__getDriveLetter(void) { return NULL; }
-unsigned char* CALLBACK CDR__getBufferSub(void) { return NULL; }
-long CALLBACK CDR__configure(void) { return 0; }
-long CALLBACK CDR__test(void) { return 0; }
-void CALLBACK CDR__about(void) {}
+char* CDR__getDriveLetter(void) { return NULL; }
+//unsigned char* CDR__getBufferSub(void) { return NULL; }
+unsigned char* CDRgetBufferSub(void) { return NULL; }
+long CDR__configure(void) { return 0; }
+long CDR__test(void) { return 0; }
+void CDR__about(void) {}
 
 #define LoadCdrSym1(dest, name) \
 	LoadSym(CDR_##dest, CDR##dest, name, 1);
@@ -350,34 +352,34 @@ void CALLBACK CDR__about(void) {}
 #define LoadCdrSymN(dest, name) \
 	LoadSym(CDR_##dest, CDR##dest, name, 0);
 
-int LoadCDRplugin(char *CDRdll) {
-	void *drv;
-
-	hCDRDriver = SysLoadLibrary(CDRdll);
-	if (hCDRDriver == NULL) {
-		CDR_configure = NULL;
-		SysMessage (_("Could Not load CDR plugin %s"), CDRdll);  return -1;
-	}
-	drv = hCDRDriver;
-	LoadCdrSym1(init, "CDRinit");
-	LoadCdrSym1(shutdown, "CDRshutdown");
-	LoadCdrSym1(open, "CDRopen");
-	LoadCdrSym1(close, "CDRclose");
-	LoadCdrSym1(getTN, "CDRgetTN");
-	LoadCdrSym1(getTD, "CDRgetTD");
-	LoadCdrSym1(readTrack, "CDRreadTrack");
-	LoadCdrSym1(getBuffer, "CDRgetBuffer");
-	LoadCdrSym0(play, "CDRplay");
-	LoadCdrSym0(stop, "CDRstop");
-	LoadCdrSym0(getStatus, "CDRgetStatus");
-	LoadCdrSym0(getDriveLetter, "CDRgetDriveLetter");
-	LoadCdrSym0(getBufferSub, "CDRgetBufferSub");
-	LoadCdrSym0(configure, "CDRconfigure");
-	LoadCdrSym0(test, "CDRtest");
-	LoadCdrSym0(about, "CDRabout");
-
-	return 0;
-}
+//int LoadCDRplugin(char *CDRdll) {
+//	void *drv;
+//
+//	hCDRDriver = SysLoadLibrary(CDRdll);
+//	if (hCDRDriver == NULL) {
+//		CDR_configure = NULL;
+//		SysMessage (_("Could Not load CDR plugin %s"), CDRdll);  return -1;
+//	}
+//	drv = hCDRDriver;
+//	LoadCdrSym1(init, "CDRinit");
+//	LoadCdrSym1(shutdown, "CDRshutdown");
+//	LoadCdrSym1(open, "CDRopen");
+//	LoadCdrSym1(close, "CDRclose");
+//	LoadCdrSym1(getTN, "CDRgetTN");
+//	LoadCdrSym1(getTD, "CDRgetTD");
+//	LoadCdrSym1(readTrack, "CDRreadTrack");
+//	LoadCdrSym1(getBuffer, "CDRgetBuffer");
+//	LoadCdrSym0(play, "CDRplay");
+//	LoadCdrSym0(stop, "CDRstop");
+//	LoadCdrSym0(getStatus, "CDRgetStatus");
+//	LoadCdrSym0(getDriveLetter, "CDRgetDriveLetter");
+//	LoadCdrSym0(getBufferSub, "CDRgetBufferSub");
+//	LoadCdrSym0(configure, "CDRconfigure");
+//	LoadCdrSym0(test, "CDRtest");
+//	LoadCdrSym0(about, "CDRabout");
+//
+//	return 0;
+//}
 
 //int LoadSPUplugin(char *SPUdll) {
 //	void *drv;
@@ -701,8 +703,8 @@ int LoadPlugins() {
 	int ret;
 	char Plugin[256];
 
-	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Cdr);
-	if (LoadCDRplugin(Plugin) == -1) return -1;
+	//sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Cdr);
+	//if (LoadCDRplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Gpu);
 	if (LoadGPUplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad1);
@@ -717,7 +719,7 @@ int LoadPlugins() {
 		if (LoadNETplugin(Plugin) == -1) return -1;
 	}
 
-	ret = CDR_init();
+	ret = CDRinit();
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
 	ret = GPU_init();
 	if (ret < 0) { SysMessage (_("GPUinit error: %d"), ret); return -1; }
@@ -745,14 +747,14 @@ void ReleasePlugins() {
 		NetOpened = 0;
 	}
 
-	CDR_shutdown();
+	CDRshutdown();
 	GPU_shutdown();
 	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
 	if (Config.UseNet && hNETDriver != NULL) NET_shutdown(); 
 
-	SysCloseLibrary(hCDRDriver); hCDRDriver = NULL;
+	//SysCloseLibrary(hCDRDriver); hCDRDriver = NULL;
 	SysCloseLibrary(hGPUDriver); hGPUDriver = NULL;
 	SysCloseLibrary(hPAD1Driver); hPAD1Driver = NULL;
 	SysCloseLibrary(hPAD2Driver); hPAD2Driver = NULL;

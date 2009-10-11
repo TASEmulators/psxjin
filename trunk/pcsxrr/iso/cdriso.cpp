@@ -15,9 +15,23 @@
 #include <zlib.h>
 #include <bzlib.h>
 
+#include <string>
+
 #include "cdriso.h"
 #include "PSEmu_Plugin_Defs.h"
 #include "Config.h"
+
+std::string CDR_iso_fileToOpen;
+
+char IsoFile[256];
+char CdDev[256];
+
+unsigned char cdbuffer[CD_FRAMESIZE_RAW * 10];
+unsigned char *pbuffer;
+
+int Zmode; // 1 Z - 2 bz2
+int fmode;						// 0 - file / 1 - Zfile
+char *Ztable;
 
 FILE *cdHandle = NULL;
 char *methods[] = {
@@ -27,28 +41,13 @@ char *methods[] = {
 
 char *LibName = "TAS ISO Plugin";
 
-const unsigned char version = 1;	// PSEmu 1.x library
-const unsigned char revision = VERSION;
-const unsigned char build = BUILD;
 
 
-char* CALLBACK PSEgetLibName(void) {
-	return LibName;
-}
-
-unsigned long CALLBACK PSEgetLibType(void) {
-	return PSE_LT_CDR;
-}
-
-unsigned long CALLBACK PSEgetLibVersion(void) {
-	return version << 16 | revision << 8 | build;
-}
-
-long CALLBACK CDRinit(void) {
+long CDRinit(void) {
 	return 0;
 }
 
-long CALLBACK CDRshutdown(void) {
+long CDRshutdown(void) {
 	return 0;
 }
 
@@ -69,7 +68,7 @@ void UpdateZmode() {
 	Zmode = 0;
 }
 
-long CALLBACK CDRopen(void) {
+long CDRopen(void) {
 	struct stat buf;
 
 	if (cdHandle != NULL)
@@ -80,9 +79,17 @@ long CALLBACK CDRopen(void) {
 	if (*IsoFile == 0) {
 		char temp[256];
 
-		CfgOpenFile();
+		if(CDR_iso_fileToOpen != "") {
+			LoadConf();
+			strcpy(IsoFile,CDR_iso_fileToOpen.c_str());
+			CDR_iso_fileToOpen = "";
+		}
+		else
+		{
+			CfgOpenFile();
+			LoadConf();
+		}
 
-		LoadConf();
 		strcpy(temp, IsoFile);
 		*IsoFile = 0;
 		SaveConf();
@@ -126,7 +133,7 @@ long CALLBACK CDRopen(void) {
 	return 0;
 }
 
-long CALLBACK CDRclose(void) {
+long CDRclose(void) {
 	if (cdHandle == NULL)
 		return 0;
 	fclose(cdHandle);
@@ -140,7 +147,7 @@ long CALLBACK CDRclose(void) {
 // buffer:
 //  byte 0 - start track
 //  byte 1 - end track
-long CALLBACK CDRgetTN(unsigned char *buffer) {
+long CDRgetTN(unsigned char *buffer) {
 	buffer[0] = 1;
 	buffer[1] = 1;
 
@@ -152,7 +159,7 @@ long CALLBACK CDRgetTN(unsigned char *buffer) {
 //  byte 0 - frame
 //  byte 1 - second
 //  byte 2 - minute
-long CALLBACK CDRgetTD(unsigned char track, unsigned char *buffer) {
+long CDRgetTD(unsigned char track, unsigned char *buffer) {
 	buffer[2] = 0;
 	buffer[1] = 2;
 	buffer[0] = 0;
@@ -163,7 +170,7 @@ long CALLBACK CDRgetTD(unsigned char track, unsigned char *buffer) {
 // read track
 // time : byte 0 - minute ; byte 1 - second ; byte 2 - frame
 // uses bcd format
-long CALLBACK CDRreadTrack(unsigned char *time) {
+long CDRreadTrack(unsigned char *time) {
 
 	if (cdHandle == NULL) return -1;
 
@@ -215,7 +222,7 @@ long CALLBACK CDRreadTrack(unsigned char *time) {
 		fread(Zbuf, 1, p, cdHandle);
 
 		size = CD_FRAMESIZE_RAW * 10;
-		BZ2_bzBuffToBuffDecompress(cdbuffer, (unsigned int*)&size, Zbuf, p, 0, 0);
+		BZ2_bzBuffToBuffDecompress((char*)cdbuffer, (unsigned int*)&size, (char*)Zbuf, p, 0, 0);
 
 		pbuffer = cdbuffer + rp * CD_FRAMESIZE_RAW + 12;
 	}
@@ -224,23 +231,23 @@ long CALLBACK CDRreadTrack(unsigned char *time) {
 }
 
 // return readed track
-unsigned char* CALLBACK CDRgetBuffer(void) {
+unsigned char* CDRgetBuffer(void) {
 	return pbuffer;
 }
 
 // plays cdda audio
 // sector : byte 0 - minute ; byte 1 - second ; byte 2 - frame
 // does NOT uses bcd format
-long CALLBACK CDRplay(unsigned char *sector) {
+long CDRplay(unsigned char *sector) {
 	return 0;
 }
 
 // stops cdda audio
-long CALLBACK CDRstop(void) {
+long CDRstop(void) {
 	return 0;
 }
 
-long CALLBACK CDRtest(void) {
+long CDRtest(void) {
 	if (*IsoFile == 0)
 		return 0;
 	cdHandle = fopen(IsoFile, "rb");
