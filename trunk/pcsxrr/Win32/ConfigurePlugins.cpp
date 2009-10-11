@@ -303,14 +303,11 @@ char *GetSelDLL(HWND hW,int id) {
 
 void OnOK(HWND hW) {
 	char * gpuDLL=GetSelDLL(hW,IDC_LISTGPU);
-	char * spuDLL=GetSelDLL(hW,IDC_LISTSPU);
-	char * cdrDLL=GetSelDLL(hW,IDC_LISTCDR);
 	char * pad1DLL=GetSelDLL(hW,IDC_LISTPAD1);
 	char * pad2DLL=GetSelDLL(hW,IDC_LISTPAD2);
 	char * biosFILE=GetSelDLL(hW,IDC_LISTBIOS);
 
-    if ((gpuDLL==NULL) || (spuDLL ==NULL) ||
-       (cdrDLL ==NULL) || (pad1DLL==NULL) ||
+    if ((gpuDLL==NULL) ||(pad1DLL==NULL) ||
 	   (pad2DLL==NULL) ||(biosFILE==NULL)) {
 		MessageBox(hW,"Configuration not OK!","Error",MB_OK|MB_ICONERROR);
 		return;
@@ -318,8 +315,6 @@ void OnOK(HWND hW) {
 
 	strcpy(Config.Bios, biosFILE);
 	strcpy(Config.Gpu,  gpuDLL);
-	strcpy(Config.Spu,  spuDLL);
-	strcpy(Config.Cdr,  cdrDLL);
 	strcpy(Config.Pad1, pad1DLL);
 	strcpy(Config.Pad2, pad2DLL);
 
