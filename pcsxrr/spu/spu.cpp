@@ -108,6 +108,8 @@
 #include "spu.h"
 #include "adsr.h"
 #include "reverb.h"
+#include "gauss_i.h"
+
 
 ////////////////////////////////////////////////////////////////////////
 // globals
@@ -331,8 +333,6 @@ INLINE void InterpolateDown(SPUCHAN * pChannel)
 
 #define gval0 (((short*)(&pChannel->SB[29]))[gpos])
 #define gval(x) (((short*)(&pChannel->SB[29]))[(gpos+x)&3])
-
-#include "gauss_i.h"
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -699,6 +699,14 @@ void mixAudio(SPU_struct* spu, int length)
 
 		left_accum += MixREVERBLeft(0);
 		right_accum += MixREVERBRight();
+
+		{
+			s32 left, right;
+			MixXA(&left,&right);
+
+			left_accum += left;
+			right_accum += right;
+		}
 
 		spu->outbuf[j*2] = limit(left_accum);
 		spu->outbuf[j*2+1] = limit(right_accum);
@@ -1166,6 +1174,9 @@ void CALLBACK SPUupdate(void)
 // XA AUDIO
 ////////////////////////////////////////////////////////////////////////
 
+//this is called from the cdrom system with a buffer of decoded xa audio
+//we are supposed to grab it and then play it. 
+//FeedXA takes care of stashing it for us
 void SPUplayADPCMchannel(xa_decode_t *xap)
 {
 	if (!iUseXA)    return;                               // no XA? bye

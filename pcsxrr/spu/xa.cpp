@@ -58,31 +58,62 @@ static int gauss_window[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 #define gvalr0 gauss_window[4+gauss_ptr]
 #define gvalr(x) gauss_window[4+((gauss_ptr+x)&3)]
 
-////////////////////////////////////////////////////////////////////////
-// MIX XA
-////////////////////////////////////////////////////////////////////////
-
-INLINE void MixXA(void)
+//rewritten for pcsxrr
+INLINE void MixXA(s32* left, s32* right)
 {
-	int ns;
+	//just a little diagnostics
+	//{
+	//	static int ctr=0;
+	//	ctr++;
+	//	if((ctr&15)==0)
+	//	{
+	//		s32 bleh = (s32)((u32)XAFeed-(u32)XAPlay);
+	//		if(bleh<0) bleh += (u32)44100;
+	//		printf("XA buf: %d\n",bleh/4);
+	//	}
+	//}
 
-	for (ns=0;ns<NSSIZE && XAPlay!=XAFeed;ns++)
+	if(XAPlay != XAFeed)
 	{
 		XALastVal=*XAPlay++;
 		if (XAPlay==XAEnd) XAPlay=XAStart;
-		SSumL[ns]+=(((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
-		SSumR[ns]+=(((short)((XALastVal>>16)&0xffff)) * iRightXAVol)/32767;
+		goto doit;
 	}
-
-	if (XAPlay==XAFeed && XARepeat)
+	else
 	{
-		XARepeat--;
-		for (;ns<NSSIZE;ns++)
+		if(XARepeat)
 		{
-			SSumL[ns]+=(((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
-			SSumR[ns]+=(((short)((XALastVal>>16)&0xffff)) * iRightXAVol)/32767;
+			XARepeat--;
+			goto doit;
+		}
+		else
+		{
+			*left = *right = 0;
+			return;
 		}
 	}
+
+doit:
+	*left = (((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
+	*right = (((short)((XALastVal>>16)&0xffff))       * iRightXAVol)/32767;
+
+	//for (ns=0;ns<NSSIZE && XAPlay!=XAFeed;ns++)
+	//{
+	//	XALastVal=*XAPlay++;
+	//	if (XAPlay==XAEnd) XAPlay=XAStart;
+	//	SSumL[ns]+=(((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
+	//	SSumR[ns]+=(((short)((XALastVal>>16)&0xffff)) * iRightXAVol)/32767;
+	//}
+
+	//if (XAPlay==XAFeed && XARepeat)
+	//{
+	//	XARepeat--;
+	//	for (;ns<NSSIZE;ns++)
+	//	{
+	//		SSumL[ns]+=(((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
+	//		SSumR[ns]+=(((short)((XALastVal>>16)&0xffff)) * iRightXAVol)/32767;
+	//	}
+	//}
 }
 
 ////////////////////////////////////////////////////////////////////////

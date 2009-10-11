@@ -739,6 +739,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\spu\gauss_i.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\spu\gauss_i.h"
 				>
 			</File>
