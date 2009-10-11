@@ -1,5 +1,5 @@
 /***************************************************************************
-                           adsr.h  -  description
+                            dma.h  -  description
                              -------------------
     begin                : Wed May 15 2002
     copyright            : (C) 2002 by Pete Bernert
@@ -24,5 +24,8 @@
 //
 //*************************************************************************//
 
-INLINE void StartADSR(SPUCHAN * pChannel);
-INLINE int  MixADSR(SPUCHAN * pChannel);
+
+unsigned short SPUreadDMA(void);
+void SPUreadDMAMem(unsigned short * pusPSXMem,int iSize);
+void SPUwriteDMA(unsigned short val);
+void SPUwriteDMAMem(unsigned short * pusPSXMem,int iSize);

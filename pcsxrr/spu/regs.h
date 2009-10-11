@@ -1,5 +1,5 @@
 /***************************************************************************
-                            spu.h  -  description
+                           regs.h  -  description
                              -------------------
     begin                : Wed May 15 2002
     copyright            : (C) 2002 by Pete Bernert
@@ -25,6 +25,10 @@
 //*************************************************************************//
 
 
-void SetupTimer(void);
-void RemoveTimer(void);
-void CALLBACK SPUplayADPCMchannel(xa_decode_t *xap);
+void FModOn(int start,int end,unsigned short val);
+void NoiseOn(int start,int end,unsigned short val);
+void SetVolumeL(unsigned char ch,short vol);
+void SetVolumeR(unsigned char ch,short vol);
+void SetPitch(int ch,unsigned short val);
+void ReverbOn(int start,int end,unsigned short val);
+void SPUwriteRegister(unsigned long reg, unsigned short val);

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          reverb.h  -  description
+                           adsr.h  -  description
                              -------------------
     begin                : Wed May 15 2002
     copyright            : (C) 2002 by Pete Bernert
@@ -25,6 +25,14 @@
 //*************************************************************************//
 
 
-void SetREVERB(unsigned short val);
-INLINE void StartREVERB(SPUCHAN * pChannel);
-INLINE void StoreREVERB(SPUCHAN * pChannel,int ns);
+#ifndef _ADSR_H_
+#define _ADSR_H_
+
+#include "spu.h"
+#include "PsxCommon.h"
+
+void InitADSR();
+void StartADSR(SPU_chan * pChannel);
+s32  MixADSR(SPU_chan * pChannel);
+
+#endif //_ADSR_H_

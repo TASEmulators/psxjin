@@ -1397,7 +1397,7 @@ static void recLHU() {
 				iRegs[_Rt_].state = ST_UNK;
 
 				PUSH32I  (addr);
-				CALL32M  ((u32)&SPU_readRegister);
+				CALLFunc ((u32)SPUreadRegister); //TODO - this might require the correct calling convention
 				MOVZX32R16toR(EAX, EAX);
 				MOV32RtoM((u32)&psxRegs.GPR.r[_Rt_], EAX);
 #ifndef __WIN32__
@@ -1830,7 +1830,7 @@ static void recSH() {
 					PUSH32M((u32)&psxRegs.GPR.r[_Rt_]);
 				}
 				PUSH32I  (addr);
-				CALL32M  ((u32)&SPU_writeRegister);
+				CALLFunc  ((u32)SPUwriteRegister);
 #ifndef __WIN32__
 				resp+= 8;
 #endif

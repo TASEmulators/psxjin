@@ -609,7 +609,7 @@ void cdrReadInterrupt() {
 			int ret = xa_decode_sector(&cdr.Xa, cdr.Transfer+4, cdr.FirstSector);
 
 			if (!ret) {
-				SPU_playADPCMchannel(&cdr.Xa);
+				SPUplayADPCMchannel(&cdr.Xa);
 				cdr.FirstSector = 0;
 			}
 			else cdr.FirstSector = -1;

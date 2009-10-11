@@ -37,7 +37,7 @@ void psxDma4(u32 madr, u32 bcr, u32 chcr) { // SPU
 #endif
 				break;
 			}
-			SPU_writeDMAMem(ptr, (bcr >> 16) * (bcr & 0xffff) * 2);
+			SPUwriteDMAMem(ptr, (bcr >> 16) * (bcr & 0xffff) * 2);
 			break;
 
 		case 0x01000200: //spu to cpu transfer
@@ -52,7 +52,7 @@ void psxDma4(u32 madr, u32 bcr, u32 chcr) { // SPU
 				break;
 			}
 			size = (bcr >> 16) * (bcr & 0xffff) * 2;
-    		SPU_readDMAMem(ptr, size);
+    		SPUreadDMAMem(ptr, size);
 			psxCpu->Clear(madr, size);
 			break;
 

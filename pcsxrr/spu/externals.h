@@ -27,6 +27,10 @@
 //
 //*************************************************************************//
 
+#ifndef _SPU_EXTERNALS_H
+#define _SPU_EXTERNALS_H
+
+#include "PsxCommon.h"
 
 /////////////////////////////////////////////////////////
 // generic defines
@@ -56,7 +60,7 @@
 #define MAXCHAN     24
 
 // ~ 1 ms of data
-#define NSSIZE 45
+//#define NSSIZE 45
 
 ///////////////////////////////////////////////////////////
 // struct defines
@@ -245,7 +249,7 @@ extern unsigned long dwNoiseVal;
 extern unsigned short spuCtrl;
 extern unsigned short spuStat;
 extern unsigned short spuIrq;
-extern unsigned long  spuAddr;
+extern u32 spuAddr;
 extern int      bEndThread;
 extern int      bThreadEnded;
 extern int      bSpuInit;
@@ -324,17 +328,4 @@ extern int           iRightXAVol;
 
 #endif
 
-///////////////////////////////////////////////////////////
-// REVERB.C globals
-///////////////////////////////////////////////////////////
-
-#ifndef _IN_REVERB
-
-extern int *          sRVBPlay;
-extern int *          sRVBEnd;
-extern int *          sRVBStart;
-extern int            iReverbOff;
-extern int            iReverbRepeat;
-extern int            iReverbNum;
-
-#endif
+#endif //_SPU_EXTERNALS_H

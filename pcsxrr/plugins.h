@@ -41,6 +41,45 @@ int  OpenPlugins();
 void ClosePlugins();
 void ResetPlugins();
 
+
+// spu plugin
+long SPUinit(void);				
+long SPUshutdown(void);	
+long SPUclose(void);			
+void SPUplaySample(unsigned char);		
+void SPUstartChannels1(unsigned short);	
+void SPUstartChannels2(unsigned short);
+void SPUstopChannels1(unsigned short);	
+void SPUstopChannels2(unsigned short);	
+void SPUputOne(unsigned long,unsigned short);			
+unsigned short SPUgetOne(unsigned long);			
+void SPUsetAddr(unsigned char, unsigned short);			
+void SPUsetPitch(unsigned char, unsigned short);		
+void SPUsetVolumeL(unsigned char, short );		
+void SPUsetVolumeR(unsigned char, short );		
+//psemu pro 2 functions from now..
+void SPUwriteRegister(unsigned long, unsigned short);	
+unsigned short SPUreadRegister(unsigned long);		
+void SPUwriteDMA(unsigned short);
+unsigned short SPUreadDMA(void);
+void SPUwriteDMAMem(unsigned short *, int);
+void SPUreadDMAMem(unsigned short *, int);
+void SPUplayADPCMchannel(xa_decode_t *);
+//void SPUregisterCallback(void (CALLBACK *callback)(void));
+long SPUconfigure(void);
+long SPUopen(HWND hwnd);
+struct FreezeStub_t {
+	unsigned char PluginName[8];
+	unsigned long PluginVersion;
+	unsigned long Size;
+};
+struct SPUFreeze_t;
+long SPUfreeze(unsigned long, SPUFreeze_t *);
+void SPUasync(unsigned long);
+void SPUstartWav(char*);
+void SPUstopWav(void);
+
+
 START_EXTERN_C
 
 typedef unsigned long (CALLBACK* PSEgetLibType)(void);
@@ -175,80 +214,6 @@ extern CDRgetDriveLetter     CDR_getDriveLetter;
 extern CDRgetBufferSub       CDR_getBufferSub;
 extern CDRconfigure          CDR_configure;
 extern CDRabout              CDR_about;
-
-// spu plugin
-typedef long (CALLBACK* SPUinit)(void);				
-typedef long (CALLBACK* SPUshutdown)(void);	
-typedef long (CALLBACK* SPUclose)(void);			
-typedef void (CALLBACK* SPUplaySample)(unsigned char);		
-typedef void (CALLBACK* SPUstartChannels1)(unsigned short);	
-typedef void (CALLBACK* SPUstartChannels2)(unsigned short);
-typedef void (CALLBACK* SPUstopChannels1)(unsigned short);	
-typedef void (CALLBACK* SPUstopChannels2)(unsigned short);	
-typedef void (CALLBACK* SPUputOne)(unsigned long,unsigned short);			
-typedef unsigned short (CALLBACK* SPUgetOne)(unsigned long);			
-typedef void (CALLBACK* SPUsetAddr)(unsigned char, unsigned short);			
-typedef void (CALLBACK* SPUsetPitch)(unsigned char, unsigned short);		
-typedef void (CALLBACK* SPUsetVolumeL)(unsigned char, short );		
-typedef void (CALLBACK* SPUsetVolumeR)(unsigned char, short );		
-//psemu pro 2 functions from now..
-typedef void (CALLBACK* SPUwriteRegister)(unsigned long, unsigned short);	
-typedef unsigned short (CALLBACK* SPUreadRegister)(unsigned long);		
-typedef void (CALLBACK* SPUwriteDMA)(unsigned short);
-typedef unsigned short (CALLBACK* SPUreadDMA)(void);
-typedef void (CALLBACK* SPUwriteDMAMem)(unsigned short *, int);
-typedef void (CALLBACK* SPUreadDMAMem)(unsigned short *, int);
-typedef void (CALLBACK* SPUplayADPCMchannel)(xa_decode_t *);
-typedef void (CALLBACK* SPUregisterCallback)(void (CALLBACK *callback)(void));
-typedef long (CALLBACK* SPUconfigure)(void);
-typedef long (CALLBACK* SPUtest)(void);			
-typedef void (CALLBACK* SPUabout)(void);
-typedef struct {
-	unsigned char PluginName[8];
-	unsigned long PluginVersion;
-	unsigned long Size;
-	unsigned char SPUPorts[0x200];
-	unsigned char SPURam[0x80000];
-	xa_decode_t xa;
-	unsigned char *SPUInfo;
-} SPUFreeze_t;
-typedef long (CALLBACK* SPUfreeze)(unsigned long, SPUFreeze_t *);
-typedef void (CALLBACK* SPUasync)(unsigned long);
-typedef long (CALLBACK* SPUstartWav)(char*);
-typedef long (CALLBACK* SPUstopWav)(void);
-
-//SPU POINTERS
-extern SPUconfigure        SPU_configure;
-extern SPUabout            SPU_about;
-extern SPUinit             SPU_init;
-extern SPUshutdown         SPU_shutdown;
-extern SPUtest             SPU_test;
-extern SPUopen             SPU_open;
-extern SPUclose            SPU_close;
-extern SPUplaySample       SPU_playSample;
-extern SPUstartChannels1   SPU_startChannels1;
-extern SPUstartChannels2   SPU_startChannels2;
-extern SPUstopChannels1    SPU_stopChannels1;
-extern SPUstopChannels2    SPU_stopChannels2;
-extern SPUputOne           SPU_putOne;
-extern SPUgetOne           SPU_getOne;
-extern SPUsetAddr          SPU_setAddr;
-extern SPUsetPitch         SPU_setPitch;
-extern SPUsetVolumeL       SPU_setVolumeL;
-extern SPUsetVolumeR       SPU_setVolumeR;
-extern SPUwriteRegister    SPU_writeRegister;
-extern SPUreadRegister     SPU_readRegister;
-extern SPUwriteDMA         SPU_writeDMA;
-extern SPUreadDMA          SPU_readDMA;
-extern SPUwriteDMAMem      SPU_writeDMAMem;
-extern SPUreadDMAMem       SPU_readDMAMem;
-extern SPUplayADPCMchannel SPU_playADPCMchannel;
-extern SPUfreeze           SPU_freeze;
-extern SPUregisterCallback SPU_registerCallback;
-extern SPUasync            SPU_async;
-extern SPUstartWav         SPU_startWav;
-extern SPUstopWav          SPU_stopWav;
-// PAD Functions
 
 typedef long (CALLBACK* PADconfigure)(void);
 typedef void (CALLBACK* PADabout)(void);

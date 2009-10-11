@@ -55,6 +55,8 @@ typedef struct {
 	HMENU hMenu;         // Main window menu
 } AppData;
 
+extern AppData gApp;
+
 #elif defined (__LINUX__) || defined (__MACOSX__)
 
 #include <sys/types.h>
@@ -79,6 +81,8 @@ typedef unsigned __int8  u8;
 typedef unsigned __int16 u16;
 typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
+
+#define INLINE __inline
 
 #elif defined(__LINUX__) || defined(__DREAMCAST__) || \
 	  defined(__MINGW32__) || defined(__MACOSX__)

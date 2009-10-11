@@ -22,8 +22,6 @@
 
 typedef long (CALLBACK* GPUopen)(HWND);
 
-typedef long (CALLBACK* SPUopen)(HWND);
-
 typedef long (CALLBACK* PADopen)(HWND);
 
 typedef long (CALLBACK* NETopen)(HWND);

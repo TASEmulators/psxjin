@@ -53,26 +53,6 @@
 
 #include "resource.h"
 
-////////////////////////////////////////////////////////////////////////
-// simple about dlg handler
-////////////////////////////////////////////////////////////////////////
-
-BOOL CALLBACK AboutDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-	case WM_COMMAND:
-	{
-		switch (LOWORD(wParam))
-		{
-		case IDOK:
-			EndDialog(hW,TRUE);
-			return TRUE;
-		}
-	}
-	}
-	return FALSE;
-}
 
 ////////////////////////////////////////////////////////////////////////
 // READ CONFIG: from win registry
