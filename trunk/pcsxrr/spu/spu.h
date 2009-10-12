@@ -123,6 +123,9 @@ public:
 	s32               iRightVolume;                        // left volume
 	s32               iRightVolRaw;                        // left psx volume value
 
+	//call this to update smpinc from the provided pitch
+	void updatePitch(u16 rawPitch);
+
 	//increment value 0000-3fff with 1000 being unit speed
 	u16 rawPitch;
 	

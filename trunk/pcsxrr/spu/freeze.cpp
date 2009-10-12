@@ -186,8 +186,8 @@ bool SPUunfreeze_new(EMUFILE* fp)
 // repair LDChen's ADSR changes
 	for (int i=0;i<24;i++)
 	{
-		SPUwriteRegister(0x1f801c00+(i<<4)+0x08,regArea[(i<<3)+0x64]);
-		SPUwriteRegister(0x1f801c00+(i<<4)+0x0A,regArea[(i<<3)+0x65]);
+		SPUwriteRegister(0x1f801c00+(i<<4)+0x08,regArea[((i<<4)+0xc00+0x08)>>1]);
+		SPUwriteRegister(0x1f801c00+(i<<4)+0x0A,regArea[((i<<4)+0xc00+0x0A)>>1]);
 	}
 
 	return true;

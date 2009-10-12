@@ -92,8 +92,15 @@ int MixADSR(SPU_chan *ch)
 	unsigned long int disp;
 	signed long int EnvelopeVol = ch->ADSR.EnvelopeVol;
 
+	if(ch->ch == 5)
+	{
+		int zzz=9;
+	}
+
 	if (ch->status == CHANSTATUS_KEYOFF)                                 // should be stopped:
 	{                                                    // do release
+
+		//printf("[%02d] decaying with release rate %d\n",(ch->ch), ch->ADSR.ReleaseRate);
 		if (ch->ADSR.ReleaseModeExp)
 		{
 			disp = TableDisp[(EnvelopeVol>>28)&0x7];
@@ -101,14 +108,20 @@ int MixADSR(SPU_chan *ch)
 		else
 		{
 			disp=-0x0C+32;
+			//disp=32;
 		}
 		EnvelopeVol-=RateTable[ch->ADSR.ReleaseRate + disp];
 
 		if (EnvelopeVol<0)
 		{
+			if(ch->ch == 6)
+			{
+				int zzz=9;
+			}
+
 			EnvelopeVol=0;
 			ch->status = CHANSTATUS_STOPPED;
-			printf("[%02d] ADSR r kill\n",ch->ch);
+			//printf("[%02d] ADSR r kill\n",ch->ch);
 			//ch->bOn=0;
 		}
 
