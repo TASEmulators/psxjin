@@ -22,7 +22,7 @@
 #include "PsxCommon.h"
 #include "Decode_XA.h"
 
-typedef struct {
+struct cdrStruct{
 	unsigned char OCUP;
 	unsigned char Reg1Mode;
 	unsigned char Reg2;
@@ -74,7 +74,7 @@ typedef struct {
 	int Seeked;
 
 	char Unused[4083];
-} cdrStruct;
+};
 
 extern cdrStruct cdr;
 

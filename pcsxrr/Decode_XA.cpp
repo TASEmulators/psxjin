@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 
+#include "CdRom.h"
 #include "Decode_XA.h"
+
 #define FIXED
 
 #ifdef _MSC_VER_

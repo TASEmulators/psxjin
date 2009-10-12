@@ -229,16 +229,18 @@ void SPU_chan::keyon()
 {
 	//? what happens when we keyon an already on channel? just guessing that its benign
 	status = CHANSTATUS_PLAY;
-	loopStartAddr = 0;
+	
+	//DO NOT DO THIS even though spu.txt made you believe it was necessary.
+	//ff7 sets loop starts before keyon and this overrides it
+	//loopStartAddr = 0;
+
+	iOldNoise = 0;
 
 	flags = 0;
 	smpcnt = 28;
 	smpinc = 44100.0 / 44100.0 / 4096 * rawPitch;
 	blockAddress = (rawStartAddr<<3);
 	
-	//loopStartAddr = blockAddress;
-	loopStartAddr = 0; //no proof yet that this gets reset even though spu.txt says it does
-
 	printf("[%02d] Keyon at %d with smpinc %f\n",ch,blockAddress,smpinc);
 
 	//init BRR
@@ -408,7 +410,7 @@ INLINE void FModChangeFrequency(SPUCHAN * pChannel,int ns)
 // surely wrong... and no noise frequency (spuCtrl&0x3f00) will be used...
 // and sometimes the noise will be used as fmod modulation... pfff
 
-INLINE int iGetNoiseVal(SPUCHAN * pChannel)
+INLINE int iGetNoiseVal(SPU_chan* pChannel)
 {
 	int fa;
 
@@ -420,15 +422,18 @@ INLINE int iGetNoiseVal(SPUCHAN * pChannel)
 	}
 	else fa=(dwNoiseVal>>2)&0x7fff;
 
-// mmm... depending on the noise freq we allow bigger/smaller changes to the previous val
+//// mmm... depending on the noise freq we allow bigger/smaller changes to the previous val
 	fa=pChannel->iOldNoise+((fa-pChannel->iOldNoise)/((0x001f-((spuCtrl&0x3f00)>>9))+1));
 	if (fa>32767L)  fa=32767L;
 	if (fa<-32767L) fa=-32767L;
 	pChannel->iOldNoise=fa;
 
-	if (iUseInterpolation<2)                              // no gauss/cubic interpolation?
-		pChannel->SB[29] = fa;                               // -> store noise val in "current sample" slot
+//	if (iUseInterpolation<2)                              // no gauss/cubic interpolation?
+//		pChannel->SB[29] = fa;                               // -> store noise val in "current sample" slot
+
 	return fa;
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -554,6 +559,7 @@ SPU_chan::SPU_chan()
 	: status(CHANSTATUS_STOPPED)
 	, bFMod(FALSE)
 	, bReverb(FALSE)
+	, bNoise(FALSE)
 {
 }
 
@@ -673,7 +679,10 @@ void mixAudio(SPU_struct* spu, int length)
 			s32 rvol = volume(chan->iRightVolume);
 
 			s32 samp;
-			decodeBRR(chan,&samp);
+			if(chan->bNoise)
+				samp=iGetNoiseVal(chan);
+			else
+				decodeBRR(chan,&samp);
 
 			s32 adsrLevel = MixADSR(chan);
 			//printf("[%02d] adsr: %d\n",i,adsrLevel);

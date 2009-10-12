@@ -21,6 +21,7 @@
 #include <stdarg.h>
 //THIS ALL IS FOR THE CDROM REGISTERS HANDLING
 #include "PsxCommon.h"
+#include "CdRom.h"
 
 // global variables
 cdrStruct cdr;

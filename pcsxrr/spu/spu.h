@@ -28,6 +28,8 @@
 #define _SPU_H_
 
 #include "PsxCommon.h"
+#include "Decode_XA.h"
+#include "emufile.h"
 
 #define NSSIZE 1
 
@@ -41,20 +43,46 @@ void SPUplayBRRchannel(xa_decode_t *xap);
 
 struct _ADSRInfo
 {
-	int            State;
-	int            AttackModeExp;
-	int            AttackRate;
-	int            DecayRate;
-	int            SustainLevel;
-	int            SustainModeExp;
-	int            SustainIncrease;
-	int            SustainRate;
-	int            ReleaseModeExp;
-	int            ReleaseRate;
-	int            EnvelopeVol;
-	long           lVolume;
-	long           lDummy1;
-	long           lDummy2;
+	s32            State;
+	s32            AttackModeExp;
+	s32            AttackRate;
+	s32            DecayRate;
+	s32            SustainLevel;
+	s32            SustainModeExp;
+	s32            SustainIncrease;
+	s32            SustainRate;
+	s32            ReleaseModeExp;
+	s32            ReleaseRate;
+	s32            EnvelopeVol;
+	s32           lVolume;
+	void save(EMUFILE* fp) {
+		fp->write32le((u32)0); //version
+		fp->write32le(&State);
+		fp->write32le(&AttackModeExp);
+		fp->write32le(&AttackRate);
+		fp->write32le(&DecayRate);
+		fp->write32le(&SustainLevel);
+		fp->write32le(&SustainModeExp);
+		fp->write32le(&SustainIncrease);
+		fp->write32le(&SustainRate);
+		fp->write32le(&ReleaseModeExp);
+		fp->write32le(&EnvelopeVol);
+		fp->write32le(&lVolume);
+	}
+	void load(EMUFILE* fp) {
+		u32 version = fp->read32le();
+		fp->read32le(&State);
+		fp->read32le(&AttackModeExp);
+		fp->read32le(&AttackRate);
+		fp->read32le(&DecayRate);
+		fp->read32le(&SustainLevel);
+		fp->read32le(&SustainModeExp);
+		fp->read32le(&SustainIncrease);
+		fp->read32le(&SustainRate);
+		fp->read32le(&ReleaseModeExp);
+		fp->read32le(&EnvelopeVol);
+		fp->read32le(&lVolume);
+	}
 };
 
 //typedef struct
@@ -83,17 +111,20 @@ public:
 
 	SPU_chan();
 
+	void save(EMUFILE* fp);
+	void load(EMUFILE* fp);
+
 	void keyon();
 	void keyoff();
 
 	u8 status;
-	int               iLeftVolume;                        // left volume
-	int               iLeftVolRaw;                        // left psx volume value
-	int               iRightVolume;                        // left volume
-	int               iRightVolRaw;                        // left psx volume value
+	s32               iLeftVolume;                        // left volume
+	s32               iLeftVolRaw;                        // left psx volume value
+	s32               iRightVolume;                        // left volume
+	s32               iRightVolRaw;                        // left psx volume value
 
 	//increment value 0000-3fff with 1000 being unit speed
-	int rawPitch;
+	u16 rawPitch;
 	
 	u16 rawStartAddr; //= RealStartAddr = startAddr<<3, used as a blockAddress
 	u32 loopStartAddr; //the loop start point, used as a blockAddress
@@ -114,6 +145,10 @@ public:
 	//(is that even right?)
 	u8 bRVBActive;
 
+	//noise state
+	s32 iOldNoise;
+	u8 bNoise;
+
 	//BRR decoding and state
 	s16 block[28];
 	s32 s_1,s_2;
@@ -121,9 +156,9 @@ public:
 	void decodeBRR(s32* out);
 
 	//hacky shit for the hacky reverb mode
-	int               iRVBOffset;                         // reverb offset
-	int               iRVBRepeat;                         // reverb repeat
-	int               iRVBNum;                            // another reverb helper
+	s32               iRVBOffset;                         // reverb offset
+	s32               iRVBRepeat;                         // reverb repeat
+	s32               iRVBNum;                            // another reverb helper
 };
 
 class SPU_struct
@@ -139,5 +174,8 @@ extern SPU_struct SPU_core;
 extern u16  spuCtrl;
 extern int iUseReverb;
 extern unsigned short  spuMem[256*1024];
+
+void SPUfreeze_new(EMUFILE* fp);
+bool SPUunfreeze_new(EMUFILE* fp);
 
 #endif

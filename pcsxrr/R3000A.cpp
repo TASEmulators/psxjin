@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "PsxCommon.h"
+#include "CdRom.h"
 
 // global variables
 R3000Acpu *psxCpu;
