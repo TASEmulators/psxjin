@@ -96,6 +96,16 @@
 
 #include "stdafx.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+#ifndef M_PI
+#define M_PI 3.1415926535897932386
+#endif
+
+#include <stdio.h>
+
+FILE* wavout = NULL;
+
 #define _IN_SPU
 
 #include "externals.h"
@@ -214,6 +224,8 @@ static int iSecureStart=0; // secure start counter
 void SPU_chan::updatePitch(u16 pitch)
 {
 	smpinc = 44100.0 / 44100.0 / 4096 * pitch;
+	//smpinc = 0.078f;
+	//smpinc = 1.0f;
 }
 
 void SPU_chan::keyon()
@@ -234,6 +246,9 @@ void SPU_chan::keyon()
 	blockAddress = (rawStartAddr<<3);
 	
 	//printf("[%02d] Keyon at %d with smpinc %f\n",ch,blockAddress,smpinc);
+
+	//init interpolation state with zeros
+	block[24] = block[25] = block[26] = block[27] = 0;
 
 	//init BRR
 	s_1 = s_2 = 0;
@@ -529,19 +544,86 @@ INLINE int iGetInterpolationVal(SPUCHAN * pChannel)
 	return fa;
 }
 
-////////////////////////////////////////////////////////////////////////
-// MAIN SPU FUNCTION
-// here is the main job handler... thread, timer or direct func call
-// basically the whole sound processing is done in this fat func!
-////////////////////////////////////////////////////////////////////////
+//these functions are an unreliable, inaccurate floor.
+//it should only be used for positive numbers
+//this isnt as fast as it could be if we used a visual c++ intrinsic, but those appear not to be universally available
+FORCEINLINE u32 u32floor(float f)
+{
+#ifdef ENABLE_SSE2
+	return (u32)_mm_cvtt_ss2si(_mm_set_ss(f));
+#else
+	return (u32)f;
+#endif
+}
+FORCEINLINE u32 u32floor(double d)
+{
+#ifdef ENABLE_SSE2
+	return (u32)_mm_cvttsd_si32(_mm_set_sd(d));
+#else
+	return (u32)d;
+#endif
+}
 
-// 5 ms waiting phase, if buffer is full and no new sound has to get started
-// .. can be made smaller (smallest val: 1 ms), but bigger waits give
-// better performance
+//same as above but works for negative values too.
+//be sure that the results are the same thing as floorf!
+FORCEINLINE s32 s32floor(float f)
+{
+#ifdef ENABLE_SSE2
+	return _mm_cvtss_si32( _mm_add_ss(_mm_set_ss(-0.5f),_mm_add_ss(_mm_set_ss(f), _mm_set_ss(f))) ) >> 1;
+#else
+	return (s32)floorf(f);
+#endif
+}
 
-#define PAUSE_W 5
-#define PAUSE_L 5000
+static FORCEINLINE u32 sputrunc(float f) { return u32floor(f); }
+static FORCEINLINE u32 sputrunc(double d) { return u32floor(d); }
 
+enum SPUInterpolationMode
+{
+	SPUInterpolation_None = 0,
+	SPUInterpolation_Linear = 1,
+	SPUInterpolation_Cosine = 2,
+	SPUInterpolation_Gaussian = 3,
+};
+
+//a is the most recent sample, going back to d as the oldest
+template<SPUInterpolationMode INTERPOLATE_MODE> static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
+{
+	float ratio = (float)_ratio;
+	if(INTERPOLATE_MODE == SPUInterpolation_Cosine)
+	{
+		//why did we change it away from the lookup table? somebody should research that
+		ratio = ratio - (int)ratio;
+		double ratio2 = ((1.0 - cos(ratio * M_PI)) * 0.5);
+		//double ratio2 = (1.0f - cos_lut[((int)(ratio*256.0))&0xFF]) / 2.0f;
+		return (s32)(((1-ratio2)*b) + (ratio2*a));
+	}
+	else if(INTERPOLATE_MODE == SPUInterpolation_Linear)
+	{
+		//linear interpolation
+		ratio = ratio - sputrunc(ratio);
+		s32 temp = s32floor((1-ratio)*b + ratio*a);
+		//printf("%d %d %d %f\n",a,b,temp,_ratio);
+		return temp;
+	} else if(INTERPOLATE_MODE == SPUInterpolation_None)
+		return a;
+	else if(INTERPOLATE_MODE == SPUInterpolation_Gaussian)
+	{
+		//I'm not sure whether I am doing this right.. 
+		//low frequency things (try low notes on channel 10 of ff7 prelude song credits screen)
+		//pop a little bit
+		//the bit logic is taken from libopenspc
+		ratio = ratio - sputrunc(ratio);
+		ratio *= 256;
+		s32 index = sputrunc(ratio)*4;
+		s32 result = (gauss[index]*d)&~2047;
+		result += (gauss[index+1]*c)&~2047;
+		result += (gauss[index+2]*b)&~2047;
+		result += (gauss[index+3]*a)&~2047;
+		result = (result>>11)&~1;
+		return result;
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -592,7 +674,11 @@ restart:
 			}
 		}
 
+		//do not do this before "end or loop" or else looping will glitch as it fails to
+		//immediately decode a block.
+		//why did I ever try this? I can't remember.
 		smpcnt -= 28;
+
 		sampnum = (int)smpcnt;
 
 		u8 header0 = readSpuMem(blockAddress);
@@ -610,6 +696,12 @@ restart:
 		s32 predict_nr = header0;
 		s32 shift_factor = predict_nr&0xf;
 		predict_nr >>= 4;
+
+		//before we decode a new block, save the last 4 values of the old block
+		block[28] = block[24];
+		block[29] = block[25];
+		block[30] = block[26];
+		block[31] = block[27];
 
 		//decode 
 		for(int i=0,j=0;i<14;i++)
@@ -636,7 +728,17 @@ restart:
 		}
 	}
 
-	*out = block[sampnum];
+	//perform interpolation. hardcoded for now
+	//if(GetAsyncKeyState('I'))
+	if(true)
+	{
+		s16 a = block[sampnum];
+		s16 b = block[(sampnum-1)&31];
+		s16 c = block[(sampnum-2)&31];
+		s16 d = block[(sampnum-3)&31];
+		*out = Interpolate<SPUInterpolation_Gaussian>(a,b,c,d,smpcnt);
+	}
+	else *out = block[sampnum];
 
 	//printf("%d\n",*out);
 }
@@ -651,9 +753,6 @@ void mixAudio(SPU_struct* spu, int length)
 	memset(spu->outbuf, 0, length*4*2);
 
 	//(todo - analyze master volumes etc.)
-
-	//TODO - this needs to have outer loop as samples, inner as channels
-	//so that we can correctly apply fmod one channel at a time
 
 	bool checklog[24]; for(int i=0;i<24;i++) checklog[i] = false;
 
@@ -676,13 +775,14 @@ void mixAudio(SPU_struct* spu, int length)
 			else
 				decodeBRR(chan,&samp);
 
+
 			s32 adsrLevel = MixADSR(chan);
 			//printf("[%02d] adsr: %d\n",i,adsrLevel);
 
 			//channel may have ended at any time
 			if (chan->status == CHANSTATUS_STOPPED) {
 				fmod = 0;
-				break;
+				continue;
 			}
 
 			checklog[i] = true;
@@ -715,8 +815,6 @@ void mixAudio(SPU_struct* spu, int length)
 				continue;
 			}
 
-			fmod = 0;
-
 			chan->smpcnt += chan->smpinc;
 
 			s32 left = (samp * chan->iLeftVolume) / 0x4000;
@@ -742,6 +840,9 @@ void mixAudio(SPU_struct* spu, int length)
 
 		spu->outbuf[j*2] = limit(left_accum);
 		spu->outbuf[j*2+1] = limit(right_accum);
+		/*fwrite(&spu->outbuf[j*2],2,1,wavout);
+		fwrite(&spu->outbuf[j*2+1],2,1,wavout);
+		fflush(wavout);*/
 
 	} //sample loop
 
@@ -1236,6 +1337,7 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 
 long SPUinit(void)
 {
+	//wavout = fopen("c:\\pcsx.raw","wb");
 	spuMemC=(unsigned char *)spuMem;                      // just small setup
 	memset((void *)s_chan,0,MAXCHAN*sizeof(SPUCHAN));
 	InitADSR();
