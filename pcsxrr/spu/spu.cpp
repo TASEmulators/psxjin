@@ -176,19 +176,6 @@ void irqCallback(void) {
 	psxHu32ref(0x1070)|= SWAPu32(0x200);
 }
 
-INLINE int volume( UINT16 n_volume )
-{
-	if( ( n_volume & 0x8000 ) != 0 )
-	{
-		n_volume = ( n_volume & 0x7f ) * 0x80;
-	}
-	else if( ( n_volume & 0x4000 ) != 0 )
-	{
-		n_volume = -( n_volume & 0x3fff );
-	}
-	return n_volume;
-}
-
 INLINE int limit( int v )
 {
 	if( v < -32768 )
@@ -215,7 +202,6 @@ const int f[5][2] =
 
 int SSumR[NSSIZE];
 int SSumL[NSSIZE];
-int iFMod[NSSIZE];
 int iCycle=0;
 short * pS;
 
@@ -224,6 +210,11 @@ static int lastns=0;       // last ns pos
 static int iSecureStart=0; // secure start counter
 
 //--------------------------------------------------------------
+
+void SPU_chan::updatePitch(u16 pitch)
+{
+	smpinc = 44100.0 / 44100.0 / 4096 * pitch;
+}
 
 void SPU_chan::keyon()
 {
@@ -235,13 +226,14 @@ void SPU_chan::keyon()
 	//loopStartAddr = 0;
 
 	iOldNoise = 0;
-
 	flags = 0;
 	smpcnt = 28;
-	smpinc = 44100.0 / 44100.0 / 4096 * rawPitch;
+
+	updatePitch(rawPitch);
+	
 	blockAddress = (rawStartAddr<<3);
 	
-	printf("[%02d] Keyon at %d with smpinc %f\n",ch,blockAddress,smpinc);
+	//printf("[%02d] Keyon at %d with smpinc %f\n",ch,blockAddress,smpinc);
 
 	//init BRR
 	s_1 = s_2 = 0;
@@ -252,7 +244,7 @@ void SPU_chan::keyon()
 
 void SPU_chan::keyoff()
 {
-	printf("[%02d] keyoff\n",ch);
+	//printf("[%02d] keyoff\n",ch);
 	status = CHANSTATUS_KEYOFF;
 }
 
@@ -374,35 +366,35 @@ INLINE void StartSound(SPUCHAN * pChannel)
 //	}
 }
 
-INLINE void VoiceChangeFrequency(SPUCHAN * pChannel)
-{
-	pChannel->iUsedFreq=pChannel->iActFreq;               // -> take it and calc steps
-	pChannel->sinc=pChannel->iRawPitch<<4;
-	if (!pChannel->sinc) pChannel->sinc=1;
-	if (iUseInterpolation==1) pChannel->SB[32]=1;         // -> freq change in simle imterpolation mode: set flag
-}
+//INLINE void VoiceChangeFrequency(SPUCHAN * pChannel)
+//{
+//	pChannel->iUsedFreq=pChannel->iActFreq;               // -> take it and calc steps
+//	pChannel->sinc=pChannel->iRawPitch<<4;
+//	if (!pChannel->sinc) pChannel->sinc=1;
+//	if (iUseInterpolation==1) pChannel->SB[32]=1;         // -> freq change in simle imterpolation mode: set flag
+//}
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE void FModChangeFrequency(SPUCHAN * pChannel,int ns)
-{
-	int NP=pChannel->iRawPitch;
-
-	NP=((32768L+iFMod[ns])*NP)/32768L;
-
-	if (NP>0x3fff) NP=0x3fff;
-	if (NP<0x1)    NP=0x1;
-
-	NP=(44100L*NP)/(4096L);                               // calc frequency
-
-	pChannel->iActFreq=NP;
-	pChannel->iUsedFreq=NP;
-	pChannel->sinc=(((NP/10)<<16)/4410);
-	if (!pChannel->sinc) pChannel->sinc=1;
-	if (iUseInterpolation==1) pChannel->SB[32]=1;         // freq change in simple interpolation mode
-
-	iFMod[ns]=0;
-}
+//INLINE void FModChangeFrequency(SPUCHAN * pChannel,int ns)
+//{
+//	int NP=pChannel->iRawPitch;
+//
+//	NP=((32768L+iFMod[ns])*NP)/32768L;
+//
+//	if (NP>0x3fff) NP=0x3fff;
+//	if (NP<0x1)    NP=0x1;
+//
+//	NP=(44100L*NP)/(4096L);                               // calc frequency
+//
+//	pChannel->iActFreq=NP;
+//	pChannel->iUsedFreq=NP;
+//	pChannel->sinc=(((NP/10)<<16)/4410);
+//	if (!pChannel->sinc) pChannel->sinc=1;
+//	if (iUseInterpolation==1) pChannel->SB[32]=1;         // freq change in simple interpolation mode
+//
+//	iFMod[ns]=0;
+//}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -663,9 +655,12 @@ void mixAudio(SPU_struct* spu, int length)
 	//TODO - this needs to have outer loop as samples, inner as channels
 	//so that we can correctly apply fmod one channel at a time
 
+	bool checklog[24]; for(int i=0;i<24;i++) checklog[i] = false;
+
 	for(int j=0;j<length;j++)
 	{
 		s32 left_accum = 0, right_accum = 0;
+		s32 fmod;
 
 		REVERB_initSample();
 
@@ -674,9 +669,6 @@ void mixAudio(SPU_struct* spu, int length)
 			SPU_chan *chan = &spu->channels[i];
 
 			if (chan->status == CHANSTATUS_STOPPED) continue;
-
-			s32 lvol = volume(chan->iLeftVolume);
-			s32 rvol = volume(chan->iRightVolume);
 
 			s32 samp;
 			if(chan->bNoise)
@@ -689,15 +681,46 @@ void mixAudio(SPU_struct* spu, int length)
 
 			//channel may have ended at any time
 			if (chan->status == CHANSTATUS_STOPPED) {
+				fmod = 0;
 				break;
 			}
 
-			chan->smpcnt += chan->smpinc;
+			checklog[i] = true;
 
 			samp = samp * adsrLevel/1023;
 
-			s32 left = (samp * lvol) / 0x4000;
-			s32 right = (samp * rvol) / 0x4000;
+			//apply the modulation
+			if(chan->bFMod)
+			{
+				//this was a little hard to test. ff7 battle fx were using it, but 
+				//its hard to tell since I dont think our noise is very good. need a better test.
+				chan->smpcnt += chan->smpinc;
+				s32 pitch = chan->rawPitch;
+				pitch = ((32768L+fmod)*pitch)/32768L;
+				if (pitch>0x3fff) pitch=0x3fff;
+				if (pitch<0x1)    pitch=0x1;
+				chan->updatePitch((u16)pitch);
+			
+				//just some diagnostics
+				//static u16 lastPitch=0xFFFF, lastRawPitch=0xFFFF; if(chan->rawPitch != lastRawPitch || lastPitch != pitch) printf("fmod bending pitch from %04X to %04X\n",lastRawPitch=chan->rawPitch,lastPitch=pitch);
+				//printf("fmod: %d\n",fmod);
+			}
+
+			//don't output this channel; it is used to modulate the next channel
+			if(i<23 && spu->channels[i+1].bFMod)
+			{
+				//should this be limited? lets check it.
+				if(samp < -32768 || samp > 32767) printf("[%02d]: limiting fmod value of %d !\n",samp);
+				fmod = limit(samp);
+				continue;
+			}
+
+			fmod = 0;
+
+			chan->smpcnt += chan->smpinc;
+
+			s32 left = (samp * chan->iLeftVolume) / 0x4000;
+			s32 right = (samp * chan->iRightVolume) / 0x4000;
 
 			left_accum += left;
 			right_accum += right;
@@ -721,6 +744,14 @@ void mixAudio(SPU_struct* spu, int length)
 		spu->outbuf[j*2+1] = limit(right_accum);
 
 	} //sample loop
+
+	//this prints which channels are active
+	//for(int i=0;i<24;i++) {
+	//	if(i==16) printf(" ");
+	//	if(checklog[i]) printf("%1x",i&15);
+	//	else printf(" ");
+	//}
+	//printf("\n");
 }
 
 //static VOID MAINProc(UINT nTimerId,UINT msg,DWORD dwUser,DWORD dwParam1, DWORD dwParam2)
@@ -1219,7 +1250,6 @@ void SetupTimer(void)
 {
 	memset(SSumR,0,NSSIZE*sizeof(int));                   // init some mixing buffers
 	memset(SSumL,0,NSSIZE*sizeof(int));
-	memset(iFMod,0,NSSIZE*sizeof(int));
 
 	pS=(short *)pSpuBuffer;                               // setup soundbuffer pointer
 //

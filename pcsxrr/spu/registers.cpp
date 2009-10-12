@@ -102,10 +102,11 @@ void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)          
 {
 	s_chan[ch].iLeftVolRaw=vol;
 
-	if (vol&0x4000) printf("SPU: PHASE INVERT\n");
+	if (vol&0x4000) printf("SPU: PHASE INVERT (setting vol to %04X)\n",vol);
 
 	if (vol&0x8000)                                       // sweep?
 	{
+		printf("SPU: VOL SWEEP\n");
 		short sInc=1;                                       // -> sweep up?
 		if (vol&0x2000) sInc=-1;                            // -> or down?
 		if (vol&0x1000) vol^=0xffff;                        // -> mmm... phase inverted? have to investigate this
@@ -113,14 +114,15 @@ void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)          
 		vol+=vol/(2*sInc);                                  // -> HACK: we don't sweep right now, so we just raise/lower the volume by the half!
 		vol*=128;
 	}
-	else                                                  // no sweep:
-	{
-		if (vol&0x4000)                                     // -> mmm... phase inverted? have to investigate this
-			//vol^=0xffff;
-			vol=0x3fff-(vol&0x3fff);
-	}
+	else 
+	{ //no sweep:
 
-	vol&=0x3fff;
+		//phase invert: just make a negative volume
+		if (vol&0x4000) 
+			//vol=0x3fff-(vol&0x3fff);
+			vol=-(vol&0x3fff);
+		else vol = vol&0x3fff;
+	}
 
 	// store volume
 	if(left) spu->channels[ch].iLeftVolume=vol;
@@ -137,6 +139,7 @@ void SetPitch(SPU_struct* spu, int ch,unsigned short val)
 	if(val>0x3fff) printf("SPU: OUT OF RANGE PITCH: %08X\n",val);
 	
 	spu->channels[ch].rawPitch = val;
+	spu->channels[ch].updatePitch(val);
 }
 
 static void SetStart(SPU_struct* spu, int ch, u16 val)
@@ -218,7 +221,7 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 			break;
 		case 0x2:
 			//right volume
-			SetVolume(&SPU_core, true, ch,val);
+			SetVolume(&SPU_core, false, ch,val);
 			break;
 		case 0x4:
 			// pitch
