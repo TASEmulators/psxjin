@@ -454,10 +454,6 @@
 				RelativePath="..\Sio.h"
 				>
 			</File>
-			<File
-				RelativePath="..\Spu.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Debugger"
@@ -763,14 +759,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\spu\psemu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\spu\psemuxa.h"
-				>
-			</File>
-			<File
 				RelativePath="..\spu\record.cpp"
 				>
 			</File>
@@ -788,10 +776,6 @@
 			</File>
 			<File
 				RelativePath="..\spu\regs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\spu\resource.h"
 				>
 			</File>
 			<File
