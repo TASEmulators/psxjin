@@ -193,7 +193,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="1"
