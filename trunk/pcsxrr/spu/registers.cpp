@@ -179,6 +179,20 @@ void ReverbOn(SPU_struct* spu, int start,int end,unsigned short val)    // REVER
 }
 
 
+void NoiseOn(SPU_struct* spu, int start,int end,unsigned short val)
+{
+	for (int ch=start;ch<end;ch++,val>>=1)
+	{
+		if (val&1)  {
+			printf("[%02d] NOISE on\n",ch);
+			spu->channels[ch].bNoise = TRUE;
+		} else spu->channels[ch].bNoise = FALSE;
+			//s_chan[ch].bNoise=1;
+		//else s_chan[ch].bNoise=0;
+	}
+}
+
+
 ////////////////////////////////////////////////////////////////////////
 // WRITE REGISTERS: called by main emu
 ////////////////////////////////////////////////////////////////////////
@@ -198,24 +212,24 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 		int ch=(r>>4)-0xc0;
 		switch (r&0x0f)
 		{
-		case 0:
+		case 0x0:
 			//left volume
 			SetVolume(&SPU_core, true, ch,val);
 			break;
-		case 2:
+		case 0x2:
 			//right volume
 			SetVolume(&SPU_core, true, ch,val);
 			break;
-		case 4:
+		case 0x4:
 			// pitch
 			SetPitch(&SPU_core, ch, val);
 			break;
-		case 6:
+		case 0x6:
 			// start
 			SetStart(&SPU_core, ch, val);
 			break;
 			
-		case 8:
+		case 0x8:
 		{
 			// level with pre-calcs
 			SPU_core.channels[ch].ADSR.AttackModeExp = (val&0x8000)?1:0;
@@ -224,7 +238,7 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 			SPU_core.channels[ch].ADSR.SustainLevel = (val & 0x000f) << 27;
 		}
 		break;
-		case 10:
+		case 0x0A:
 		{
 			// adsr times with pre-calcs
 			SPU_core.channels[ch].ADSR.SustainModeExp = (val&0x8000)?1:0;
@@ -240,8 +254,9 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 			printf("SPU: WROTE TO ADSR READBACK\n");
 			break;
 		case 0x0E: 
-			SPU_core.channels[ch].loopStartAddr = val;
-			if(val!=0) printf("[%02d] Loopstart set to %d\n",val);
+			//this can be tested nicely in the ff7 intro credits screen where the harp won't work unless this gets set
+			SPU_core.channels[ch].loopStartAddr = val<<3;
+			if(val!=0) printf("[%02d] Loopstart set to %d\n",ch,val<<3);
 			break;
 		}
 
@@ -360,11 +375,11 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 		break;
 
 	case H_Noise1:
-		NoiseOn(0,16,val);
+		NoiseOn(&SPU_core,0,16,val);
 		break;
 
 	case H_Noise2:
-		NoiseOn(16,24,val);
+		NoiseOn(&SPU_core,16,24,val);
 		break;
 
 	case H_RVBon1:
@@ -552,25 +567,4 @@ u16 SPUreadRegister(unsigned long reg)
 	}
 
 	return regArea[(r-0xc00)>>1];
-}
-
-////////////////////////////////////////////////////////////////////////
-// NOISE register write
-////////////////////////////////////////////////////////////////////////
-
-void NoiseOn(int start,int end,unsigned short val)     // NOISE ON PSX COMMAND
-{
-	int ch;
-
-	for (ch=start;ch<end;ch++,val>>=1)                    // loop channels
-	{
-		if (val&1)                                          // -> noise on/off
-		{
-			s_chan[ch].bNoise=1;
-		}
-		else
-		{
-			s_chan[ch].bNoise=0;
-		}
-	}
 }

@@ -3,6 +3,10 @@
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h>
+#include <algorithm>
+
+using std::min;
+using std::max;
 
 #ifdef __linux
 #include <unistd.h>

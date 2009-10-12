@@ -34,6 +34,7 @@ typedef void* HWND;
 #include "PSEmu_Plugin_Defs.h"
 #include "PsxCommon.h"
 #include "Decode_XA.h"
+#include "CdRom.h"
 
 #include "iso/cdriso.h"
 
@@ -75,8 +76,6 @@ struct FreezeStub_t {
 	unsigned long PluginVersion;
 	unsigned long Size;
 };
-struct SPUFreeze_t;
-long SPUfreeze(unsigned long, SPUFreeze_t *);
 void SPUasync(unsigned long);
 void SPUstartWav(char*);
 void SPUstopWav(void);

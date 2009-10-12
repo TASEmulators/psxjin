@@ -31,6 +31,7 @@
 #define _SPU_EXTERNALS_H
 
 #include "PsxCommon.h"
+#include "Decode_XA.h"
 
 /////////////////////////////////////////////////////////
 // generic defines
@@ -41,10 +42,6 @@
 #define PSE_SPU_ERR                 -60
 #define PSE_SPU_ERR_NOTCONFIGURED   PSE_SPU_ERR - 1
 #define PSE_SPU_ERR_INIT            PSE_SPU_ERR - 2
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 // spu defines

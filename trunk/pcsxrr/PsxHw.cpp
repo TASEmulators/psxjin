@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "PsxCommon.h"
+#include "CdRom.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)

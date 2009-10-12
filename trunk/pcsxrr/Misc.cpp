@@ -25,6 +25,9 @@
 #include "Coff.h"
 #include "PsxCommon.h"
 #include "plugins.h"
+#include "EmuFile.h"
+#include "CdRom.h"
+#include "spu/spu.h"
 
 // global variables
 char CdromId[10];
@@ -439,7 +442,6 @@ const char PcsxHeader[32] = "STv3 PCSX v" PCSX_VERSION;
 int SaveState(char *file) {
 	gzFile f;
 	GPUFreeze_t *gpufP;
-	SPUFreeze_t *spufP;
 	int Size;
 	unsigned char *pMem;
 
@@ -469,15 +471,12 @@ int SaveState(char *file) {
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
 	free(gpufP);
 
-	// spu
-	spufP = (SPUFreeze_t *) malloc(16);
-	SPUfreeze(2, (SPUFreeze_t*)spufP);
-	Size = ((FreezeStub_t*)spufP)->Size; gzwrite(f, &Size, 4);
-	free(spufP);
-	spufP = (SPUFreeze_t *) malloc(Size);
-	SPUfreeze(1, spufP);
-	gzwrite(f, spufP, Size);
-	free(spufP);
+	EMUFILE_MEMORY memfile;
+	SPUfreeze_new(&memfile);
+	Size = memfile.size();
+	gzwrite(f, &Size, 4);
+	gzwrite(f, memfile.buf(),Size);
+
 
 	sioFreeze(f, 1);
 	cdrFreeze(f, 1);
@@ -494,7 +493,6 @@ int SaveState(char *file) {
 int LoadState(char *file) {
 	gzFile f;
 	GPUFreeze_t *gpufP;
-	SPUFreeze_t *spufP;
 	int Size;
 	char header[32];
 
@@ -525,10 +523,12 @@ int LoadState(char *file) {
 
 	// spu
 	gzread(f, &Size, 4);
-	spufP = (SPUFreeze_t *) malloc (Size);
-	gzread(f, spufP, Size);
-	SPUfreeze(0, spufP);
-	free(spufP);
+	EMUFILE_MEMORY memfile;
+	memfile.expand(Size);
+	gzread(f, memfile.buf(), Size);
+	bool ok = SPUunfreeze_new(&memfile);
+	if(!ok) return 1;
+
 
 	sioFreeze(f, 0);
 	cdrFreeze(f, 0);
@@ -563,7 +563,6 @@ int CheckState(char *file) {
 int SaveStateEmbed(char *file) {
 	gzFile f;
 	GPUFreeze_t *gpufP;
-	SPUFreeze_t *spufP;
 	int Size;
 	unsigned char *pMem;
 
@@ -594,14 +593,12 @@ int SaveStateEmbed(char *file) {
 	free(gpufP);
 
 	// spu
-	spufP = (SPUFreeze_t *) malloc(16);
-	SPUfreeze(2, (SPUFreeze_t*)spufP);
-	Size = ((FreezeStub_t*)spufP)->Size; gzwrite(f, &Size, 4);
-	free(spufP);
-	spufP = (SPUFreeze_t *) malloc(Size);
-	SPUfreeze(1, spufP);
-	gzwrite(f, spufP, Size);
-	free(spufP);
+	EMUFILE_MEMORY memfile;
+	SPUfreeze_new(&memfile);
+	Size = memfile.size();
+	gzwrite(f, &Size, 4);
+	gzwrite(f, memfile.buf(),Size);
+
 
 	sioFreeze(f, 1);
 	cdrFreeze(f, 1);
@@ -617,7 +614,6 @@ int SaveStateEmbed(char *file) {
 int LoadStateEmbed(char *file) {
 	gzFile f;
 	GPUFreeze_t *gpufP;
-	SPUFreeze_t *spufP;
 	int Size;
 	char header[32];
 	FILE* fp;
@@ -661,10 +657,11 @@ int LoadStateEmbed(char *file) {
 
 	// spu
 	gzread(f, &Size, 4);
-	spufP = (SPUFreeze_t *) malloc (Size);
-	gzread(f, spufP, Size);
-	SPUfreeze(0, spufP);
-	free(spufP);
+	EMUFILE_MEMORY memfile;
+	memfile.expand(Size);
+	gzread(f, memfile.buf(), Size);
+	bool ok = SPUunfreeze_new(&memfile);
+	if(!ok) return 1;
 
 	sioFreeze(f, 0);
 	cdrFreeze(f, 0);
