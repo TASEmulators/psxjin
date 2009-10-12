@@ -259,7 +259,7 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 		case 0x0E: 
 			//this can be tested nicely in the ff7 intro credits screen where the harp won't work unless this gets set
 			SPU_core.channels[ch].loopStartAddr = val<<3;
-			if(val!=0) printf("[%02d] Loopstart set to %d\n",ch,val<<3);
+			//if(val!=0) printf("[%02d] Loopstart set to %d\n",ch,val<<3);
 			break;
 		}
 

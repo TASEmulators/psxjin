@@ -299,7 +299,7 @@ void SNDDXSetVolume(int volume)
 
 void SetupSound(void)
 {
-	const int sndbuffersize=735*4;
+	const int sndbuffersize=735*4; //four frames worth
 	SNDDXInit(sndbuffersize);
 }
 

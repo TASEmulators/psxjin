@@ -45,7 +45,7 @@
 
 void SPU_chan::save(EMUFILE* fp)
 {
-	fp->write32le((u32)0); //version
+	fp->write32le((u32)1); //version
 
 	fp->write8le(status);
 
@@ -72,7 +72,7 @@ void SPU_chan::save(EMUFILE* fp)
 	fp->write32le(iOldNoise);
 	fp->write8le(bNoise);
 
-	for(int i=0;i<28;i++)
+	for(int i=0;i<32;i++)
 		fp->write16le(block[i]);
 	fp->write32le(s_1);
 	fp->write32le(s_2);
@@ -114,6 +114,10 @@ void SPU_chan::load(EMUFILE* fp)
 
 	for(int i=0;i<28;i++)
 		fp->read16le(&block[i]);
+	if(version==1)
+		for(int i=28;i<32;i++)
+			fp->read16le(&block[i]);
+
 	fp->read32le(&s_1);
 	fp->read32le(&s_2);
 	fp->read8le(&flags);

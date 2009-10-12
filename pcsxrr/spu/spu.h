@@ -153,7 +153,11 @@ public:
 	u8 bNoise;
 
 	//BRR decoding and state
-	s16 block[28];
+	//note that the block is larger than the 28 sample blocksize.
+	//this is a clever hack to help keep previous samples available for interpolation.
+	//the final four samples of a block will get moved to 28,29,30,31 in order to wrap around
+	//when interpolating using samples before sample 0 of the current block
+	s16 block[32];
 	s32 s_1,s_2;
 	u8 flags;
 	void decodeBRR(s32* out);
