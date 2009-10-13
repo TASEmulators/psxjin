@@ -304,8 +304,7 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 	
 	case H_SPUirqAddr:
 		spuIrq = val;
-		printf("SPU: irq set to %08x spuIrq",spuIrq<<3);
-		pSpuIrq=spuMemC+((unsigned long) val<<3);
+		//printf("SPU: irq set to %08x spuIrq\n",((u32)spuIrq)<<3);
 		break;
 
 	case H_SPUrvolL:
@@ -558,7 +557,7 @@ u16 SPUreadRegister(unsigned long reg)
 		}
 
 		case H_SPUirqAddr:
-			return spuIrq;
+			return spuIrq>>3;
 
 		case H_SPUon1:
 			printf("Reading H_SPUon1\n");

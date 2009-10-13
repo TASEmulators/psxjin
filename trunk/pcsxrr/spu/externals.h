@@ -245,7 +245,7 @@ extern REVERBInfo rvb;
 extern unsigned long dwNoiseVal;
 extern unsigned short spuCtrl;
 extern unsigned short spuStat;
-extern unsigned short spuIrq;
+extern u16 spuIrq;
 extern u32 spuAddr;
 extern int      bEndThread;
 extern int      bThreadEnded;
