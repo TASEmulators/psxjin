@@ -103,6 +103,7 @@
 #endif
 
 #include <stdio.h>
+#include <queue>
 
 FILE* wavout = NULL;
 
@@ -130,9 +131,120 @@ FILE* wavout = NULL;
 unsigned short  regArea[10000];
 unsigned short  spuMem[256*1024];
 unsigned char * spuMemC;
-unsigned char * pSpuIrq=0;
 unsigned char * pSpuBuffer;
 unsigned char * pMixIrq=0;
+
+bool mixqueue_go;
+std::queue<s16> mixqueue;
+
+template<typename T> inline T _abs(T val)
+{
+	if(val<0) return -val;
+	else return val;
+}
+
+template<typename T> inline T moveValueTowards(T val, T target, T incr)
+{
+	incr = _abs(incr);
+	T delta = _abs(target-val);
+	if(val<target) val += incr;
+	else if(val>target) val -= incr;
+	T newDelta = _abs(target-val);
+	if(newDelta >= delta)
+		val = target;
+	return val;
+}
+
+const bool streamingMode = false;
+
+class Adjustobuf
+{
+public:
+	Adjustobuf(int _minLatency, int _maxLatency)
+		: size(0)
+		, minLatency(_minLatency)
+		, maxLatency(_maxLatency)
+	{
+		rollingTotalSize = 0;
+		targetLatency = (maxLatency + minLatency)/2;
+		rate = 1.0f;
+		cursor = 0.0f;
+		curr[0] = curr[1] = 0;
+		kAverageSize = 80000;
+	}
+
+	float rate, cursor;
+	int minLatency, targetLatency, maxLatency;
+	std::queue<s16> buffer;
+	int size;
+	s16 curr[2];
+
+	std::queue<int> statsHistory;
+
+	void enqueue(s16 left, s16 right) 
+	{
+		buffer.push(left);
+		buffer.push(right);
+		size++;
+	}
+
+	s64 rollingTotalSize;
+
+	int kAverageSize;
+
+	void addStatistic()
+	{
+		statsHistory.push(size);
+		rollingTotalSize += size;
+		if(statsHistory.size()>kAverageSize)
+		{
+			rollingTotalSize -= statsHistory.front();
+			statsHistory.pop();
+
+			float averageSize = rollingTotalSize / kAverageSize;
+			static int ctr=0;  ctr++; if((ctr&127)==0) printf("avg size: %f curr size: %d rate: %f\n",averageSize,size,rate);
+			{
+				float targetRate;
+				if(averageSize < targetLatency)
+				{
+					targetRate = 1.0f - (targetLatency-averageSize)/kAverageSize;
+				}
+				else if(averageSize > targetLatency) {
+					targetRate = 1.0f + (averageSize-targetLatency)/kAverageSize;
+				} else targetRate = 1.0f;
+			
+				//rate = moveValueTowards(rate,targetRate,0.001f);
+				rate = targetRate;
+			}
+
+		}
+
+
+	}
+
+	void dequeue(s16& left, s16& right)
+	{
+		left = right = 0; 
+		addStatistic();
+		if(size==0) { return; }
+		cursor += rate;
+		while(cursor>1.0f) {
+			cursor -= 1.0f;
+			if(size>0) {
+				curr[0] = buffer.front(); buffer.pop();
+				curr[1] = buffer.front(); buffer.pop();
+				size--;
+			}
+		}
+		left = curr[0]; 
+		right = curr[1];
+	}
+} 
+#ifdef NDEBUG
+adjustobuf(200,1000);
+#else
+adjustobuf(22000,44000);
+#endif
 
 static inline u8 readSpuMem(u32 addr) { return spuMemC[addr]; }
 
@@ -159,7 +271,7 @@ unsigned long   dwNoiseVal=1;                          // global noise generator
 
 u16  spuCtrl=0;                             // some vars to store psx reg infos
 unsigned short  spuStat=0;
-unsigned short  spuIrq=0;
+u16 spuIrq=0;
 u32   spuAddr=0xffffffff;                    // address into spu mem
 int             bEndThread=0;                          // thread handlers
 int             bThreadEnded=0;
@@ -245,7 +357,7 @@ void SPU_chan::keyon()
 	
 	blockAddress = (rawStartAddr<<3);
 	
-	//printf("[%02d] Keyon at %d with smpinc %f\n",ch,blockAddress,smpinc);
+	printf("[%02d] Keyon at %08X with smpinc %f\n",ch,blockAddress,smpinc);
 
 	//init interpolation state with zeros
 	block[24] = block[25] = block[26] = block[27] = 0;
@@ -627,6 +739,19 @@ template<SPUInterpolationMode INTERPOLATE_MODE> static FORCEINLINE s32 Interpola
 
 ////////////////////////////////////////////////////////////////////////
 
+//triggers an irq if the irq address is in the specified range
+void triggerIrqRange(u32 base, u32 size)
+{
+	//can't trigger an irq without the flag enabled
+	if(!(spuCtrl&0x40)) return;
+
+	u32 irqAddr = ((u32)spuIrq)<<3;
+	if(base <= irqAddr && irqAddr < base+size) {
+		//printf("triggering irq with args %08X %08X\n",base,size);
+		irqCallback();
+	}
+}
+
 int iSpuAsyncWait=0;
 
 SPU_chan::SPU_chan()
@@ -680,6 +805,8 @@ restart:
 		smpcnt -= 28;
 
 		sampnum = (int)smpcnt;
+
+		triggerIrqRange(blockAddress,16);
 
 		u8 header0 = readSpuMem(blockAddress);
 		
@@ -838,10 +965,23 @@ void mixAudio(SPU_struct* spu, int length)
 			right_accum += right;
 		}
 
-		spu->outbuf[j*2] = limit(left_accum);
-		spu->outbuf[j*2+1] = limit(right_accum);
-		/*fwrite(&spu->outbuf[j*2],2,1,wavout);
-		fwrite(&spu->outbuf[j*2+1],2,1,wavout);
+		//handle spu mute
+		if ((spuCtrl&0x4000)==0) {
+			left_accum = 0;
+			right_accum = 0;
+		}
+
+		s16 left_out = limit(left_accum);
+		s16 right_out = limit(right_accum);
+
+		if(streamingMode)
+			adjustobuf.enqueue(left_out,right_out);
+		else
+			spu->outbuf[j*2] = right_out;
+			spu->outbuf[j*2+1] = right_accum;
+
+		/*fwrite(&left_out,2,1,wavout);
+		fwrite(&right_out,2,1,wavout);
 		fflush(wavout);*/
 
 	} //sample loop
@@ -1254,41 +1394,53 @@ void mixAudio(SPU_struct* spu, int length)
 //fFrameRateHz=33868800.0f/677343.75f;        // 50.00238
 //else fFrameRateHz=33868800.0f/680595.00f;        // 49.76351
 //16934400 is half this. we'll go with that assumption for now
-
-static const double time_per_cycle = (double)1.0/(PSXCLK/2);
+static const double time_per_cycle = (double)1.0/(PSXCLK);
 static const double samples_per_cycle = time_per_cycle * 44100;
-
+static double mixtime = 0;
 
 void SPUasync(unsigned long cycle)
 {
 	u32 SNDDXGetAudioSpace();
 	u32 len = SNDDXGetAudioSpace();
 
-	mixAudio(&SPU_core,len);
-	
-	void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
-	SNDDXUpdateAudio(SPU_core.outbuf,len);
+	if(streamingMode)
+	{
+		mixtime += samples_per_cycle*cycle;
+		int mixtodo = (int)mixtime;
+		mixtime -= mixtodo;
+
+		//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
+
+		mixAudio(&SPU_core,mixtodo);
+		
+		if(!mixqueue_go) {
+			if(adjustobuf.size > 200)
+				mixqueue_go = true;
+		}
+		else
+		{
+			s16 sample[2];
+
+			for(u32 i=0;i<len;i++) {
+				if(adjustobuf.size==0) {
+					mixqueue_go = false;
+					break;
+				}
+				adjustobuf.dequeue(sample[0],sample[1]);
+				void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+				SNDDXUpdateAudio(sample,1);
+			}
+		}
+	}
+	else
+	{
+		mixAudio(&SPU_core,len);
+		
+		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+		SNDDXUpdateAudio(SPU_core.outbuf,len);
+	}
 
 
-//#ifdef _WINDOWS
-//	if (iRecordMode==2)
-//	{
-//		if (IsWindow(hWRecord)) DestroyWindow(hWRecord);
-//		hWRecord=0;
-//		iRecordMode=0;
-//	}
-//#endif
-//
-// if(iUseTimer==2)                                      // special mode, only used in Linux by this spu (or if you enable the experimental Windows mode)
-//  {
-//	if (!bSpuInit) return;                              // -> no init, no call
-//
-//#ifdef _WINDOWS
-//	MAINProc(0,0,0,0,0);                                // -> experimental win mode... not really tested... don't like the drawbacks
-//#else
-//	MAINThread(0);                                      // -> linux high-compat mode
-//#endif
-//}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1337,6 +1489,8 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 
 long SPUinit(void)
 {
+	mixtime = 0;
+	mixqueue_go = false;
 	//wavout = fopen("c:\\pcsx.raw","wb");
 	spuMemC=(unsigned char *)spuMem;                      // just small setup
 	memset((void *)s_chan,0,MAXCHAN*sizeof(SPUCHAN));
@@ -1497,7 +1651,6 @@ long SPUopen(void)
 	spuMemC=(unsigned char *)spuMem;
 	pMixIrq=0;
 	memset((void *)s_chan,0,(MAXCHAN+1)*sizeof(SPUCHAN));
-	pSpuIrq=0;
 	iSPUIRQWait=1;
 
 #ifdef _WINDOWS
