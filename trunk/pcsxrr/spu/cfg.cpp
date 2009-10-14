@@ -81,9 +81,8 @@ void ReadConfig(void)
 	iXAPitch=0;
 	iUseTimer=0;
 	iSPUIRQWait=0;
-	iNoDesyncMode=1;
 	iRecordMode=0;
-	iUseReverb=2;
+	iUseReverb=1;
 	iUseInterpolation=2;
 	iDisStereo=0;
 	iUseDBufIrq=0;
@@ -102,18 +101,17 @@ void ReadConfig(void)
 		size = 4;
 		if(RegQueryValueEx(myKey,"UseTimer",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iUseTimer=(int)temp;
+		if(iUseTimer==2) iUseTimer=0; //removed a timer mode
 		size = 4;
 		if (RegQueryValueEx(myKey,"SPUIRQWait",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iSPUIRQWait=(int)temp;
-		size = 4;
-		if (RegQueryValueEx(myKey,"NoDesyncMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iNoDesyncMode=(int)temp;
 		size = 4;
 		if (RegQueryValueEx(myKey,"RecordMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iRecordMode=(int)temp;
 		size = 4;
 		if (RegQueryValueEx(myKey,"UseReverb",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iUseReverb=(int)temp;
+		if(iUseReverb==2) iUseReverb=1; //old reverb mode was removed
 		size = 4;
 		if (RegQueryValueEx(myKey,"UseInterpolation",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iUseInterpolation=(int)temp;
@@ -153,8 +151,6 @@ void WriteConfig(void)
  RegSetValueEx(myKey,"UseTimer",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iSPUIRQWait;
 	RegSetValueEx(myKey,"SPUIRQWait",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iNoDesyncMode;
-	RegSetValueEx(myKey,"NoDesyncMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iRecordMode;
 	RegSetValueEx(myKey,"RecordMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iUseReverb;
@@ -185,9 +181,8 @@ BOOL OnInitDSoundDialog(HWND hW)
 	if (iXAPitch)    CheckDlgButton(hW,IDC_XAPITCH,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USETIMER);
-	tempDest=ComboBox_AddString(hWC, "0: Fast mode (thread, recommended for PCSX-RR)");
-	tempDest=ComboBox_AddString(hWC, "1: Timer event mode (doesn't work with .kkapture)");
-	tempDest=ComboBox_AddString(hWC, "2: SPUasync (*NOT* recommended for PCSX-RR)");
+	tempDest=ComboBox_AddString(hWC, "0: Asynchronous (normal)");
+	tempDest=ComboBox_AddString(hWC, "1: Synchronous (sometimes necessary for streams)");
 	tempDest=ComboBox_SetCurSel(hWC,iUseTimer);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
@@ -199,22 +194,21 @@ BOOL OnInitDSoundDialog(HWND hW)
 	tempDest=ComboBox_SetCurSel(hWC,5-iVolume);
 
 	if (iSPUIRQWait)  CheckDlgButton(hW,IDC_IRQWAIT,TRUE);
-	if (iNoDesyncMode)CheckDlgButton(hW,IDC_NODESYNCMODE,TRUE);
 	if (iRecordMode)  CheckDlgButton(hW,IDC_RECORDMODE,TRUE);
 	if (iDisStereo)   CheckDlgButton(hW,IDC_DISSTEREO,TRUE);
 	if (iUseDBufIrq)  CheckDlgButton(hW,IDC_IRQDECODE,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USEREVERB);
 	tempDest=ComboBox_AddString(hWC, "0: No reverb (fastest)");
-	tempDest=ComboBox_AddString(hWC, "1: Simple reverb (fakes the most common effects)");
-	tempDest=ComboBox_AddString(hWC, "2: PSX reverb (best quality)");
+	tempDest=ComboBox_AddString(hWC, "1: PSX reverb (best quality)");
 	tempDest=ComboBox_SetCurSel(hWC,iUseReverb);
 
 	hWC=GetDlgItem(hW,IDC_INTERPOL);
 	tempDest=ComboBox_AddString(hWC, "0: None (fastest)");
-	tempDest=ComboBox_AddString(hWC, "1: Simple interpolation");
+	tempDest=ComboBox_AddString(hWC, "1: Linear interpolation (typical)");
 	tempDest=ComboBox_AddString(hWC, "2: Gaussian interpolation (good quality)");
 	tempDest=ComboBox_AddString(hWC, "3: Cubic interpolation (better treble)");
+	tempDest=ComboBox_AddString(hWC, "4: Cosine interpolation (no comment)");
 	tempDest=ComboBox_SetCurSel(hWC,iUseInterpolation);
 
 	return TRUE;
@@ -251,10 +245,6 @@ void OnDSoundOK(HWND hW)
 	if (IsDlgButtonChecked(hW,IDC_IRQWAIT))
 		iSPUIRQWait=1;
 	else iSPUIRQWait=0;
-
-	if (IsDlgButtonChecked(hW,IDC_NODESYNCMODE))
-		iNoDesyncMode=1;
-	else iNoDesyncMode=0;
 
 	if (IsDlgButtonChecked(hW,IDC_RECORDMODE))
 		iRecordMode=1;

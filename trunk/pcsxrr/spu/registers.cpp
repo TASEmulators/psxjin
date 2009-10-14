@@ -99,8 +99,6 @@ void SoundOff(SPU_struct *spu, int start,int end,unsigned short val)
 // them used
 void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)            // LEFT VOLUME
 {
-	s_chan[ch].iLeftVolRaw=vol;
-
 	if (vol&0x4000) printf("SPU: PHASE INVERT (setting vol to %04X)\n",vol);
 
 	if (vol&0x8000)                                       // sweep?
@@ -124,16 +122,13 @@ void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)          
 	}
 
 	// store volume
+	//printf("set volume %s to %04X\n",left?"left":"right",vol);
 	if(left) spu->channels[ch].iLeftVolume=vol;
-	spu->channels[ch].iRightVolume = vol;
+	else spu->channels[ch].iRightVolume = vol;
 }
 
 void SetPitch(SPU_struct* spu, int ch,unsigned short val)
 {
-	//int NP;
-	//if (val>0x3fff) NP=0x3fff;                            // get pitch val
-	//else           NP=val;
-
 	//should we clamp the pitch??
 	//need a verification case
 	if(val>0x3fff) {
@@ -398,109 +393,100 @@ void SPUwriteRegister(u32 reg, u16 val)
 		break;
 
 	case H_Reverb+0:
-
 		rvb.FB_SRC_A=val;
-
-		// OK, here's the fake REVERB stuff...
-		// depending on effect we do more or less delay and repeats... bah
-		// still... better than nothing :)
-
-		SetREVERB(val);
 		break;
-
-
-	case H_Reverb+2   :
-		rvb.FB_SRC_B=(short)val;
+	case H_Reverb+2:
+		rvb.FB_SRC_B=(s16)val;
 		break;
 	case H_Reverb+4   :
-		rvb.IIR_ALPHA=(short)val;
+		rvb.IIR_ALPHA=(s16)val;
 		break;
 	case H_Reverb+6   :
-		rvb.ACC_COEF_A=(short)val;
+		rvb.ACC_COEF_A=(s16)val;
 		break;
 	case H_Reverb+8   :
-		rvb.ACC_COEF_B=(short)val;
+		rvb.ACC_COEF_B=(s16)val;
 		break;
 	case H_Reverb+10  :
-		rvb.ACC_COEF_C=(short)val;
+		rvb.ACC_COEF_C=(s16)val;
 		break;
 	case H_Reverb+12  :
-		rvb.ACC_COEF_D=(short)val;
+		rvb.ACC_COEF_D=(s16)val;
 		break;
 	case H_Reverb+14  :
-		rvb.IIR_COEF=(short)val;
+		rvb.IIR_COEF=(s16)val;
 		break;
 	case H_Reverb+16  :
-		rvb.FB_ALPHA=(short)val;
+		rvb.FB_ALPHA=(s16)val;
 		break;
 	case H_Reverb+18  :
-		rvb.FB_X=(short)val;
+		rvb.FB_X=(s16)val;
 		break;
 	case H_Reverb+20  :
-		rvb.IIR_DEST_A0=(short)val;
+		rvb.IIR_DEST_A0=(s16)val;
 		break;
 	case H_Reverb+22  :
-		rvb.IIR_DEST_A1=(short)val;
+		rvb.IIR_DEST_A1=(s16)val;
 		break;
 	case H_Reverb+24  :
-		rvb.ACC_SRC_A0=(short)val;
+		rvb.ACC_SRC_A0=(s16)val;
 		break;
 	case H_Reverb+26  :
-		rvb.ACC_SRC_A1=(short)val;
+		rvb.ACC_SRC_A1=(s16)val;
 		break;
 	case H_Reverb+28  :
-		rvb.ACC_SRC_B0=(short)val;
+		rvb.ACC_SRC_B0=(s16)val;
 		break;
 	case H_Reverb+30  :
-		rvb.ACC_SRC_B1=(short)val;
+		rvb.ACC_SRC_B1=(s16)val;
 		break;
 	case H_Reverb+32  :
-		rvb.IIR_SRC_A0=(short)val;
+		rvb.IIR_SRC_A0=(s16)val;
 		break;
 	case H_Reverb+34  :
-		rvb.IIR_SRC_A1=(short)val;
+		rvb.IIR_SRC_A1=(s16)val;
 		break;
 	case H_Reverb+36  :
-		rvb.IIR_DEST_B0=(short)val;
+		rvb.IIR_DEST_B0=(s16)val;
 		break;
 	case H_Reverb+38  :
-		rvb.IIR_DEST_B1=(short)val;
+		rvb.IIR_DEST_B1=(s16)val;
 		break;
 	case H_Reverb+40  :
-		rvb.ACC_SRC_C0=(short)val;
+		rvb.ACC_SRC_C0=(s16)val;
 		break;
 	case H_Reverb+42  :
-		rvb.ACC_SRC_C1=(short)val;
+		rvb.ACC_SRC_C1=(s16)val;
 		break;
 	case H_Reverb+44  :
-		rvb.ACC_SRC_D0=(short)val;
+		rvb.ACC_SRC_D0=(s16)val;
 		break;
 	case H_Reverb+46  :
-		rvb.ACC_SRC_D1=(short)val;
+		rvb.ACC_SRC_D1=(s16)val;
 		break;
 	case H_Reverb+48  :
-		rvb.IIR_SRC_B1=(short)val;
+		rvb.IIR_SRC_B1=(s16)val;
 		break;
 	case H_Reverb+50  :
-		rvb.IIR_SRC_B0=(short)val;
+		rvb.IIR_SRC_B0=(s16)val;
 		break;
 	case H_Reverb+52  :
-		rvb.MIX_DEST_A0=(short)val;
+		rvb.MIX_DEST_A0=(s16)val;
 		break;
 	case H_Reverb+54  :
-		rvb.MIX_DEST_A1=(short)val;
+		rvb.MIX_DEST_A1=(s16)val;
 		break;
 	case H_Reverb+56  :
-		rvb.MIX_DEST_B0=(short)val;
+		rvb.MIX_DEST_B0=(s16)val;
 		break;
 	case H_Reverb+58  :
-		rvb.MIX_DEST_B1=(short)val;
+		rvb.MIX_DEST_B1=(s16)val;
 		break;
 	case H_Reverb+60  :
-		rvb.IN_COEF_L=(short)val;
+		rvb.IN_COEF_L=(s16)val;
 		break;
 	case H_Reverb+62  :
-		rvb.IN_COEF_R=(short)val;
+		rvb.IN_COEF_R=(s16)val;
 		break;
 	}
 

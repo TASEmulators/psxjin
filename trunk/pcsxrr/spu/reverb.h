@@ -31,10 +31,9 @@
 
 void InitREVERB();
 void ShutdownREVERB();
-void SetREVERB(unsigned short val);
 void StartREVERB(SPU_chan* pChannel);
-void StoreREVERB(SPU_chan* pChannel,s32 ns,s32 left, s32 right);
-s32 MixREVERBLeft(int ns);
+void StoreREVERB(SPU_chan* pChannel,s32 left, s32 right);
+s32 MixREVERBLeft();
 s32 MixREVERBRight();
 void REVERB_initSample();
 

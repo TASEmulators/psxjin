@@ -77,9 +77,9 @@ void SPU_chan::save(EMUFILE* fp)
 	fp->write32le(s_2);
 	fp->write8le(flags);
 
-	fp->write32le(iRVBOffset);
-	fp->write32le(iRVBRepeat);
-	fp->write32le(iRVBNum);
+	fp->write32le((u32)0);
+	fp->write32le((u32)0);
+	fp->write32le((u32)0);
 }
 
 void SPU_chan::load(EMUFILE* fp)
@@ -121,9 +121,10 @@ void SPU_chan::load(EMUFILE* fp)
 	fp->read32le(&s_2);
 	fp->read8le(&flags);
 
-	fp->read32le(&iRVBOffset);
-	fp->read32le(&iRVBRepeat);
-	fp->read32le(&iRVBNum);
+	s32 temp;
+	fp->read32le(&temp);
+	fp->read32le(&temp);
+	fp->read32le(&temp);
 }
 
 void SPUfreeze_new(EMUFILE* fp)
@@ -133,12 +134,14 @@ void SPUfreeze_new(EMUFILE* fp)
 	const u32 tag = 0xBEEFFACE;
 	fp->write32le(tag);
 
-	fp->write32le((u32)0); //version
+	fp->write32le((u32)1); //version
 
 	fp->fwrite(spuMem,0x80000);
 	fp->fwrite(regArea,0x200);
 	fp->write32le(spuAddr);
 	fp->write16le(spuIrq);
+
+	fp->write32le(&SPU_core.mixIrqCounter);
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core.channels[i].save(fp);
 
@@ -156,12 +159,14 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	if(tag != 0xBEEFFACE) return false;
 
 	u32 version = fp->read32le();
-	if(version != 0) return false;
+	if(version <0 || version>1) return false;
 
 	fp->fread(spuMem,0x80000);
 	fp->fread(regArea,0x200);
 	fp->read32le(&spuAddr);
 	fp->read16le(&spuIrq);
+
+	if(version>=1) fp->read32le(&SPU_core.mixIrqCounter);
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core.channels[i].load(fp);
 
