@@ -775,10 +775,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\spu\regs.h"
-				>
-			</File>
-			<File
 				RelativePath="..\spu\reverb.cpp"
 				>
 			</File>

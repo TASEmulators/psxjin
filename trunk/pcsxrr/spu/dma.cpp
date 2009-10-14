@@ -30,16 +30,18 @@
 
 #include "externals.h"
 
-////////////////////////////////////////////////////////////////////////
-// READ DMA (one value)
-////////////////////////////////////////////////////////////////////////
+void triggerIrqRange(u32 base, u32 size);
 
-unsigned short SPUreadDMA(void)
+// READ DMA (one value)
+u16 SPUreadDMA(void)
 {
-	unsigned short s;
+	u16 s;
+
+	//printf("SPU single read dma %08X\n",spuAddr);
 
 	s=spuMem[spuAddr>>1];
 
+	//triggerIrqRange(spuAddr,2);
 
 	spuAddr+=2;
 	if (spuAddr>0x7ffff) spuAddr=0;
@@ -49,17 +51,15 @@ unsigned short SPUreadDMA(void)
 	return s;
 }
 
-////////////////////////////////////////////////////////////////////////
 // READ DMA (many values)
-////////////////////////////////////////////////////////////////////////
-
-void SPUreadDMAMem(unsigned short * pusPSXMem,int iSize)
+void SPUreadDMAMem(u16 * pusPSXMem,int iSize)
 {
-	int i;
+	//printf("SPU multi read dma %08X %d\n",spuAddr, iSize);
 
-	for (i=0;i<iSize;i++)
+	for (int i=0;i<iSize;i++)
 	{
 		*pusPSXMem++=spuMem[spuAddr>>1];                    // spu addr got by writeregister
+		//triggerIrqRange(spuAddr,2);
 		spuAddr+=2;                                         // inc spu addr
 		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
 	}
@@ -80,9 +80,12 @@ void SPUreadDMAMem(unsigned short * pusPSXMem,int iSize)
 // WRITE DMA (one value)
 ////////////////////////////////////////////////////////////////////////
 
-void  SPUwriteDMA(unsigned short val)
+void  SPUwriteDMA(u16 val)
 {
+	//printf("SPU single write dma %08X\n",spuAddr);
+
 	spuMem[spuAddr>>1] = val;                             // spu addr got by writeregister
+	//triggerIrqRange(spuAddr,2);
 
 	spuAddr+=2;                                           // inc spu addr
 	if (spuAddr>0x7ffff) spuAddr=0;                       // wrap
@@ -95,13 +98,14 @@ void  SPUwriteDMA(unsigned short val)
 // WRITE DMA (many values)
 ////////////////////////////////////////////////////////////////////////
 
-void SPUwriteDMAMem(unsigned short * pusPSXMem,int iSize)
+void SPUwriteDMAMem(u16 * pusPSXMem,int iSize)
 {
-	int i;
+	//printf("SPU multi write dma %08X %d\n",spuAddr, iSize);
 
-	for (i=0;i<iSize;i++)
+	for (int i=0;i<iSize;i++)
 	{
 		spuMem[spuAddr>>1] = *pusPSXMem++;                  // spu addr got by writeregister
+		//triggerIrqRange(spuAddr,2);
 		spuAddr+=2;                                         // inc spu addr
 		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
 	}

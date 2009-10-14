@@ -40,7 +40,6 @@
 #include "externals.h"
 #include "registers.h"
 #include "spu.h"
-#include "regs.h"
 #include "emufile.h"
 
 void SPU_chan::save(EMUFILE* fp)

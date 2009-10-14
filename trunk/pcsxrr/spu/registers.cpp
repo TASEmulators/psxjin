@@ -43,7 +43,6 @@
 
 #include "externals.h"
 #include "registers.h"
-#include "regs.h"
 #include "reverb.h"
 #include "spu.h"
 
@@ -136,7 +135,11 @@ void SetPitch(SPU_struct* spu, int ch,unsigned short val)
 	//else           NP=val;
 
 	//should we clamp the pitch??
-	if(val>0x3fff) printf("SPU: OUT OF RANGE PITCH: %08X\n",val);
+	//need a verification case
+	if(val>0x3fff) {
+		printf("[%02d] SPU: OUT OF RANGE PITCH: %08X\n",ch,val);
+		val &= 0x3fff;
+	}
 	
 	spu->channels[ch].rawPitch = val;
 	spu->channels[ch].updatePitch(val);
@@ -200,9 +203,11 @@ void NoiseOn(SPU_struct* spu, int start,int end,unsigned short val)
 // WRITE REGISTERS: called by main emu
 ////////////////////////////////////////////////////////////////////////
 
-void SPUwriteRegister(unsigned long reg, unsigned short val)
+void SPUwriteRegister(u32 reg, u16 val)
 {
-	const unsigned long r=reg&0xfff;
+	const u32 r=reg&0xfff;
+
+	//printf("write reg %08x %04x\n",r,val);
 
 	//cache a copy of the register for reading back.
 	//we have no reason yet to doubt that this will work.
@@ -505,9 +510,11 @@ void SPUwriteRegister(unsigned long reg, unsigned short val)
 // READ REGISTER: called by main emu
 ////////////////////////////////////////////////////////////////////////
 
-u16 SPUreadRegister(unsigned long reg)
+u16 SPUreadRegister(u32 reg)
 {
-	const unsigned long r=reg&0xfff;
+	const u32 r=reg&0xfff;
+
+	//printf("read reg %08x\n",r);
 
 	//printf("SPUreadRegister: %04X\n",r);
 

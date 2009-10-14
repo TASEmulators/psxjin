@@ -112,7 +112,6 @@ FILE* wavout = NULL;
 #include "externals.h"
 #include "cfg.h"
 #include "dsoundoss.h"
-#include "regs.h"
 #include "record.h"
 #include "resource.h"
 #include "PsxCommon.h"
@@ -357,7 +356,7 @@ void SPU_chan::keyon()
 	
 	blockAddress = (rawStartAddr<<3);
 	
-	printf("[%02d] Keyon at %08X with smpinc %f\n",ch,blockAddress,smpinc);
+	//printf("[%02d] Keyon at %08X with smpinc %f\n",ch,blockAddress,smpinc);
 
 	//init interpolation state with zeros
 	block[24] = block[25] = block[26] = block[27] = 0;
@@ -785,6 +784,13 @@ restart:
 		//end or loop
 		if(flags&1)
 		{
+			//there seems to be a special condition which triggers the irq if the loop address equals the irq address
+			//(even if this sample is stopping)
+			//either that, or the hardware always reads the block referenced by loop target even if the sample is ending.
+			//thousand arms will need this in order to trigger the very first voiceover
+			//should this be 1 or 16? equality or range?
+			triggerIrqRange(loopStartAddr,16);
+
 			//when the old spu would kill a sound this way, it was immediate.
 			//maybe adsr release is only for keyoff
 			if(flags != 3) {
@@ -806,6 +812,8 @@ restart:
 
 		sampnum = (int)smpcnt;
 
+		//this will be tested by the impressive valkyrie profile new game sound
+		//which is large and apparently streams in
 		triggerIrqRange(blockAddress,16);
 
 		u8 header0 = readSpuMem(blockAddress);
