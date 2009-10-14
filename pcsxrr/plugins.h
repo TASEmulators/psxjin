@@ -61,9 +61,9 @@ void SPUsetPitch(unsigned char, unsigned short);
 void SPUsetVolumeL(unsigned char, short );		
 void SPUsetVolumeR(unsigned char, short );		
 //psemu pro 2 functions from now..
-void SPUwriteRegister(unsigned long, unsigned short);	
-unsigned short SPUreadRegister(unsigned long);		
-void SPUwriteDMA(unsigned short);
+void SPUwriteRegister(u32, u16);	
+u16 SPUreadRegister(u32);		
+void SPUwriteDMA(short);
 unsigned short SPUreadDMA(void);
 void SPUwriteDMAMem(unsigned short *, int);
 void SPUreadDMAMem(unsigned short *, int);
