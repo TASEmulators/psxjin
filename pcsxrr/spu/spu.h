@@ -33,8 +33,6 @@
 
 #define NSSIZE 1
 
-void SetupTimer(void);
-void RemoveTimer(void);
 void SPUplayBRRchannel(xa_decode_t *xap);
 
 #define CHANSTATUS_STOPPED          0
@@ -162,10 +160,6 @@ public:
 	u8 flags;
 	void decodeBRR(s32* out);
 
-	//hacky shit for the hacky reverb mode
-	s32               iRVBOffset;                         // reverb offset
-	s32               iRVBRepeat;                         // reverb repeat
-	s32               iRVBNum;                            // another reverb helper
 };
 
 class SPU_struct

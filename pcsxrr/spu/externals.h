@@ -230,7 +230,6 @@ extern int        iVolume;
 extern int        iXAPitch;
 extern int        iUseTimer;
 extern int        iSPUIRQWait;
-extern int        iNoDesyncMode;
 extern int        iRecordMode;
 extern int        iUseReverb;
 extern int        iUseInterpolation;

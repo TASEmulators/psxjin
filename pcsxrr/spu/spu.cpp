@@ -73,8 +73,6 @@ template<typename T> inline T moveValueTowards(T val, T target, T incr)
 	return val;
 }
 
-const bool streamingMode = false;
-
 class Adjustobuf
 {
 public:
@@ -174,16 +172,15 @@ int             iVolume=3;
 int             iXAPitch=0;
 int             iUseTimer=0;
 int             iSPUIRQWait=1;
-int             iNoDesyncMode=1;
 int             iRecordMode=0;
-int             iUseReverb=2;
+int             iUseReverb=1;
 int             iUseInterpolation=2;
 int             iDisStereo=0;
 int             iUseDBufIrq=0;
 
-// MAIN infos struct for each channel
+FORCEINLINE bool isStreamingMode() { return iUseTimer==1; }
 
-SPUCHAN         s_chan[MAXCHAN+1];                     // channel + 1 infos (1 is security for fmod handling)
+// MAIN infos struct for each channel
 
 unsigned long   dwNoiseVal=1;                          // global noise generator
 
@@ -240,8 +237,6 @@ const int f[5][2] =
 	{  122, -60 }
 };
 
-int SSumR[NSSIZE];
-int SSumL[NSSIZE];
 int iCycle=0;
 short * pS;
 
@@ -400,13 +395,15 @@ enum SPUInterpolationMode
 {
 	SPUInterpolation_None = 0,
 	SPUInterpolation_Linear = 1,
-	SPUInterpolation_Cosine = 2,
-	SPUInterpolation_Gaussian = 3,
+	SPUInterpolation_Gaussian = 2,
+	SPUInterpolation_Cubic = 3,
+	SPUInterpolation_Cosine = 4,
 };
 
 //a is the most recent sample, going back to d as the oldest
-template<SPUInterpolationMode INTERPOLATE_MODE> static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
+static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 {
+	SPUInterpolationMode INTERPOLATE_MODE = (SPUInterpolationMode)iUseInterpolation;
 	float ratio = (float)_ratio;
 	if(INTERPOLATE_MODE == SPUInterpolation_Cosine)
 	{
@@ -440,6 +437,19 @@ template<SPUInterpolationMode INTERPOLATE_MODE> static FORCEINLINE s32 Interpola
 		result += (gauss[index+3]*a)&~2047;
 		result = (result>>11)&~1;
 		return result;
+	}
+	else if(INTERPOLATE_MODE == SPUInterpolation_Cubic)
+	{
+		float y0 = d, y1 = c, y2 = b, y3 = a;
+		float mu = ratio - (int)ratio;
+		float mu2 = mu*mu;
+		float a0 = y3 - y2 - y0 + y1;
+		float a1 = y0 - y1 - a0;
+		float a2 = y2 - y0;
+		float a3 = y1;
+
+		float result = a0*mu*mu2+a1*mu2+a2*mu+a3;
+		return (s32)result;
 	}
 }
 
@@ -581,7 +591,7 @@ restart:
 		s16 b = block[(sampnum-1)&31];
 		s16 c = block[(sampnum-2)&31];
 		s16 d = block[(sampnum-3)&31];
-		*out = Interpolate<SPUInterpolation_Gaussian>(a,b,c,d,smpcnt);
+		*out = Interpolate(a,b,c,d,smpcnt);
 	}
 	else *out = block[sampnum];
 
@@ -669,10 +679,10 @@ void mixAudio(SPU_struct* spu, int length)
 			right_accum += right;
 
 			if (chan->bRVBActive) 
-				StoreREVERB(chan,0,left,right);
+				StoreREVERB(chan,left,right);
 		} //channel loop
 
-		left_accum += MixREVERBLeft(0);
+		left_accum += MixREVERBLeft();
 		right_accum += MixREVERBRight();
 
 		{
@@ -692,15 +702,15 @@ void mixAudio(SPU_struct* spu, int length)
 		s16 left_out = limit(left_accum);
 		s16 right_out = limit(right_accum);
 
-		if(streamingMode)
+		if(isStreamingMode())
 			adjustobuf.enqueue(left_out,right_out);
 		else
-			spu->outbuf[j*2] = right_out;
+			spu->outbuf[j*2] = left_out;
 			spu->outbuf[j*2+1] = right_out;
 
-	/*	fwrite(&left_out,2,1,wavout);
-		fwrite(&right_out,2,1,wavout);
-		fflush(wavout);*/
+		//fwrite(&left_out,2,1,wavout);
+		//fwrite(&right_out,2,1,wavout);
+		//fflush(wavout);
 
 		// special irq handling in the decode buffers (0x0000-0x1000)
 		// we know:
@@ -1145,7 +1155,7 @@ void SPUasync(unsigned long cycle)
 	u32 SNDDXGetAudioSpace();
 	u32 len = SNDDXGetAudioSpace();
 
-	if(streamingMode)
+	if(isStreamingMode())
 	{
 		mixtime += samples_per_cycle*cycle;
 		int mixtodo = (int)mixtime;
@@ -1185,25 +1195,6 @@ void SPUasync(unsigned long cycle)
 
 }
 
-////////////////////////////////////////////////////////////////////////
-// SPU UPDATE... new epsxe func
-//  1 time every 32 hsync lines
-//  (312/32)x50 in pal
-//  (262/32)x60 in ntsc
-////////////////////////////////////////////////////////////////////////
-
-#ifndef _WINDOWS
-
-// since epsxe 1.5.2 (linux) uses SPUupdate, not SPUasync, I will
-// leave that func in the linux port, until epsxe linux is using
-// the async function as well
-
-void CALLBACK SPUupdate(void)
-{
-	SPUasync(0);
-}
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 // XA AUDIO
@@ -1235,78 +1226,11 @@ long SPUinit(void)
 	mixqueue_go = false;
 	//wavout = fopen("c:\\pcsx.raw","wb");
 	spuMemC=(unsigned char *)spuMem;                      // just small setup
-	memset((void *)s_chan,0,MAXCHAN*sizeof(SPUCHAN));
 	InitADSR();
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////
-// SETUPTIMER: init of certain buffers and threads/timers
-////////////////////////////////////////////////////////////////////////
 
-void SetupTimer(void)
-{
-	memset(SSumR,0,NSSIZE*sizeof(int));                   // init some mixing buffers
-	memset(SSumL,0,NSSIZE*sizeof(int));
-
-//
-//	bEndThread=0;                                         // init thread vars
-//	bThreadEnded=0;
-//	bSpuInit=1;                                           // flag: we are inited
-//#ifdef _WINDOWS
-// if(iUseTimer==1)                                      // windows: use timer
-//  {
-//   timeBeginPeriod(1);
-//   timeSetEvent(1,1,MAINProc,0,TIME_ONESHOT);
-//  }
-// else 
-// if(iUseTimer==0)                                      // windows: use thread
-//  {
-//   //_beginthread(MAINThread,0,NULL);
-//   DWORD dw;
-//   hMainThread=CreateThread(NULL,0,MAINThreadEx,0,0,&dw);
-//   SetThreadPriority(hMainThread,
-//                     //THREAD_PRIORITY_TIME_CRITICAL);
-//                     THREAD_PRIORITY_HIGHEST);
-//  }
-//#else
-//#ifndef NOTHREADLIB
-// if(!iUseTimer)                                        // linux: use thread
-//  {
-//   pthread_create(&thread, NULL, MAINThread, NULL);
-//  }
-//#endif
-//#endif
-}
-
-////////////////////////////////////////////////////////////////////////
-// REMOVETIMER: kill threads/timers
-////////////////////////////////////////////////////////////////////////
-
-void RemoveTimer(void)
-{
-//	bEndThread=1;                                         // raise flag to end thread
-//
-//#ifdef _WINDOWS
-// if(iUseTimer!=2)                                      // windows thread?
-//  {
-//   while(!bThreadEnded) {Sleep(5L);}                   // -> wait till thread has ended
-//   Sleep(5L);
-//  }
-// if(iUseTimer==1) timeEndPeriod(1);                    // windows timer? stop it
-//#else
-//#ifndef NOTHREADLIB
-// if(!iUseTimer)                                        // linux tread?
-//  {
-//   int i=0;
-//   while(!bThreadEnded && i<2000) {usleep(1000L);i++;} // -> wait until thread has ended
-//   if(thread!=-1) {pthread_cancel(thread);thread=-1;}  // -> cancel thread anyway
-//  }
-//#endif
-//#endif
-//	bThreadEnded=0;                                       // no more spu is running
-//	bSpuInit=0;
-}
 
 ////////////////////////////////////////////////////////////////////////
 // SETUPSTREAMS: init most of the spu buffers
@@ -1371,8 +1295,6 @@ long SPUopen(void)
 	bEndThread=0;
 	bThreadEnded=0;
 	spuMemC=(unsigned char *)spuMem;
-	pMixIrq=0;
-	memset((void *)s_chan,0,(MAXCHAN+1)*sizeof(SPUCHAN));
 	iSPUIRQWait=1;
 
 #ifdef _WINDOWS
@@ -1387,8 +1309,6 @@ long SPUopen(void)
 	SetupSound();                                         // setup sound (before init!)
 
 	SetupStreams();                                       // prepare streaming
-
-	SetupTimer();                                         // timer for feeding data
 
 	bSPUIsOpen=1;
 
@@ -1429,8 +1349,6 @@ long SPUclose(void)
 	if (IsWindow(hWRecord)) DestroyWindow(hWRecord);
 	hWRecord=0;
 #endif
-
-	RemoveTimer();                                        // no more feeding
 
 	RemoveSound();                                        // no more sound handling
 
