@@ -1,98 +1,17 @@
+//spu.cpp
+//original (C) 2002 by Pete Bernert
+//nearly entirely rewritten for pcsxrr by zeromus
+//original changelog is at end of file, for reference
+
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 2 of the License, or
+//(at your option) any later version. See also the license.txt file for
+//additional informations.                                              
+
 //TODO - volume sweep not emulated
 
-/***************************************************************************
-                            spu.c  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2004/09/19 - Pete
-// - added option: IRQ handling in the decoded sound buffer areas (Crash Team Racing)
-//
-// 2004/09/18 - Pete
-// - changed global channel var handling to local pointers (hopefully it will help LDChen's port)
-//
-// 2004/04/22 - Pete
-// - finally fixed frequency modulation and made some cleanups
-//
-// 2003/04/07 - Eric
-// - adjusted cubic interpolation algorithm
-//
-// 2003/03/16 - Eric
-// - added cubic interpolation
-//
-// 2003/03/01 - linuzappz
-// - libraryName changes using ALSA
-//
-// 2003/02/28 - Pete
-// - added option for type of interpolation
-// - adjusted spu irqs again (Thousant Arms, Valkyrie Profile)
-// - added MONO support for MSWindows DirectSound
-//
-// 2003/02/20 - kode54
-// - amended interpolation code, goto GOON could skip initialization of gpos and cause segfault
-//
-// 2003/02/19 - kode54
-// - moved SPU IRQ handler and changed sample flag processing
-//
-// 2003/02/18 - kode54
-// - moved ADSR calculation outside of the sample decode loop, somehow I doubt that
-//   ADSR timing is relative to the frequency at which a sample is played... I guess
-//   this remains to be seen, and I don't know whether ADSR is applied to noise channels...
-//
-// 2003/02/09 - kode54
-// - one-shot samples now process the end block before stopping
-// - in light of removing fmod hack, now processing ADSR on frequency channel as well
-//
-// 2003/02/08 - kode54
-// - replaced easy interpolation with gaussian
-// - removed fmod averaging hack
-// - changed .sinc to be updated from .iRawPitch, no idea why it wasn't done this way already (<- Pete: because I sometimes fail to see the obvious, haharhar :)
-//
-// 2003/02/08 - linuzappz
-// - small bugfix for one usleep that was 1 instead of 1000
-// - added iDisStereo for no stereo (Linux)
-//
-// 2003/01/22 - Pete
-// - added easy interpolation & small noise adjustments
-//
-// 2003/01/19 - Pete
-// - added Neill's reverb
-//
-// 2003/01/12 - Pete
-// - added recording window handlers
-//
-// 2003/01/06 - Pete
-// - added Neill's ADSR timings
-//
-// 2002/12/28 - Pete
-// - adjusted spu irq handling, fmod handling and loop handling
-//
-// 2002/08/14 - Pete
-// - added extra reverb
-//
-// 2002/06/08 - linuzappz
-// - SPUupdate changed for SPUasync
-//
-// 2002/05/15 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
+//-------------------------------
 
 #include "stdafx.h"
 
@@ -105,7 +24,7 @@
 #include <stdio.h>
 #include <queue>
 
-FILE* wavout = NULL;
+//FILE* wavout = NULL;
 
 #define _IN_SPU
 
@@ -376,121 +295,11 @@ void SPU_chan::keyoff()
 
 SPU_struct SPU_core;
 
-//--------------------------------------------------------------
-
-//------------------
-// dirty inline func includes
-//#include "reverb.cpp"
-//------------------
-
-INLINE void InterpolateUp(SPUCHAN * pChannel)
-{
-	if (pChannel->SB[32]==1)                              // flag == 1? calc step and set flag... and don't change the value in this pass
-	{
-		const int id1=pChannel->SB[30]-pChannel->SB[29];    // curr delta to next val
-		const int id2=pChannel->SB[31]-pChannel->SB[30];    // and next delta to next-next val :)
-
-		pChannel->SB[32]=0;
-
-		if (id1>0)                                          // curr delta positive
-		{
-			if (id2<id1)
-			{
-				pChannel->SB[28]=id1;
-				pChannel->SB[32]=2;
-			}
-			else
-				if (id2<(id1<<1))
-					pChannel->SB[28]=(id1*pChannel->sinc)/0x10000L;
-				else
-					pChannel->SB[28]=(id1*pChannel->sinc)/0x20000L;
-		}
-		else                                                // curr delta negative
-		{
-			if (id2>id1)
-			{
-				pChannel->SB[28]=id1;
-				pChannel->SB[32]=2;
-			}
-			else
-				if (id2>(id1<<1))
-					pChannel->SB[28]=(id1*pChannel->sinc)/0x10000L;
-				else
-					pChannel->SB[28]=(id1*pChannel->sinc)/0x20000L;
-		}
-	}
-	else
-		if (pChannel->SB[32]==2)                              // flag 1: calc step and set flag... and don't change the value in this pass
-		{
-			pChannel->SB[32]=0;
-
-			pChannel->SB[28]=(pChannel->SB[28]*pChannel->sinc)/0x20000L;
-			if (pChannel->sinc<=0x8000)
-				pChannel->SB[29]=pChannel->SB[30]-(pChannel->SB[28]*((0x10000/pChannel->sinc)-1));
-			else pChannel->SB[29]+=pChannel->SB[28];
-		}
-		else                                                  // no flags? add bigger val (if possible), calc smaller step, set flag1
-			pChannel->SB[29]+=pChannel->SB[28];
-}
-
-//
-// even easier interpolation on downsampling, also no special filter, again just "Pete's common sense" tm
-//
-
-INLINE void InterpolateDown(SPUCHAN * pChannel)
-{
-	if (pChannel->sinc>=0x20000L)                               // we would skip at least one val?
-	{
-		pChannel->SB[29]+=(pChannel->SB[30]-pChannel->SB[29])/2;  // add easy weight
-		if (pChannel->sinc>=0x30000L)                             // we would skip even more vals?
-			pChannel->SB[29]+=(pChannel->SB[31]-pChannel->SB[30])/2; // add additional next weight
-	}
-}
-
-
-////////////////////////////////////////////////////////////////////////
-// helpers for gauss interpolation
-
-#define gval0 (((short*)(&pChannel->SB[29]))[gpos])
-#define gval(x) (((short*)(&pChannel->SB[29]))[(gpos+x)&3])
-
-////////////////////////////////////////////////////////////////////////
+//---------------------------------------
 
 #include "xa.cpp"
 
-////////////////////////////////////////////////////////////////////////
-// START SOUND... called by main thread to setup a new sound on a channel
-////////////////////////////////////////////////////////////////////////
-
-INLINE void StartSound(SPUCHAN * pChannel)
-{
-////	StartADSR(pChannel);
-//	StartREVERB(pChannel);
-//
-//	pChannel->pCurr=pChannel->pStart;                     // set sample start
-//
-//	pChannel->s_1=0;                                      // init mixing vars
-//	pChannel->s_2=0;
-//	pChannel->iSBPos=28;
-//
-//	pChannel->bNew=0;                                     // init channel flags
-//	pChannel->bStop=0;
-//	pChannel->bOn=1;
-//
-//	pChannel->SB[29]=0;                                   // init our interpolation helpers
-//	pChannel->SB[30]=0;
-//
-//	if (iUseInterpolation>=2)                             // gauss interpolation?
-//	{
-//		pChannel->spos=0x30000L;  // -> start with more decoding
-//		pChannel->SB[28]=0;
-//	}
-//	else
-//	{
-//		pChannel->spos=0x10000L;  // -> no/simple interpolation starts with one 44100 decoding
-//		pChannel->SB[31]=0;
-//	}
-}
+//old functions handy to refer to
 
 //INLINE void VoiceChangeFrequency(SPUCHAN * pChannel)
 //{
@@ -499,8 +308,6 @@ INLINE void StartSound(SPUCHAN * pChannel)
 //	if (!pChannel->sinc) pChannel->sinc=1;
 //	if (iUseInterpolation==1) pChannel->SB[32]=1;         // -> freq change in simle imterpolation mode: set flag
 //}
-
-////////////////////////////////////////////////////////////////////////
 
 //INLINE void FModChangeFrequency(SPUCHAN * pChannel,int ns)
 //{
@@ -522,7 +329,8 @@ INLINE void StartSound(SPUCHAN * pChannel)
 //	iFMod[ns]=0;
 //}
 
-////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------
 
 // noise handler... just produces some noise data
 // surely wrong... and no noise frequency (spuCtrl&0x3f00) will be used...
@@ -552,107 +360,6 @@ INLINE int iGetNoiseVal(SPU_chan* pChannel)
 	return fa;
 
 
-}
-
-////////////////////////////////////////////////////////////////////////
-
-INLINE void StoreInterpolationVal(SPUCHAN * pChannel,int fa)
-{
-	if (pChannel->bFMod==2)                               // fmod freq channel
-		pChannel->SB[29]=fa;
-	else
-	{
-		if ((spuCtrl&0x4000)==0) fa=0;                      // muted?
-		else                                                // else adjust
-		{
-			if (fa>32767L)  fa=32767L;
-			if (fa<-32767L) fa=-32767L;
-		}
-
-		if (iUseInterpolation>=2)                           // gauss/cubic interpolation
-		{
-			int gpos = pChannel->SB[28];
-			gval0 = fa;
-			gpos = (gpos+1) & 3;
-			pChannel->SB[28] = gpos;
-		}
-		else
-			if (iUseInterpolation==1)                           // simple interpolation
-			{
-				pChannel->SB[28] = 0;
-				pChannel->SB[29] = pChannel->SB[30];              // -> helpers for simple linear interpolation: delay real val for two slots, and calc the two deltas, for a 'look at the future behaviour'
-				pChannel->SB[30] = pChannel->SB[31];
-				pChannel->SB[31] = fa;
-				pChannel->SB[32] = 1;                             // -> flag: calc new interolation
-			}
-			else pChannel->SB[29]=fa;                           // no interpolation
-	}
-}
-
-////////////////////////////////////////////////////////////////////////
-
-INLINE int iGetInterpolationVal(SPUCHAN * pChannel)
-{
-	int fa;
-
-	if (pChannel->bFMod==2) return pChannel->SB[29];
-
-	switch (iUseInterpolation)
-	{
-		//--------------------------------------------------//
-	case 3:                                             // cubic interpolation
-	{
-		long xd;
-		int gpos;
-		xd = ((pChannel->spos) >> 1)+1;
-		gpos = pChannel->SB[28];
-
-		fa  = gval(3) - 3*gval(2) + 3*gval(1) - gval0;
-		fa *= (xd - (2<<15)) / 6;
-		fa >>= 15;
-		fa += gval(2) - gval(1) - gval(1) + gval0;
-		fa *= (xd - (1<<15)) >> 1;
-		fa >>= 15;
-		fa += gval(1) - gval0;
-		fa *= xd;
-		fa >>= 15;
-		fa = fa + gval0;
-
-	}
-	break;
-	//--------------------------------------------------//
-	case 2:                                             // gauss interpolation
-	{
-		int vl, vr;
-		int gpos;
-		vl = (pChannel->spos >> 6) & ~3;
-		gpos = pChannel->SB[28];
-		vr=(gauss[vl]*gval0)&~2047;
-		vr+=(gauss[vl+1]*gval(1))&~2047;
-		vr+=(gauss[vl+2]*gval(2))&~2047;
-		vr+=(gauss[vl+3]*gval(3))&~2047;
-		fa = vr>>11;
-	}
-	break;
-	//--------------------------------------------------//
-	case 1:                                             // simple interpolation
-	{
-		if (pChannel->sinc<0x10000L)                      // -> upsampling?
-			InterpolateUp(pChannel);                     // --> interpolate up
-		else InterpolateDown(pChannel);                   // --> else down
-		fa=pChannel->SB[29];
-	}
-	break;
-	//--------------------------------------------------//
-	default:                                            // no interpolation
-	{
-		fa=pChannel->SB[29];
-	}
-	break;
-	//--------------------------------------------------//
-	}
-
-	return fa;
 }
 
 //these functions are an unreliable, inaccurate floor.
@@ -763,8 +470,11 @@ SPU_chan::SPU_chan()
 
 SPU_struct::SPU_struct()
 {
+	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
 		channels[i].ch = i;
+
+	mixIrqCounter = 0;
 }
 
 void SPU_chan::decodeBRR(s32* out)
@@ -986,11 +696,35 @@ void mixAudio(SPU_struct* spu, int length)
 			adjustobuf.enqueue(left_out,right_out);
 		else
 			spu->outbuf[j*2] = right_out;
-			spu->outbuf[j*2+1] = right_accum;
+			spu->outbuf[j*2+1] = right_out;
 
-		/*fwrite(&left_out,2,1,wavout);
+	/*	fwrite(&left_out,2,1,wavout);
 		fwrite(&right_out,2,1,wavout);
 		fflush(wavout);*/
+
+		// special irq handling in the decode buffers (0x0000-0x1000)
+		// we know:
+		// the decode buffers are located in spu memory in the following way:
+		// 0x0000-0x03ff  CD audio left
+		// 0x0400-0x07ff  CD audio right
+		// 0x0800-0x0bff  Voice 1
+		// 0x0c00-0x0fff  Voice 3
+		// and decoded data is 16 bit for one sample
+		// we assume:
+		// even if voices 1/3 are off or no cd audio is playing, the internal
+		// play positions will move on and wrap after 0x400 bytes.
+		// Therefore: we just need a pointer from spumem+0 to spumem+3ff, and
+		// increase this pointer on each sample by 2 bytes. If this pointer
+		// (or 0x400 offsets of this pointer) hits the spuirq address, we generate
+		// an IRQ. 
+
+		triggerIrqRange(spu->mixIrqCounter,2);
+		triggerIrqRange(spu->mixIrqCounter+0x400,2);
+		triggerIrqRange(spu->mixIrqCounter+0x800,2);
+		triggerIrqRange(spu->mixIrqCounter+0xC00,2);
+
+		spu->mixIrqCounter += 2;
+		spu->mixIrqCounter &= 0x3FF;
 
 	} //sample loop
 
@@ -1515,7 +1249,6 @@ void SetupTimer(void)
 	memset(SSumR,0,NSSIZE*sizeof(int));                   // init some mixing buffers
 	memset(SSumL,0,NSSIZE*sizeof(int));
 
-	pS=(short *)pSpuBuffer;                               // setup soundbuffer pointer
 //
 //	bEndThread=0;                                         // init thread vars
 //	bThreadEnded=0;
@@ -1583,8 +1316,6 @@ void SetupStreams(void)
 {
 	int i;
 
-	pSpuBuffer=(unsigned char *)malloc(32768);            // alloc mixing buffer
-
 	if (iUseReverb==1) i=88200*2;
 	else              i=NSSIZE*2;
 
@@ -1595,21 +1326,6 @@ void SetupStreams(void)
 	XAPlay  = XAStart;
 	XAFeed  = XAStart;
 	XAEnd   = XAStart + 44100;
-
-	for (i=0;i<MAXCHAN;i++)                               // loop sound channels
-	{
-// we don't use mutex sync... not needed, would only
-// slow us down:
-//   s_chan[i].hMutex=CreateMutex(NULL,FALSE,NULL);
-		s_chan[i].ADSRX.SustainLevel = 0xf<<27;             // -> init sustain
-		s_chan[i].iMute=0;
-		s_chan[i].iIrqDone=0;
-		s_chan[i].pLoop=spuMemC;
-		s_chan[i].pStart=spuMemC;
-		s_chan[i].pCurr=spuMemC;
-	}
-
-	if (iUseDBufIrq) pMixIrq=spuMemC;                     // enable decoded buffer irqs by setting the address
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1618,8 +1334,6 @@ void SetupStreams(void)
 
 void RemoveStreams(void)
 {
-	free(pSpuBuffer);                                     // free mixing buffer
-	pSpuBuffer=NULL;
 	free(XAStart);                                        // free XA buffer
 	XAStart=0;
 
@@ -1775,3 +1489,80 @@ void SPUstopWav()
 {
 	RecordStop();
 }
+
+
+//---------------------------------------------------------------
+//original changelog
+
+// History of changes:
+//
+// 2004/09/19 - Pete
+// - added option: IRQ handling in the decoded sound buffer areas (Crash Team Racing)
+//
+// 2004/09/18 - Pete
+// - changed global channel var handling to local pointers (hopefully it will help LDChen's port)
+//
+// 2004/04/22 - Pete
+// - finally fixed frequency modulation and made some cleanups
+//
+// 2003/04/07 - Eric
+// - adjusted cubic interpolation algorithm
+//
+// 2003/03/16 - Eric
+// - added cubic interpolation
+//
+// 2003/03/01 - linuzappz
+// - libraryName changes using ALSA
+//
+// 2003/02/28 - Pete
+// - added option for type of interpolation
+// - adjusted spu irqs again (Thousant Arms, Valkyrie Profile)
+// - added MONO support for MSWindows DirectSound
+//
+// 2003/02/20 - kode54
+// - amended interpolation code, goto GOON could skip initialization of gpos and cause segfault
+//
+// 2003/02/19 - kode54
+// - moved SPU IRQ handler and changed sample flag processing
+//
+// 2003/02/18 - kode54
+// - moved ADSR calculation outside of the sample decode loop, somehow I doubt that
+//   ADSR timing is relative to the frequency at which a sample is played... I guess
+//   this remains to be seen, and I don't know whether ADSR is applied to noise channels...
+//
+// 2003/02/09 - kode54
+// - one-shot samples now process the end block before stopping
+// - in light of removing fmod hack, now processing ADSR on frequency channel as well
+//
+// 2003/02/08 - kode54
+// - replaced easy interpolation with gaussian
+// - removed fmod averaging hack
+// - changed .sinc to be updated from .iRawPitch, no idea why it wasn't done this way already (<- Pete: because I sometimes fail to see the obvious, haharhar :)
+//
+// 2003/02/08 - linuzappz
+// - small bugfix for one usleep that was 1 instead of 1000
+// - added iDisStereo for no stereo (Linux)
+//
+// 2003/01/22 - Pete
+// - added easy interpolation & small noise adjustments
+//
+// 2003/01/19 - Pete
+// - added Neill's reverb
+//
+// 2003/01/12 - Pete
+// - added recording window handlers
+//
+// 2003/01/06 - Pete
+// - added Neill's ADSR timings
+//
+// 2002/12/28 - Pete
+// - adjusted spu irq handling, fmod handling and loop handling
+//
+// 2002/08/14 - Pete
+// - added extra reverb
+//
+// 2002/06/08 - linuzappz
+// - SPUupdate changed for SPUasync
+//
+// 2002/05/15 - Pete
+// - generic cleanup for the Peops release

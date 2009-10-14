@@ -173,6 +173,8 @@ class SPU_struct
 public:
 	SPU_struct();
 
+	u32 mixIrqCounter;
+
 	SPU_chan channels[24];
 	s16 outbuf[100000];
 };
