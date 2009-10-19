@@ -46,12 +46,10 @@ u16 SPUreadDMA(void)
 	spuAddr+=2;
 	if (spuAddr>0x7ffff) spuAddr=0;
 
-	iSpuAsyncWait=0;
-
 	return s;
 }
 
-// READ DMA (many values)
+//READ DMA (many values)
 void SPUreadDMAMem(u16 * pusPSXMem,int iSize)
 {
 	//printf("SPU multi read dma %08X %d\n",spuAddr, iSize);
@@ -63,24 +61,14 @@ void SPUreadDMAMem(u16 * pusPSXMem,int iSize)
 		spuAddr+=2;                                         // inc spu addr
 		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
 	}
-
-	iSpuAsyncWait=0;
-
 }
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
 
 // to investigate: do sound data updates by writedma affect spu
 // irqs? Will an irq be triggered, if new data is written to
 // the memory irq address?
 
-////////////////////////////////////////////////////////////////////////
-// WRITE DMA (one value)
-////////////////////////////////////////////////////////////////////////
-
-void  SPUwriteDMA(u16 val)
+//WRITE DMA (one value)
+void SPUwriteDMA(u16 val)
 {
 	//printf("SPU single write dma %08X\n",spuAddr);
 
@@ -89,15 +77,9 @@ void  SPUwriteDMA(u16 val)
 
 	spuAddr+=2;                                           // inc spu addr
 	if (spuAddr>0x7ffff) spuAddr=0;                       // wrap
-
-	iSpuAsyncWait=0;
-
 }
 
-////////////////////////////////////////////////////////////////////////
-// WRITE DMA (many values)
-////////////////////////////////////////////////////////////////////////
-
+//WRITE DMA (many values)
 void SPUwriteDMAMem(u16 * pusPSXMem,int iSize)
 {
 	//printf("SPU multi write dma %08X %d\n",spuAddr, iSize);
@@ -109,10 +91,6 @@ void SPUwriteDMAMem(u16 * pusPSXMem,int iSize)
 		spuAddr+=2;                                         // inc spu addr
 		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
 	}
-
-	iSpuAsyncWait=0;
-
 }
 
-////////////////////////////////////////////////////////////////////////
 

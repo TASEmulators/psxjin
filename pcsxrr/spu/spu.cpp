@@ -39,21 +39,21 @@
 #include "reverb.h"
 #include "gauss_i.h"
 
+SPU_struct *SPU_core, *SPU_user;
 
-////////////////////////////////////////////////////////////////////////
-// globals
-////////////////////////////////////////////////////////////////////////
+//global spu values
+u16 regArea[10000]; //register cache
+u16 spuMem[256*1024]; //spu memory
 
-// psx buffer / addresses
 
-unsigned short  regArea[10000];
-unsigned short  spuMem[256*1024];
-unsigned char * spuMemC;
-unsigned char * pSpuBuffer;
-unsigned char * pMixIrq=0;
+class ISynchronizingAudioBuffer
+{
+public:
+	virtual void enqueue_samples(s16* buf, int samples_provided) = 0;
 
-bool mixqueue_go;
-std::queue<s16> mixqueue;
+	//returns the number of samples actually supplied, which may not match the number requested
+	virtual int output_samples(s16* buf, int samples_requested) = 0;
+};
 
 template<typename T> inline T _abs(T val)
 {
@@ -73,125 +73,443 @@ template<typename T> inline T moveValueTowards(T val, T target, T incr)
 	return val;
 }
 
-class Adjustobuf
+
+class ZeromusSynchronizer : public ISynchronizingAudioBuffer
 {
 public:
-	Adjustobuf(int _minLatency, int _maxLatency)
-		: size(0)
-		, minLatency(_minLatency)
-		, maxLatency(_maxLatency)
+	ZeromusSynchronizer()
+		: mixqueue_go(false)
+		,
+		#ifdef NDEBUG
+		adjustobuf(200,1000)
+		#else
+		adjustobuf(22000,44000)
+		#endif
 	{
-		rollingTotalSize = 0;
-		targetLatency = (maxLatency + minLatency)/2;
-		rate = 1.0f;
-		cursor = 0.0f;
-		curr[0] = curr[1] = 0;
-		kAverageSize = 80000;
+
 	}
 
-	float rate, cursor;
-	int minLatency, targetLatency, maxLatency;
-	std::queue<s16> buffer;
-	int size;
-	s16 curr[2];
+	bool mixqueue_go;
 
-	std::queue<int> statsHistory;
-
-	void enqueue(s16 left, s16 right) 
+	virtual void enqueue_samples(s16* buf, int samples_provided)
 	{
-		buffer.push(left);
-		buffer.push(right);
-		size++;
+		for(int i=0;i<samples_provided;i++) {
+			s16 left = *buf++;
+			s16 right = *buf++;
+			adjustobuf.enqueue(left,right);
+		}
 	}
 
-	s64 rollingTotalSize;
-
-	int kAverageSize;
-
-	void addStatistic()
+	//returns the number of samples actually supplied, which may not match the number requested
+	virtual int output_samples(s16* buf, int samples_requested)
 	{
-		statsHistory.push(size);
-		rollingTotalSize += size;
-		if(statsHistory.size()>kAverageSize)
+		int done = 0;
+		if(!mixqueue_go) {
+			if(adjustobuf.size > 200)
+				mixqueue_go = true;
+		}
+		else
 		{
-			rollingTotalSize -= statsHistory.front();
-			statsHistory.pop();
-
-			float averageSize = rollingTotalSize / kAverageSize;
-			static int ctr=0;  ctr++; if((ctr&127)==0) printf("avg size: %f curr size: %d rate: %f\n",averageSize,size,rate);
-			{
-				float targetRate;
-				if(averageSize < targetLatency)
-				{
-					targetRate = 1.0f - (targetLatency-averageSize)/kAverageSize;
+			for(int i=0;i<samples_requested;i++) {
+				if(adjustobuf.size==0) {
+					mixqueue_go = false;
+					break;
 				}
-				else if(averageSize > targetLatency) {
-					targetRate = 1.0f + (averageSize-targetLatency)/kAverageSize;
-				} else targetRate = 1.0f;
-			
-				//rate = moveValueTowards(rate,targetRate,0.001f);
-				rate = targetRate;
+				done++;
+				s16 left, right;
+				adjustobuf.dequeue(left,right);
+				*buf++ = left;
+				*buf++ = right;
 			}
-
 		}
-
-
+		
+		return done;
 	}
 
-	void dequeue(s16& left, s16& right)
+private:
+	class Adjustobuf
 	{
-		left = right = 0; 
-		addStatistic();
-		if(size==0) { return; }
-		cursor += rate;
-		while(cursor>1.0f) {
-			cursor -= 1.0f;
-			if(size>0) {
-				curr[0] = buffer.front(); buffer.pop();
-				curr[1] = buffer.front(); buffer.pop();
-				size--;
-			}
+	public:
+		Adjustobuf(int _minLatency, int _maxLatency)
+			: size(0)
+			, minLatency(_minLatency)
+			, maxLatency(_maxLatency)
+		{
+			rollingTotalSize = 0;
+			targetLatency = (maxLatency + minLatency)/2;
+			rate = 1.0f;
+			cursor = 0.0f;
+			curr[0] = curr[1] = 0;
+			kAverageSize = 80000;
 		}
-		left = curr[0]; 
-		right = curr[1];
+
+		float rate, cursor;
+		int minLatency, targetLatency, maxLatency;
+		std::queue<s16> buffer;
+		int size;
+		s16 curr[2];
+
+		std::queue<int> statsHistory;
+
+		void enqueue(s16 left, s16 right) 
+		{
+			buffer.push(left);
+			buffer.push(right);
+			size++;
+		}
+
+		s64 rollingTotalSize;
+
+		u32 kAverageSize;
+
+		void addStatistic()
+		{
+			statsHistory.push(size);
+			rollingTotalSize += size;
+			if(statsHistory.size()>kAverageSize)
+			{
+				rollingTotalSize -= statsHistory.front();
+				statsHistory.pop();
+
+				float averageSize = (float)(rollingTotalSize / kAverageSize);
+				//static int ctr=0;  ctr++; if((ctr&127)==0) printf("avg size: %f curr size: %d rate: %f\n",averageSize,size,rate);
+				{
+					float targetRate;
+					if(averageSize < targetLatency)
+					{
+						targetRate = 1.0f - (targetLatency-averageSize)/kAverageSize;
+					}
+					else if(averageSize > targetLatency) {
+						targetRate = 1.0f + (averageSize-targetLatency)/kAverageSize;
+					} else targetRate = 1.0f;
+				
+					//rate = moveValueTowards(rate,targetRate,0.001f);
+					rate = targetRate;
+				}
+
+			}
+
+
+		}
+
+		void dequeue(s16& left, s16& right)
+		{
+			left = right = 0; 
+			addStatistic();
+			if(size==0) { return; }
+			cursor += rate;
+			while(cursor>1.0f) {
+				cursor -= 1.0f;
+				if(size>0) {
+					curr[0] = buffer.front(); buffer.pop();
+					curr[1] = buffer.front(); buffer.pop();
+					size--;
+				}
+			}
+			left = curr[0]; 
+			right = curr[1];
+		}
+	} adjustobuf;
+};
+
+class NitsujaSynchronizer : public ISynchronizingAudioBuffer
+{
+private:
+	template<typename T>
+	struct ssampT
+	{
+		T l, r;
+		enum { TMAX = (1 << ((sizeof(T) * 8) - 1)) - 1 };
+		ssampT() {}
+		ssampT(T ll, T rr) : l(ll), r(rr) {}
+		template<typename T2>
+		ssampT(ssampT<T2> s) : l(s.l), r(s.r) {}
+		ssampT operator+(const ssampT& rhs)
+		{
+			s32 l2 = l+rhs.l;
+			s32 r2 = r+rhs.r;
+			if(l2 > TMAX) l2 = TMAX;
+			if(l2 < -TMAX) l2 = -TMAX;
+			if(r2 > TMAX) r2 = TMAX;
+			if(r2 < -TMAX) r2 = -TMAX;
+			return ssampT(l2, r2);
+		}
+		ssampT operator/(int rhs)
+		{
+			return ssampT(l/rhs,r/rhs);
+		}
+		ssampT operator*(int rhs)
+		{
+			s32 l2 = l*rhs;
+			s32 r2 = r*rhs;
+			if(l2 > TMAX) l2 = TMAX;
+			if(l2 < -TMAX) l2 = -TMAX;
+			if(r2 > TMAX) r2 = TMAX;
+			if(r2 < -TMAX) r2 = -TMAX;
+			return ssampT(l2, r2);
+		}
+		ssampT muldiv (int num, int den)
+		{
+			num = std::max<T>(0,num);
+			return ssampT(((s32)l * num) / den, ((s32)r * num) / den);
+		}
+		ssampT faded (ssampT rhs, int cur, int start, int end)
+		{
+			if(cur <= start)
+				return *this;
+			if(cur >= end)
+				return rhs;
+
+			//float ang = 3.14159f * (float)(cur - start) / (float)(end - start);
+			//float amt = (1-cosf(ang))*0.5f;
+			//cur = start + (int)(amt * (end - start));
+
+			int inNum = cur - start;
+			int outNum = end - cur;
+			int denom = end - start;
+
+			int lrv = ((int)l * outNum + (int)rhs.l * inNum) / denom;
+			int rrv = ((int)r * outNum + (int)rhs.r * inNum) / denom;
+
+			return ssampT<T>(lrv,rrv);
+		}
+	};
+
+	typedef ssampT<s16> ssamp;
+
+	std::vector<ssamp> sampleQueue;
+
+	// reflects x about y if x exceeds y.
+	FORCEINLINE int reflectAbout(int x, int y)
+	{
+			//return (x)+(x)/(y)*(2*((y)-(x))-1);
+			return (x<y) ? x : (2*y-x-1);
 	}
-} 
-#ifdef NDEBUG
-adjustobuf(200,1000);
-#else
-adjustobuf(22000,44000);
+
+	void emit_samples(s16* outbuf, ssamp* samplebuf, int samples)
+	{
+		for(int i=0;i<samples;i++) {
+			*outbuf++ = samplebuf[i].l;
+			*outbuf++ = samplebuf[i].r;
+		}
+	}
+	 
+public:
+	NitsujaSynchronizer()
+	{}
+
+	virtual void enqueue_samples(s16* buf, int samples_provided)
+	{
+		for(int i=0;i<samples_provided;i++)
+		{
+			sampleQueue.push_back(ssamp(buf[0],buf[1]));
+			buf += 2;
+		}
+	}
+
+	virtual int output_samples(s16* buf, int samples_requested)
+	{
+		int audiosize = samples_requested;
+		int queued = sampleQueue.size();
+		// truncate input and output sizes to 8 because I am too lazy to deal with odd numbers
+		audiosize &= ~7;
+		queued &= ~7;
+
+		if(queued > 0x200 && audiosize > 0) // is there any work to do?
+		{
+			// are we going at normal speed?
+			// or more precisely, are the input and output queues/buffers of similar size?
+			if(queued > 900 || audiosize > queued * 2)
+			{
+				// not normal speed. we have to resample it somehow in this case.
+				static std::vector<ssamp> outsamples;
+				outsamples.clear();
+				if(audiosize <= queued)
+				{
+					// fast forward speed
+					// this is the easy case, just crossfade it and it sounds ok
+					for(int i = 0; i < audiosize; i++)
+					{
+						int j = i + queued - audiosize;
+						ssamp outsamp = sampleQueue[i].faded(sampleQueue[j], i,0,audiosize);
+						outsamples.push_back(ssamp(outsamp));
+					}
+				}
+				else
+				{
+					// slow motion speed
+					// here we take a very different approach,
+					// instead of crossfading it, we select a single sample from the queue
+					// and make sure that the index we use to select a sample is constantly moving
+					// and that it starts at the first sample in the queue and ends on the last one.
+					//
+					// hopefully the index doesn't move discontinuously or we'll get slight crackling
+					// (there might still be a minor bug here that causes this occasionally)
+					//
+					// here's a diagram of how the index we sample from moves:
+					//
+					// queued (this axis represents the index we sample from. the top means the end of the queue)
+					// ^
+					// |   --> audiosize (this axis represents the output index we write to, right meaning forward in output time/position)
+					// |   A           C       C  end
+					//    A A     B   C C     C
+					//   A   A   A B C   C   C
+					//  A     A A   B     C C
+					// A       A           C
+					// start
+					//
+					// yes, this means we are spending some stretches of time playing the sound backwards,
+					// but the stretches are short enough that this doesn't sound weird.
+					// apparently this also sounds less "echoey" or "robotic" than only playing it forwards.
+
+					int midpointX = audiosize >> 1;
+					int midpointY = queued >> 1;
+
+					// all we need to do here is calculate the X position of the leftmost "B" in the above diagram.
+					// TODO: we should calculate it with a simple equation like
+					//   midpointXOffset = min(something,somethingElse);
+					// but it's a little difficult to work it out exactly
+					// so here's a stupid search for the value for now:
+
+					int prevA = 999999;
+					int midpointXOffset = queued/2;
+					while(true)
+					{
+						int a = abs(reflectAbout((midpointX - midpointXOffset) % (queued*2), queued) - midpointY) - midpointXOffset;
+						if(((a > 0) != (prevA > 0) || (a < 0) != (prevA < 0)) && prevA != 999999)
+						{
+							if((a + prevA)&1) // there's some sort of off-by-one problem with this search since we're moving diagonally...
+								midpointXOffset++; // but this fixes it most of the time...
+							break; // found it
+						}
+						prevA = a;
+						midpointXOffset--;
+						if(midpointXOffset < 0)
+						{
+							midpointXOffset = 0;
+							break; // failed somehow? let's just omit the "B" stretch in this case.
+						}
+					}
+					int leftMidpointX = midpointX - midpointXOffset;
+					int rightMidpointX = midpointX + midpointXOffset;
+					int leftMidpointY = reflectAbout((leftMidpointX) % (queued*2), queued);
+					int rightMidpointY = (queued-1) - reflectAbout((((int)audiosize-1 - rightMidpointX + queued*2) % (queued*2)), queued);
+
+					// output the left almost-half of the sound (section "A")
+					for(int x = 0; x < leftMidpointX; x++)
+					{
+						int i = reflectAbout(x % (queued*2), queued);
+						outsamples.push_back(sampleQueue[i]);
+					}
+
+					// output the middle stretch (section "B")
+					int y = leftMidpointY;
+					int dyMidLeft  = (leftMidpointY  < midpointY) ? 1 : -1;
+					int dyMidRight = (rightMidpointY > midpointY) ? 1 : -1;
+					for(int x = leftMidpointX; x < midpointX; x++, y+=dyMidLeft)
+						outsamples.push_back(sampleQueue[y]);
+					for(int x = midpointX; x < rightMidpointX; x++, y+=dyMidRight)
+						outsamples.push_back(sampleQueue[y]);
+
+					// output the end of the queued sound (section "C")
+					for(int x = rightMidpointX; x < audiosize; x++)
+					{
+						int i = (queued-1) - reflectAbout((((int)audiosize-1 - x + queued*2) % (queued*2)), queued);
+						outsamples.push_back(sampleQueue[i]);
+					}
+					assert(outsamples.back().l == sampleQueue[queued-1].l);
+				} //end else
+
+				// if the user SPU mixed some channels, mix them in with our output now
+#ifdef HYBRID_SPU
+				SPU_MixAudio<2>(SPU_user,audiosize);
+				for(int i = 0; i < audiosize; i++)
+					outsamples[i] = outsamples[i] + *(ssamp*)(&SPU_user->outbuf[i*2]);
 #endif
 
-static inline u8 readSpuMem(u32 addr) { return spuMemC[addr]; }
+				emit_samples(buf,&outsamples[0],audiosize);
+				sampleQueue.erase(sampleQueue.begin(), sampleQueue.begin() + queued);
+				return audiosize;
+			}
+			else
+			{
+				// normal speed
+				// just output the samples straightforwardly.
+				//
+				// at almost-full speeds (like 50/60 FPS)
+				// what will happen is that we rapidly fluctuate between entering this branch
+				// and entering the "slow motion speed" branch above.
+				// but that's ok! because all of these branches sound similar enough that we can get away with it.
+				// so the two cases actually complement each other.
+
+				if(audiosize >= queued)
+				{
+#ifdef HYBRID_SPU
+					SPU_MixAudio<2>(SPU_user,queued);
+					for(int i = 0; i < queued; i++)
+						sampleQueue[i] = sampleQueue[i] + *(ssamp*)(&SPU_user->outbuf[i*2]);
+#endif
+					emit_samples(buf,&sampleQueue[0],queued);
+					sampleQueue.erase(sampleQueue.begin(), sampleQueue.begin() + queued);
+					return queued;
+				}
+				else
+				{
+#ifdef HYBRID_SPU
+					SPU_MixAudio<2>(SPU_user,audiosize);
+					for(int i = 0; i < audiosize; i++)
+						sampleQueue[i] = sampleQueue[i] + *(ssamp*)(&SPU_user->outbuf[i*2]);
+#endif
+					emit_samples(buf,&sampleQueue[0],audiosize);
+					sampleQueue.erase(sampleQueue.begin(), sampleQueue.begin()+audiosize);
+					return audiosize;
+				}
+
+			} //end normal speed
+
+		} //end if there is any work to do
+		else
+		{
+			return 0;
+		}
+
+	} //output_samples
+
+private:
+
+}; //NitsujaSynchronizer
+
+//static ISynchronizingAudioBuffer* synchronizer = new ZeromusSynchronizer();
+static ISynchronizingAudioBuffer* synchronizer = new NitsujaSynchronizer();
+
+static inline u8 readSpuMem(u32 addr) { return ((u8*)spuMem)[addr]; }
 
 
 // user settings
 
-int             iUseXA=1;
-int             iVolume=3;
-int             iXAPitch=0;
-int             iUseTimer=0;
-int             iSPUIRQWait=1;
-int             iRecordMode=0;
-int             iUseReverb=1;
-int             iUseInterpolation=2;
-int             iDisStereo=0;
-int             iUseDBufIrq=0;
+int iUseXA=1;
+int iVolume=3;
+int iXAPitch=0;
+int iUseTimer=0;
+int iSPUIRQWait=1;
+int iRecordMode=0;
+int iUseReverb=1;
+int iUseInterpolation=2;
+int iDisStereo=0;
+int iUseDBufIrq=0;
 
-FORCEINLINE bool isStreamingMode() { return iUseTimer==1; }
+FORCEINLINE bool isStreamingMode() { return iUseTimer==2; }
 
 // MAIN infos struct for each channel
 
-unsigned long   dwNoiseVal=1;                          // global noise generator
+u32 dwNoiseVal=1;                          // global noise generator
 
-u16  spuCtrl=0;                             // some vars to store psx reg infos
-unsigned short  spuStat=0;
+u16 spuCtrl=0;                             // some vars to store psx reg infos
+u16 spuStat=0;
 u16 spuIrq=0;
-u32   spuAddr=0xffffffff;                    // address into spu mem
-int             bEndThread=0;                          // thread handlers
-int             bThreadEnded=0;
-int             bSpuInit=0;
-int             bSPUIsOpen=0;
+u32 spuAddr=0xffffffff;                    // address into spu mem
+int bSpuInit=0;
+int bSPUIsOpen=0;
 
 #ifdef _WINDOWS
 HWND    hWMain=0;                                      // window handle
@@ -287,8 +605,6 @@ void SPU_chan::keyoff()
 	//printf("[%02d] keyoff\n",ch);
 	status = CHANSTATUS_KEYOFF;
 }
-
-SPU_struct SPU_core;
 
 //---------------------------------------
 
@@ -405,59 +721,68 @@ static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 {
 	SPUInterpolationMode INTERPOLATE_MODE = (SPUInterpolationMode)iUseInterpolation;
 	float ratio = (float)_ratio;
-	if(INTERPOLATE_MODE == SPUInterpolation_Cosine)
-	{
-		//why did we change it away from the lookup table? somebody should research that
-		ratio = ratio - (int)ratio;
-		double ratio2 = ((1.0 - cos(ratio * M_PI)) * 0.5);
-		//double ratio2 = (1.0f - cos_lut[((int)(ratio*256.0))&0xFF]) / 2.0f;
-		return (s32)(((1-ratio2)*b) + (ratio2*a));
-	}
-	else if(INTERPOLATE_MODE == SPUInterpolation_Linear)
-	{
-		//linear interpolation
-		ratio = ratio - sputrunc(ratio);
-		s32 temp = s32floor((1-ratio)*b + ratio*a);
-		//printf("%d %d %d %f\n",a,b,temp,_ratio);
-		return temp;
-	} else if(INTERPOLATE_MODE == SPUInterpolation_None)
-		return a;
-	else if(INTERPOLATE_MODE == SPUInterpolation_Gaussian)
-	{
-		//I'm not sure whether I am doing this right.. 
-		//low frequency things (try low notes on channel 10 of ff7 prelude song credits screen)
-		//pop a little bit
-		//the bit logic is taken from libopenspc
-		ratio = ratio - sputrunc(ratio);
-		ratio *= 256;
-		s32 index = sputrunc(ratio)*4;
-		s32 result = (gauss[index]*d)&~2047;
-		result += (gauss[index+1]*c)&~2047;
-		result += (gauss[index+2]*b)&~2047;
-		result += (gauss[index+3]*a)&~2047;
-		result = (result>>11)&~1;
-		return result;
-	}
-	else if(INTERPOLATE_MODE == SPUInterpolation_Cubic)
-	{
-		float y0 = d, y1 = c, y2 = b, y3 = a;
-		float mu = ratio - (int)ratio;
-		float mu2 = mu*mu;
-		float a0 = y3 - y2 - y0 + y1;
-		float a1 = y0 - y1 - a0;
-		float a2 = y2 - y0;
-		float a3 = y1;
 
-		float result = a0*mu*mu2+a1*mu2+a2*mu+a3;
-		return (s32)result;
+	switch(INTERPOLATE_MODE)
+	{
+	case SPUInterpolation_None:
+		return a;
+	case SPUInterpolation_Cosine:
+		{
+			//why did we change it away from the lookup table? somebody should research that
+			ratio = ratio - (int)ratio;
+			double ratio2 = ((1.0 - cos(ratio * M_PI)) * 0.5);
+			//double ratio2 = (1.0f - cos_lut[((int)(ratio*256.0))&0xFF]) / 2.0f;
+			return (s32)(((1-ratio2)*b) + (ratio2*a));
+		}
+	case SPUInterpolation_Linear:
+		{
+			//linear interpolation
+			ratio = ratio - sputrunc(ratio);
+			s32 temp = s32floor((1-ratio)*b + ratio*a);
+			//printf("%d %d %d %f\n",a,b,temp,_ratio);
+			return temp;
+		} 
+	case SPUInterpolation_Gaussian:
+		{
+			//I'm not sure whether I am doing this right.. 
+			//low frequency things (try low notes on channel 10 of ff7 prelude song credits screen)
+			//pop a little bit
+			//the bit logic is taken from libopenspc
+			ratio = ratio - sputrunc(ratio);
+			ratio *= 256;
+			s32 index = sputrunc(ratio)*4;
+			s32 result = (gauss[index]*d)&~2047;
+			result += (gauss[index+1]*c)&~2047;
+			result += (gauss[index+2]*b)&~2047;
+			result += (gauss[index+3]*a)&~2047;
+			result = (result>>11)&~1;
+			return result;
+		}
+	case SPUInterpolation_Cubic:
+		{
+			float y0 = d, y1 = c, y2 = b, y3 = a;
+			float mu = ratio - (int)ratio;
+			float mu2 = mu*mu;
+			float a0 = y3 - y2 - y0 + y1;
+			float a1 = y0 - y1 - a0;
+			float a2 = y2 - y0;
+			float a3 = y1;
+
+			float result = a0*mu*mu2+a1*mu2+a2*mu+a3;
+			return (s32)result;
+		}
+	default:
+		return 0;
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 //triggers an irq if the irq address is in the specified range
-void triggerIrqRange(u32 base, u32 size)
+void SPU_struct::triggerIrqRange(u32 base, u32 size)
 {
+	if(!isCore) return;
+
 	//can't trigger an irq without the flag enabled
 	if(!(spuCtrl&0x40)) return;
 
@@ -468,8 +793,6 @@ void triggerIrqRange(u32 base, u32 size)
 	}
 }
 
-int iSpuAsyncWait=0;
-
 SPU_chan::SPU_chan()
 	: status(CHANSTATUS_STOPPED)
 	, bFMod(FALSE)
@@ -478,7 +801,8 @@ SPU_chan::SPU_chan()
 {
 }
 
-SPU_struct::SPU_struct()
+SPU_struct::SPU_struct(bool _isCore)
+: isCore(_isCore)
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
@@ -487,7 +811,7 @@ SPU_struct::SPU_struct()
 	mixIrqCounter = 0;
 }
 
-void SPU_chan::decodeBRR(s32* out)
+s32 SPU_chan::decodeBRR(SPU_struct* spu)
 {
 	//find out which block we need and decode a new one if necessary.
 	//it is safe to only check for overflow once since we can only play samples at +2 octaves (4x too fast)
@@ -509,13 +833,13 @@ restart:
 			//either that, or the hardware always reads the block referenced by loop target even if the sample is ending.
 			//thousand arms will need this in order to trigger the very first voiceover
 			//should this be 1 or 16? equality or range?
-			triggerIrqRange(loopStartAddr,16);
+			spu->triggerIrqRange(loopStartAddr,16);
 
 			//when the old spu would kill a sound this way, it was immediate.
 			//maybe adsr release is only for keyoff
 			if(flags != 3) {
 				status = CHANSTATUS_STOPPED;
-				return;
+				return 0;
 			}
 			else {
 				//printf("[%02d] looping to %d\n",ch,loopStartAddr);
@@ -534,7 +858,7 @@ restart:
 
 		//this will be tested by the impressive valkyrie profile new game sound
 		//which is large and apparently streams in
-		triggerIrqRange(blockAddress,16);
+		spu->triggerIrqRange(blockAddress,16);
 
 		u8 header0 = readSpuMem(blockAddress);
 		
@@ -591,19 +915,15 @@ restart:
 		s16 b = block[(sampnum-1)&31];
 		s16 c = block[(sampnum-2)&31];
 		s16 d = block[(sampnum-3)&31];
-		*out = Interpolate(a,b,c,d,smpcnt);
+		return Interpolate(a,b,c,d,smpcnt);
 	}
-	else *out = block[sampnum];
+	else return block[sampnum];
 
 	//printf("%d\n",*out);
 }
 
-void decodeBRR(SPU_chan* chan, s32* out)
-{
-	chan->decodeBRR(out);
-}
 
-void mixAudio(SPU_struct* spu, int length)
+void mixAudio(bool kill, SPU_struct* spu, int length)
 {
 	memset(spu->outbuf, 0, length*4*2);
 
@@ -626,9 +946,9 @@ void mixAudio(SPU_struct* spu, int length)
 
 			s32 samp;
 			if(chan->bNoise)
-				samp=iGetNoiseVal(chan);
+				samp = iGetNoiseVal(chan);
 			else
-				decodeBRR(chan,&samp);
+				samp = chan->decodeBRR(spu);
 
 
 			s32 adsrLevel = MixADSR(chan);
@@ -678,12 +998,14 @@ void mixAudio(SPU_struct* spu, int length)
 			left_accum += left;
 			right_accum += right;
 
-			if (chan->bRVBActive) 
-				StoreREVERB(chan,left,right);
+			if(!kill)
+				if (chan->bRVBActive) 
+					StoreREVERB(chan,left,right);
 		} //channel loop
 
-		left_accum += MixREVERBLeft();
-		right_accum += MixREVERBRight();
+		if(!kill)
+			left_accum += MixREVERBLeft();
+			right_accum += MixREVERBRight();
 
 		{
 			s32 left, right;
@@ -699,14 +1021,15 @@ void mixAudio(SPU_struct* spu, int length)
 			right_accum = 0;
 		}
 
-		s16 left_out = limit(left_accum);
-		s16 right_out = limit(right_accum);
+		s16 output[] = { limit(left_accum), limit(right_accum) };
 
 		if(isStreamingMode())
-			adjustobuf.enqueue(left_out,right_out);
+			synchronizer->enqueue_samples(output,1);
 		else
-			spu->outbuf[j*2] = left_out;
-			spu->outbuf[j*2+1] = right_out;
+		{
+			spu->outbuf[j*2] = output[0];
+			spu->outbuf[j*2+1] = output[1];
+		}
 
 		//fwrite(&left_out,2,1,wavout);
 		//fwrite(&right_out,2,1,wavout);
@@ -728,13 +1051,16 @@ void mixAudio(SPU_struct* spu, int length)
 		// (or 0x400 offsets of this pointer) hits the spuirq address, we generate
 		// an IRQ. 
 
-		triggerIrqRange(spu->mixIrqCounter,2);
-		triggerIrqRange(spu->mixIrqCounter+0x400,2);
-		triggerIrqRange(spu->mixIrqCounter+0x800,2);
-		triggerIrqRange(spu->mixIrqCounter+0xC00,2);
+		if(spu->isCore)
+		{
+			spu->triggerIrqRange(spu->mixIrqCounter,2);
+			spu->triggerIrqRange(spu->mixIrqCounter+0x400,2);
+			spu->triggerIrqRange(spu->mixIrqCounter+0x800,2);
+			spu->triggerIrqRange(spu->mixIrqCounter+0xC00,2);
 
-		spu->mixIrqCounter += 2;
-		spu->mixIrqCounter &= 0x3FF;
+			spu->mixIrqCounter += 2;
+			spu->mixIrqCounter &= 0x3FF;
+		}
 
 	} //sample loop
 
@@ -747,398 +1073,6 @@ void mixAudio(SPU_struct* spu, int length)
 	//printf("\n");
 }
 
-//static VOID MAINProc(UINT nTimerId,UINT msg,DWORD dwUser,DWORD dwParam1, DWORD dwParam2)
-//{
-//	int s_1,s_2,fa,ns,voldiv=iVolume;
-//	unsigned char * start;
-//	unsigned int nSample;
-//	int ch,predict_nr,shift_factor,flags,d,s;
-//	int bIRQReturn=0;
-//	SPUCHAN * pChannel;
-//
-//
-//	//while (!bEndThread)                                   // until we are shutting down
-//	{
-//		//--------------------------------------------------//
-//		// ok, at the beginning we are looking if there is
-//		// enuff free place in the dsound/oss buffer to
-//		// fill in new data, or if there is a new channel to start.
-//		// if not, we wait (thread) or return (timer/spuasync)
-//		// until enuff free place is available/a new channel gets
-//		// started
-//
-//		if (dwNewChannel)                                   // new channel should start immedately?
-//		{                                                  // (at least one bit 0 ... MAXCHANNEL is set?)
-//			iSecureStart++;                                   // -> set iSecure
-//			if (iSecureStart>5) iSecureStart=0;               //    (if it is set 5 times - that means on 5 tries a new samples has been started - in a row, we will reset it, to give the sound update a chance)
-//		}
-//		else iSecureStart=0;                                // 0: no new channel should start
-//
-//		while (!iSecureStart && !bEndThread &&              // no new start? no thread end?
-//		       (SoundGetBytesBuffered()>TESTSIZE))          // and still enuff data in sound buffer?
-//		{
-//			iSecureStart=0;                                   // reset secure
-//
-//			//TODO ZERO - removed this mode
-////#ifdef _WINDOWS
-////     if(iUseTimer)                                     // no-thread mode?
-////      {
-////       if(iUseTimer==1)                                // -> ok, timer mode 1: setup a oneshot timer of x ms to wait
-////        timeSetEvent(PAUSE_W,1,MAINProc,0,TIME_ONESHOT);
-////       return;                                         // -> and done this time (timer mode 1 or 2)
-////      }
-////                                                       // win thread mode:
-////     Sleep(PAUSE_W);                                   // sleep for x ms (win)
-////#else
-////     if(iUseTimer) return 0;                           // linux no-thread mode? bye
-////     usleep(PAUSE_L);                                  // else sleep for x ms (linux)
-////#endif
-//
-//			if (dwNewChannel) iSecureStart=1;                 // if a new channel kicks in (or, of course, sound buffer runs low), we will leave the loop
-//		}
-//
-//		//--------------------------------------------------// continue from irq handling in timer mode?
-//
-//		if (lastch>=0)                                      // will be -1 if no continue is pending
-//		{
-//			ch=lastch;
-//			ns=lastns;
-//			lastch=-1;                  // -> setup all kind of vars to continue
-//			pChannel=&s_chan[ch];
-//			goto GOON;                                        // -> directly jump to the continue point
-//		}
-//
-//		//--------------------------------------------------//
-//		//- main channel loop                              -//
-//		//--------------------------------------------------//
-//		{
-//			pChannel=s_chan;
-//			for (ch=0;ch<MAXCHAN;ch++,pChannel++)             // loop em all... we will collect 1 ms of sound of each playing channel
-//			{
-//				if (pChannel->bNew)
-//				{
-//					StartSound(pChannel);                         // start new sound
-//					dwNewChannel&=~(1<<ch);                       // clear new channel bit
-//				}
-//
-//				if (!pChannel->bOn) continue;                   // channel not playing? next
-//
-//				if (pChannel->iActFreq!=pChannel->iUsedFreq)    // new psx frequency?
-//					VoiceChangeFrequency(pChannel);
-//
-//				ns=0;
-//				while (ns<NSSIZE)                               // loop until 1 ms of data is reached
-//				{
-//					if (pChannel->bFMod==1 && iFMod[ns])          // fmod freq channel
-//						FModChangeFrequency(pChannel,ns);
-//
-//					while (pChannel->spos>=0x10000L)
-//					{
-//						if (pChannel->iSBPos==28)                   // 28 reached?
-//						{
-//							start=pChannel->pCurr;                    // set up the current pos
-//
-//							if (start == (unsigned char*)-1)          // special "stop" sign
-//							{
-//								pChannel->bOn=0;                        // -> turn everything off
-//								pChannel->ADSRX.lVolume=0;
-//								pChannel->ADSRX.EnvelopeVol=0;
-//								goto ENDX;                              // -> and done for this channel
-//							}
-//
-//							pChannel->iSBPos=0;
-//
-//							//////////////////////////////////////////// spu irq handler here? mmm... do it later
-//
-//							s_1=pChannel->s_1;
-//							s_2=pChannel->s_2;
-//
-//							predict_nr=(int)*start;
-//							start++;
-//							shift_factor=predict_nr&0xf;
-//							predict_nr >>= 4;
-//							flags=(int)*start;
-//							start++;
-//
-//							// -------------------------------------- //
-//
-//							for (nSample=0;nSample<28;start++)
-//							{
-//								d=(int)*start;
-//								s=((d&0xf)<<12);
-//								if (s&0x8000) s|=0xffff0000;
-//
-//								fa=(s >> shift_factor);
-//								fa=fa + ((s_1 * f[predict_nr][0])>>6) + ((s_2 * f[predict_nr][1])>>6);
-//								s_2=s_1;
-//								s_1=fa;
-//								s=((d & 0xf0) << 8);
-//
-//								pChannel->SB[nSample++]=fa;
-//
-//								if (s&0x8000) s|=0xffff0000;
-//								fa=(s>>shift_factor);
-//								fa=fa + ((s_1 * f[predict_nr][0])>>6) + ((s_2 * f[predict_nr][1])>>6);
-//								s_2=s_1;
-//								s_1=fa;
-//
-//								pChannel->SB[nSample++]=fa;
-//							}
-//
-//							//////////////////////////////////////////// irq check
-//
-//							if ((spuCtrl&0x40))        // some callback and irq active?
-//							{
-//								if ((pSpuIrq >  start-16 &&             // irq address reached?
-//								     pSpuIrq <= start) ||
-//								    ((flags&1) &&                        // special: irq on looping addr, when stop/loop flag is set
-//								     (pSpuIrq >  pChannel->pLoop-16 &&
-//								      pSpuIrq <= pChannel->pLoop)))
-//								{
-//									pChannel->iIrqDone=1;                 // -> debug flag
-//									if (!iNoDesyncMode)
-//										irqCallback();                        // -> call main emu
-//
-//									if (iSPUIRQWait)                      // -> option: wait after irq for main emu
-//									{
-//										iSpuAsyncWait=1;
-//										bIRQReturn=1;
-//									}
-//								}
-//							}
-//
-//							//////////////////////////////////////////// flag handler
-//
-//							if ((flags&4) && (!pChannel->bIgnoreLoop))
-//								pChannel->pLoop=start-16;                // loop adress
-//
-//							if (flags&1)                              // 1: stop/loop
-//							{
-//								// We play this block out first...
-//								//if(!(flags&2))                          // 1+2: do loop... otherwise: stop
-//								if (flags!=3 || pChannel->pLoop==NULL)  // PETE: if we don't check exactly for 3, loop hang ups will happen (DQ4, for example)
-//								{                                      // and checking if pLoop is set avoids crashes, yeah
-//									start = (unsigned char*)-1;
-//								}
-//								else
-//								{
-//									start = pChannel->pLoop;
-//								}
-//							}
-//
-//							pChannel->pCurr=start;                    // store values for next cycle
-//							pChannel->s_1=s_1;
-//							pChannel->s_2=s_2;
-//
-//							////////////////////////////////////////////
-//
-//							if (bIRQReturn)                           // special return for "spu irq - wait for cpu action"
-//							{
-//								bIRQReturn=0;
-//               if(iUseTimer!=2)
-//                { 
-//                 DWORD dwWatchTime=timeGetTime()+2500;
-//                 while(iSpuAsyncWait && !bEndThread && 
-//                       timeGetTime()<dwWatchTime)
-//#ifdef _WINDOWS
-//                     Sleep(1);
-//#else
-//                     usleep(1000L);
-//#endif
-//                }
-//               else
-//                {
-//								lastch=ch;
-//								lastns=ns;
-//
-//#ifdef _WINDOWS
-//								return;
-//#else
-//								return 0;
-//#endif
-//							}
-//              }
-//
-//							////////////////////////////////////////////
-//
-//GOON: ;
-//
-//						}
-//
-//						fa=pChannel->SB[pChannel->iSBPos++];        // get sample data
-//
-//						StoreInterpolationVal(pChannel,fa);         // store val for later interpolation
-//
-//						pChannel->spos -= 0x10000L;
-//					}
-//
-//					////////////////////////////////////////////////
-//
-//					if (pChannel->bNoise)
-//						fa=iGetNoiseVal(pChannel);               // get noise val
-//					else fa=iGetInterpolationVal(pChannel);       // get sample val
-//
-//					pChannel->sval=(MixADSR(pChannel)*fa)/1023;   // mix adsr
-//
-//					if (pChannel->bFMod==2)                       // fmod freq channel
-//						iFMod[ns]=pChannel->sval;                    // -> store 1T sample data, use that to do fmod on next channel
-//					else                                          // no fmod freq channel
-//					{
-//						//////////////////////////////////////////////
-//						// ok, left/right sound volume (psx volume goes from 0 ... 0x3fff)
-//
-//						if (pChannel->iMute)
-//							pChannel->sval=0;                         // debug mute
-//						else
-//						{
-//							SSumL[ns]+=(pChannel->sval*pChannel->iLeftVolume)/0x4000L;
-//							SSumR[ns]+=(pChannel->sval*pChannel->iRightVolume)/0x4000L;
-//						}
-//
-//						//////////////////////////////////////////////
-//						// now let us store sound data for reverb
-//
-//						if (pChannel->bRVBActive) StoreREVERB(pChannel,ns);
-//					}
-//
-//					////////////////////////////////////////////////
-//					// ok, go on until 1 ms data of this channel is collected
-//
-//					ns++;
-//					pChannel->spos += pChannel->sinc;
-//
-//				}
-//ENDX:   ;                                                      
-//			}
-//		}
-//
-//		//---------------------------------------------------//
-//		//- here we have another 1 ms of sound data
-//		//---------------------------------------------------//
-//		// mix XA infos (if any)
-//
-//		if (XAPlay!=XAFeed || XARepeat) MixXA();
-//
-//		///////////////////////////////////////////////////////
-//		// mix all channels (including reverb) into one buffer
-//
-//		if (iDisStereo)                                      // no stereo?
-//		{
-//			int dl,dr;
-//			for (ns=0;ns<NSSIZE;ns++)
-//			{
-//				SSumL[ns]+=MixREVERBLeft(ns);
-//
-//				if (voldiv==5)
-//					dl=0;
-//				else
-//					dl=SSumL[ns]/voldiv;
-//				SSumL[ns]=0;
-//				if (dl<-32767) dl=-32767;
-//				if (dl>32767) dl=32767;
-//
-//				SSumR[ns]+=MixREVERBRight();
-//
-//				if (voldiv==5)
-//					dr=0;
-//				else
-//					dr=SSumR[ns]/voldiv;
-//				SSumR[ns]=0;
-//				if (dr<-32767) dr=-32767;
-//				if (dr>32767) dr=32767;
-//				*pS++=(dl+dr)/2;
-//			}
-//		}
-//		else                                                 // stereo:
-//			for (ns=0;ns<NSSIZE;ns++)
-//			{
-//				SSumL[ns]+=MixREVERBLeft(ns);
-//
-//				if (voldiv==5)
-//					d=0;
-//				else
-//					d=SSumL[ns]/voldiv;
-//				SSumL[ns]=0;
-//				if (d<-32767) d=-32767;
-//				if (d>32767) d=32767;
-//				*pS++=d;
-//
-//				SSumR[ns]+=MixREVERBRight();
-//
-//				if (voldiv==5)
-//					d=0;
-//				else
-//					d=SSumR[ns]/voldiv;
-//				SSumR[ns]=0;
-//				if (d<-32767) d=-32767;
-//				if (d>32767) d=32767;
-//				*pS++=d;
-//			}
-//
-//		//////////////////////////////////////////////////////
-//		// special irq handling in the decode buffers (0x0000-0x1000)
-//		// we know:
-//		// the decode buffers are located in spu memory in the following way:
-//		// 0x0000-0x03ff  CD audio left
-//		// 0x0400-0x07ff  CD audio right
-//		// 0x0800-0x0bff  Voice 1
-//		// 0x0c00-0x0fff  Voice 3
-//		// and decoded data is 16 bit for one sample
-//		// we assume:
-//		// even if voices 1/3 are off or no cd audio is playing, the internal
-//		// play positions will move on and wrap after 0x400 bytes.
-//		// Therefore: we just need a pointer from spumem+0 to spumem+3ff, and
-//		// increase this pointer on each sample by 2 bytes. If this pointer
-//		// (or 0x400 offsets of this pointer) hits the spuirq address, we generate
-//		// an IRQ. Only problem: the "wait for cpu" option is kinda hard to do here
-//		// in some of Peops timer modes. So: we ignore this option here (for now).
-//		// Also note: we abuse the channel 0-3 irq debug display for those irqs
-//		// (since that's the easiest way to display such irqs in debug mode :))
-//
-//		if (pMixIrq)                          // pMixIRQ will only be set, if the config option is active
-//		{
-//			for (ns=0;ns<NSSIZE;ns++)
-//			{
-//				if ((spuCtrl&0x40) && pSpuIrq && pSpuIrq<spuMemC+0x1000)
-//				{
-//					for (ch=0;ch<4;ch++)
-//					{
-//						if (pSpuIrq>=pMixIrq+(ch*0x400) && pSpuIrq<pMixIrq+(ch*0x400)+2)
-//						{
-//							irqCallback();
-//							s_chan[ch].iIrqDone=1;
-//						}
-//					}
-//				}
-//				pMixIrq+=2;
-//				if (pMixIrq>spuMemC+0x3ff) pMixIrq=spuMemC;
-//			}
-//		}
-//
-//		InitREVERB();
-//
-//		//////////////////////////////////////////////////////
-//		// feed the sound
-//		// wanna have around 1/60 sec (16.666 ms) updates
-//
-//		if (iCycle++>16)
-//		{
-//			SoundFeedStreamData((unsigned char*)pSpuBuffer,
-//			                    ((unsigned char *)pS)-
-//			                    ((unsigned char *)pSpuBuffer));
-//			pS=(short *)pSpuBuffer;
-//			iCycle=0;
-//		}
-//	}
-//
-//// end of big main loop...
-//
-//	bThreadEnded=1;
-//
-//#ifndef _WINDOWS
-//	return 0;
-//#endif
-//}
 
 //measured 16123034 cycles per second
 //this is around 15.3761 MHZ
@@ -1155,44 +1089,79 @@ void SPUasync(unsigned long cycle)
 	u32 SNDDXGetAudioSpace();
 	u32 len = SNDDXGetAudioSpace();
 
+	mixtime += samples_per_cycle*cycle;
+	int mixtodo = (int)mixtime;
+	mixtime -= mixtodo;
+
 	if(isStreamingMode())
 	{
-		mixtime += samples_per_cycle*cycle;
-		int mixtodo = (int)mixtime;
-		mixtime -= mixtodo;
-
 		//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
 
-		mixAudio(&SPU_core,mixtodo);
-		
-		if(!mixqueue_go) {
-			if(adjustobuf.size > 200)
-				mixqueue_go = true;
-		}
-		else
-		{
-			s16 sample[2];
+		mixAudio(false,SPU_core,mixtodo);
 
-			for(u32 i=0;i<len;i++) {
-				if(adjustobuf.size==0) {
-					mixqueue_go = false;
-					break;
-				}
-				adjustobuf.dequeue(sample[0],sample[1]);
-				void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
-				SNDDXUpdateAudio(sample,1);
-			}
+		//u32 todo = len;
+		//printf("%d\n",len);
+		//while(todo>0)
+		//{
+		//	//8 is chosen to accomodate nitsuja's synchronizer
+		//	if(todo<8) { printf("todo<8\n"); break; }
+		//	u32 unit = 8;
+		//	todo -= unit;
+		//	printf("-- %d\n",todo);
+		//	s16 sample[16];
+		//	int done = synchronizer->output_samples(sample,unit);
+		//	if(done) {
+		//		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+		//		for(int j=0;j<done;j++)
+		//			SNDDXUpdateAudio(&sample[j*2],1);
+		//	}
+		//	if(done<(int)unit) { 
+		//		printf("done<unit ( %d<%d) \n", done, unit); break;
+		//	}
+		//}
+
+		if(len>0)
+		{
+			static std::vector<s16> outbuf;
+			if(outbuf.size() < len*2)
+				outbuf.resize(len*2
+				);
+
+			int done = synchronizer->output_samples(&outbuf[0],len);
+			void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+			for(int j=0;j<done;j++)
+				SNDDXUpdateAudio(&outbuf[j*2],1);
 		}
+
+		//for(u32 i=0;i<len;i++) {
+		//	s16 sample[2];
+		//	int done = synchronizer->output_samples(sample,1);
+		//	if(done) {
+		//		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+		//		SNDDXUpdateAudio(sample,1);
+		//	} else break;
+		//}
+
 	}
 	else
 	{
-		mixAudio(&SPU_core,len);
-		
 		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
-		SNDDXUpdateAudio(SPU_core.outbuf,len);
+		if(iUseTimer==1)
+		{
+			//dual synch/asynch mode
+			//(do timing with core and mixing with user)
+			mixAudio(false,SPU_user,len);
+			mixAudio(true,SPU_core,mixtodo);
+			SNDDXUpdateAudio(SPU_user->outbuf,len);
+		}
+		else
+		{
+			//pure asynch mode
+			mixAudio(false,SPU_core,len);
+			SNDDXUpdateAudio(SPU_core->outbuf,len);
+		}
+		
 	}
-
-
 }
 
 
@@ -1212,20 +1181,13 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 	FeedXA(xap);                                          // call main XA feeder
 }
 
-////////////////////////////////////////////////////////////////////////
-// INIT/EXIT STUFF
-////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////
-// SPUINIT: this func will be called first by the main emu
-////////////////////////////////////////////////////////////////////////
-
+//this func will be called first by the main emu
 long SPUinit(void)
 {
-	mixtime = 0;
-	mixqueue_go = false;
 	//wavout = fopen("c:\\pcsx.raw","wb");
-	spuMemC=(unsigned char *)spuMem;                      // just small setup
+	SPU_core = new SPU_struct(true);
+	SPU_user = new SPU_struct(false);
+	mixtime = 0;
 	InitADSR();
 	return 0;
 }
@@ -1292,9 +1254,6 @@ long SPUopen(void)
 	iVolume=3;
 	spuIrq=0;
 	spuAddr=0xffffffff;
-	bEndThread=0;
-	bThreadEnded=0;
-	spuMemC=(unsigned char *)spuMem;
 	iSPUIRQWait=1;
 
 #ifdef _WINDOWS

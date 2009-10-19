@@ -395,6 +395,8 @@ static int recInit() {
 	{
 		DWORD ass;
 		VirtualProtect(recMem,RECMEM_SIZE,PAGE_EXECUTE_READWRITE,&ass);
+		//VirtualProtect(recRAM,0x200000,PAGE_EXECUTE_READWRITE,&ass);
+		//VirtualProtect(recROM,0x080000,PAGE_EXECUTE_READWRITE,&ass);
 	}
 	#endif
 
@@ -468,6 +470,10 @@ __inline static void execute() {
 
 		if (*recFunc == 0) {
 			recRecompile();
+		}
+		if((u32)*recFunc==0x01d30be0)
+		{
+			int zzz=9;
 		}
 		(*recFunc)();
 	}
@@ -1831,9 +1837,10 @@ static void recSH() {
 				}
 				PUSH32I  (addr);
 				CALLFunc  ((u32)SPUwriteRegister);
-#ifndef __WIN32__
+//zeromus 19-oct-2009 - where did this come from?? i had to comment it out to fix dynarec
+//#ifndef __WIN32__
 				resp+= 8;
-#endif
+//#endif
 				return;
 			}
 		}

@@ -193,21 +193,8 @@ void NoiseOn(SPU_struct* spu, int start,int end,unsigned short val)
 	}
 }
 
-
-////////////////////////////////////////////////////////////////////////
-// WRITE REGISTERS: called by main emu
-////////////////////////////////////////////////////////////////////////
-
-void SPUwriteRegister(u32 reg, u16 val)
+void SPU_struct::writeRegister(u32 r, u16 val)
 {
-	const u32 r=reg&0xfff;
-
-	//printf("write reg %08x %04x\n",r,val);
-
-	//cache a copy of the register for reading back.
-	//we have no reason yet to doubt that this will work.
-	regArea[(r-0xc00)>>1] = val;
-
 	//channel parameters range:
 	if (r>=0x0c00 && r<0x0d80)
 	{
@@ -217,38 +204,38 @@ void SPUwriteRegister(u32 reg, u16 val)
 		{
 		case 0x0:
 			//left volume
-			SetVolume(&SPU_core, true, ch,val);
+			SetVolume(this, true, ch,val);
 			break;
 		case 0x2:
 			//right volume
-			SetVolume(&SPU_core, false, ch,val);
+			SetVolume(this, false, ch,val);
 			break;
 		case 0x4:
 			// pitch
-			SetPitch(&SPU_core, ch, val);
+			SetPitch(this, ch, val);
 			break;
 		case 0x6:
 			// start
-			SetStart(&SPU_core, ch, val);
+			SetStart(this, ch, val);
 			break;
 			
 		case 0x8:
 		{
-			// level with pre-calcs
-			SPU_core.channels[ch].ADSR.AttackModeExp = (val&0x8000)?1:0;
-			SPU_core.channels[ch].ADSR.AttackRate = ((val>>8) & 0x007f)^0x7f;
-			SPU_core.channels[ch].ADSR.DecayRate = 4*(((val>>4) & 0x000f)^0x1f);
-			SPU_core.channels[ch].ADSR.SustainLevel = (val & 0x000f) << 27;
+			//level with pre-calcs
+			channels[ch].ADSR.AttackModeExp = (val&0x8000)?1:0;
+			channels[ch].ADSR.AttackRate = ((val>>8) & 0x007f)^0x7f;
+			channels[ch].ADSR.DecayRate = 4*(((val>>4) & 0x000f)^0x1f);
+			channels[ch].ADSR.SustainLevel = (val & 0x000f) << 27;
 		}
 		break;
 		case 0x0A:
 		{
-			// adsr times with pre-calcs
-			SPU_core.channels[ch].ADSR.SustainModeExp = (val&0x8000)?1:0;
-			SPU_core.channels[ch].ADSR.SustainIncrease= (val&0x4000)?0:1;
-			SPU_core.channels[ch].ADSR.SustainRate = ((val>>6) & 0x007f)^0x7f;
-			SPU_core.channels[ch].ADSR.ReleaseModeExp = (val&0x0020)?1:0;
-			SPU_core.channels[ch].ADSR.ReleaseRate = 4*((val & 0x001f)^0x1f);
+			//adsr times with pre-calcs
+			channels[ch].ADSR.SustainModeExp = (val&0x8000)?1:0;
+			channels[ch].ADSR.SustainIncrease= (val&0x4000)?0:1;
+			channels[ch].ADSR.SustainRate = ((val>>6) & 0x007f)^0x7f;
+			channels[ch].ADSR.ReleaseModeExp = (val&0x0020)?1:0;
+			channels[ch].ADSR.ReleaseRate = 4*((val & 0x001f)^0x1f);
 		}
 		break;
 		
@@ -258,7 +245,7 @@ void SPUwriteRegister(u32 reg, u16 val)
 			break;
 		case 0x0E: 
 			//this can be tested nicely in the ff7 intro credits screen where the harp won't work unless this gets set
-			SPU_core.channels[ch].loopStartAddr = val<<3;
+			channels[ch].loopStartAddr = val<<3;
 			//if(val!=0) printf("[%02d] Loopstart set to %d\n",ch,val<<3);
 			break;
 		}
@@ -266,6 +253,22 @@ void SPUwriteRegister(u32 reg, u16 val)
 		return;
 	}
 
+	switch(r)
+	{
+		case H_FMod1: FModOn(this,0,16,val); return;
+		case H_FMod2: FModOn(this,16,24,val); return;
+		case H_Noise1: NoiseOn(this,0,16,val); return;
+		case H_Noise2: NoiseOn(this,16,24,val); return;
+		case H_RVBon1: ReverbOn(this,0,16,val); return;
+		case H_RVBon2: ReverbOn(this,16,24,val); return;
+		case H_SPUon1: SoundOn(this,0,16,val); return;
+		case H_SPUon2: SoundOn(this,16,24,val); return;
+		case H_SPUoff1: SoundOff(this,0,16,val); return;
+		case H_SPUoff2: SoundOff(this,16,24,val); return;
+	}
+
+	if(this != SPU_core) return;
+	
 	switch (r)
 	{
 	case H_SPUaddr:
@@ -342,22 +345,6 @@ void SPUwriteRegister(u32 reg, u16 val)
 		      break;
 		*/
 	
-	case H_SPUon1:
-		SoundOn(&SPU_core,0,16,val);
-		break;
-
-	case H_SPUon2:
-		SoundOn(&SPU_core,16,24,val);
-		break;
-
-	case H_SPUoff1:
-		SoundOff(&SPU_core,0,16,val);
-		break;
-
-	case H_SPUoff2:
-		SoundOff(&SPU_core,16,24,val);
-		break;
-
 	case H_CDLeft:
 		iLeftXAVol=val  & 0x7fff;
 		if (cddavCallback) cddavCallback(0,val);
@@ -368,29 +355,6 @@ void SPUwriteRegister(u32 reg, u16 val)
 		if (cddavCallback) cddavCallback(1,val);
 		break;
 
-	case H_FMod1:
-		FModOn(&SPU_core,0,16,val);
-		break;
-
-	case H_FMod2:
-		FModOn(&SPU_core,16,24,val);
-		break;
-
-	case H_Noise1:
-		NoiseOn(&SPU_core,0,16,val);
-		break;
-
-	case H_Noise2:
-		NoiseOn(&SPU_core,16,24,val);
-		break;
-
-	case H_RVBon1:
-		ReverbOn(&SPU_core,0,16,val);
-		break;
-
-	case H_RVBon2:
-		ReverbOn(&SPU_core,16,24,val);
-		break;
 
 	case H_Reverb+0:
 		rvb.FB_SRC_A=val;
@@ -489,7 +453,22 @@ void SPUwriteRegister(u32 reg, u16 val)
 		rvb.IN_COEF_R=(s16)val;
 		break;
 	}
+}
 
+//WRITE REGISTERS: called by main emu
+void SPUwriteRegister(u32 reg, u16 val)
+{
+	const u32 r=reg&0xfff;
+
+	//printf("write reg %08x %04x\n",r,val);
+
+	//cache a copy of the register for reading back.
+	//we have no reason yet to doubt that this will work.
+	regArea[(r-0xc00)>>1] = val;
+
+	SPU_core->writeRegister(r,val);
+	//if(SPU_user)
+	//	SPU_user->writeRegister(r,val);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -521,13 +500,13 @@ u16 SPUreadRegister(u32 reg)
 				//since the game will choose to cut out the flute lead sound to play other instruments.
 				//with this here, the game knows that the sound isnt dead yet.
 
-				return (u16)(((u32)SPU_core.channels[ch].ADSR.EnvelopeVol)>>16);
+				return (u16)(((u32)SPU_core->channels[ch].ADSR.EnvelopeVol)>>16);
 			}
 
 			case 0x0E: {
 				// get loop address
 				printf("SPUreadRegister: reading ch %02d loop address\n");
-				return SPU_core.channels[ch].loopStartAddr;
+				return SPU_core->channels[ch].loopStartAddr;
 			}
 		}
 	} //end individual channel regs

@@ -141,9 +141,9 @@ void SPUfreeze_new(EMUFILE* fp)
 	fp->write32le(spuAddr);
 	fp->write16le(spuIrq);
 
-	fp->write32le(&SPU_core.mixIrqCounter);
+	fp->write32le(&SPU_core->mixIrqCounter);
 
-	for(int i=0;i<MAXCHAN;i++) SPU_core.channels[i].save(fp);
+	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].save(fp);
 
 	//this is a bit odd. xa playback needs to be reengineered so its less finicky
 	//and so that it uses a proper fifo which can save its state
@@ -166,9 +166,9 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	fp->read32le(&spuAddr);
 	fp->read16le(&spuIrq);
 
-	if(version>=1) fp->read32le(&SPU_core.mixIrqCounter);
+	if(version>=1) fp->read32le(&SPU_core->mixIrqCounter);
 
-	for(int i=0;i<MAXCHAN;i++) SPU_core.channels[i].load(fp);
+	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].load(fp);
 
 	//this is WRONG. this state needs to be independent of xapGlobal.
 	//not only that, our fifo isnt restored.

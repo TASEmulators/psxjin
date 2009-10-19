@@ -101,6 +101,7 @@ struct _ADSRInfo
 //	long           lVolume;
 //} ;
 
+class SPU_struct;
 
 class SPU_chan
 {
@@ -158,22 +159,25 @@ public:
 	s16 block[32];
 	s32 s_1,s_2;
 	u8 flags;
-	void decodeBRR(s32* out);
+	s32 decodeBRR(SPU_struct* spu);
 
 };
 
 class SPU_struct
 {
 public:
-	SPU_struct();
+	SPU_struct(bool _isCore);
+	void triggerIrqRange(u32 base, u32 size);
 
 	u32 mixIrqCounter;
 
 	SPU_chan channels[24];
 	s16 outbuf[100000];
+	void writeRegister(u32 r, u16 val);
+	bool isCore;
 };
 
-extern SPU_struct SPU_core;
+extern SPU_struct *SPU_core, *SPU_user;
 extern u16  spuCtrl;
 extern int iUseReverb;
 extern unsigned short  spuMem[256*1024];

@@ -101,7 +101,6 @@ void ReadConfig(void)
 		size = 4;
 		if(RegQueryValueEx(myKey,"UseTimer",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iUseTimer=(int)temp;
-		if(iUseTimer==2) iUseTimer=0; //removed a timer mode
 		size = 4;
 		if (RegQueryValueEx(myKey,"SPUIRQWait",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iSPUIRQWait=(int)temp;
@@ -181,8 +180,9 @@ BOOL OnInitDSoundDialog(HWND hW)
 	if (iXAPitch)    CheckDlgButton(hW,IDC_XAPITCH,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USETIMER);
-	tempDest=ComboBox_AddString(hWC, "0: Asynchronous (normal)");
-	tempDest=ComboBox_AddString(hWC, "1: Synchronous (sometimes necessary for streams)");
+	tempDest=ComboBox_AddString(hWC, "0: Asynchronous (normal, tas UNSAFE)");
+	tempDest=ComboBox_AddString(hWC, "1: Dual SPU Synch/Asynch (tas safe, doesnt work yet)");
+	tempDest=ComboBox_AddString(hWC, "2: Synchronous (tas safe, sometimes needed for streams)");
 	tempDest=ComboBox_SetCurSel(hWC,iUseTimer);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
