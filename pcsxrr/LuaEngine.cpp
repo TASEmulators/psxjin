@@ -24,6 +24,7 @@ extern "C" {
 #include "PsxCommon.h"
 #ifdef WIN32
 #include "Win32/Win32.h"
+#include "Win32/resource.h"
 #endif
 #include "LuaEngine.h"
 
@@ -34,6 +35,18 @@ extern "C" {
 
 #ifndef inline
 #define inline __inline
+#endif
+
+static void(*info_print)(int uid, const char* str);
+static void(*info_onstart)(int uid);
+static void(*info_onstop)(int uid);
+static int info_uid;
+#ifdef WIN32
+extern HWND LuaConsoleHWnd;
+extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+extern void PrintToWindowConsole(int hDlgAsInt, const char* str);
+extern void WinLuaOnStart(int hDlgAsInt);
+extern void WinLuaOnStop(int hDlgAsInt);
 #endif
 
 static lua_State *LUA;
@@ -90,12 +103,25 @@ static const char *button_mappings[] = {
 	"select", "l3", "r3", "start", "up", "right", "down", "left",
 	"l2", "r2", "l1", "r1", "triangle", "circle", "x", "square"
 };
+
+#ifdef _MSC_VER
+	#define snprintf _snprintf
+	#define vscprintf _vscprintf
+#else
+	#define stricmp strcasecmp
+	#define strnicmp strncasecmp
+	#define __forceinline __attribute__((always_inline))
+#endif
+
 static const char* luaCallIDStrings [] =
 {
 	"CALL_BEFOREEMULATION",
 	"CALL_AFTEREMULATION",
 	"CALL_BEFOREEXIT",
 };
+
+static char* rawToCString(lua_State* L, int idx=0);
+static const char* toCString(lua_State* L, int idx=0);
 
 // LuaWriteInform is very slow, so we'll only use it if memory.register was used in this session.
 static int usingMemoryRegister=0;
@@ -274,6 +300,264 @@ static int pcsx_unpause(lua_State *L) {
 	return lua_yield(L, 0);
 }
 
+static inline bool isalphaorunderscore(char c)
+{
+	return isalpha(c) || c == '_';
+}
+
+static std::vector<const void*> s_tableAddressStack; // prevents infinite recursion of a table within a table (when cycle is found, print something like table:parent)
+static std::vector<const void*> s_metacallStack; // prevents infinite recursion if something's __tostring returns another table that contains that something (when cycle is found, print the inner result without using __tostring)
+
+#define APPENDPRINT { int _n = snprintf(ptr, remaining,
+#define END ); if(_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
+static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
+{
+	if(remaining <= 0)
+		return;
+
+	const char* str = ptr; // for debugging
+
+	// if there is a __tostring metamethod then call it
+	int usedMeta = luaL_callmeta(L, i, "__tostring");
+	if(usedMeta)
+	{
+		std::vector<const void*>::const_iterator foundCycleIter = std::find(s_metacallStack.begin(), s_metacallStack.end(), lua_topointer(L,i));
+		if(foundCycleIter != s_metacallStack.end())
+		{
+			lua_pop(L, 1);
+			usedMeta = false;
+		}
+		else
+		{
+			s_metacallStack.push_back(lua_topointer(L,i));
+			i = lua_gettop(L);
+		}
+	}
+
+	switch(lua_type(L, i))
+	{
+		case LUA_TNONE: break;
+		case LUA_TNIL: APPENDPRINT "nil" END break;
+		case LUA_TBOOLEAN: APPENDPRINT lua_toboolean(L,i) ? "true" : "false" END break;
+		case LUA_TSTRING: APPENDPRINT "%s",lua_tostring(L,i) END break;
+		case LUA_TNUMBER: APPENDPRINT "%.12Lg",lua_tonumber(L,i) END break;
+		case LUA_TFUNCTION: 
+			if((L->base + i-1)->value.gc->cl.c.isC)
+			{
+				//lua_CFunction func = lua_tocfunction(L, i);
+				//std::map<lua_CFunction, const char*>::iterator iter = s_cFuncInfoMap.find(func);
+				//if(iter == s_cFuncInfoMap.end())
+					goto defcase;
+				//APPENDPRINT "function(%s)", iter->second END 
+			}
+			else
+			{
+				APPENDPRINT "function(" END 
+				Proto* p = (L->base + i-1)->value.gc->cl.l.p;
+				int numParams = p->numparams + (p->is_vararg?1:0);
+				for (int n=0; n<p->numparams; n++)
+				{
+					APPENDPRINT "%s", getstr(p->locvars[n].varname) END 
+					if(n != numParams-1)
+						APPENDPRINT "," END
+				}
+				if(p->is_vararg)
+					APPENDPRINT "..." END
+				APPENDPRINT ")" END
+			}
+			break;
+defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END break;
+		case LUA_TTABLE:
+		{
+			// first make sure there's enough stack space
+			if(!lua_checkstack(L, 4))
+			{
+				// note that even if lua_checkstack never returns false,
+				// that doesn't mean we didn't need to call it,
+				// because calling it retrieves stack space past LUA_MINSTACK
+				goto defcase;
+			}
+
+			std::vector<const void*>::const_iterator foundCycleIter = std::find(s_tableAddressStack.begin(), s_tableAddressStack.end(), lua_topointer(L,i));
+			if(foundCycleIter != s_tableAddressStack.end())
+			{
+				int parentNum = s_tableAddressStack.end() - foundCycleIter;
+				if(parentNum > 1)
+					APPENDPRINT "%s:parent^%d",luaL_typename(L,i),parentNum END
+				else
+					APPENDPRINT "%s:parent",luaL_typename(L,i) END
+			}
+			else
+			{
+				s_tableAddressStack.push_back(lua_topointer(L,i));
+				struct Scope { ~Scope(){ s_tableAddressStack.pop_back(); } } scope;
+
+				APPENDPRINT "{" END
+
+				lua_pushnil(L); // first key
+				int keyIndex = lua_gettop(L);
+				int valueIndex = keyIndex + 1;
+				bool first = true;
+				bool skipKey = true; // true if we're still in the "array part" of the table
+				lua_Number arrayIndex = (lua_Number)0;
+				while(lua_next(L, i))
+				{
+					if(first)
+						first = false;
+					else
+						APPENDPRINT ", " END
+					if(skipKey)
+					{
+						arrayIndex += (lua_Number)1;
+						bool keyIsNumber = (lua_type(L, keyIndex) == LUA_TNUMBER);
+						skipKey = keyIsNumber && (lua_tonumber(L, keyIndex) == arrayIndex);
+					}
+					if(!skipKey)
+					{
+						bool keyIsString = (lua_type(L, keyIndex) == LUA_TSTRING);
+						bool invalidLuaIdentifier = (!keyIsString || !isalphaorunderscore(*lua_tostring(L, keyIndex)));
+						if(invalidLuaIdentifier)
+							if(keyIsString)
+								APPENDPRINT "['" END
+							else
+								APPENDPRINT "[" END
+
+						toCStringConverter(L, keyIndex, ptr, remaining); // key
+
+						if(invalidLuaIdentifier)
+							if(keyIsString)
+								APPENDPRINT "']=" END
+							else
+								APPENDPRINT "]=" END
+						else
+							APPENDPRINT "=" END
+					}
+
+					bool valueIsString = (lua_type(L, valueIndex) == LUA_TSTRING);
+					if(valueIsString)
+						APPENDPRINT "'" END
+
+					toCStringConverter(L, valueIndex, ptr, remaining); // value
+
+					if(valueIsString)
+						APPENDPRINT "'" END
+
+					lua_pop(L, 1);
+
+					if(remaining <= 0)
+					{
+						lua_settop(L, keyIndex-1); // stack might not be clean yet if we're breaking early
+						break;
+					}
+				}
+				APPENDPRINT "}" END
+			}
+		}	break;
+	}
+
+	if(usedMeta)
+	{
+		s_metacallStack.pop_back();
+		lua_pop(L, 1);
+	}
+}
+
+static const int s_tempStrMaxLen = 64 * 1024;
+static char s_tempStr [s_tempStrMaxLen];
+
+static char* rawToCString(lua_State* L, int idx)
+{
+	int a = idx>0 ? idx : 1;
+	int n = idx>0 ? idx : lua_gettop(L);
+
+	char* ptr = s_tempStr;
+	*ptr = 0;
+
+	int remaining = s_tempStrMaxLen;
+	for(int i = a; i <= n; i++)
+	{
+		toCStringConverter(L, i, ptr, remaining);
+		if(i != n)
+			APPENDPRINT " " END
+	}
+
+	if(remaining < 3)
+	{
+		while(remaining < 6)
+			remaining++, ptr--;
+		APPENDPRINT "..." END
+	}
+	APPENDPRINT "\r\n" END
+	// the trailing newline is so print() can avoid having to do wasteful things to print its newline
+	// (string copying would be wasteful and calling info.print() twice can be extremely slow)
+	// at the cost of functions that don't want the newline needing to trim off the last two characters
+	// (which is a very fast operation and thus acceptable in this case)
+
+	return s_tempStr;
+}
+#undef APPENDPRINT
+#undef END
+
+
+// replacement for luaB_tostring() that is able to show the contents of tables (and formats numbers better, and show function prototypes)
+// can be called directly from lua via tostring(), assuming tostring hasn't been reassigned
+static int tostring(lua_State *L)
+{
+	char* str = rawToCString(L);
+	str[strlen(str)-2] = 0; // hack: trim off the \r\n (which is there to simplify the print function's task)
+	lua_pushstring(L, str);
+	return 1;
+}
+
+// like rawToCString, but will check if the global Lua function tostring()
+// has been replaced with a custom function, and call that instead if so
+static const char* toCString(lua_State* L, int idx)
+{
+	int a = idx>0 ? idx : 1;
+	int n = idx>0 ? idx : lua_gettop(L);
+	lua_getglobal(L, "tostring");
+	lua_CFunction cf = lua_tocfunction(L,-1);
+	if(cf == tostring) // optimization: if using our own C tostring function, we can bypass the call through Lua and all the string object allocation that would entail
+	{
+		lua_pop(L,1);
+		return rawToCString(L, idx);
+	}
+	else // if the user overrided the tostring function, we have to actually call it and store the temporarily allocated string it returns
+	{
+		lua_pushstring(L, "");
+		for (int i=a; i<=n; i++) {
+			lua_pushvalue(L, -2);  // function to be called
+			lua_pushvalue(L, i);   // value to print
+			lua_call(L, 1, 1);
+			if(lua_tostring(L, -1) == NULL)
+				luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
+			lua_pushstring(L, (i<n) ? " " : "\r\n");
+			lua_concat(L, 3);
+		}
+		const char* str = lua_tostring(L, -1);
+		strncpy(s_tempStr, str, s_tempStrMaxLen);
+		s_tempStr[s_tempStrMaxLen-1] = 0;
+		lua_pop(L, 2);
+		return s_tempStr;
+	}
+}
+
+// replacement for luaB_print() that goes to the appropriate textbox instead of stdout
+static int print(lua_State *L)
+{
+	const char* str = toCString(L);
+
+	int uid = info_uid;//luaStateToUIDMap[L->l_G->mainthread];
+	//LuaContextInfo& info = GetCurrentInfo();
+
+	if(info_print)
+		info_print(uid, str);
+	else
+		puts(str);
+
+	//worry(L, 100);
+	return 0;
+}
 
 char pcsx_message_buffer[1024];
 // pcsx.message(string msg)
@@ -287,6 +571,59 @@ static int pcsx_message(lua_State *L) {
 	return 0;
 }
 
+// provides an easy way to copy a table from Lua
+// (simple assignment only makes an alias, but sometimes an independent table is desired)
+// currently this function only performs a shallow copy,
+// but I think it should be changed to do a deep copy (possibly of configurable depth?)
+// that maintains the internal table reference structure
+static int copytable(lua_State *L)
+{
+	int origIndex = 1; // we only care about the first argument
+	int origType = lua_type(L, origIndex);
+	if(origType == LUA_TNIL)
+	{
+		lua_pushnil(L);
+		return 1;
+	}
+	if(origType != LUA_TTABLE)
+	{
+		luaL_typerror(L, 1, lua_typename(L, LUA_TTABLE));
+		lua_pushnil(L);
+		return 1;
+	}
+	
+	lua_createtable(L, lua_objlen(L,1), 0);
+	int copyIndex = lua_gettop(L);
+
+	lua_pushnil(L); // first key
+	int keyIndex = lua_gettop(L);
+	int valueIndex = keyIndex + 1;
+
+	while(lua_next(L, origIndex))
+	{
+		lua_pushvalue(L, keyIndex);
+		lua_pushvalue(L, valueIndex);
+		lua_rawset(L, copyIndex); // copytable[key] = value
+		lua_pop(L, 1);
+	}
+
+	// copy the reference to the metatable as well, if any
+	if(lua_getmetatable(L, origIndex))
+		lua_setmetatable(L, copyIndex);
+
+	return 1; // return the new table
+}
+
+// because print traditionally shows the address of tables,
+// and the print function I provide instead shows the contents of tables,
+// I also provide this function
+// (otherwise there would be no way to see a table's address, AFAICT)
+static int addressof(lua_State *L)
+{
+	const void* ptr = lua_topointer(L,-1);
+	lua_pushinteger(L, (lua_Integer)ptr);
+	return 1;
+}
 
 static int pcsx_registerbefore(lua_State *L) {
 	if (!lua_isnil(L,1))
@@ -2393,7 +2730,7 @@ BOOL luabitop_validate(lua_State *L) // originally named as luaopen_bit
   if (b != (UBits)1437217655L || BAD_SAR) {  /* Perform a simple self-test. */
     const char *msg = "compiled with incompatible luaconf.h";
 #ifdef LUA_NUMBER_DOUBLE
-#ifdef _WIN32
+#ifdef WIN32
     if (b == (UBits)1610612736L)
       msg = "use D3DCREATE_FPU_PRESERVE with DirectX";
 #endif
@@ -2558,7 +2895,7 @@ static const struct luaL_reg pcsxlib [] = {
 	{"registerafter", pcsx_registerafter},
 	{"registerexit", pcsx_registerexit},
 	{"message", pcsx_message},
-	
+	{"print", print}, // sure, why not
 	{NULL,NULL}
 };
 
@@ -2705,7 +3042,7 @@ void PCSX_LuaFrameBoundary() {
 
 	} else {
 		PCSX_LuaOnStop();
-		GPU_displayText("Script died of natural causes.\n");
+		//GPU_displayText("Script died of natural causes.\n");
 	}
 
 	// Past here, the nes actually runs, so any Lua code is called mid-frame. We must
@@ -2766,6 +3103,12 @@ int PCSX_LoadLuaCode(const char *filename) {
 		luaL_register(LUA, "bit", bit_funcs); // LuaBitOp library
 		lua_settop(LUA, 0); // clean the stack, because each call to luaL_register leaves a table on top
 
+		// register a few utility functions outside of libraries (in the global namespace)
+		lua_register(LUA, "print", print);
+		lua_register(LUA, "tostring", tostring);
+		lua_register(LUA, "addressof", addressof);
+		lua_register(LUA, "copytable", copytable);
+
 		// old bit operation functions
 		lua_register(LUA, "AND", bit_band);
 		lua_register(LUA, "OR", bit_bor);
@@ -2815,8 +3158,23 @@ int PCSX_LoadLuaCode(const char *filename) {
 	transparencyModifier = 255; // opaque
 	lua_joypads_used = 0; // not used
 
+#ifdef WIN32
+	info_print = PrintToWindowConsole;
+	info_onstart = WinLuaOnStart;
+	info_onstop = WinLuaOnStop;
+	if(!LuaConsoleHWnd)
+		LuaConsoleHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_LUA), NULL, (DLGPROC) DlgLuaScriptDialog);
+	info_uid = (int)LuaConsoleHWnd;
+#else
+	info_print = NULL;
+	info_onstart = NULL;
+	info_onstop = NULL;
+#endif
+	if (info_onstart)
+		info_onstart(info_uid);
+
 	// And run it right now. :)
-	PCSX_LuaFrameBoundary();
+	//PCSX_LuaFrameBoundary();
 
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
 	lua_sethook(thread, PCSX_LuaHookFunction, LUA_MASKCOUNT, 10000);
@@ -2851,6 +3209,9 @@ void PCSX_LuaStop() {
 	//execute the user's shutdown callbacks
 	CallExitFunction();
 
+	if (info_onstop)
+		info_onstop(info_uid);
+
 	lua_close(LUA); // this invokes our garbage collectors for us
 	LUA = NULL;
 	PCSX_LuaOnStop();
@@ -2862,7 +3223,8 @@ void PCSX_LuaStop() {
  *
  */
 int PCSX_LuaRunning() {
-	return LUA && luaRunning;
+	// FIXME: return false when no callback functions are registered.
+	return (int) (LUA != NULL); // should return true if callback functions are active.
 }
 
 
@@ -2901,6 +3263,7 @@ uint32 PCSX_LuaReadJoypad(int which) {
  * This function will not return true if a script is not running.
  */
 int PCSX_LuaRerecordCountSkip() {
+	// FIXME: return true if (there are any active callback functions && skipRerecords)
 	return LUA && luaRunning && skipRerecords;
 }
 
@@ -2927,7 +3290,7 @@ void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 		LUA_SCREEN_HEIGHT = 512;
 	}
 
-	if (!LUA || !luaRunning)
+	if (!LUA/* || !luaRunning*/)
 		return;
 
 	// First, check if we're being called by anybody
@@ -2993,4 +3356,12 @@ void PCSX_LuaClearGui() {
 
 void PCSX_LuaEnableGui(uint8 enabled) {
 	gui_enabled = enabled;
+}
+
+
+lua_State* PCSX_GetLuaState() {
+	return LUA;
+}
+char* PCSX_GetLuaScriptName() {
+	return luaScriptName;
 }

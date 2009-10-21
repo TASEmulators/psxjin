@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_;NOMINMAX"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				StructMemberAlignment="5"
@@ -159,7 +159,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;NOMINMAX"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				StructMemberAlignment="5"
@@ -270,7 +270,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;NOMINMAX"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				StructMemberAlignment="5"
@@ -281,6 +281,7 @@
 				ProgramDataBaseFileName="$(IntDir)\vc80.pdb"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
 				CompileAs="0"
 				DisableSpecificWarnings="4996"
 			/>
@@ -352,6 +353,10 @@
 			</File>
 			<File
 				RelativePath="AboutDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\luaconsole.cpp"
 				>
 			</File>
 			<File

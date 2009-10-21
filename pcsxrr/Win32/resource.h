@@ -31,6 +31,7 @@
 #define IDD_EDITWATCH                   139
 #define IDD_PROMPT                      140
 #define IDR_RWACCELERATOR               141
+#define IDD_LUA                         142
 #define IDC_ISOFILE                     1000
 #define IDC_EDIT2                       1001
 #define MW_ADDR00                       1001
@@ -373,6 +374,12 @@
 #define IDC_PROMPT_TEXT                 1313
 #define IDC_PROMPT_TEXT2                1314
 #define IDC_PROMPT_EDIT                 1315
+#define IDC_BUTTON_LUABROWSE            1316
+#define IDC_BUTTON_LUARUN               1317
+#define IDC_BUTTON_LUASTOP              1318
+#define IDC_EDIT_LUAPATH                1319
+#define IDC_LUACONSOLE                  1320
+#define IDC_BUTTON_LUAEDIT              1321
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
@@ -466,8 +473,8 @@
 #define ID_HELP_TUTORIAL                40109
 #define IDD_RAM_POKE                    40110
 #define ID_CONFIGURATION_MEMPOKE        40111
-#define ID_LUA_RUN                      40112
-#define ID_LUA_STOP                     40113
+#define ID_LUA_OPEN                     40112
+#define ID_LUA_CLOSE_ALL                40113
 #define ID_LUA_RELOAD                   40114
 #define RAMMENU_FILE_AUTOLOAD           40115
 #define RAMMENU_FILE_SAVEWINDOW         40116
@@ -499,9 +506,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        115
+#define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         40044
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1322
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
