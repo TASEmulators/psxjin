@@ -34,6 +34,9 @@
 #include "ram_search.h"
 #include "ramwatch.h"
 
+extern HWND LuaConsoleHWnd;
+extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+
 extern int iTurboMode;
 int iSpeedMode = 7;
 
@@ -543,23 +546,22 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_LUA_RUN].key
-	&& modifiers == EmuCommandTable[EMUCMD_LUA_RUN].keymod)
+	if(key == EmuCommandTable[EMUCMD_LUA_OPEN].key
+	&& modifiers == EmuCommandTable[EMUCMD_LUA_OPEN].keymod)
 	{
-		if(!PCSX_LuaRunning())
-			WIN32_LuaRunScript();
+		if(!LuaConsoleHWnd)
+		{
+			LuaConsoleHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_LUA), NULL, (DLGPROC) DlgLuaScriptDialog);
+		}
+		else
+			SetForegroundWindow(LuaConsoleHWnd);
 		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_LUA_STOP].key
 	&& modifiers == EmuCommandTable[EMUCMD_LUA_STOP].keymod)
 	{
-		if(PCSX_LuaRunning()) {
-			PCSX_LuaStop();
-			EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_ENABLED);
-			EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
-			EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
-		}
+		PCSX_LuaStop();
 		return;
 	}
 

@@ -31,5 +31,6 @@ void PCSX_LuaWriteInform();
 void PCSX_LuaClearGui();
 void PCSX_LuaEnableGui(uint8 enabled);
 
+char* PCSX_GetLuaScriptName();
 
 #endif

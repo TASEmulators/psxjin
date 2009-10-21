@@ -78,7 +78,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,               0,           "Resident Evil 2/3 Fix E/D", },
 	{ VK_F3,           VK_CONTROL,  "Reset", },
 	{ 0,               0,           "VSync Advance", },
-	{ 'L',             VK_CONTROL,  "Run Lua Script", },
+	{ 'L',             VK_CONTROL,  "New Lua Script Window", },
 	{ 0,               0,           "Stop Lua Script", },
 	{ 'L',             VK_SHIFT,    "Reload Lua Script", },
 	{ 0,               0,           "RAM Search Perform", },

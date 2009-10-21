@@ -43,6 +43,9 @@
 #include "ram_search.h"
 #include "ramwatch.h"
 
+extern HWND LuaConsoleHWnd;
+extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+
 // global variables
 AppData gApp;
 HANDLE hConsole;
@@ -593,19 +596,18 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 					return TRUE;
 
-				case ID_LUA_RUN:
-					WIN32_LuaRunScript();
+				case ID_LUA_OPEN:
+					if(!LuaConsoleHWnd)
+					{
+						LuaConsoleHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_LUA), NULL, (DLGPROC) DlgLuaScriptDialog);
+					}
+					else
+						SetForegroundWindow(LuaConsoleHWnd);
 					break;
 
-				case ID_LUA_STOP:
-					PCSX_LuaStop();
-					EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_ENABLED);
-					EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
-					EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
-					break;
-
-				case ID_LUA_RELOAD:
-					PCSX_ReloadLuaCode();
+				case ID_LUA_CLOSE_ALL:
+					if(LuaConsoleHWnd)
+						PostMessage(LuaConsoleHWnd, WM_CLOSE, 0, 0);
 					break;
 
 				case ID_START_CAPTURE:
@@ -706,7 +708,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					if(!RamSearchHWnd)
 					{
 						reset_address_info();
-						RamSearchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+						RamSearchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), NULL, (DLGPROC) RamSearchProc);
 					}
 					else
 						SetForegroundWindow(RamSearchHWnd);
@@ -715,7 +717,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_RAM_WATCH:
 					if(!RamWatchHWnd)
 					{
-						RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+						RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
 					}
 					else
 						SetForegroundWindow(RamWatchHWnd);
@@ -1593,11 +1595,9 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&File"));
 	ADDMENUITEM(0, _("E&xit"), ID_FILE_EXIT);
 	ADDSEPARATOR(0);
-	ADDSUBMENUS(0, 2, _("&Lua"));
-	ADDMENUITEM(2, _("Re&load Script"), ID_LUA_RELOAD);
-	ADDSEPARATOR(2);
-	ADDMENUITEM(2, _("&Stop Script"), ID_LUA_STOP);
-	ADDMENUITEM(2, _("&Run Script..."), ID_LUA_RUN);
+	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
+	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
+	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDSUBMENUS(0, 1, _("&Movie"));
 	ADDMENUITEM(1, _("Record &AVI Help..."), ID_START_CAPTURE);
 	ADDSEPARATOR(1);
@@ -1644,8 +1644,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Quick Tutorial"), ID_HELP_TUTORIAL);
 
 	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_GRAYED);
+	EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED);
 }
 
 void CreateMainWindow(int nCmdShow) {
@@ -1691,11 +1690,6 @@ void CreateMainWindow(int nCmdShow) {
 		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_GRAYED);
 		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_ENABLED);
-	}
-	if (PCSX_LuaRunning()) {
-		EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_GRAYED);
-		EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_ENABLED);
-		EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_ENABLED);
 	}
 //	if (Movie.capture) {
 //		EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
@@ -1999,27 +1993,4 @@ void CreateMemPoke()
 	}
 	else // already open so just reactivate the window
 		SetActiveWindow(memPokeHWND);
-}
-
-void WIN32_LuaRunScript() {
-	const char filter[]="PCSX-RR Lua Script (*.lua)\0*.lua\0All files(*.*)\0*.*\0\0";
-	char nameo[2048];
-	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
-	ofn.hInstance=gApp.hInstance;
-	ofn.lpstrTitle="Load Lua Script...";
-	ofn.lpstrFilter=filter;
-	nameo[0]=0;
-	ofn.lpstrFile=nameo;
-	ofn.nMaxFile=256;
-	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.lpstrInitialDir=".\\";
-	
-	if(GetOpenFileName(&ofn)) {
-		PCSX_LoadLuaCode(nameo);
-		EnableMenuItem(gApp.hMenu,ID_LUA_RUN,MF_GRAYED);
-		EnableMenuItem(gApp.hMenu,ID_LUA_STOP,MF_ENABLED);
-		EnableMenuItem(gApp.hMenu,ID_LUA_RELOAD,MF_ENABLED);
-	}
 }

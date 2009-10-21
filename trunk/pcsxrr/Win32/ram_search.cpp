@@ -1109,7 +1109,7 @@ void ReopenRamWindows() //Reopen them when a new Rom is loaded
 		{
 			reset_address_info();
 			LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-			RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+			RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), NULL, (DLGPROC) RamSearchProc);
 		}
 	}
 	if (RamWatchClosed || AutoRWLoad)
@@ -1118,7 +1118,7 @@ void ReopenRamWindows() //Reopen them when a new Rom is loaded
 		if(!RamWatchHWnd)
 		{
 			if (AutoRWLoad) OpenRWRecentFile(0);
-			RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+			RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
 		}
 	}
 
