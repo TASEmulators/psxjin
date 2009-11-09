@@ -380,6 +380,8 @@
 #define IDC_EDIT_LUAPATH                1319
 #define IDC_LUACONSOLE                  1320
 #define IDC_BUTTON_LUAEDIT              1321
+#define IDC_LUACONSOLE_CLEAR            1322
+#define IDC_LUACONSOLE_CHOOSEFONT       1323
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
@@ -508,7 +510,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         40044
-#define _APS_NEXT_CONTROL_VALUE         1322
+#define _APS_NEXT_CONTROL_VALUE         1324
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
