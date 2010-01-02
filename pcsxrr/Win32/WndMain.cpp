@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
-		Config.PauseAfterPlayback = 1;
+		Config.PauseAfterPlayback = 0;
 		strcpy(Config.Bios,       "scph1001.bin");
 		strcpy(Config.Gpu,        "gpuTASsoft.dll");
 		strcpy(Config.Spu,        "spuTAS.dll");
