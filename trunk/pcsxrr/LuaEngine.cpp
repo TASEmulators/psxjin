@@ -1030,7 +1030,7 @@ int movie_framecount(lua_State *L) {
 // string movie.mode()
 //
 //   "record", "playback" or nil
-int movie_mode(lua_State *L) {
+static int movie_mode(lua_State *L) {
 	if (Movie.mode == MOVIEMODE_RECORD)
 		lua_pushstring(L, "record");
 	else if (Movie.mode == MOVIEMODE_PLAY)
@@ -1038,6 +1038,52 @@ int movie_mode(lua_State *L) {
 	else
 		lua_pushnil(L);
 	return 1;
+}
+
+static int movie_isactive(lua_State *L) {
+	lua_pushboolean(L, Movie.mode == MOVIEMODE_INACTIVE);
+	return 1;
+}
+
+static int movie_isrecording(lua_State *L) {
+	lua_pushboolean(L, Movie.mode == MOVIEMODE_RECORD);
+	return 1;
+}
+
+static int movie_isplaying(lua_State *L) {
+	lua_pushboolean(L, Movie.mode == MOVIEMODE_PLAY);
+	return 1;
+}
+
+
+static int movie_getname(lua_State *L) {
+	if(Movie.mode != MOVIEMODE_INACTIVE)
+		lua_pushstring(L, Movie.movieFilename);
+	else
+		lua_pushstring(L, "");
+	return 1;
+}
+
+static int movie_getlength(lua_State *L) {
+	if(Movie.mode != MOVIEMODE_INACTIVE)
+		lua_pushinteger(L, Movie.totalFrames);
+	else
+		lua_pushinteger(L, 0);
+	return 1;
+}
+
+static int movie_rerecordcount(lua_State *L) {
+	if(Movie.mode != MOVIEMODE_INACTIVE)
+		lua_pushinteger(L, Movie.rerecordCount);
+	else
+		lua_pushinteger(L, 0);
+	return 1;
+}
+
+static int movie_setrerecordcount(lua_State *L) {
+	if(Movie.mode != MOVIEMODE_INACTIVE)
+		Movie.rerecordCount = luaL_checkinteger(L, 1);
+	return 0;
 }
 
 
@@ -3017,8 +3063,17 @@ static const struct luaL_reg savestatelib[] = {
 
 static const struct luaL_reg movielib[] = {
 
-	{"framecount", movie_framecount},
+	{"active", movie_isactive},
+	{"recording", movie_isrecording},
+	{"playing", movie_isplaying},
 	{"mode", movie_mode},
+
+	{"length", movie_getlength},
+	{"name", movie_getname},
+	{"rerecordcount", movie_rerecordcount},
+	{"setrerecordcount", movie_setrerecordcount},
+
+	{"framecount", movie_framecount},
 	{"rerecordcounting", movie_rerecordcounting},
 	{"stop", movie_stop},
 
