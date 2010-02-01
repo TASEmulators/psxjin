@@ -1041,7 +1041,7 @@ static int movie_mode(lua_State *L) {
 }
 
 static int movie_isactive(lua_State *L) {
-	lua_pushboolean(L, Movie.mode == MOVIEMODE_INACTIVE);
+	lua_pushboolean(L, Movie.mode != MOVIEMODE_INACTIVE);
 	return 1;
 }
 
