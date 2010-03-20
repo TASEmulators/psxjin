@@ -155,6 +155,11 @@ void SPUfreeze_new(EMUFILE* fp)
 
 bool SPUunfreeze_new(EMUFILE* fp)
 {
+	SPU_core->~SPU_struct();
+	SPU_user->~SPU_struct();
+	new(SPU_core) SPU_struct(true);
+	new(SPU_user) SPU_struct(false);
+
 	u32 tag = fp->read32le();
 	if(tag != 0xBEEFFACE) return false;
 
@@ -201,3 +206,4 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	return true;
 	
 }
+

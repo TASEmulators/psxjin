@@ -471,10 +471,10 @@ __inline static void execute() {
 		if (*recFunc == 0) {
 			recRecompile();
 		}
-		if((u32)*recFunc==0x01d30be0)
-		{
-			int zzz=9;
-		}
+		//if((u32)*recFunc==0x01d30be0)
+		//{
+		//	int zzz=9;
+		//}
 		(*recFunc)();
 	}
 	else { // pause

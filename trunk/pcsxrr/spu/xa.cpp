@@ -140,6 +140,7 @@ INLINE void FeedXA(xa_decode_t *xap)
 //----------------------------------------------------//
 	if (iXAPitch)                                         // pitch change option?
 	{
+		printf("hmm\n");
 		static DWORD dwLT=0;
 		static DWORD dwFPS=0;
 		static int   iFPSCnt=0;
@@ -188,6 +189,7 @@ INLINE void FeedXA(xa_decode_t *xap)
 
 		if (iXAPitch)
 		{
+			printf("hmm\n");
 			long l1,l2;
 			short s;
 			for (i=0;i<iSize;i++)
@@ -303,6 +305,7 @@ INLINE void FeedXA(xa_decode_t *xap)
 
 		if (iXAPitch)
 		{
+			printf("hmm\n");
 			long l1;
 			for (i=0;i<iSize;i++)
 			{
