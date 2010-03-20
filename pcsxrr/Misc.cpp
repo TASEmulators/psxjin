@@ -360,9 +360,11 @@ int CheckCdrom() {
 		else Config.PsxType = 0; // ntsc
 	}
 	psxUpdateVSyncRate();
-	if (CdromLabel[0] == ' ') {
+	//zeromus 21-oct-2009 - why would you want this to be the label?  it is not unique.
+	//if it is not going to be the rom filename then it should be the id which is unique
+	//if (CdromLabel[0] == ' ') {
 		strncpy(CdromLabel, CdromId, 9);
-	}
+	//}
 	SysPrintf("CD-ROM Label: %.32s\n", CdromLabel);
 	SysPrintf("CD-ROM ID: %.9s\n", CdromId);
 

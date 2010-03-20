@@ -41,6 +41,7 @@ void SPUplayBRRchannel(xa_decode_t *xap);
 
 struct _ADSRInfo
 {
+	_ADSRInfo();
 	s32            State;
 	s32            AttackModeExp;
 	s32            AttackRate;
@@ -167,6 +168,8 @@ class SPU_struct
 {
 public:
 	SPU_struct(bool _isCore);
+	~SPU_struct();
+	
 	void triggerIrqRange(u32 base, u32 size);
 
 	u32 mixIrqCounter;
@@ -185,4 +188,6 @@ extern unsigned short  spuMem[256*1024];
 void SPUfreeze_new(EMUFILE* fp);
 bool SPUunfreeze_new(EMUFILE* fp);
 
+void SPUmute();
+void SPUunMute();
 #endif

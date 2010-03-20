@@ -490,6 +490,7 @@
 #define ID_RAM_WATCH                    40124
 #define RW_MENU_FIRST_RECENT_FILE       40130
 #define RW_MENU_LAST_RECENT_FILE        40150
+#define ID_EMULATOR_CONTINUE            40151
 #define IDC_STATIC1                     50001
 #define IDC_STATIC2                     50002
 #define IDC_STATIC3                     50003

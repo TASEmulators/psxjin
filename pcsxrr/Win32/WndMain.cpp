@@ -42,6 +42,7 @@
 #include "moviewin.h"
 #include "ram_search.h"
 #include "ramwatch.h"
+#include "../spu/spu.h"
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -52,6 +53,7 @@ HANDLE hConsole;
 long LoadCdBios;
 char cfgfile[256];
 int Running;
+int Continue=0;
 char PcsxDir[256];
 
 extern bool OpenPlugins(HWND hWnd);
@@ -383,7 +385,17 @@ void RunMessageLoop() {
 }
 
 void RunGui() {
-	for(;;) RunMessageLoop();
+	Continue = 0;
+	for(;;) {
+		RunMessageLoop();
+		Sleep(1);
+		if(Continue)
+			break;
+	}
+	SetMenu(gApp.hWnd, NULL);
+	OpenPlugins(gApp.hWnd);
+	Continue = 0;
+	Running = 1;
 }
 
 void RestoreWindow() {
@@ -618,6 +630,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_RUN_CD:
 					LoadCdBios = 0;
 
+					ClosePlugins();
 					if(!OpenPlugins(hWnd)) return FALSE;
 					
 					SetMenu(hWnd, NULL);
@@ -669,6 +682,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STATES_SAVE_SLOT4: States_Save(3); return TRUE;
 				case ID_FILE_STATES_SAVE_SLOT5: States_Save(4); return TRUE;
 				case ID_FILE_STATES_SAVE_OTHER: OnStates_SaveOther(); return TRUE;
+
+				case ID_EMULATOR_CONTINUE:
+					Continue = 1;
+					return TRUE;
 
 				case ID_EMULATOR_RUN:
 					SetMenu(hWnd, NULL);
@@ -1612,6 +1629,7 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
 	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
+	ADDMENUITEM(0, _("&Continue"), ID_EMULATOR_CONTINUE);
 
 	ADDSUBMENU(0, _("&Configuration"));
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
@@ -1802,8 +1820,10 @@ void SysUpdate() {
 }
 
 void SysRunGui() {
+	SPUmute();
 	RestoreWindow();
 	RunGui();
+	SPUunMute();
 }
 
 
