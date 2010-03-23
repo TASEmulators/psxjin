@@ -283,4 +283,8 @@ char *GetSavestateFilename(int newState);
 #include "Cheat.h"
 #include "LuaEngine.h"
 
+#ifndef CTASSERT
+#define	CTASSERT(x)		typedef char __assert ## y[(x) ? 1 : -1]
+#endif
+
 #endif /* __PSXCOMMON_H__ */

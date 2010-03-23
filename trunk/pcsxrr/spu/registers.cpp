@@ -519,12 +519,13 @@ u16 SPUreadRegister(u32 reg)
 			return spuStat;
 
 		case H_SPUaddr:
-			return (unsigned short)(spuAddr>>3);
+			return (u16)(SPU_core->spuAddr>>3);
 
 		case H_SPUdata: {
-			unsigned short s=spuMem[spuAddr>>1];
-			spuAddr+=2;
-			if(spuAddr>0x7ffff) spuAddr=0;
+			u16 s=SPU_core->spuMem[SPU_core->spuAddr>>1];
+			SPU_core->spuAddr+=2;
+			if(SPU_core->spuAddr>0x7ffff) SPU_core->spuAddr=0;
+			if(SPU_user) SPU_user->spuAddr = SPU_core->spuAddr;
 			return s;
 		}
 

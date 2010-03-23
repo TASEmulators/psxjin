@@ -40,6 +40,76 @@ void SPUplayBRRchannel(xa_decode_t *xap);
 #define CHANSTATUS_PLAY             1
 #define CHANSTATUS_KEYOFF             2
 
+struct REVERBInfo
+{
+	REVERBInfo()
+	{
+		memset(arr,0,sizeof(arr));
+	}
+	union
+	{
+		struct
+		{
+			s32 StartAddr;      // reverb area start addr in samples
+			s32 CurrAddr;       // reverb area curr addr in samples
+
+			s32 VolLeft;
+			s32 VolRight;
+			s32 iLastRVBLeft;
+			s32 iLastRVBRight;
+			s32 iRVBLeft;
+			s32 iRVBRight;
+
+
+			s32 FB_SRC_A;       // (offset)
+			s32 FB_SRC_B;       // (offset)
+			s32 IIR_ALPHA;      // (coef.)
+			s32 ACC_COEF_A;     // (coef.)
+			s32 ACC_COEF_B;     // (coef.)
+			s32 ACC_COEF_C;     // (coef.)
+			s32 ACC_COEF_D;     // (coef.)
+			s32 IIR_COEF;       // (coef.)
+			s32 FB_ALPHA;       // (coef.)
+			s32 FB_X;           // (coef.)
+			s32 IIR_DEST_A0;    // (offset)
+			s32 IIR_DEST_A1;    // (offset)
+			s32 ACC_SRC_A0;     // (offset)
+			s32 ACC_SRC_A1;     // (offset)
+			s32 ACC_SRC_B0;     // (offset)
+			s32 ACC_SRC_B1;     // (offset)
+			s32 IIR_SRC_A0;     // (offset)
+			s32 IIR_SRC_A1;     // (offset)
+			s32 IIR_DEST_B0;    // (offset)
+			s32 IIR_DEST_B1;    // (offset)
+			s32 ACC_SRC_C0;     // (offset)
+			s32 ACC_SRC_C1;     // (offset)
+			s32 ACC_SRC_D0;     // (offset)
+			s32 ACC_SRC_D1;     // (offset)
+			s32 IIR_SRC_B1;     // (offset)
+			s32 IIR_SRC_B0;     // (offset)
+			s32 MIX_DEST_A0;    // (offset)
+			s32 MIX_DEST_A1;    // (offset)
+			s32 MIX_DEST_B0;    // (offset)
+			s32 MIX_DEST_B1;    // (offset)
+			s32 IN_COEF_L;      // (coef.)
+			s32 IN_COEF_R;      // (coef.)
+		};
+
+		s32 arr[41];
+	};
+
+	void save(EMUFILE* fp) {
+		fp->write32le((u32)0); //version
+		for(int i=0;i<41;i++)
+			fp->write32le(&arr[i]);
+	}
+	void load(EMUFILE* fp) {
+		u32 version = fp->read32le();
+		for(int i=0;i<41;i++)
+			fp->read32le(&arr[i]);
+	}
+};
+
 struct _ADSRInfo
 {
 	_ADSRInfo();
@@ -182,13 +252,40 @@ public:
 
 	s32 iLeftXAVol, iRightXAVol;
 
+	u32 spuAddr;
+	u16 spuMem[256*1024];
+	inline u8 readSpuMem(u32 addr) { return ((u8*)spuMem)[addr]; }
+
 	xa_queue_base *xaqueue;
+
+	//---reverb--
+	s32 sRVBBuf[2];
+	REVERBInfo rvb;
+	void REVERB_initSample();
+	void StoreREVERB(SPU_chan* pChannel,s32 left, s32 right);
+	int MixREVERBLeft();
+	int MixREVERBRight();
+	int g_buffer(int iOff);
+	void s_buffer(int iOff,int iVal);
+	void s_buffer1(int iOff,int iVal);
+	//------
+
+	//--dma--
+	u16 SPUreadDMA(void);
+	void SPUreadDMAMem(u16 * pusPSXMem,int iSize);
+	void SPUwriteDMA(u16 val);
+	void SPUwriteDMAMem(u16 * pusPSXMem,int iSize);
+	//
 };
 
 extern SPU_struct *SPU_core, *SPU_user;
 extern u16  spuCtrl;
 extern int iUseReverb;
-extern unsigned short  spuMem[256*1024];
+
+u16 SPUreadDMA();
+void SPUreadDMAMem(u16 * pusPSXMem,int iSize);
+void SPUwriteDMA(u16 val);
+void SPUwriteDMAMem(u16 * pusPSXMem,int iSize);
 
 void SPUfreeze_new(EMUFILE* fp);
 bool SPUunfreeze_new(EMUFILE* fp);

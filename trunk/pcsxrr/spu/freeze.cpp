@@ -134,18 +134,26 @@ void SPUfreeze_new(EMUFILE* fp)
 	const u32 tag = 0xBEEFFACE;
 	fp->write32le(tag);
 
-	fp->write32le((u32)2); //version
+	fp->write32le((u32)0); //version
 
-	fp->fwrite(spuMem,0x80000);
+	CTASSERT(sizeof(SPU_core->spuMem)==0x80000);
+	fp->fwrite(SPU_core->spuMem,0x80000);
 	fp->fwrite(regArea,0x200);
-	fp->write32le(spuAddr);
+	fp->write32le(&SPU_core->spuAddr);
 	fp->write16le(spuIrq);
 
 	fp->write32le(&SPU_core->mixIrqCounter);
 
+	fp->write32le(&SPU_core->sRVBBuf[0]);
+	fp->write32le(&SPU_core->sRVBBuf[1]);
+	SPU_core->rvb.save(fp);
+
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].save(fp);
 
 	SPU_core->xaqueue->freeze(fp);
+
+	const u32 endtag = 0xBAADF00D;
+	fp->write32le(endtag);
 }
 
 bool SPUunfreeze_new(EMUFILE* fp)
@@ -159,14 +167,18 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	if(tag != 0xBEEFFACE) return false;
 
 	u32 version = fp->read32le();
-	if(version<2) return false;
+	//if(version<3) return false;
 
-	fp->fread(spuMem,0x80000);
+	fp->fread(SPU_core->spuMem,0x80000);
 	fp->fread(regArea,0x200);
-	fp->read32le(&spuAddr);
+	fp->read32le(&SPU_core->spuAddr);
 	fp->read16le(&spuIrq);
 
-	if(version>=1) fp->read32le(&SPU_core->mixIrqCounter);
+	fp->read32le(&SPU_core->mixIrqCounter);
+
+	fp->read32le(&SPU_core->sRVBBuf[0]);
+	fp->read32le(&SPU_core->sRVBBuf[1]);
+	SPU_core->rvb.load(fp);
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].load(fp);
 
@@ -194,7 +206,12 @@ bool SPUunfreeze_new(EMUFILE* fp)
 		SPUwriteRegister(0x1f801c00+(i<<4)+0x0A,regArea[((i<<4)+0xc00+0x0A)>>1]);
 	}
 
+	u32 endtag = fp->read32le();
+	if(endtag != 0xBAADF00D) return false;
+
 	return true;
+
+	//TODO - copy core into user (xaqueue will need special help)
 	
 }
 

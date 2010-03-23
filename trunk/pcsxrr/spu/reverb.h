@@ -29,12 +29,10 @@
 
 #include "spu.h"
 
-void InitREVERB();
-void ShutdownREVERB();
 void StartREVERB(SPU_chan* pChannel);
 void StoreREVERB(SPU_chan* pChannel,s32 left, s32 right);
-s32 MixREVERBLeft();
-s32 MixREVERBRight();
+s32 MixREVERBLeft(SPU_struct* spu);
+s32 MixREVERBRight(SPU_struct* spu);
 void REVERB_initSample();
 
 #endif //_REVERB_H_
