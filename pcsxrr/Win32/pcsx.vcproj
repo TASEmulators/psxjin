@@ -800,6 +800,14 @@
 				RelativePath="..\spu\stdafx.h"
 				>
 			</File>
+			<File
+				RelativePath="..\spu\xa.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\spu\xa.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="iso"

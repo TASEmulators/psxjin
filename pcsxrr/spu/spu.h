@@ -30,6 +30,7 @@
 #include "PsxCommon.h"
 #include "Decode_XA.h"
 #include "emufile.h"
+#include "xa.h"
 
 #define NSSIZE 1
 
@@ -178,6 +179,10 @@ public:
 	s16 outbuf[100000];
 	void writeRegister(u32 r, u16 val);
 	bool isCore;
+
+	s32 iLeftXAVol, iRightXAVol;
+
+	xa_queue_base *xaqueue;
 };
 
 extern SPU_struct *SPU_core, *SPU_user;
