@@ -16,6 +16,10 @@
 #pragma warning(disable:4244)
 #endif
 
+const int kBaseFrequency = 37800;
+//const int kBaseFrequency = 37400; //maybe makes the timing mismatches go away (not enough, but improves it)
+const int kHalfFrquency = kBaseFrequency/2;
+
 typedef unsigned char U8;
 typedef unsigned short U16;
 typedef unsigned long U32;
@@ -128,7 +132,7 @@ static void xa_decode_data( xa_decode_t *xdp, unsigned char *srcp ) {
 	nbits = xdp->nbits == 4 ? 4 : 2;
 
 	if (xdp->stereo) { // stereo
-		if ((xdp->nbits == 8) && (xdp->freq == 37800)) { // level A
+		if ((xdp->nbits == 8) && (xdp->freq == kBaseFrequency)) { // level A
 			for (j=0; j < 18; j++) {
 				sound_groupsp = srcp + j * 128;		// sound groups header
 				sound_datap = sound_groupsp + 16;	// sound data just after the header
@@ -191,7 +195,7 @@ static void xa_decode_data( xa_decode_t *xdp, unsigned char *srcp ) {
 	    	}
 		}
 	} else { // mono
-		if ((xdp->nbits == 8) && (xdp->freq == 37800)) { // level A
+		if ((xdp->nbits == 8) && (xdp->freq == kBaseFrequency)) { // level A
 			for (j=0; j < 18; j++) {
     			sound_groupsp = srcp + j * 128;		// sound groups header
     			sound_datap = sound_groupsp + 16;	// sound data just after the header
@@ -297,8 +301,8 @@ static int parse_xa_audio_sector( xa_decode_t *xdp,
 								  int is_first_sector ) {
     if ( is_first_sector ) {
 		switch ( AUDIO_CODING_GET_FREQ(subheadp->coding) ) {
-			case 0: xdp->freq = 37800;   break;
-			case 1: xdp->freq = 18900;   break;
+			case 0: xdp->freq = kBaseFrequency;   break;
+			case 1: xdp->freq = kHalfFrquency;   break;
 			default: xdp->freq = 0;      break;
 		}
 		switch ( AUDIO_CODING_GET_BPS(subheadp->coding) ) {

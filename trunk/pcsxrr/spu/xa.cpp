@@ -1,399 +1,207 @@
-/***************************************************************************
-                            xa.c  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
+//xa.cpp
+//original (C) 2002 by Pete Bernert
+//nearly entirely rewritten for pcsxrr by zeromus
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 2 of the License, or
+//(at your option) any later version. See also the license.txt file for
+//additional informations.                                              
 
-//*************************************************************************//
-// History of changes:
-//
-// 2003/02/18 - kode54
-// - added gaussian interpolation
-//
-// 2002/05/15 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
 
 #include "stdafx.h"
+#include "PsxCommon.h"
 
-#define _IN_XA
+#include <deque>
+#include "spu.h"
 
-// will be included from spu.c
-#ifdef _IN_SPU
+extern int bSPUIsOpen;
+s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio);
 
-////////////////////////////////////////////////////////////////////////
-// XA GLOBALS
-////////////////////////////////////////////////////////////////////////
-
-xa_decode_t   * xapGlobal=0;
-
-unsigned long * XAFeed  = NULL;
-unsigned long * XAPlay  = NULL;
-unsigned long * XAStart = NULL;
-unsigned long * XAEnd   = NULL;
-unsigned long   XARepeat  = 0;
-unsigned long   XALastVal = 0;
-
-int             iLeftXAVol  = 32767;
-int             iRightXAVol = 32767;
-
-static int gauss_ptr = 0;
-static int gauss_window[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-
-#define gvall0 gauss_window[gauss_ptr]
-#define gvall(x) gauss_window[(gauss_ptr+x)&3]
-#define gvalr0 gauss_window[4+gauss_ptr]
-#define gvalr(x) gauss_window[4+((gauss_ptr+x)&3)]
-
-//rewritten for pcsxrr
-INLINE void MixXA(s32* left, s32* right)
+struct xa_sample
 {
-	//just a little diagnostics
-	//{
-	//	static int ctr=0;
-	//	ctr++;
-	//	if((ctr&15)==0)
-	//	{
-	//		s32 bleh = (s32)((u32)XAFeed-(u32)XAPlay);
-	//		if(bleh<0) bleh += (u32)44100;
-	//		printf("XA buf: %d\n",bleh/4);
-	//	}
-	//}
+	union {
+		s16 both[2];
+		struct {
+			s16 left, right;
+		};
+	};
+	s32 freq;
 
-	if(XAPlay != XAFeed)
+	void freeze(EMUFILE* fp)
 	{
-		XALastVal=*XAPlay++;
-		if (XAPlay==XAEnd) XAPlay=XAStart;
-		goto doit;
+		fp->write16le(&left);
+		fp->write16le(&right);
+		fp->write32le(&freq);
 	}
-	else
+	bool unfreeze(EMUFILE* fp)
 	{
-		if(XARepeat)
-		{
-			XARepeat--;
-			goto doit;
-		}
-		else
-		{
-			*left = *right = 0;
-			return;
-		}
+		fp->read16le(&left);
+		fp->read16le(&right);
+		fp->read32le(&freq);
+		return true;
 	}
+};
 
-doit:
-	*left = (((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
-	*right = (((short)((XALastVal>>16)&0xffff))       * iRightXAVol)/32767;
-
-	//for (ns=0;ns<NSSIZE && XAPlay!=XAFeed;ns++)
-	//{
-	//	XALastVal=*XAPlay++;
-	//	if (XAPlay==XAEnd) XAPlay=XAStart;
-	//	SSumL[ns]+=(((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
-	//	SSumR[ns]+=(((short)((XALastVal>>16)&0xffff)) * iRightXAVol)/32767;
-	//}
-
-	//if (XAPlay==XAFeed && XARepeat)
-	//{
-	//	XARepeat--;
-	//	for (;ns<NSSIZE;ns++)
-	//	{
-	//		SSumL[ns]+=(((short)(XALastVal&0xffff))       * iLeftXAVol)/32767;
-	//		SSumR[ns]+=(((short)((XALastVal>>16)&0xffff)) * iRightXAVol)/32767;
-	//	}
-	//}
-}
-
-////////////////////////////////////////////////////////////////////////
-// FEED XA
-////////////////////////////////////////////////////////////////////////
-
-INLINE void FeedXA(xa_decode_t *xap)
+//this code is really naive. it's probably all wrong, i'm not good at this kind of stuff.
+//really ought to make a circular buffer.
+//alternatively we could keep these in the blocks they originally came in
+//instead of splitting them all into samples.
+//the timing logic is terribly slow.
+//going for a simple reference implementation here.
+//but it is a little strange because the blocks can be different samplerates.
+//another reason for implementing it this way is so that the xa_queue can represent some kind of reliable hardware state
+//and the spu can fetch samples from it at whatever rate it needs to (whatever rate, one day, the user has specified)
+//instead of resampling everything as soon as it is received.
+//
+//there may be something wrong with the interpolation, but it is hard to tell, since I think there is also
+//something wrong with the xa adpcm decoding.
+class xa_queue : public std::deque<xa_sample>, public xa_queue_base
 {
-	int sinc,spos,i,iSize,iPlace,vl,vr;
-
-	if (!bSPUIsOpen) return;
-
-	xapGlobal = xap;                                      // store info for save states
-	XARepeat  = 100;                                      // set up repeat
-
-	iSize=((44100*xap->nsamples)/xap->freq);              // get size
-	if (!iSize) return;                                   // none? bye
-
-	if (XAFeed<XAPlay) iPlace=XAPlay-XAFeed;              // how much space in my buf?
-	else              iPlace=(XAEnd-XAFeed) + (XAPlay-XAStart);
-
-	if (iPlace==0) return;                                // no place at all
-
-//----------------------------------------------------//
-	if (iXAPitch)                                         // pitch change option?
+public:
+	xa_queue()
+		: counter(0)
+		, lastFrac(0)
 	{
-		printf("hmm\n");
-		static DWORD dwLT=0;
-		static DWORD dwFPS=0;
-		static int   iFPSCnt=0;
-		static int   iLastSize=0;
-		static DWORD dwL1=0;
-		DWORD dw=timeGetTime(),dw1,dw2;
+		//we need to be bootstrapped with something
+		xa_sample blank;
+		blank.left = blank.right = 0;
+		blank.freq = 44100;
+		for(int i=0;i<4;i++)
+			curr.push_back(blank);
+	}
 
-		iPlace=iSize;
+	void enqueue(xa_decode_t* xap)
+	{
+		xa_sample blank;
+		blank.left = blank.right = 0;
+		blank.freq = xap->freq;
 
-		dwFPS+=dw-dwLT;
-		iFPSCnt++;
+		//the first time we enqueue any data, put a little delay.
+		//this may help, but probably not, since we have some timing problem
+		//that makes us replay too fast
+		if(size()==0)
+			for(int i=0;i<882;i++)
+				push_back(blank);
 
-		dwLT=dw;
-
-		if (iFPSCnt>=10)
-		{
-			if (!dwFPS) dwFPS=1;
-			dw1=1000000/dwFPS;
-			if (dw1>=(dwL1-100) && dw1<=(dwL1+100)) dw1=dwL1;
-			else dwL1=dw1;
-			dw2=(xap->freq*100/xap->nsamples);
-			if ((!dw1)||((dw2+100)>=dw1)) iLastSize=0;
-			else
+		if(xap->stereo)
+			for(int i=0;i<xap->nsamples;i++)
 			{
-				iLastSize=iSize*dw2/dw1;
-				if (iLastSize>iPlace) iLastSize=iPlace;
-				iSize=iLastSize;
+				xa_sample temp;
+				temp.freq = xap->freq;
+				temp.left = xap->pcm[i*2];
+				temp.right = xap->pcm[i*2+1];
+				push_back(temp);
 			}
-			iFPSCnt=0;
-			dwFPS=0;
-		}
 		else
+			for(int i=0;i<xap->nsamples;i++)
+			{
+				xa_sample temp;
+				temp.freq = xap->freq;
+				temp.left = temp.right = xap->pcm[i];
+				push_back(temp);
+			}
+	}
+
+	double counter;
+	double lastFrac;
+
+	std::deque<xa_sample> curr;
+
+	void fetch(s16* fourStereoSamples)
+	{
+		for(int i=0;i<4;i++)
 		{
-			if (iLastSize) iSize=iLastSize;
+			fourStereoSamples[i*2] = curr[3-i].left;
+			fourStereoSamples[i*2+1] = curr[3-i].right;
 		}
 	}
-//----------------------------------------------------//
 
-	spos=0x10000L;
-	sinc = (xap->nsamples << 16) / iSize;                 // calc freq by num / size
-
-	if (xap->stereo)
+	void advance()
 	{
-		unsigned long * pS=(unsigned long *)xap->pcm;
-		unsigned long l=0;
-
-		if (iXAPitch)
+		if(size()==0) return;
+		counter += 1.0/44100;
+		for(;;)
 		{
-			printf("hmm\n");
-			long l1,l2;
-			short s;
-			for (i=0;i<iSize;i++)
-			{
-				if (iUseInterpolation==2)
-				{
-					while (spos>=0x10000L)
-					{
-						l = *pS++;
-						gauss_window[gauss_ptr] = (short)LOWORD(l);
-						gauss_window[4+gauss_ptr] = (short)HIWORD(l);
-						gauss_ptr = (gauss_ptr+1) & 3;
-						spos -= 0x10000L;
-					}
-					vl = (spos >> 6) & ~3;
-					vr=(gauss[vl]*gvall0)&~2047;
-					vr+=(gauss[vl+1]*gvall(1))&~2047;
-					vr+=(gauss[vl+2]*gvall(2))&~2047;
-					vr+=(gauss[vl+3]*gvall(3))&~2047;
-					l= (vr >> 11) & 0xffff;
-					vr=(gauss[vl]*gvalr0)&~2047;
-					vr+=(gauss[vl+1]*gvalr(1))&~2047;
-					vr+=(gauss[vl+2]*gvalr(2))&~2047;
-					vr+=(gauss[vl+3]*gvalr(3))&~2047;
-					l |= vr << 5;
-				}
-				else
-				{
-					while (spos>=0x10000L)
-					{
-						l = *pS++;
-						spos -= 0x10000L;
-					}
-				}
-
-				s=(short)LOWORD(l);
-				l1=s;
-				l1=(l1*iPlace)/iSize;
-				if (l1<-32767) l1=-32767;
-				if (l1> 32767) l1=32767;
-				s=(short)HIWORD(l);
-				l2=s;
-				l2=(l2*iPlace)/iSize;
-				if (l2<-32767) l2=-32767;
-				if (l2> 32767) l2=32767;
-				l=(l1&0xffff)|(l2<<16);
-
-				*XAFeed++=l;
-
-				if (XAFeed==XAEnd) XAFeed=XAStart;
-				if (XAFeed==XAPlay)
-				{
-					if (XAPlay!=XAStart) XAFeed=XAPlay-1;
-					break;
-				}
-
-				spos += sinc;
+			if(size()==0) {
+				printf("empty\n");
+				lastFrac = 0;
+				counter = 0;
+				return;
 			}
-		}
-		else
-		{
-			for (i=0;i<iSize;i++)
+			double target = 1.0/front().freq;
+			if(counter>=target)
 			{
-				if (iUseInterpolation==2)
-				{
-					while (spos>=0x10000L)
-					{
-						l = *pS++;
-						gauss_window[gauss_ptr] = (short)LOWORD(l);
-						gauss_window[4+gauss_ptr] = (short)HIWORD(l);
-						gauss_ptr = (gauss_ptr+1) & 3;
-						spos -= 0x10000L;
-					}
-					vl = (spos >> 6) & ~3;
-					vr=(gauss[vl]*gvall0)&~2047;
-					vr+=(gauss[vl+1]*gvall(1))&~2047;
-					vr+=(gauss[vl+2]*gvall(2))&~2047;
-					vr+=(gauss[vl+3]*gvall(3))&~2047;
-					l= (vr >> 11) & 0xffff;
-					vr=(gauss[vl]*gvalr0)&~2047;
-					vr+=(gauss[vl+1]*gvalr(1))&~2047;
-					vr+=(gauss[vl+2]*gvalr(2))&~2047;
-					vr+=(gauss[vl+3]*gvalr(3))&~2047;
-					l |= vr << 5;
-				}
-				else
-				{
-					while (spos>=0x10000L)
-					{
-						l = *pS++;
-						spos -= 0x10000L;
-					}
-				}
-
-				*XAFeed++=l;
-
-				if (XAFeed==XAEnd) XAFeed=XAStart;
-				if (XAFeed==XAPlay)
-				{
-					if (XAPlay!=XAStart) XAFeed=XAPlay-1;
-					break;
-				}
-
-				spos += sinc;
-			}
+				curr.pop_front();
+				curr.push_back(front());
+				pop_front();
+				counter -= target;
+			} else break;
 		}
+		lastFrac = counter/(1.0/front().freq);
+		//lastFrac = 0;
 	}
-	else
+
+	virtual void freeze(EMUFILE* fp)
 	{
-		unsigned short * pS=(unsigned short *)xap->pcm;
-		unsigned long l;
-		short s=0;
-
-		if (iXAPitch)
-		{
-			printf("hmm\n");
-			long l1;
-			for (i=0;i<iSize;i++)
-			{
-				if (iUseInterpolation==2)
-				{
-					while (spos>=0x10000L)
-					{
-						gauss_window[gauss_ptr] = (short)*pS++;
-						gauss_ptr = (gauss_ptr+1) & 3;
-						spos -= 0x10000L;
-					}
-					vl = (spos >> 6) & ~3;
-					vr=(gauss[vl]*gvall0)&~2047;
-					vr+=(gauss[vl+1]*gvall(1))&~2047;
-					vr+=(gauss[vl+2]*gvall(2))&~2047;
-					vr+=(gauss[vl+3]*gvall(3))&~2047;
-					l1=s= vr >> 11;
-					l1 &= 0xffff;
-				}
-				else
-				{
-					while (spos>=0x10000L)
-					{
-						s = *pS++;
-						spos -= 0x10000L;
-					}
-					l1=s;
-				}
-
-				l1=(l1*iPlace)/iSize;
-				if (l1<-32767) l1=-32767;
-				if (l1> 32767) l1=32767;
-				l=(l1&0xffff)|(l1<<16);
-				*XAFeed++=l;
-
-				if (XAFeed==XAEnd) XAFeed=XAStart;
-				if (XAFeed==XAPlay)
-				{
-					if (XAPlay!=XAStart) XAFeed=XAPlay-1;
-					break;
-				}
-
-				spos += sinc;
-			}
-		}
-		else
-		{
-			for (i=0;i<iSize;i++)
-			{
-				if (iUseInterpolation==2)
-				{
-					while (spos>=0x10000L)
-					{
-						gauss_window[gauss_ptr] = (short)*pS++;
-						gauss_ptr = (gauss_ptr+1) & 3;
-						spos -= 0x10000L;
-					}
-					vl = (spos >> 6) & ~3;
-					vr=(gauss[vl]*gvall0)&~2047;
-					vr+=(gauss[vl+1]*gvall(1))&~2047;
-					vr+=(gauss[vl+2]*gvall(2))&~2047;
-					vr+=(gauss[vl+3]*gvall(3))&~2047;
-					l=s= vr >> 11;
-					l &= 0xffff;
-				}
-				else
-				{
-					while (spos>=0x10000L)
-					{
-						s = *pS++;
-						spos -= 0x10000L;
-					}
-					l=s;
-				}
-
-				*XAFeed++=(l|(l<<16));
-
-				if (XAFeed==XAEnd) XAFeed=XAStart;
-				if (XAFeed==XAPlay)
-				{
-					if (XAPlay!=XAStart) XAFeed=XAPlay-1;
-					break;
-				}
-
-				spos += sinc;
-			}
-		}
+		fp->write32le((u32)0); //version
+		fp->writedouble(counter);
+		fp->writedouble(lastFrac);
+		fp->write32le(curr.size());
+		for(size_t i=0;i<curr.size();i++)
+			curr[i].freeze(fp);
+		fp->write32le(size());
+		for(size_t i=0;i<size();i++)
+			operator[](i).freeze(fp);
 	}
-}
 
-#endif
+	virtual bool unfreeze(EMUFILE* fp)
+	{
+		u32 version;
+		fp->read32le(&version);
+		fp->readdouble(&counter);
+		fp->readdouble(&lastFrac);
+		u32 temp;
+		fp->read32le(&temp);
+		for(size_t i=0;i<temp;i++)
+		{
+			xa_sample samp;
+			samp.unfreeze(fp);
+			curr.push_back(samp);
+		}
+		fp->read32le(&temp);
+		for(size_t i=0;i<temp;i++)
+		{
+			xa_sample samp;
+			samp.unfreeze(fp);
+			push_back(samp);
+		}
+		return true;
+	}
+
+	void feed(xa_decode_t *xap)
+	{
+		printf("xa feeding xa nsamp=%d chans=%d freq=%d\n",xap->nsamples,xap->stereo*2,xap->freq);
+		//printf("%d\n",xaqueue.size());
+
+		if (!bSPUIsOpen) return;
+
+		enqueue(xap);
+	}
+
+	void fetch(s32* left, s32* right)
+	{
+		s16 samples[8];
+
+		fetch(samples);
+		*left = _Interpolate(samples[0], samples[2], samples[4], samples[6], lastFrac);
+		*right = _Interpolate(samples[1], samples[3], samples[5], samples[7], lastFrac);
+
+		*left = (*left * SPU_core->iLeftXAVol)/32767;
+		*right = (*right * SPU_core->iRightXAVol)/32767;
+
+		advance();
+	}
+};
+
+xa_queue_base* xa_queue_base::construct() { return new xa_queue(); }

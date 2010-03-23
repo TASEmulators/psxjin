@@ -303,25 +303,4 @@ extern int iDoRecord;
 
 #endif
 
-///////////////////////////////////////////////////////////
-// XA.C globals
-///////////////////////////////////////////////////////////
-
-#ifndef _IN_XA
-
-extern xa_decode_t   * xapGlobal;
-
-extern unsigned long * XAFeed;
-extern unsigned long * XAPlay;
-extern unsigned long * XAStart;
-extern unsigned long * XAEnd;
-
-extern unsigned long   XARepeat;
-extern unsigned long   XALastVal;
-
-extern int           iLeftXAVol;
-extern int           iRightXAVol;
-
-#endif
-
 #endif //_SPU_EXTERNALS_H

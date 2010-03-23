@@ -39,6 +39,8 @@
 #include "reverb.h"
 #include "gauss_i.h"
 #include "metaspu/metaspu.h"
+#include "xa.h"
+
 
 SPU_struct *SPU_core, *SPU_user;
 
@@ -174,8 +176,6 @@ void SPU_chan::keyoff()
 
 //---------------------------------------
 
-#include "xa.cpp"
-
 //old functions handy to refer to
 
 //INLINE void VoiceChangeFrequency(SPUCHAN * pChannel)
@@ -283,7 +283,7 @@ enum SPUInterpolationMode
 };
 
 //a is the most recent sample, going back to d as the oldest
-static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
+s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 {
 	SPUInterpolationMode INTERPOLATE_MODE = (SPUInterpolationMode)iUseInterpolation;
 	float ratio = (float)_ratio;
@@ -342,6 +342,11 @@ static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 	}
 }
 
+static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
+{
+	return _Interpolate(a,b,c,d,_ratio);
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 //triggers an irq if the irq address is in the specified range
@@ -369,6 +374,9 @@ SPU_chan::SPU_chan()
 
 SPU_struct::SPU_struct(bool _isCore)
 : isCore(_isCore)
+, iLeftXAVol(32767)
+, iRightXAVol(32767)
+, xaqueue(xa_queue_base::construct())
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
@@ -377,7 +385,9 @@ SPU_struct::SPU_struct(bool _isCore)
 	mixIrqCounter = 0;
 }
 
-SPU_struct::~SPU_struct() {}
+SPU_struct::~SPU_struct() {
+	delete xaqueue;
+}
 
 s32 SPU_chan::decodeBRR(SPU_struct* spu)
 {
@@ -572,12 +582,15 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 		} //channel loop
 
 		if(!kill)
+		{
 			left_accum += MixREVERBLeft();
 			right_accum += MixREVERBRight();
+		}
 
+		if(spu->isCore)
 		{
 			s32 left, right;
-			MixXA(&left,&right);
+			spu->xaqueue->fetch(&left,&right);
 
 			left_accum += left;
 			right_accum += right;
@@ -733,7 +746,8 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 	if (!xap)       return;
 	if (!xap->freq) return;                               // no xa freq ? bye
 
-	FeedXA(xap);                                          // call main XA feeder
+	SPU_core->xaqueue->feed(xap);
+	//SPU_user->xaqueue->feed(xap);
 }
 
 //this func will be called first by the main emu
@@ -762,11 +776,11 @@ void SetupStreams(void)
 
 	InitREVERB();
 
-	XAStart =                                             // alloc xa buffer
-	  (unsigned long *)malloc(44100*4);
-	XAPlay  = XAStart;
-	XAFeed  = XAStart;
-	XAEnd   = XAStart + 44100;
+	//XAStart =                                             // alloc xa buffer
+	//  (unsigned long *)malloc(44100*4);
+	//XAPlay  = XAStart;
+	//XAFeed  = XAStart;
+	//XAEnd   = XAStart + 44100;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -775,8 +789,8 @@ void SetupStreams(void)
 
 void RemoveStreams(void)
 {
-	free(XAStart);                                        // free XA buffer
-	XAStart=0;
+	//free(XAStart);                                        // free XA buffer
+	//XAStart=0;
 
 	ShutdownREVERB();
 

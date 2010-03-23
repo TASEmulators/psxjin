@@ -24,6 +24,20 @@
 //
 //*************************************************************************//
 
+#ifndef _XA_H_
+#define _XA_H_
 
-INLINE void MixXA(void);
-INLINE void FeedXA(xa_decode_t *xap);
+#include "PsxCommon.h"
+struct xa_decode_t;
+
+class xa_queue_base
+{
+public:
+	virtual void freeze(EMUFILE* fp)=0;
+	virtual bool unfreeze(EMUFILE* fp)=0;
+	static xa_queue_base* construct();
+	virtual void feed(xa_decode_t *xap)=0;
+	virtual void fetch(s32* left, s32* right)=0;
+};
+
+#endif //_XA_H_

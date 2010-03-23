@@ -134,7 +134,7 @@ void SPUfreeze_new(EMUFILE* fp)
 	const u32 tag = 0xBEEFFACE;
 	fp->write32le(tag);
 
-	fp->write32le((u32)1); //version
+	fp->write32le((u32)2); //version
 
 	fp->fwrite(spuMem,0x80000);
 	fp->fwrite(regArea,0x200);
@@ -145,12 +145,7 @@ void SPUfreeze_new(EMUFILE* fp)
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].save(fp);
 
-	//this is a bit odd. xa playback needs to be reengineered so its less finicky
-	//and so that it uses a proper fifo which can save its state
-	xa_decode_t tempxa;
-	memset(&tempxa,0,sizeof(xa_decode_t));
-	if(xapGlobal) tempxa = *xapGlobal;
-	tempxa.save(fp);
+	SPU_core->xaqueue->freeze(fp);
 }
 
 bool SPUunfreeze_new(EMUFILE* fp)
@@ -164,7 +159,7 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	if(tag != 0xBEEFFACE) return false;
 
 	u32 version = fp->read32le();
-	if(version <0 || version>1) return false;
+	if(version<2) return false;
 
 	fp->fread(spuMem,0x80000);
 	fp->fread(regArea,0x200);
@@ -175,11 +170,7 @@ bool SPUunfreeze_new(EMUFILE* fp)
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].load(fp);
 
-	//this is WRONG. this state needs to be independent of xapGlobal.
-	//not only that, our fifo isnt restored.
-	xa_decode_t tempxa;
-	tempxa.load(fp);
-	if(xapGlobal) *xapGlobal = tempxa;
+	SPU_core->xaqueue->unfreeze(fp);
 
 // repair some globals
 	for (int i=0;i<=62;i+=2)
