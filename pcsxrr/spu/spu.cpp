@@ -46,11 +46,10 @@ SPU_struct *SPU_core, *SPU_user;
 
 //global spu values
 u16 regArea[10000]; //register cache
-u16 spuMem[256*1024]; //spu memory
 
 static ISynchronizingAudioBuffer* synchronizer = metaspu_construct(ESynchMethod_N);
 
-static inline u8 readSpuMem(u32 addr) { return ((u8*)spuMem)[addr]; }
+
 
 
 // user settings
@@ -75,7 +74,7 @@ u32 dwNoiseVal=1;                          // global noise generator
 u16 spuCtrl=0;                             // some vars to store psx reg infos
 u16 spuStat=0;
 u16 spuIrq=0;
-u32 spuAddr=0xffffffff;                    // address into spu mem
+
 int bSpuInit=0;
 int bSPUIsOpen=0;
 
@@ -377,10 +376,13 @@ SPU_struct::SPU_struct(bool _isCore)
 , iLeftXAVol(32767)
 , iRightXAVol(32767)
 , xaqueue(xa_queue_base::construct())
+, spuAddr(0xffffffff)
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
 		channels[i].ch = i;
+
+	memset(spuMem,0,sizeof(spuMem));
 
 	mixIrqCounter = 0;
 }
@@ -438,9 +440,9 @@ restart:
 		//which is large and apparently streams in
 		spu->triggerIrqRange(blockAddress,16);
 
-		u8 header0 = readSpuMem(blockAddress);
+		u8 header0 = spu->readSpuMem(blockAddress);
 		
-		flags = readSpuMem(blockAddress+1);
+		flags = spu->readSpuMem(blockAddress+1);
 
 		//this flag bit means that we are setting the loop start point
 		if(flags&4) {
@@ -463,7 +465,7 @@ restart:
 		//decode 
 		for(int i=0,j=0;i<14;i++)
 		{
-			s32 d = readSpuMem(blockAddress++);
+			s32 d = spu->readSpuMem(blockAddress++);
 			s32 s = (d&0xf)<<12;
 			if(s&0x8000) s|=0xffff0000;
 			s32 fa = (s>>shift_factor);
@@ -514,7 +516,7 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 		s32 left_accum = 0, right_accum = 0;
 		s32 fmod;
 
-		REVERB_initSample();
+		spu->REVERB_initSample();
 
 		for(int i=0;i<24;i++)
 		{
@@ -578,13 +580,13 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 
 			if(!kill)
 				if (chan->bRVBActive) 
-					StoreREVERB(chan,left,right);
+					spu->StoreREVERB(chan,left,right);
 		} //channel loop
 
 		if(!kill)
 		{
-			left_accum += MixREVERBLeft();
-			right_accum += MixREVERBRight();
+			left_accum += spu->MixREVERBLeft();
+			right_accum += spu->MixREVERBRight();
 		}
 
 		if(spu->isCore)
@@ -654,6 +656,66 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 	//printf("\n");
 }
 
+u16 SPU_struct::SPUreadDMA(void)
+{
+	//printf("SPU single read dma %08X\n",spuAddr);
+
+	u16 s=SPU_core->spuMem[spuAddr>>1];
+
+	//triggerIrqRange(spuAddr,2);
+
+	spuAddr+=2;
+	if (spuAddr>0x7ffff) spuAddr=0;
+
+	return s;
+}
+
+void SPU_struct::SPUreadDMAMem(u16 * pusPSXMem,int iSize)
+{
+	//printf("SPU multi read dma %08X %d\n",spuAddr, iSize);
+
+	for (int i=0;i<iSize;i++)
+	{
+		*pusPSXMem++=spuMem[spuAddr>>1];                    // spu addr got by writeregister
+		//triggerIrqRange(spuAddr,2);
+		spuAddr+=2;                                         // inc spu addr
+		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
+	}
+}
+
+// to investigate: do sound data updates by writedma affect spu
+// irqs? Will an irq be triggered, if new data is written to
+// the memory irq address?
+
+void SPU_struct::SPUwriteDMA(u16 val)
+{
+	//printf("SPU single write dma %08X\n",spuAddr);
+
+	spuMem[spuAddr>>1] = val;                             // spu addr got by writeregister
+	//triggerIrqRange(spuAddr,2);
+
+	spuAddr+=2;                                           // inc spu addr
+	if (spuAddr>0x7ffff) spuAddr=0;                       // wrap
+}
+
+
+void SPU_struct::SPUwriteDMAMem(u16 * pusPSXMem,int iSize)
+{
+	//printf("SPU multi write dma %08X %d\n",spuAddr, iSize);
+
+	for (int i=0;i<iSize;i++)
+	{
+		spuMem[spuAddr>>1] = *pusPSXMem++;                  // spu addr got by writeregister
+		//triggerIrqRange(spuAddr,2);
+		spuAddr+=2;                                         // inc spu addr
+		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
+	}
+}
+
+u16 SPUreadDMA() { return SPU_core->SPUreadDMA(); }
+void SPUreadDMAMem(u16 * pusPSXMem,int iSize) { SPU_core->SPUreadDMAMem(pusPSXMem,iSize); }
+void SPUwriteDMA(u16 val) { SPU_core->SPUwriteDMA(val); }
+void SPUwriteDMAMem(u16 * pusPSXMem,int iSize) { SPU_core->SPUwriteDMAMem(pusPSXMem,iSize); }
 
 //measured 16123034 cycles per second
 //this is around 15.3761 MHZ
@@ -774,8 +836,6 @@ void SetupStreams(void)
 	if (iUseReverb==1) i=88200*2;
 	else              i=NSSIZE*2;
 
-	InitREVERB();
-
 	//XAStart =                                             // alloc xa buffer
 	//  (unsigned long *)malloc(44100*4);
 	//XAPlay  = XAStart;
@@ -791,8 +851,6 @@ void RemoveStreams(void)
 {
 	//free(XAStart);                                        // free XA buffer
 	//XAStart=0;
-
-	ShutdownREVERB();
 
 	/*
 	 int i;
@@ -822,7 +880,6 @@ long SPUopen(void)
 	iUseXA=1;                                             // just small setup
 	iVolume=3;
 	spuIrq=0;
-	spuAddr=0xffffffff;
 	iSPUIRQWait=1;
 
 #ifdef _WINDOWS

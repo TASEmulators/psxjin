@@ -721,14 +721,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\spu\dma.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\spu\dma.h"
-				>
-			</File>
-			<File
 				RelativePath="..\spu\dsound.cpp"
 				>
 			</File>

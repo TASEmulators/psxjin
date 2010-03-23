@@ -38,36 +38,25 @@
 #include "PsxCommon.h"
 #include "externals.h"
 
-s32 sRVBBuf[2];
-
-REVERBInfo      rvb;
-
 
 void StartREVERB(SPU_chan * pChannel)
 {
 	if (pChannel->bReverb && (spuCtrl&0x80))              // reverb possible?
 	{
-		if (iUseReverb==1) pChannel->bRVBActive=1;
+		//if (iUseReverb==1) 
+			pChannel->bRVBActive=1;
 	}
 	else pChannel->bRVBActive=0;                          // else -> no reverb
 }
 
-void InitREVERB(void)
-{
-	memset((void *)&rvb,0,sizeof(REVERBInfo));
-}
-
-void ShutdownREVERB()
-{
-}
-
-void REVERB_initSample() {
+void SPU_struct::REVERB_initSample() {
 	sRVBBuf[0] = sRVBBuf[1] = 0;
 }
 
-void StoreREVERB(SPU_chan* pChannel,s32 left, s32 right)
+void SPU_struct::StoreREVERB(SPU_chan* pChannel,s32 left,s32 right)
 {
-	if (iUseReverb==0) return;
+	//not respecting user's setting right now..
+	//if (iUseReverb==0) return;
 
 	//in pcsxrr this is done earlier
 	//const s32 iRxl=(pChannel->sval*pChannel->iLeftVolume)/0x4000;
@@ -78,7 +67,7 @@ void StoreREVERB(SPU_chan* pChannel,s32 left, s32 right)
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE int g_buffer(int iOff)                          // get_buffer content helper: takes care about wraps
+FORCEINLINE int SPU_struct::g_buffer(int iOff)                          // get_buffer content helper: takes care about wraps
 {
 	short * p=(short *)spuMem;
 	iOff=(iOff*4)+rvb.CurrAddr;
@@ -89,7 +78,7 @@ INLINE int g_buffer(int iOff)                          // get_buffer content hel
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE void s_buffer(int iOff,int iVal)                // set_buffer content helper: takes care about wraps and clipping
+FORCEINLINE void SPU_struct::s_buffer(int iOff,int iVal)                // set_buffer content helper: takes care about wraps and clipping
 {
 	short * p=(short *)spuMem;
 	iOff=(iOff*4)+rvb.CurrAddr;
@@ -102,7 +91,7 @@ INLINE void s_buffer(int iOff,int iVal)                // set_buffer content hel
 
 ////////////////////////////////////////////////////////////////////////
 
-INLINE void s_buffer1(int iOff,int iVal)                // set_buffer (+1 sample) content helper: takes care about wraps and clipping
+FORCEINLINE void SPU_struct::s_buffer1(int iOff,int iVal)                // set_buffer (+1 sample) content helper: takes care about wraps and clipping
 {
 	short * p=(short *)spuMem;
 	iOff=(iOff*4)+rvb.CurrAddr+1;
@@ -115,10 +104,11 @@ INLINE void s_buffer1(int iOff,int iVal)                // set_buffer (+1 sample
 
 ////////////////////////////////////////////////////////////////////////
 
-int MixREVERBLeft()
+int SPU_struct::MixREVERBLeft()
 {
-	if (iUseReverb==0) return 0;
+	//if (iUseReverb==0) return 0;
 
+	//TODO - must fix
 	static int iCnt=0;                                  // this func will be called with 44.1 khz
 
 	iCnt++;
@@ -195,9 +185,9 @@ int MixREVERBLeft()
 
 ////////////////////////////////////////////////////////////////////////
 
-int MixREVERBRight()
+int SPU_struct::MixREVERBRight()
 {
-	if (iUseReverb==0) return 0;
+	//if (iUseReverb==0) return 0;
 	int i=rvb.iLastRVBRight+(rvb.iRVBRight-rvb.iLastRVBRight)/2;
 	rvb.iLastRVBRight=rvb.iRVBRight;
 	// -> just return the last right reverb val (little bit scaled by the previous right val)
