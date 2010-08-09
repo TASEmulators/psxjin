@@ -87,22 +87,22 @@ The corresponding bytes indicate which buttons are pressed at each frame for eac
 *Standard Controller*
 {{{
 000 2-byte unsigned short:
-    bit 0: Select
-    bit 1: unknown
-    bit 2: unknown
-    bit 3: Start
-    bit 4: Up
-    bit 5: Right
-    bit 6: Down
-    bit 7: Left
-    bit 8: L2
-    bit 9: R2
-    bit 10: L1
-    bit 11: R1
-    bit 12: Triangle
-    bit 13: Circle
-    bit 14: Cross
-    bit 15: Square
+    01 00 Select
+    02 00 unknown
+    04 00 unknown
+    08 00 Start
+    10 00 Up
+    20 00 Right
+    40 00 Down
+    80 00 Left
+    00 01 L2
+    00 02 R2
+    00 04 L1
+    00 08 R1
+    00 10 Triangle
+    00 20 Circle
+    00 40 Cross
+    00 80 Square
 }}}
 
 *Analog Joystick/Controller*
