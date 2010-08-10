@@ -88,6 +88,8 @@ static int transparencyModifier = 255;
 // Our joypads.
 static uint32 lua_joypads[2];
 static uint8 lua_joypads_used;
+static LuaAnalogJoy lua_analogjoy[2];
+static uint8 lua_analogjoy_used;
 
 static uint8 gui_enabled = TRUE;
 static enum { GUI_USED_SINCE_LAST_DISPLAY, GUI_USED_SINCE_LAST_FRAME, GUI_CLEAR } gui_used = GUI_CLEAR;
@@ -134,6 +136,7 @@ static int usingMemoryRegister=0;
 static void PCSX_LuaOnStop() {
 	luaRunning = FALSE;
 	lua_joypads_used = 0;
+	lua_analogjoy_used = 0;
 	gui_used = GUI_CLEAR;
 }
 
@@ -888,6 +891,69 @@ static int joypad_set(lua_State *L) {
 	return 0;
 }
 
+static int joypad_getanalog(lua_State *L) {
+
+	// Reads the joypads as inputted by the user
+	PadDataS padd;
+	int which = luaL_checkinteger(L,1);
+	if(which == 1)
+		PAD1_readPort1(&padd);
+	else if(which == 2)
+		PAD2_readPort2(&padd);
+	else
+		luaL_error(L,"Invalid input port (valid range 1-2, specified %d)", which);
+
+	lua_newtable(L);
+
+	lua_pushinteger(L, padd.leftJoyX);
+	lua_setfield(L, -2, "xleft");
+	lua_pushinteger(L, padd.leftJoyY);
+	lua_setfield(L, -2, "yleft");
+	lua_pushinteger(L, padd.rightJoyX);
+	lua_setfield(L, -2, "xright");
+	lua_pushinteger(L, padd.rightJoyY);
+	lua_setfield(L, -2, "yright");
+
+	return 1;
+}
+
+static int joypad_setanalog(lua_State *L) {
+
+	int index = 1;
+
+	int which = luaL_checkinteger(L, index);
+	if (which < 1 || which > 2) {
+		luaL_error(L,"Invalid output port (valid range 1-2, specified %d)", which);
+	}
+	index++;
+
+	luaL_checktype(L, index, LUA_TTABLE);
+
+	lua_analogjoy_used |= 1 << (which-1);
+	memset(&lua_analogjoy[which-1], 128, sizeof(LuaAnalogJoy));
+
+	lua_getfield(L, index, "xleft");
+	if (!lua_isnil(L,-1))
+		lua_analogjoy[which-1].xleft = (unsigned char) std::min(std::max(lua_tointeger(L, -1), 0), 255);
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, "yleft");
+	if (!lua_isnil(L,-1))
+		lua_analogjoy[which-1].yleft = (unsigned char) std::min(std::max(lua_tointeger(L, -1), 0), 255);
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, "xright");
+	if (!lua_isnil(L,-1))
+		lua_analogjoy[which-1].xright = (unsigned char) std::min(std::max(lua_tointeger(L, -1), 0), 255);
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, "yright");
+	if (!lua_isnil(L,-1))
+		lua_analogjoy[which-1].yright = (unsigned char) std::min(std::max(lua_tointeger(L, -1), 0), 255);
+	lua_pop(L, 1);
+
+	return 0;
+}
 
 // Helper function to convert a savestate object to the filename it represents.
 static char *savestateobj2filename(lua_State *L, int offset) {
@@ -3045,6 +3111,8 @@ static const struct luaL_reg joypadlib[] = {
 	{"getdown", joypad_getdown},
 	{"getup", joypad_getup},
 	{"set", joypad_set},
+	{"getanalog", joypad_getanalog},
+	{"setanalog", joypad_setanalog},
 	// alternative names
 	{"read", joypad_get},
 	{"write", joypad_set},
@@ -3138,6 +3206,7 @@ void PCSX_LuaFrameBoundary() {
 	frameAdvanceWaiting = FALSE;
 
 	lua_joypads_used = 0;
+	lua_analogjoy_used = 0;
 
 	numTries = 1000;
 	chdir(luaCWD);
@@ -3276,6 +3345,7 @@ int PCSX_LoadLuaCode(const char *filename) {
 	skipRerecords = FALSE;
 	transparencyModifier = 255; // opaque
 	lua_joypads_used = 0; // not used
+	lua_analogjoy_used = 0; // not used
 
 #ifdef WIN32
 	info_print = PrintToWindowConsole;
@@ -3372,6 +3442,30 @@ uint32 PCSX_LuaReadJoypad(int which) {
 	}
 	else
 		return 0; // disconnected
+}
+
+
+/**
+ * Returns true if Lua would like to steal the given analog joypad control.
+ */
+int PCSX_LuaUsingAnalogJoy(int which) {
+	if (!PCSX_LuaRunning())
+		return 0;
+	return lua_analogjoy_used & (1 << which);
+}
+
+
+/**
+ * Reads the analog joysticks Lua is feeding for the given joypad.
+ */
+LuaAnalogJoy* PCSX_LuaReadAnalogJoy(int which) {
+	if (!PCSX_LuaRunning())
+		return NULL;
+	if (lua_analogjoy_used & (1 << which)) {
+		return &lua_analogjoy[which];
+	}
+	else
+		return NULL; // disconnected
 }
 
 

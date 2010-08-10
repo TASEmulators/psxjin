@@ -1,6 +1,13 @@
 #ifndef _LUAENGINE_H
 #define _LUAENGINE_H
 
+typedef struct StructLuaAnalogJoy {
+	unsigned char xleft;
+	unsigned char yleft;
+	unsigned char xright;
+	unsigned char yright;
+} LuaAnalogJoy;
+
 enum LuaCallID
 {
 	LUACALL_BEFOREEMULATION,
@@ -20,6 +27,8 @@ int PCSX_LuaRunning();
 
 int PCSX_LuaUsingJoypad(int);
 uint32 PCSX_LuaReadJoypad(int);
+int PCSX_LuaUsingAnalogJoy(int);
+LuaAnalogJoy* PCSX_LuaReadAnalogJoy(int);
 int PCSX_LuaSpeed();
 //int PCSX_LuaFrameskip();
 int PCSX_LuaRerecordCountSkip();
