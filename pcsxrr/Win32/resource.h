@@ -370,7 +370,6 @@
 #define IDC_C_WATCH_DUPLICATE           1309
 #define ID_WATCHES_UPDOWN               1310
 #define IDC_C_WATCH_UP                  1311
-#define IDC_C_WATCH_DUPLICATE2          1311
 #define IDC_C_WATCH_SEPARATE            1999
 #define IDC_C_WATCH_DOWN                1312
 #define IDC_PROMPT_TEXT                 1313
