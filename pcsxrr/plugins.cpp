@@ -509,6 +509,13 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	PAD1_readPort1(&padd);
 
 	if(PCSX_LuaUsingJoypad(0)) padd.buttonStatus = PCSX_LuaReadJoypad(0)^0xffff;
+	LuaAnalogJoy* luaAnalogJoy = PCSX_LuaReadAnalogJoy(0);
+	if (luaAnalogJoy != NULL) {
+		padd.leftJoyX = luaAnalogJoy->xleft;
+		padd.leftJoyY = luaAnalogJoy->yleft;
+		padd.rightJoyX = luaAnalogJoy->xright;
+		padd.rightJoyY = luaAnalogJoy->yright;
+	}
 
 /* movie stuff start */
 
@@ -582,6 +589,13 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	PAD2_readPort2(&padd);
 
 	if(PCSX_LuaUsingJoypad(1)) padd.buttonStatus = PCSX_LuaReadJoypad(1)^0xffff;
+	LuaAnalogJoy* luaAnalogJoy = PCSX_LuaReadAnalogJoy(1);
+	if (luaAnalogJoy != NULL) {
+		padd.leftJoyX = luaAnalogJoy->xleft;
+		padd.leftJoyY = luaAnalogJoy->yleft;
+		padd.rightJoyX = luaAnalogJoy->xright;
+		padd.rightJoyY = luaAnalogJoy->yright;
+	}
 
 /* movie stuff start */
 
