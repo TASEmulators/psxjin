@@ -108,8 +108,7 @@ void WIN32_LoadState(int newState) {
 		Movie.mode = previousMode;
 	}
 	GPU_displayText(Text);
-	Update_RAM_Search(); // Update_RAM_Watch() is also called.
-	UpdateMemWatch();
+	UpdateToolWindows();
 }
 
 char *GetSavestateFilename(int newState) {

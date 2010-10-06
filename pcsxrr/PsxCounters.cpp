@@ -226,9 +226,7 @@ GPU_setcurrentmode(modeFlags);
 // update WIN32 tools
 #ifdef WIN32
 	PCSXApplyCheats();
-	Update_RAM_Search(); // Update_RAM_Watch() is also called.
-	UpdateMemWatch();
-//		UpdateMemSearch();
+	UpdateToolWindows();
 #endif
 
 CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);

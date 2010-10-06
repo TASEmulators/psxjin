@@ -11,6 +11,7 @@
 #define DEBUG_DIALOG                    103
 #define ABOUT_DIALOG                    104
 #define IDD_CPUCONF                     105
+#define IDD_MEM_VIEW                    106
 #define IDD_NETPLAY                     108
 #define IDD_CONNECT                     109
 #define IDD_REPLAYINP                   110
@@ -61,7 +62,6 @@
 #define IDC_PSXAUTO                     1010
 #define MW_ADDR03                       1010
 #define IDC_IRQWAIT                     1010
-#define IDC_GO                          1011
 #define IDC_PSXTYPES                    1011
 #define IDC_NODESYNCMODE                1011
 #define IDC_BREAK                       1012
@@ -311,6 +311,14 @@
 #define IDC_COP2C29                     1181
 #define IDC_COP2C30                     1182
 #define IDC_COP2C31                     1183
+#define IDC_GO                          1184
+#define IDC_TEXTDUMP                    1185
+#define IDC_MEMVIEWBOX                  1186
+#define IDC_ADDRESS                     1187
+#define IDC_RAWDUMP                     1188
+#define IDC_REGION                      1189
+#define IDC_VIEWMODE                    1190
+#define IDC_DUMPALL                     1191
 #define IDC_BUTTON1                     1254
 #define IDC_FORMAT1                     1254
 #define IDC_FORMAT2                     1255
@@ -492,6 +500,7 @@
 #define RW_MENU_FIRST_RECENT_FILE       40130
 #define RW_MENU_LAST_RECENT_FILE        40150
 #define ID_EMULATOR_CONTINUE            40151
+#define IDM_MEMORY                      40152
 #define IDC_STATIC1                     50001
 #define IDC_STATIC2                     50002
 #define IDC_STATIC3                     50003

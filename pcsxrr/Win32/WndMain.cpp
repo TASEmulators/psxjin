@@ -42,6 +42,8 @@
 #include "moviewin.h"
 #include "ram_search.h"
 #include "ramwatch.h"
+#include "CWindow.h"
+#include "memView.h"
 #include "../spu/spu.h"
 
 extern HWND LuaConsoleHWnd;
@@ -356,6 +358,8 @@ int main(int argc, char **argv) {
 
 	RunGui();
 
+	CloseAllToolWindows();
+
 	return 0;
 }
 
@@ -405,6 +409,14 @@ void RestoreWindow() {
 	ShowCursor(TRUE);
 	SetCursor(LoadCursor(gApp.hInstance, IDC_ARROW));
 	ShowCursor(TRUE);
+}
+
+void UpdateToolWindows()
+{
+	Update_RAM_Search();	//Update_RAM_Watch() is also called; hotkey.cpp - HK_StateLoadSlot & State_Load also call these functions
+	UpdateMemWatch();
+
+	RefreshAllToolWindows();
 }
 
 int Slots[5] = { -1, -1, -1, -1, -1 };
@@ -739,6 +751,13 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					else
 						SetForegroundWindow(RamWatchHWnd);
 					return TRUE;
+
+				case IDM_MEMORY:
+					if (!RegWndClass("MemView_ViewBox", MemView_ViewBoxProc, 0, sizeof(CMemView*)))
+						return 0;
+
+					OpenToolWindow(new CMemView());
+					return 0;
 
 				case ID_CONFIGURATION_MEMWATCH:
 						CreateMemWatch();
@@ -1651,6 +1670,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("RAM &Poke"), ID_CONFIGURATION_MEMPOKE);
 	ADDMENUITEM(0, _("RAM &Search"), ID_RAM_SEARCH);
 	ADDMENUITEM(0, _("RAM &Search (Old)"), ID_CONFIGURATION_MEMSEARCH);
+	ADDMENUITEM(0, _("View Memory"), IDM_MEMORY);
 	ADDMENUITEM(0, _("&Cheat Editor"), ID_CONFIGURATION_CHEATS);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
