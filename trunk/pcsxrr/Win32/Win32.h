@@ -77,6 +77,8 @@ void ResetMenuSlots();
 
 void CreateMemPoke();
 
+void UpdateToolWindows();
+
 // maphkeys.c
 extern HWND hMHkeysDlg;
 int MHkeysUpdate();
