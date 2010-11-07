@@ -152,6 +152,10 @@ void SPUfreeze_new(EMUFILE* fp)
 
 	SPU_core->xaqueue.freeze(fp);
 
+	//a bit weird to do this here, but i wanted to have a more solid XA state saver
+	//and the cdr freeze sucks. I made sure this saves and loads after the cdr state
+	cdr.Xa.save(fp);
+
 	const u32 endtag = 0xBAADF00D;
 	fp->write32le(endtag);
 }
@@ -204,12 +208,18 @@ bool SPUunfreeze_new(EMUFILE* fp)
 		SPUwriteRegister(0x1f801c00+(i<<4)+0x0A,regArea[((i<<4)+0xc00+0x0A)>>1]);
 	}
 
+	//a bit weird to do this here, but i wanted to have a more solid XA state saver
+	//and the cdr freeze sucks. I made sure this saves and loads after the cdr state
+	cdr.Xa.load(fp);
+
+
 	u32 endtag = fp->read32le();
 	if(endtag != 0xBAADF00D) return false;
 
+	//TODO - copy core into user (xaqueue will need special help)
+
 	return true;
 
-	//TODO - copy core into user (xaqueue will need special help)
 	
 }
 
