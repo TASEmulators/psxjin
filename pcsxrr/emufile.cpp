@@ -1,24 +1,28 @@
-#include "PsxCommon.h"
+/* 
+Copyright (C) 2009-2010 DeSmuME team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
 #include "emufile.h"
 
 #include <vector>
-
-/* little endian (ds' endianess) to local endianess convert macros */
-#ifdef LOCAL_BE	/* local arch is big endian */
-# define LE_TO_LOCAL_16(x) ((((x)&0xff)<<8)|(((x)>>8)&0xff))
-# define LE_TO_LOCAL_32(x) ((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)>>8)&0xff00)|(((x)>>24)&0xff))
-# define LE_TO_LOCAL_64(x) ((((x)&0xff)<<56)|(((x)&0xff00)<<40)|(((x)&0xff0000)<<24)|(((x)&0xff000000)<<8)|(((x)>>8)&0xff000000)|(((x)>>24)&0xff00)|(((x)>>40)&0xff00)|(((x)>>56)&0xff))
-# define LOCAL_TO_LE_16(x) ((((x)&0xff)<<8)|(((x)>>8)&0xff))
-# define LOCAL_TO_LE_32(x) ((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)>>8)&0xff00)|(((x)>>24)&0xff))
-# define LOCAL_TO_LE_64(x) ((((x)&0xff)<<56)|(((x)&0xff00)<<40)|(((x)&0xff0000)<<24)|(((x)&0xff000000)<<8)|(((x)>>8)&0xff000000)|(((x)>>24)&0xff00)|(((x)>>40)&0xff00)|(((x)>>56)&0xff))
-#else		/* local arch is little endian */
-# define LE_TO_LOCAL_16(x) (x)
-# define LE_TO_LOCAL_32(x) (x)
-# define LE_TO_LOCAL_64(x) (x)
-# define LOCAL_TO_LE_16(x) (x)
-# define LOCAL_TO_LE_32(x) (x)
-# define LOCAL_TO_LE_64(x) (x)
-#endif
 
 bool EMUFILE::readAllBytes(std::vector<u8>* dstbuf, const std::string& fname)
 {
@@ -28,6 +32,58 @@ bool EMUFILE::readAllBytes(std::vector<u8>* dstbuf, const std::string& fname)
 	dstbuf->resize(size);
 	file.fread(&dstbuf->at(0),size);
 	return true;
+}
+
+size_t EMUFILE_MEMORY::_fread(const void *ptr, size_t bytes){
+	u32 remain = len-pos;
+	u32 todo = std::min<u32>(remain,(u32)bytes);
+	if(len==0)
+	{
+		failbit = true;
+		return 0;
+	}
+	if(todo<=4)
+	{
+		u8* src = buf()+pos;
+		u8* dst = (u8*)ptr;
+		for(size_t i=0;i<todo;i++)
+			*dst++ = *src++;
+	}
+	else
+	{
+		memcpy((void*)ptr,buf()+pos,todo);
+	}
+	pos += todo;
+	if(todo<bytes)
+		failbit = true;
+	return todo;
+}
+
+void EMUFILE_FILE::truncate(s32 length)
+{
+	fflush(fp);
+	#ifdef _MSC_VER
+		_chsize(_fileno(fp),length);
+	#else
+		ftruncate(fileno(fp),length);
+	#endif
+	fclose(fp);
+	fp = NULL;
+	open(fname.c_str(),mode);
+}
+
+
+EMUFILE* EMUFILE_FILE::memwrap()
+{
+	EMUFILE_MEMORY* mem = new EMUFILE_MEMORY(size());
+	if(size()==0) return mem;
+	fread(mem->buf(),size());
+	return mem;
+}
+
+EMUFILE* EMUFILE_MEMORY::memwrap()
+{
+	return this;
 }
 
 void EMUFILE::write64le(u64* val)

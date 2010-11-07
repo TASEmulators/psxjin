@@ -84,8 +84,6 @@ void ReadConfig(void)
 	iRecordMode=0;
 	iUseReverb=1;
 	iUseInterpolation=2;
-	iDisStereo=0;
-	iUseDBufIrq=0;
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\SPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
 	{
@@ -115,11 +113,6 @@ void ReadConfig(void)
 		if (RegQueryValueEx(myKey,"UseInterpolation",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iUseInterpolation=(int)temp;
 		size = 4;
-		if (RegQueryValueEx(myKey,"DisStereo",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iDisStereo=(int)temp;
-		size = 4;
-		if (RegQueryValueEx(myKey,"DecodedBufIRQ",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iUseDBufIrq=(int)temp;
 
 		RegCloseKey(myKey);
 	}
@@ -156,10 +149,6 @@ void WriteConfig(void)
 	RegSetValueEx(myKey,"UseReverb",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iUseInterpolation;
 	RegSetValueEx(myKey,"UseInterpolation",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iDisStereo;
-	RegSetValueEx(myKey,"DisStereo",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iUseDBufIrq;
-	RegSetValueEx(myKey,"DecodedBufIRQ",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 
 	RegCloseKey(myKey);
 }
@@ -195,12 +184,10 @@ BOOL OnInitDSoundDialog(HWND hW)
 
 	if (iSPUIRQWait)  CheckDlgButton(hW,IDC_IRQWAIT,TRUE);
 	if (iRecordMode)  CheckDlgButton(hW,IDC_RECORDMODE,TRUE);
-	if (iDisStereo)   CheckDlgButton(hW,IDC_DISSTEREO,TRUE);
-	if (iUseDBufIrq)  CheckDlgButton(hW,IDC_IRQDECODE,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USEREVERB);
-	tempDest=ComboBox_AddString(hWC, "0: No reverb (fastest)");
-	tempDest=ComboBox_AddString(hWC, "1: PSX reverb (best quality)");
+	tempDest=ComboBox_AddString(hWC, "0: Don't Output Reverb (but process it anyway to be safe)");
+	tempDest=ComboBox_AddString(hWC, "1: Output Reverb");
 	tempDest=ComboBox_SetCurSel(hWC,iUseReverb);
 
 	hWC=GetDlgItem(hW,IDC_INTERPOL);
@@ -249,14 +236,6 @@ void OnDSoundOK(HWND hW)
 	if (IsDlgButtonChecked(hW,IDC_RECORDMODE))
 		iRecordMode=1;
 	else iRecordMode=0;
-
-	if (IsDlgButtonChecked(hW,IDC_DISSTEREO))
-		iDisStereo=1;
-	else iDisStereo=0;
-
-	if (IsDlgButtonChecked(hW,IDC_IRQDECODE))
-		iUseDBufIrq=1;
-	else iUseDBufIrq=0;
 
 	WriteConfig();                                        // write registry
 
@@ -467,28 +446,6 @@ void ReadConfigFile(void)
 	if (iUseInterpolation<0) iUseInterpolation=0;
 	if (iUseInterpolation>3) iUseInterpolation=3;
 
-	strcpy(t,"\nDisStereo");
-	p=strstr(pB,t);
-	if (p)
-	{
-		p=strstr(p,"=");
-		len=1;
-	}
-	if (p)  iDisStereo=atoi(p+len);
-	if (iDisStereo<0) iDisStereo=0;
-	if (iDisStereo>1) iDisStereo=1;
-
-	strcpy(t,"\nDecodedBufIRQ");
-	p=strstr(pB,t);
-	if (p)
-	{
-		p=strstr(p,"=");
-		len=1;
-	}
-	if (p)  iUseDBufIrq=atoi(p+len);
-	if (iUseDBufIrq<0) iUseDBufIrq=0;
-	if (iUseDBufIrq>1) iUseDBufIrq=1;
-
 	free(pB);
 }
 
@@ -506,7 +463,6 @@ void ReadConfig(void)
 	iUseReverb=2;
 	iUseInterpolation=2;
 	iDisStereo=0;
-	iUseDBufIrq=0;
 
 	ReadConfigFile();
 }

@@ -28,16 +28,44 @@
 #define _XA_H_
 
 #include "PsxCommon.h"
+#include <deque>
+#include "emufile.h"
 struct xa_decode_t;
 
-class xa_queue_base
+class EMUFILE;
+
+struct xa_sample
+{
+	union {
+		s16 both[2];
+		struct {
+			s16 left, right;
+		};
+	};
+	s32 freq;
+
+	void freeze(EMUFILE* fp);
+	bool unfreeze(EMUFILE* fp);
+};
+
+class xa_queue : public std::deque<xa_sample>
 {
 public:
-	virtual void freeze(EMUFILE* fp)=0;
-	virtual bool unfreeze(EMUFILE* fp)=0;
-	static xa_queue_base* construct();
-	virtual void feed(xa_decode_t *xap)=0;
-	virtual void fetch(s32* left, s32* right)=0;
+	xa_queue();
+	void enqueue(xa_decode_t* xap);
+	void advance();
+	void freeze(EMUFILE* fp);
+	bool unfreeze(EMUFILE* fp);
+	void feed(xa_decode_t *xap);
+	void fetch(s16* fourStereoSamples);
+	void fetch(s32* left, s32* right);
+
+private:
+	double counter;
+	double lastFrac;
+
+	std::deque<xa_sample> curr;
+
 };
 
 #endif //_XA_H_

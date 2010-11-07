@@ -141,8 +141,6 @@ extern int        iSPUIRQWait;
 extern int        iRecordMode;
 extern int        iUseReverb;
 extern int        iUseInterpolation;
-extern int        iDisStereo;
-extern int        iUseDBufIrq;
 
 // MISC
 

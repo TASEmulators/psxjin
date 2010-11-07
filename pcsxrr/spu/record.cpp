@@ -57,17 +57,8 @@ void RecordStart()
 	memset(&pcmwf,0,sizeof(WAVEFORMATEX));
 	pcmwf.wFormatTag      = WAVE_FORMAT_PCM;
 
-	if (iDisStereo)
-	{
-		pcmwf.nChannels       = 1;
-		pcmwf.nBlockAlign     = 2;
-	}
-	else
-	{
-		pcmwf.nChannels       = 2;
-		pcmwf.nBlockAlign     = 4;
-	}
-
+	pcmwf.nChannels       = 2;
+	pcmwf.nBlockAlign     = 4;
 	pcmwf.nSamplesPerSec  = 44100;
 	pcmwf.nAvgBytesPerSec = pcmwf.nSamplesPerSec * pcmwf.nBlockAlign;
 	pcmwf.wBitsPerSample  = 16;

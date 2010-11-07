@@ -62,8 +62,6 @@ int iSPUIRQWait=1;
 int iRecordMode=0;
 int iUseReverb=1;
 int iUseInterpolation=2;
-int iDisStereo=0;
-int iUseDBufIrq=0;
 
 FORCEINLINE bool isStreamingMode() { return iUseTimer==2; }
 
@@ -375,7 +373,6 @@ SPU_struct::SPU_struct(bool _isCore)
 : isCore(_isCore)
 , iLeftXAVol(32767)
 , iRightXAVol(32767)
-, xaqueue(xa_queue_base::construct())
 , spuAddr(0xffffffff)
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
@@ -388,7 +385,6 @@ SPU_struct::SPU_struct(bool _isCore)
 }
 
 SPU_struct::~SPU_struct() {
-	delete xaqueue;
 }
 
 s32 SPU_chan::decodeBRR(SPU_struct* spu)
@@ -592,7 +588,7 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 		if(spu->isCore)
 		{
 			s32 left, right;
-			spu->xaqueue->fetch(&left,&right);
+			spu->xaqueue.fetch(&left,&right);
 
 			left_accum += left;
 			right_accum += right;
@@ -794,6 +790,46 @@ void SPUasync(unsigned long cycle)
 	}
 }
 
+void _ADSRInfo::save(EMUFILE* fp) {
+	fp->write32le((u32)0); //version
+	fp->write32le(&State);
+	fp->write32le(&AttackModeExp);
+	fp->write32le(&AttackRate);
+	fp->write32le(&DecayRate);
+	fp->write32le(&SustainLevel);
+	fp->write32le(&SustainModeExp);
+	fp->write32le(&SustainIncrease);
+	fp->write32le(&SustainRate);
+	fp->write32le(&ReleaseModeExp);
+	fp->write32le(&EnvelopeVol);
+	fp->write32le(&lVolume);
+}
+void _ADSRInfo::load(EMUFILE* fp) {
+	u32 version = fp->read32le();
+	fp->read32le(&State);
+	fp->read32le(&AttackModeExp);
+	fp->read32le(&AttackRate);
+	fp->read32le(&DecayRate);
+	fp->read32le(&SustainLevel);
+	fp->read32le(&SustainModeExp);
+	fp->read32le(&SustainIncrease);
+	fp->read32le(&SustainRate);
+	fp->read32le(&ReleaseModeExp);
+	fp->read32le(&EnvelopeVol);
+	fp->read32le(&lVolume);
+}
+
+void REVERBInfo::save(EMUFILE* fp) {
+	fp->write32le((u32)0); //version
+	for(int i=0;i<41;i++)
+		fp->write32le(&arr[i]);
+}
+void REVERBInfo::load(EMUFILE* fp) {
+	u32 version = fp->read32le();
+	for(int i=0;i<41;i++)
+		fp->read32le(&arr[i]);
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 // XA AUDIO
@@ -808,7 +844,7 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 	if (!xap)       return;
 	if (!xap->freq) return;                               // no xa freq ? bye
 
-	SPU_core->xaqueue->feed(xap);
+	SPU_core->xaqueue.feed(xap);
 	//SPU_user->xaqueue->feed(xap);
 }
 

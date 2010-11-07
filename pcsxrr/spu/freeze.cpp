@@ -150,7 +150,7 @@ void SPUfreeze_new(EMUFILE* fp)
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].save(fp);
 
-	SPU_core->xaqueue->freeze(fp);
+	SPU_core->xaqueue.freeze(fp);
 
 	const u32 endtag = 0xBAADF00D;
 	fp->write32le(endtag);
@@ -158,10 +158,8 @@ void SPUfreeze_new(EMUFILE* fp)
 
 bool SPUunfreeze_new(EMUFILE* fp)
 {
-	SPU_core->~SPU_struct();
-	SPU_user->~SPU_struct();
-	new(SPU_core) SPU_struct(true);
-	new(SPU_user) SPU_struct(false);
+	reconstruct(SPU_core,true);
+	reconstruct(SPU_user,false);
 
 	u32 tag = fp->read32le();
 	if(tag != 0xBEEFFACE) return false;
@@ -182,7 +180,7 @@ bool SPUunfreeze_new(EMUFILE* fp)
 
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].load(fp);
 
-	SPU_core->xaqueue->unfreeze(fp);
+	SPU_core->xaqueue.unfreeze(fp);
 
 // repair some globals
 	for (int i=0;i<=62;i+=2)

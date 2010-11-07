@@ -364,3 +364,39 @@ xa_decode_t	xa;
 		play_wave( xa.pcm, xa.freq, xa.nsamples );
 	}
 */
+
+
+void ADPCM_Decode_t::save(EMUFILE* fp) {
+	fp->write32le(&y0);
+	fp->write32le(&y1);
+}
+void ADPCM_Decode_t::load(EMUFILE* fp) {
+	fp->read32le(&y0);
+	fp->read32le(&y1);
+}
+
+void xa_decode_t::save(EMUFILE* fp) {
+	fp->write32le((u32)0); //version
+	fp->write32le(&freq);
+	fp->write32le(&nbits);
+	fp->write32le(&stereo);
+	fp->write32le(&nsamples);
+	left.save(fp);
+	right.save(fp);
+	for(int i=0;i<16384;i++)
+		fp->write16le(&pcm[i]);
+}
+
+void xa_decode_t::load(EMUFILE* fp) {
+	u32 version = fp->read32le();
+	fp->read32le(&freq);
+	fp->read32le(&nbits);
+	fp->read32le(&stereo);
+	fp->read32le(&nsamples);
+	left.load(fp);
+	right.load(fp);
+	for(int i=0;i<16384;i++)
+		fp->read16le(&pcm[i]);
+}
+
+
