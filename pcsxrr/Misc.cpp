@@ -473,19 +473,18 @@ int SaveState(char *file) {
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
 	free(gpufP);
 
-	EMUFILE_MEMORY memfile;
-	SPUfreeze_new(&memfile);
-	Size = memfile.size();
-	gzwrite(f, &Size, 4);
-	gzwrite(f, memfile.buf(),Size);
-
-
 	sioFreeze(f, 1);
 	cdrFreeze(f, 1);
 	psxHwFreeze(f, 1);
 	psxRcntFreeze(f, 1);
 	mdecFreeze(f, 1);
 	MovieFreeze(f, 1);
+
+	EMUFILE_MEMORY memfile;
+	SPUfreeze_new(&memfile);
+	Size = memfile.size();
+	gzwrite(f, &Size, 4);
+	gzwrite(f, memfile.buf(),Size);
 
 	gzclose(f);
 
@@ -523,6 +522,13 @@ int LoadState(char *file) {
 	GPU_freeze(0, gpufP);
 	free(gpufP);
 
+	sioFreeze(f, 0);
+	cdrFreeze(f, 0);
+	psxHwFreeze(f, 0);
+	psxRcntFreeze(f, 0);
+	mdecFreeze(f, 0);
+	MovieFreeze(f, 0);
+
 	// spu
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
@@ -530,14 +536,6 @@ int LoadState(char *file) {
 	gzread(f, memfile.buf(), Size);
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
-
-
-	sioFreeze(f, 0);
-	cdrFreeze(f, 0);
-	psxHwFreeze(f, 0);
-	psxRcntFreeze(f, 0);
-	mdecFreeze(f, 0);
-	MovieFreeze(f, 0);
 
 	gzclose(f);
 
