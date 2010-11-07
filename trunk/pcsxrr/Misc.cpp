@@ -526,7 +526,7 @@ int LoadState(char *file) {
 	// spu
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
-	memfile.expand(Size);
+	memfile.truncate(Size);
 	gzread(f, memfile.buf(), Size);
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
@@ -660,7 +660,7 @@ int LoadStateEmbed(char *file) {
 	// spu
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
-	memfile.expand(Size);
+	memfile.truncate(Size);
 	gzread(f, memfile.buf(), Size);
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;

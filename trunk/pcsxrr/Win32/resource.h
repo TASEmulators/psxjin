@@ -17,6 +17,7 @@
 #define IDD_REPLAYINP                   110
 #define IDD_RECORDINP                   111
 #define IDD_CFGDLG                      112
+#define IDD_SPUCFGDLG                   112
 #define SPLASH_LOGO                     113
 #define IDD_RECORD                      113
 #define IDD_GPREGS                      114
@@ -378,7 +379,6 @@
 #define IDC_C_WATCH_DUPLICATE           1309
 #define ID_WATCHES_UPDOWN               1310
 #define IDC_C_WATCH_UP                  1311
-#define IDC_C_WATCH_SEPARATE            1999
 #define IDC_C_WATCH_DOWN                1312
 #define IDC_PROMPT_TEXT                 1313
 #define IDC_PROMPT_TEXT2                1314
@@ -391,6 +391,7 @@
 #define IDC_BUTTON_LUAEDIT              1321
 #define IDC_LUACONSOLE_CLEAR            1322
 #define IDC_LUACONSOLE_CHOOSEFONT       1323
+#define IDC_C_WATCH_SEPARATE            1999
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
