@@ -48,6 +48,13 @@ void xa_queue::enqueue(xa_decode_t* xap)
 	blank.left = blank.right = 0;
 	blank.freq = xap->freq;
 
+	//if this is the first sample in your queue, clear our time tracking data
+	if(size()==0)
+	{
+		lastFrac = 0;
+		counter = 0;
+	}
+
 	if(xap->stereo)
 		for(int i=0;i<xap->nsamples;i++)
 		{
@@ -70,19 +77,10 @@ void xa_queue::enqueue(xa_decode_t* xap)
 
 void xa_queue::fetch(s16* fourStereoSamples)
 {
-	for(size_t i=0;i<4;i++)
+	for(int i=0;i<4;i++)
 	{
-		size_t idx = 3-i;
-		if(idx>=curr.size())
-		{
-			fourStereoSamples[i*2] = 0;
-			fourStereoSamples[i*2+1] = 0;
-		}
-		else
-		{
-			fourStereoSamples[i*2] = curr[idx].left;
-			fourStereoSamples[i*2+1] = curr[idx].right;
-		}
+		fourStereoSamples[i*2] = curr[3-i].left;
+		fourStereoSamples[i*2+1] = curr[3-i].right;
 	}
 }
 
@@ -93,14 +91,10 @@ void xa_queue::advance()
 	for(;;)
 	{
 		if(size()==0) {
-
 			//if we have a counter >= 1 then we may be having timer problems
 			//and our XA queue is underrunning.
 			if(counter>=1) printf("empty with counter=%f\n",counter);
 			//counter < 1 is OK as it is just a little phase error between SPU and XA
-
-			lastFrac = 0;
-			counter = 0;
 			return;
 		}
 		double target = 1.0/front().freq;

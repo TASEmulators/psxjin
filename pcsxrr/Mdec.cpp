@@ -167,11 +167,12 @@ void iqtab_init(int *iqtab,unsigned char *iq_y);
 void yuv2rgb24(int *blk,unsigned char *image);
 void yuv2rgb15(int *blk,unsigned short *image);
 
-struct {
+struct TMdec {
 	unsigned long command;
 	unsigned long status;
 	unsigned short *rl;
 	int rlsize;
+	void fix();
 } mdec;
 
 int iq_y[DCTSIZE2],iq_uv[DCTSIZE2];
@@ -180,6 +181,10 @@ void mdecInit(void) {
 	mdec.rl = (u16*)&psxM[0x100000];
 	mdec.command = 0;
 	mdec.status = 0;
+}
+void TMdec::fix()
+{
+	mdec.rl = (u16*)&psxM[0x100000];
 }
 
 
@@ -513,6 +518,7 @@ int mdecFreeze(gzFile f, int Mode) {
 	char Unused[4096];
 
 	gzfreeze(&mdec, sizeof(mdec));
+	mdec.fix();
 	gzfreezel(iq_y);
 	gzfreezel(iq_uv);
 	gzfreezel(Unused);
