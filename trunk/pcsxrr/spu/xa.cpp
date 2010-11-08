@@ -49,11 +49,11 @@ void xa_queue::enqueue(xa_decode_t* xap)
 	blank.freq = xap->freq;
 
 	//if this is the first sample in your queue, clear our time tracking data
-	if(size()==0)
-	{
-		lastFrac = 0;
-		counter = 0;
-	}
+	//if(size()==0)
+	//{
+	//	lastFrac = 0;
+	//	counter = 0;
+	//}
 
 	if(xap->stereo)
 		for(int i=0;i<xap->nsamples;i++)
@@ -91,6 +91,7 @@ void xa_queue::advance()
 	for(;;)
 	{
 		if(size()==0) {
+			//printf("empty with counter=%f\n",counter);
 			//if we have a counter >= 1 then we may be having timer problems
 			//and our XA queue is underrunning.
 			if(counter>=1) printf("empty with counter=%f\n",counter);
