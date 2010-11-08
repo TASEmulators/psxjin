@@ -902,7 +902,7 @@ void SPU_Emulate_user()
 
 	if (audiosize > 0)
 	{
-		printf("%d %d\n",iPause,iFrameAdvance);
+		//printf("%d %d\n",iPause,iFrameAdvance);
 		if(iPause && !iFrameAdvance)
 		{
 			static std::vector<s16> empty;
