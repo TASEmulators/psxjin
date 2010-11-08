@@ -109,12 +109,11 @@ int SPU_struct::MixREVERBLeft()
 	//if (iUseReverb==0) return 0;
 
 	//TODO - must fix
-	static int iCnt=0;                                  // this func will be called with 44.1 khz
+	iReverbCycle++;
 
-	iCnt++;
-
-	if (iCnt&1)                                         // we work on every second left value: downsample to 22 khz
+	if(!(iReverbCycle&1))                                         // we work on every second left value: downsample to 22 khz
 	{
+		iReverbCycle = 0;
 		if (spuCtrl&0x80)                                 // -> reverb on? oki
 		{
 			int ACC0,ACC1,FB_A0,FB_A1,FB_B0,FB_B1;
