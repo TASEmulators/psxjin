@@ -65,6 +65,7 @@
 #define IDC_IRQWAIT                     1010
 #define IDC_PSXTYPES                    1011
 #define IDC_NODESYNCMODE                1011
+#define IDC_SYNCHMETHOD                 1011
 #define IDC_BREAK                       1012
 #define IDC_DISCPUQKEYS                 1012
 #define IDC_QKEYS                       1012

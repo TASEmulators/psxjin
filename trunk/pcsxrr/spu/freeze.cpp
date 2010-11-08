@@ -140,7 +140,9 @@ void SPUfreeze_new(EMUFILE* fp)
 	fp->fwrite(SPU_core->spuMem,0x80000);
 	fp->fwrite(regArea,0x200);
 	fp->write32le(&SPU_core->spuAddr);
-	fp->write16le(spuIrq);
+	fp->write16le(&SPU_core->spuCtrl);
+	fp->write16le(&SPU_core->spuStat);
+	fp->write16le(&SPU_core->spuIrq);
 
 	fp->write32le(&SPU_core->mixIrqCounter);
 
@@ -174,7 +176,9 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	fp->fread(SPU_core->spuMem,0x80000);
 	fp->fread(regArea,0x200);
 	fp->read32le(&SPU_core->spuAddr);
-	fp->read16le(&spuIrq);
+	fp->read16le(&SPU_core->spuCtrl);
+	fp->read16le(&SPU_core->spuStat);
+	fp->read16le(&SPU_core->spuIrq);
 
 	fp->read32le(&SPU_core->mixIrqCounter);
 
@@ -217,9 +221,8 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	if(endtag != 0xBAADF00D) return false;
 
 	//TODO - copy core into user (xaqueue will need special help)
+	SPUcloneUser();
 
 	return true;
-
-	
 }
 

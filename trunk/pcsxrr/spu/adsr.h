@@ -31,7 +31,7 @@
 #include "spu.h"
 #include "PsxCommon.h"
 
-void InitADSR();
+void StaticInitADSR();
 void StartADSR(SPU_chan * pChannel);
 s32  MixADSR(SPU_chan * pChannel);
 

@@ -145,6 +145,7 @@ class SPU_chan
 {
 public:
 	u32 ch;
+	SPU_struct* spu;
 
 	SPU_chan();
 
@@ -219,6 +220,9 @@ public:
 	s32 iLeftXAVol, iRightXAVol;
 
 	u32 spuAddr;
+	u16 spuCtrl;
+	u16 spuStat;
+	u16 spuIrq;
 	u16 spuMem[256*1024];
 	inline u8 readSpuMem(u32 addr) { return ((u8*)spuMem)[addr]; }
 
@@ -245,7 +249,6 @@ public:
 };
 
 extern SPU_struct *SPU_core, *SPU_user;
-extern u16  spuCtrl;
 extern int iUseReverb;
 
 u16 SPUreadDMA();
@@ -255,7 +258,9 @@ void SPUwriteDMAMem(u16 * pusPSXMem,int iSize);
 
 void SPUfreeze_new(EMUFILE* fp);
 bool SPUunfreeze_new(EMUFILE* fp);
+void SPUcloneUser();
 
 void SPUmute();
 void SPUunMute();
+void SPUReset();
 #endif
