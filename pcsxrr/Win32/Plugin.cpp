@@ -78,8 +78,8 @@ void WIN32_SaveState(int newState) {
 	GPU_freeze(2, (GPUFreeze_t *)&StatesC);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PCSX*: Saved State %d"), StatesC+1);
-	else sprintf(Text, _("*PCSX*: Error Saving State %d"), StatesC+1);
+		 sprintf(Text, _("*PCSX*: Saved State %d"), StatesC);
+	else sprintf(Text, _("*PCSX*: Error Saving State %d"), StatesC);
 	GPU_displayText(Text);
 	if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 }
@@ -102,9 +102,9 @@ void WIN32_LoadState(int newState) {
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
 	ret = LoadState(Text);
 	if (ret == 0)
-		sprintf(Text, _("*PCSX*: Loaded State %d"), StatesC+1);
+		sprintf(Text, _("*PCSX*: Loaded State %d"), StatesC);
 	else {
-		sprintf(Text, _("*PCSX*: Error Loading State %d"), StatesC+1);
+		sprintf(Text, _("*PCSX*: Error Loading State %d"), StatesC);
 		Movie.mode = previousMode;
 	}
 	GPU_displayText(Text);
