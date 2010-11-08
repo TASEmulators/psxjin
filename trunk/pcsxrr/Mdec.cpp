@@ -173,18 +173,29 @@ struct TMdec {
 	unsigned short *rl;
 	int rlsize;
 	void fix();
+	void unfix();
 } mdec;
 
 int iq_y[DCTSIZE2],iq_uv[DCTSIZE2];
 
 void mdecInit(void) {
-	mdec.rl = (u16*)&psxM[0x100000];
+	mdec.rl = 0;
 	mdec.command = 0;
 	mdec.status = 0;
+	mdec.fix();
 }
 void TMdec::fix()
 {
-	mdec.rl = (u16*)&psxM[0x100000];
+	u8* ptr = (u8*)rl;
+	ptr += (intptr_t)&psxM[0x100000];
+	rl = (u16*)ptr;
+}
+
+void TMdec::unfix()
+{
+	u8* ptr = (u8*)rl;
+	ptr -= (intptr_t)&psxM[0x100000];
+	rl = (u16*)ptr;
 }
 
 
@@ -517,6 +528,7 @@ void yuv2rgb24(int *blk,unsigned char *image) {
 int mdecFreeze(gzFile f, int Mode) {
 	char Unused[4096];
 
+	mdec.unfix();
 	gzfreeze(&mdec, sizeof(mdec));
 	mdec.fix();
 	gzfreezel(iq_y);
