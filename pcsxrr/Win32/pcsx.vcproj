@@ -80,7 +80,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
-				OutputFile="$(OutDir)\pcsx.exe"
+				OutputFile="$(OutDir)\pcsxrr-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
@@ -189,7 +189,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
-				OutputFile="$(OutDir)\pcsx.exe"
+				OutputFile="$(OutDir)\pcsxrr-release.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
@@ -301,7 +301,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
-				OutputFile="$(OutDir)\pcsx.exe"
+				OutputFile="$(OutDir)\pcsxrr-releaseFastbuild.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"

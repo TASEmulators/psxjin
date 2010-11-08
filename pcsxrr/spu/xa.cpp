@@ -126,6 +126,7 @@ void xa_queue::freeze(EMUFILE* fp)
 
 bool xa_queue::unfreeze(EMUFILE* fp)
 {
+	reconstruct(this);
 	u32 version;
 	fp->read32le(&version);
 	fp->readdouble(&counter);
@@ -150,8 +151,7 @@ bool xa_queue::unfreeze(EMUFILE* fp)
 
 void xa_queue::feed(xa_decode_t *xap)
 {
-	printf("xa feeding xa nsamp=%d chans=%d freq=%d\n",xap->nsamples,xap->stereo*2,xap->freq);
-	//printf("%d\n",xaqueue.size());
+	//printf("xa feeding xa nsamp=%d chans=%d freq=%d\n",xap->nsamples,xap->stereo*2,xap->freq);
 
 	enqueue(xap);
 }
