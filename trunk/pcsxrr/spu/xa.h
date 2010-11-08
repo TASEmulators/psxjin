@@ -36,6 +36,13 @@ class EMUFILE;
 
 struct xa_sample
 {
+	xa_sample() {}
+	xa_sample(s16 l, s16 r)
+		: left(l)
+		, right(r)
+	{
+	}
+
 	union {
 		s16 both[2];
 		struct {

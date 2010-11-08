@@ -134,6 +134,8 @@ void WriteConfig(void)
 	RegSetValueEx(myKey,"XAPitch",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iSoundMode;
 	RegSetValueEx(myKey,"SoundMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
+	temp=iSynchMethod;
+	RegSetValueEx(myKey,"SynchMethod",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iRecordMode;
 	RegSetValueEx(myKey,"RecordMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iUseReverb;
