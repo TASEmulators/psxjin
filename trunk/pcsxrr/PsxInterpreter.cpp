@@ -57,8 +57,8 @@ void inline execI()
 		if (iVSyncFlag) {
 			if (iGpuHasUpdated) {
 				if (iSaveStateTo) {
-						WIN32_SaveState(iSaveStateTo-1);
-						iSaveStateTo = 0;
+					WIN32_SaveState(iSaveStateTo==10?0:iSaveStateTo);
+					iSaveStateTo = 0;
 				}
 				if (iFrameAdvance || iDoPauseAtVSync) {
 					iPause = 1;
@@ -91,12 +91,12 @@ void inline execI()
 		SysUpdate();
 
 		if (iSaveStateTo) {
-			WIN32_SaveState(iSaveStateTo-1);
+			WIN32_SaveState(iSaveStateTo==10?0:iSaveStateTo);
 			iSaveStateTo = 0;
 		}
 	}
 	if (iLoadStateFrom) {
-		WIN32_LoadState(iLoadStateFrom-1);
+		WIN32_LoadState(iLoadStateFrom==10?0:iLoadStateFrom);
 		iLoadStateFrom = 0;
 	}
 	if (iCallW32Gui) {

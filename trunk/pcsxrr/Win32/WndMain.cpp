@@ -459,8 +459,8 @@ void States_Load(int num) {
 	sprintf (Text, "sstates\\%10.10s.%3.3d", CdromLabel, num);
 	ret = LoadState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PCSX*: Loaded State %d"), num+1);
-	else sprintf(Text, _("*PCSX*: Error Loading State %d"), num+1);
+		 sprintf(Text, _("*PCSX*: Loaded State %d"), num);
+	else sprintf(Text, _("*PCSX*: Error Loading State %d"), num);
 	GPU_displayText(Text);
 
 	Running = 1;
@@ -483,8 +483,8 @@ void States_Save(int num) {
 	GPU_freeze(2, (GPUFreeze_t *)&num);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PCSX*: Loaded State %d"), num+1);
-	else sprintf(Text, _("*PCSX*: Error Loading State %d"), num+1);
+		 sprintf(Text, _("*PCSX*: Saved State %d"), num);
+	else sprintf(Text, _("*PCSX*: Error Saving State %d"), num);
 	GPU_displayText(Text);
 
 	Running = 1;
