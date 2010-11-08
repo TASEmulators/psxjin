@@ -340,10 +340,11 @@ unsigned long psxRcntRcount(unsigned long index) {
 }
 
 int psxRcntFreeze(gzFile f, int Mode) {
-	char Unused[4096 - sizeof(psxCounter)];
 
-	gzfreezel(psxCounters);
-	gzfreezel(Unused);
+	gzfreezelarr(psxCounters);
+	gzfreezel(&psxNextCounter);
+	gzfreezel(&psxNextsCounter);
+	gzfreezel(&cnts);
 
 	return 0;
 }

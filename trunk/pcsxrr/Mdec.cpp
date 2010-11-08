@@ -526,15 +526,11 @@ void yuv2rgb24(int *blk,unsigned char *image) {
 }
 
 int mdecFreeze(gzFile f, int Mode) {
-	char Unused[4096] = {0};
-
 	mdec.unfix();
 	gzfreeze(&mdec, sizeof(mdec));
 	mdec.fix();
-	gzfreezel(iq_y);
-	gzfreezel(iq_uv);
-	gzfreezel(Unused);
-
+	gzfreezelarr(iq_y);
+	gzfreezelarr(iq_uv);
 	return 0;
 }
 

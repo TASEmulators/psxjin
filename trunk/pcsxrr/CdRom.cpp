@@ -1060,6 +1060,7 @@ int cdrFreeze(gzFile f, int Mode) {
 	int tmp;
 
 	gzfreeze(&cdr, sizeof(cdr));
+	gzfreeze(&stat, sizeof(stat));
 
 	if (Mode == 1) tmp = cdr.pTransfer - cdr.Transfer;
 	gzfreezel(&tmp);
