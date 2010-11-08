@@ -252,8 +252,8 @@ enum EMUSPEED_SET
 void SetEmulationSpeed(int cmd);
 
 #define gzfreeze(ptr, size) \
-	if (Mode == 1) gzwrite(f, ptr, size); \
-	if (Mode == 0) gzread(f, ptr, size);
+	if (Mode == 1) fwrite(ptr, 1, size, (FILE*)f); \
+	if (Mode == 0) fread(ptr, 1, size, (FILE*)f);
 
 #define gzfreezel(ptr) gzfreeze(ptr, sizeof(ptr))
 

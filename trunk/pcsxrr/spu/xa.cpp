@@ -79,8 +79,8 @@ void xa_queue::fetch(s16* fourStereoSamples)
 {
 	for(int i=0;i<4;i++)
 	{
-		fourStereoSamples[i*2] = curr[3-i].left;
-		fourStereoSamples[i*2+1] = curr[3-i].right;
+		fourStereoSamples[i*2] = curr[i].left;
+		fourStereoSamples[i*2+1] = curr[i].right;
 	}
 }
 
@@ -133,6 +133,7 @@ bool xa_queue::unfreeze(EMUFILE* fp)
 	fp->readdouble(&lastFrac);
 	u32 temp;
 	fp->read32le(&temp);
+	curr.resize(0);
 	for(size_t i=0;i<temp;i++)
 	{
 		xa_sample samp;
