@@ -16,8 +16,8 @@
 #pragma warning(disable:4244)
 #endif
 
-//const int kBaseFrequency = 37800;
-const int kBaseFrequency = 37400; //maybe makes the timing mismatches go away (not enough, but improves it)
+const int kBaseFrequency = 37800;
+//const int kBaseFrequency = 37400; //maybe makes the timing mismatches go away (not enough, but improves it)
 const int kHalfFrquency = kBaseFrequency/2;
 
 typedef unsigned char U8;

@@ -70,7 +70,6 @@ u32 dwNoiseVal=1;                          // global noise generator
 
 
 int bSpuInit=0;
-int bSPUIsOpen=0;
 
 #ifdef _WINDOWS
 HWND    hWMain=0;                                      // window handle
@@ -954,8 +953,6 @@ long SPUopen(HWND hW)
 long SPUopen(void)
 #endif
 {
-	if (bSPUIsOpen) return false;                             // security for some stupid main emus
-
 	iUseXA=1;                                             // just small setup
 	iVolume=3;
 
@@ -971,8 +968,6 @@ long SPUopen(void)
 	SetupSound();                                         // setup sound (before init!)
 
 	SetupStreams();                                       // prepare streaming
-
-	bSPUIsOpen=1;
 
 #ifdef _WINDOWS
 	if (iRecordMode)                                      // windows recording dialog
@@ -1016,10 +1011,6 @@ void SPUsetConfigFile(char * pCfg)
 
 long SPUclose(void)
 {
-	if (!bSPUIsOpen) return 0;                            // some security
-
-	bSPUIsOpen=0;                                         // no more open
-
 #ifdef _WINDOWS
 	if (IsWindow(hWRecord)) DestroyWindow(hWRecord);
 	hWRecord=0;
