@@ -107,7 +107,6 @@ void inline execI()
 			MOV_WriteMovieFile();
 		if (Movie.capture)
 			WIN32_StopAviRecord();
-		//ClosePlugins();
 		SysRunGui();
 	}
 }
