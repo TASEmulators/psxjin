@@ -481,11 +481,17 @@ int SaveState(char *file) {
 	long pos = ftell(f);
 
 	sioFreeze(f, 1);
+	pos = ftell(f);
 	cdrFreeze(f, 1);
+	pos = ftell(f);
 	psxHwFreeze(f, 1);
+	pos = ftell(f);
 	psxRcntFreeze(f, 1);
+	pos = ftell(f);
 	mdecFreeze(f, 1);
+	pos = ftell(f);
 	MovieFreeze(f, 1);
+	pos = ftell(f);
 
 	EMUFILE_MEMORY memfile;
 	SPUfreeze_new(&memfile);

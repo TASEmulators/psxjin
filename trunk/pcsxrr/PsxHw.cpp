@@ -711,7 +711,7 @@ void psxHwWrite32(u32 add, u32 value) {
 }
 
 int psxHwFreeze(gzFile f, int Mode) {
-	char Unused[4096];
+	char Unused[4096] = {0};
 
 	gzfreezel(Unused);
 

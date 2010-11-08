@@ -615,7 +615,7 @@ void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
 }
 
 int sioFreeze(gzFile f, int Mode) {
-	char Unused[4096];
+	char Unused[4096] = {0};
 
 	gzfreezel(buf);
 	gzfreezel(&StatReg);
