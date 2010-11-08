@@ -40,6 +40,7 @@
 #include "gauss_i.h"
 #include "metaspu/metaspu.h"
 #include "xa.h"
+#include "movie.h"
 
 
 SPU_struct *SPU_core, *SPU_user;
@@ -81,6 +82,20 @@ static HANDLE   hMainThread;
 static pthread_t thread = -1;                          // thread id (linux)
 #endif
 #endif
+
+class Lock {
+public:
+	Lock(); // defaults to the critical section around NDS_exec
+	Lock(CRITICAL_SECTION& cs);
+	~Lock();
+private:
+	CRITICAL_SECTION* m_cs;
+};
+
+CRITICAL_SECTION win_execute_sync;
+Lock::Lock() : m_cs(&win_execute_sync) { EnterCriticalSection(m_cs); }
+Lock::Lock(CRITICAL_SECTION& cs) : m_cs(&cs) { EnterCriticalSection(m_cs); }
+Lock::~Lock() { LeaveCriticalSection(m_cs); }
 
 unsigned long dwNewChannel=0;                          // flags for faster testing, if new channel starts
 
@@ -500,7 +515,7 @@ restart:
 }
 
 
-void mixAudio(bool kill, SPU_struct* spu, int length)
+void mixAudio(bool killReverb, SPU_struct* spu, int length)
 {
 	memset(spu->outbuf, 0, length*4*2);
 
@@ -575,18 +590,17 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 			left_accum += left;
 			right_accum += right;
 
-			if(!kill)
+			if(!killReverb)
 				if (chan->bRVBActive) 
 					spu->StoreREVERB(chan,left,right);
 		} //channel loop
 
-		if(!kill)
+		if(!killReverb)
 		{
 			left_accum += spu->MixREVERBLeft();
 			right_accum += spu->MixREVERBRight();
 		}
 
-		if(spu->isCore)
 		{
 			s32 left, right;
 			spu->xaqueue.fetch(&left,&right);
@@ -744,15 +758,13 @@ _ADSRInfo::_ADSRInfo()
 ,	EnvelopeVol(0)
 ,	lVolume(0)
 {
-	int zzz=9;
 }
 
-		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
 
 void SPUasync(unsigned long cycle)
 {
-	u32 SNDDXGetAudioSpace();
-	u32 len = SNDDXGetAudioSpace();
+	Lock lock;
 
 	mixtime += samples_per_cycle*cycle;
 	int mixtodo = (int)mixtime;
@@ -761,49 +773,18 @@ void SPUasync(unsigned long cycle)
 	switch(iSoundMode)
 	{
 	case SOUND_MODE_ASYNCH:
-		{
-			//produce the amount of sound that the sound driver needs
-			//and feed it right now.
-			mixAudio(false,SPU_core,len);
-			SNDDXUpdateAudio(SPU_core->outbuf,len);
-		}
 		break;
 	case SOUND_MODE_DUAL:
-		{
-			//produce the amount of sound that the sound driver needs
-			//and feed it right now
-			mixAudio(false,SPU_user,len);
-			SNDDXUpdateAudio(SPU_user->outbuf,len);
-
-			//produce the logically correct amount of sound, just for emulation's sake (output will be discarded)
-			//TODO (as an optimization, the output could actually be non-mixed. i think this may be done in desmume)
-			mixAudio(true,SPU_core,mixtodo);
-		}
+		//produce the logically correct amount of sound, just for emulation's sake (output will be discarded)
+		//TODO (as an optimization, the output could actually be non-mixed. i think this may be done in desmume)
+		mixAudio(true,SPU_core,mixtodo);
 		break;
 	case SOUND_MODE_SYNCH:
-		{
-			//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
+		//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
 
-			//produce the logically correct amount of sound. 
-			//these will get enqueued in the synchronizer
-			mixAudio(false,SPU_core,mixtodo);
-
-			//take this opportunity (we have none other in pcsx) to grab samples from the synchronizer
-			//to feed the sound driver
-			if(len>0)
-			{
-				static std::vector<s16> outbuf;
-				if(outbuf.size() < len*2)
-					outbuf.resize(len*2
-					);
-
-				int done = synchronizer->output_samples(&outbuf[0],len);
-				void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
-				for(int j=0;j<done;j++)
-					SNDDXUpdateAudio(&outbuf[j*2],1);
-			}
-
-		}
+		//produce the logically correct amount of sound. 
+		//these will get enqueued in the synchronizer
+		mixAudio(false,SPU_core,mixtodo);
 		break;
 	}
 }
@@ -863,7 +844,7 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 	if (!xap->freq) return;                               // no xa freq ? bye
 
 	SPU_core->xaqueue.feed(xap);
-	//SPU_user->xaqueue->feed(xap);
+	if(SPU_user) SPU_user->xaqueue.feed(xap);
 }
 
 //this func will be called first by the main emu
@@ -903,49 +884,72 @@ void SPUcloneUser()
 		SPU_user->channels[i].spu = SPU_user;
 }
 
-////////////////////////////////////////////////////////////////////////
-// SETUPSTREAMS: init most of the spu buffers
-////////////////////////////////////////////////////////////////////////
-
-void SetupStreams(void)
-{
-	int i;
-
-	if (iUseReverb==1) i=88200*2;
-	else              i=NSSIZE*2;
-
-	//XAStart =                                             // alloc xa buffer
-	//  (unsigned long *)malloc(44100*4);
-	//XAPlay  = XAStart;
-	//XAFeed  = XAStart;
-	//XAEnd   = XAStart + 44100;
-}
-
-////////////////////////////////////////////////////////////////////////
-// REMOVESTREAMS: free most buffer
-////////////////////////////////////////////////////////////////////////
-
-void RemoveStreams(void)
-{
-	//free(XAStart);                                        // free XA buffer
-	//XAStart=0;
-
-	/*
-	 int i;
-	 for(i=0;i<MAXCHAN;i++)
-	  {
-	   WaitForSingleObject(s_chan[i].hMutex,2000);
-	   ReleaseMutex(s_chan[i].hMutex);
-	   if(s_chan[i].hMutex)
-	    {CloseHandle(s_chan[i].hMutex);s_chan[i].hMutex=0;}
-	  }
-	*/
-}
-
 
 ////////////////////////////////////////////////////////////////////////
 // SPUOPEN: called by main emu after init
 ////////////////////////////////////////////////////////////////////////
+
+static volatile bool doterminate;
+static volatile bool terminated;
+
+void SPU_Emulate_user()
+{
+	if(!SPU_user)
+		return;
+
+	u32 SNDDXGetAudioSpace();
+	u32 audiosize = SNDDXGetAudioSpace();
+
+	if (audiosize > 0)
+	{
+		printf("%d %d\n",iPause,iFrameAdvance);
+		if(iPause && !iFrameAdvance)
+		{
+			static std::vector<s16> empty;
+			if(empty.size() < audiosize*2) empty.resize(audiosize*2);
+			SNDDXUpdateAudio(&empty[0],audiosize);
+			return;
+		}
+		//printf("mix %i samples\n", audiosize);
+		//if (audiosize > SPU_user->bufsize)
+		//	audiosize = SPU_user->bufsize;
+
+		s16* outbuf;
+		int samplesOutput;
+		switch(iSoundMode)
+		{
+		case SOUND_MODE_ASYNCH:
+			mixAudio(false,SPU_core,audiosize);
+			outbuf = SPU_core->outbuf;
+			samplesOutput = audiosize;
+			break;
+		case SOUND_MODE_DUAL:
+			mixAudio(false,SPU_user,audiosize);
+			outbuf = SPU_user->outbuf;
+			samplesOutput = audiosize;
+			break;
+		case SOUND_MODE_SYNCH:
+			samplesOutput = synchronizer->output_samples(outbuf = SPU_user->outbuf, audiosize);
+			break;
+		}
+
+		SNDDXUpdateAudio(outbuf,samplesOutput);
+	}
+}
+
+DWORD WINAPI SNDDXThread( LPVOID )
+{
+	for(;;) {
+		if(doterminate) break;
+		{
+			Lock lock;
+			SPU_Emulate_user();
+		}
+		Sleep(10);
+	}
+	terminated = true;
+	return 0;
+}
 
 #ifdef _WINDOWS
 long SPUopen(HWND hW)
@@ -953,6 +957,8 @@ long SPUopen(HWND hW)
 long SPUopen(void)
 #endif
 {
+	InitializeCriticalSection(&win_execute_sync);
+
 	iUseXA=1;                                             // just small setup
 	iVolume=3;
 
@@ -967,8 +973,6 @@ long SPUopen(void)
 
 	SetupSound();                                         // setup sound (before init!)
 
-	SetupStreams();                                       // prepare streaming
-
 #ifdef _WINDOWS
 	if (iRecordMode)                                      // windows recording dialog
 	{
@@ -979,6 +983,10 @@ long SPUopen(void)
 		SetFocus(hWMain);
 	}
 #endif
+
+	doterminate = false;
+	terminated = false;
+	CreateThread(0,0,SNDDXThread,0,0,0);
 
 	return PSE_SPU_ERR_SUCCESS;
 }
@@ -1017,8 +1025,6 @@ long SPUclose(void)
 #endif
 
 	RemoveSound();                                        // no more sound handling
-
-	RemoveStreams();                                      // no more streaming
 
 	return 0;
 }
@@ -1073,6 +1079,7 @@ void SPUstopWav()
 {
 	RecordStop();
 }
+
 
 
 //---------------------------------------------------------------

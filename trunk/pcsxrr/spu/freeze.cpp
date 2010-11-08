@@ -220,7 +220,6 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	u32 endtag = fp->read32le();
 	if(endtag != 0xBAADF00D) return false;
 
-	//TODO - copy core into user (xaqueue will need special help)
 	SPUcloneUser();
 
 	return true;
