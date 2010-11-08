@@ -255,7 +255,9 @@ void SetEmulationSpeed(int cmd);
 	if (Mode == 1) fwrite(ptr, 1, size, (FILE*)f); \
 	if (Mode == 0) fread(ptr, 1, size, (FILE*)f);
 
-#define gzfreezel(ptr) gzfreeze(ptr, sizeof(ptr))
+template<typename T> void _gzfreezel(int Mode, FILE* f, T* ptr) { gzfreeze(ptr, sizeof(T)); }
+#define gzfreezel(ptr) _gzfreezel(Mode, ((FILE*)f), ptr)
+#define gzfreezelarr(arr) gzfreeze(&arr[0],sizeof(arr))
 
 char *GetSavestateFilename(int newState);
 

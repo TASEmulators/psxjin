@@ -463,13 +463,20 @@ int SaveState(char *file) {
 	gzwrite(f, pMem, 128*96*3);
 	free(pMem);
 
+	long pos = ftell(f);
+
 	gzwrite(f, psxM, 0x00200000);
+	pos = ftell(f);
 	gzwrite(f, psxR, 0x00080000);
+	pos = ftell(f);
 	gzwrite(f, psxH, 0x00010000);
+	pos = ftell(f);
 	gzwrite(f, (void*)&psxRegs, sizeof(psxRegs));
+	pos = ftell(f);
 
 	if (Config.HLE)
 		psxBiosFreeze(1);
+	pos = ftell(f);
 
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
@@ -477,9 +484,7 @@ int SaveState(char *file) {
 	GPU_freeze(1, gpufP);
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
 	free(gpufP);
-
-	long pos = ftell(f);
-
+	pos = ftell(f);
 	sioFreeze(f, 1);
 	pos = ftell(f);
 	cdrFreeze(f, 1);
@@ -497,7 +502,9 @@ int SaveState(char *file) {
 	SPUfreeze_new(&memfile);
 	Size = memfile.size();
 	gzwrite(f, &Size, 4);
+	pos = ftell(f);
 	gzwrite(f, memfile.buf(),Size);
+	pos = ftell(f);
 
 	fclose(f);
 
