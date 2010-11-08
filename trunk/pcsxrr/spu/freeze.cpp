@@ -111,12 +111,8 @@ void SPU_chan::load(EMUFILE* fp)
 	fp->read32le(&iOldNoise);
 	fp->read8le(&bNoise);
 
-	for(int i=0;i<28;i++)
+	for(int i=0;i<32;i++)
 		fp->read16le(&block[i]);
-	if(version==1)
-		for(int i=28;i<32;i++)
-			fp->read16le(&block[i]);
-
 	fp->read32le(&s_1);
 	fp->read32le(&s_2);
 	fp->read8le(&flags);
@@ -139,6 +135,7 @@ void SPUfreeze_new(EMUFILE* fp)
 	CTASSERT(sizeof(SPU_core->spuMem)==0x80000);
 	fp->fwrite(SPU_core->spuMem,0x80000);
 	fp->fwrite(regArea,0x200);
+	fp->write8le(&SPU_core->iReverbCycle);
 	fp->write32le(&SPU_core->spuAddr);
 	fp->write16le(&SPU_core->spuCtrl);
 	fp->write16le(&SPU_core->spuStat);

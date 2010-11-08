@@ -210,8 +210,6 @@ public:
 	
 	void triggerIrqRange(u32 base, u32 size);
 
-	u32 mixIrqCounter;
-
 	SPU_chan channels[24];
 	s16 outbuf[100000];
 	void writeRegister(u32 r, u16 val);
@@ -219,10 +217,12 @@ public:
 
 	s32 iLeftXAVol, iRightXAVol;
 
+	u8 iReverbCycle;
 	u32 spuAddr;
 	u16 spuCtrl;
 	u16 spuStat;
 	u16 spuIrq;
+	u32 mixIrqCounter;
 	u16 spuMem[256*1024];
 	inline u8 readSpuMem(u32 addr) { return ((u8*)spuMem)[addr]; }
 

@@ -241,7 +241,7 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 		
 		case 0x0C:
 			// READS BACK current adsr volume... not sure what writing here does
-			printf("SPU: WROTE TO ADSR READBACK\n");
+			printf("SPU: WROTE TO ADSR READBACK (unknown behaviour)\n");
 			break;
 		case 0x0E: 
 			//this can be tested nicely in the ff7 intro credits screen where the harp won't work unless this gets set

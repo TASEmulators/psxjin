@@ -47,7 +47,7 @@
 SPU_struct *SPU_core, *SPU_user;
 
 //global spu values
-u16 regArea[10000]; //register cache
+u16 regArea[0x100]; //register cache
 
 static ISynchronizingAudioBuffer* synchronizer = NULL;
 
@@ -384,10 +384,12 @@ SPU_struct::SPU_struct(bool _isCore)
 : isCore(_isCore)
 , iLeftXAVol(32767)
 , iRightXAVol(32767)
+, iReverbCycle(0)
 , spuAddr(0xffffffff)
 , spuCtrl(0)
 , spuStat(0)
 , spuIrq(0)
+, mixIrqCounter(0)
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
@@ -397,8 +399,6 @@ SPU_struct::SPU_struct(bool _isCore)
 	}
 
 	memset(spuMem,0,sizeof(spuMem));
-
-	mixIrqCounter = 0;
 }
 
 SPU_struct::~SPU_struct() {
@@ -901,6 +901,7 @@ bool SPUunfreeze_new(EMUFILE* fp)
 
 	fp->fread(SPU_core->spuMem,0x80000);
 	fp->fread(regArea,0x200);
+	fp->read8le(&SPU_core->iReverbCycle);
 	fp->read32le(&SPU_core->spuAddr);
 	fp->read16le(&SPU_core->spuCtrl);
 	fp->read16le(&SPU_core->spuStat);
@@ -915,28 +916,6 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	for(int i=0;i<MAXCHAN;i++) SPU_core->channels[i].load(fp);
 
 	SPU_core->xaqueue.unfreeze(fp);
-
-// repair some globals
-	for (int i=0;i<=62;i+=2)
-		SPUwriteRegister(H_Reverb+i,regArea[(H_Reverb+i-0xc00)>>1]);
-	SPUwriteRegister(H_SPUReverbAddr,regArea[(H_SPUReverbAddr-0xc00)>>1]);
-	SPUwriteRegister(H_SPUrvolL,regArea[(H_SPUrvolL-0xc00)>>1]);
-	SPUwriteRegister(H_SPUrvolR,regArea[(H_SPUrvolR-0xc00)>>1]);
-
-	SPUwriteRegister(H_SPUctrl,(unsigned short)(regArea[(H_SPUctrl-0xc00)>>1]|0x4000));
-	SPUwriteRegister(H_SPUstat,regArea[(H_SPUstat-0xc00)>>1]);
-	SPUwriteRegister(H_CDLeft,regArea[(H_CDLeft-0xc00)>>1]);
-	SPUwriteRegister(H_CDRight,regArea[(H_CDRight-0xc00)>>1]);
-
-// fix to prevent new interpolations from crashing
-	//for (i=0;i<MAXCHAN;i++) s_chan[i].SB[28]=0;
-
-// repair LDChen's ADSR changes
-	for (int i=0;i<24;i++)
-	{
-		SPUwriteRegister(0x1f801c00+(i<<4)+0x08,regArea[((i<<4)+0xc00+0x08)>>1]);
-		SPUwriteRegister(0x1f801c00+(i<<4)+0x0A,regArea[((i<<4)+0xc00+0x0A)>>1]);
-	}
 
 	//a bit weird to do this here, but i wanted to have a more solid XA state saver
 	//and the cdr freeze sucks. I made sure this saves and loads after the cdr state
