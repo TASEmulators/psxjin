@@ -47,7 +47,7 @@ static const unsigned long int TableDisp[] =
 
 static unsigned long int RateTable[160];
 
-void InitADSR(void)                                    // INIT ADSR
+void StaticInitADSR(void)                                    // INIT ADSR
 {
 	unsigned long r,rs,rd;
 	int i;

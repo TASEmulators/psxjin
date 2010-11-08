@@ -267,8 +267,6 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 		case H_SPUoff2: SoundOff(this,16,24,val); return;
 	}
 
-	if(this != SPU_core) return;
-	
 	switch (r)
 	{
 	case H_SPUaddr:
@@ -467,8 +465,8 @@ void SPUwriteRegister(u32 reg, u16 val)
 	regArea[(r-0xc00)>>1] = val;
 
 	SPU_core->writeRegister(r,val);
-	//if(SPU_user)
-	//	SPU_user->writeRegister(r,val);
+	if(SPU_user)
+		SPU_user->writeRegister(r,val);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -504,7 +502,7 @@ u16 SPUreadRegister(u32 reg)
 			}
 
 			case 0x0E: {
-				// get loop address
+				//get loop address
 				printf("SPUreadRegister: reading ch %02d loop address\n");
 				return SPU_core->channels[ch].loopStartAddr;
 			}
@@ -513,10 +511,10 @@ u16 SPUreadRegister(u32 reg)
 
 	switch(r) {
 		case H_SPUctrl:
-			return spuCtrl;
+			return SPU_core->spuCtrl;
 
 		case H_SPUstat:
-			return spuStat;
+			return SPU_core->spuStat;
 
 		case H_SPUaddr:
 			return (u16)(SPU_core->spuAddr>>3);
@@ -525,20 +523,24 @@ u16 SPUreadRegister(u32 reg)
 			u16 s=SPU_core->spuMem[SPU_core->spuAddr>>1];
 			SPU_core->spuAddr+=2;
 			if(SPU_core->spuAddr>0x7ffff) SPU_core->spuAddr=0;
+			
+			//SPU_user needs to be notified of this so that subsequent writes will be in the right place
 			if(SPU_user) SPU_user->spuAddr = SPU_core->spuAddr;
 			return s;
 		}
 
 		case H_SPUirqAddr:
-			return spuIrq>>3;
+			return SPU_core->spuIrq>>3;
 
 		case H_SPUon1:
-			printf("Reading H_SPUon1\n");
-//			return IsSoundOn(0,16);
+			printf("NOTIMPLEMENTED! Reading H_SPUon1\n");
+			//return IsSoundOn(0,16);
+			break;
 
 		case H_SPUon2:
-			printf("Reading H_SPUon2\n");
-//			return IsSoundOn(16,24);
+			printf("NOTIMPLEMENTED! Reading H_SPUon2\n");
+			//return IsSoundOn(16,24);
+			break;
 	}
 
 	return regArea[(r-0xc00)>>1];

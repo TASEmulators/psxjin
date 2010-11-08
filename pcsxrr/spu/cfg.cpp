@@ -58,16 +58,8 @@
 // READ CONFIG: from win registry
 ////////////////////////////////////////////////////////////////////////
 
-// timer mode 2 (spuupdate sync mode) can be enabled for windows
-// by setting MAXMODE to 2.
-// Attention: that mode is not much tested, maybe the dsound buffers
-// need to get adjusted to use that mode safely. Also please note:
-// sync sound updates will _always_ cause glitches, if the system is
-// busy by, for example, long lasting cdrom accesses. OK, you have
-// be warned :)
-
 #define MAXMODE 2
-//#define MAXMODE 1
+#define MAXMETHOD 2
 
 void ReadConfig(void)
 {
@@ -79,8 +71,8 @@ void ReadConfig(void)
 	iUseXA=1;                                             // init vars
 	iVolume=3;
 	iXAPitch=0;
-	iUseTimer=0;
-	iSPUIRQWait=0;
+	iSoundMode=1;
+	iSynchMethod=0;
 	iRecordMode=0;
 	iUseReverb=1;
 	iUseInterpolation=2;
@@ -97,11 +89,11 @@ void ReadConfig(void)
 		if (RegQueryValueEx(myKey,"XAPitch",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iXAPitch=(int)temp;
 		size = 4;
-		if(RegQueryValueEx(myKey,"UseTimer",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iUseTimer=(int)temp;
+		if(RegQueryValueEx(myKey,"SoundMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
+			iSoundMode=(int)temp;
 		size = 4;
-		if (RegQueryValueEx(myKey,"SPUIRQWait",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iSPUIRQWait=(int)temp;
+		if(RegQueryValueEx(myKey,"SynchMethod",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
+			iSynchMethod=(int)temp;
 		size = 4;
 		if (RegQueryValueEx(myKey,"RecordMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
 			iRecordMode=(int)temp;
@@ -117,7 +109,8 @@ void ReadConfig(void)
 		RegCloseKey(myKey);
 	}
 
- if(iUseTimer>MAXMODE) iUseTimer=MAXMODE;              // some checks
+	if(iSoundMode>MAXMODE) iSoundMode=MAXMODE;              // some checks
+	if(iSynchMethod>MAXMETHOD) iSynchMethod=MAXMETHOD;
 	if (iVolume<1) iVolume=1;
 	if (iVolume>5) iVolume=5;
 }
@@ -139,10 +132,8 @@ void WriteConfig(void)
 	RegSetValueEx(myKey,"Volume",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iXAPitch;
 	RegSetValueEx(myKey,"XAPitch",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
- temp=iUseTimer;
- RegSetValueEx(myKey,"UseTimer",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iSPUIRQWait;
-	RegSetValueEx(myKey,"SPUIRQWait",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
+	temp=iSoundMode;
+	RegSetValueEx(myKey,"SoundMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iRecordMode;
 	RegSetValueEx(myKey,"RecordMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
 	temp=iUseReverb;
@@ -170,9 +161,15 @@ BOOL OnInitDSoundDialog(HWND hW)
 
 	hWC=GetDlgItem(hW,IDC_USETIMER);
 	tempDest=ComboBox_AddString(hWC, "0: Asynchronous (normal, tas UNSAFE)");
-	tempDest=ComboBox_AddString(hWC, "1: Dual SPU Synch/Asynch (tas safe, doesnt work yet)");
-	tempDest=ComboBox_AddString(hWC, "2: Synchronous (tas safe, sometimes needed for streams)");
-	tempDest=ComboBox_SetCurSel(hWC,iUseTimer);
+	tempDest=ComboBox_AddString(hWC, "1: Dual SPU (tas safe, slight glitches [default])");
+	tempDest=ComboBox_AddString(hWC, "2: Synchronous (tas safe, buffering glitches)");
+	tempDest=ComboBox_SetCurSel(hWC,iSoundMode);
+
+	hWC=GetDlgItem(hW,IDC_SYNCHMETHOD);
+	tempDest=ComboBox_AddString(hWC, "Method \"N\" (super cool) [default]");
+	tempDest=ComboBox_AddString(hWC, "Method \"Z\" (super strange)");
+	tempDest=ComboBox_AddString(hWC, "Method \"P\" (super laggy but magical)");
+	tempDest=ComboBox_SetCurSel(hWC,iSynchMethod);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
 	tempDest=ComboBox_AddString(hWC, "0: mute");
@@ -182,7 +179,6 @@ BOOL OnInitDSoundDialog(HWND hW)
 	tempDest=ComboBox_AddString(hWC, "4: loudest");
 	tempDest=ComboBox_SetCurSel(hWC,5-iVolume);
 
-	if (iSPUIRQWait)  CheckDlgButton(hW,IDC_IRQWAIT,TRUE);
 	if (iRecordMode)  CheckDlgButton(hW,IDC_RECORDMODE,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USEREVERB);
@@ -218,7 +214,10 @@ void OnDSoundOK(HWND hW)
 	else iXAPitch=0;
 
 	hWC=GetDlgItem(hW,IDC_USETIMER);
-	iUseTimer=ComboBox_GetCurSel(hWC);
+	iSoundMode=ComboBox_GetCurSel(hWC);
+
+	hWC=GetDlgItem(hW,IDC_SYNCHMETHOD);
+	iSynchMethod=ComboBox_GetCurSel(hWC);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
 	iVolume=5-ComboBox_GetCurSel(hWC);
@@ -229,10 +228,6 @@ void OnDSoundOK(HWND hW)
 	hWC=GetDlgItem(hW,IDC_INTERPOL);
 	iUseInterpolation=ComboBox_GetCurSel(hWC);
 
-	if (IsDlgButtonChecked(hW,IDC_IRQWAIT))
-		iSPUIRQWait=1;
-	else iSPUIRQWait=0;
-
 	if (IsDlgButtonChecked(hW,IDC_RECORDMODE))
 		iRecordMode=1;
 	else iRecordMode=0;
@@ -240,6 +235,8 @@ void OnDSoundOK(HWND hW)
 	WriteConfig();                                        // write registry
 
 	EndDialog(hW,TRUE);
+
+	SPUReset();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -420,9 +417,6 @@ void ReadConfigFile(void)
 		p=strstr(p,"=");
 		len=1;
 	}
-	if (p)  iSPUIRQWait=atoi(p+len);
-	if (iSPUIRQWait<0) iSPUIRQWait=0;
-	if (iSPUIRQWait>1) iSPUIRQWait=1;
 
 	strcpy(t,"\nUseReverb");
 	p=strstr(pB,t);
@@ -458,8 +452,8 @@ void ReadConfig(void)
 	iVolume=3;
 	iUseXA=1;
 	iXAPitch=0;
-	iSPUIRQWait=1;
-	iUseTimer=0;
+	iSoundMode=1;
+	iSynchMethod=0;
 	iUseReverb=2;
 	iUseInterpolation=2;
 	iDisStereo=0;

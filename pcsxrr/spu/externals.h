@@ -136,8 +136,8 @@ extern unsigned char * pSpuBuffer;
 extern int        iUseXA;
 extern int        iVolume;
 extern int        iXAPitch;
-extern int        iUseTimer;
-extern int        iSPUIRQWait;
+extern int        iSoundMode;
+extern int		  iSynchMethod;
 extern int        iRecordMode;
 extern int        iUseReverb;
 extern int        iUseInterpolation;
@@ -145,8 +145,6 @@ extern int        iUseInterpolation;
 // MISC
 
 extern unsigned long dwNoiseVal;
-extern unsigned short spuCtrl;
-extern unsigned short spuStat;
 extern u16 spuIrq;
 extern int      bEndThread;
 extern int      bThreadEnded;

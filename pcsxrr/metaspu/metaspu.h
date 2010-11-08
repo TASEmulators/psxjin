@@ -27,6 +27,8 @@
 #ifndef _METASPU_H_
 #define _METASPU_H_
 
+#include "metaspu_types.h"
+
 #include <algorithm>
 
 template< typename T >

@@ -47,31 +47,27 @@ SPU_struct *SPU_core, *SPU_user;
 //global spu values
 u16 regArea[10000]; //register cache
 
-static ISynchronizingAudioBuffer* synchronizer = metaspu_construct(ESynchMethod_N);
-
-
-
+static ISynchronizingAudioBuffer* synchronizer = NULL;
 
 // user settings
+#define SOUND_MODE_ASYNCH 0
+#define SOUND_MODE_DUAL 1
+#define SOUND_MODE_SYNCH 2
+int iSoundMode=SOUND_MODE_DUAL;
 
 int iUseXA=1;
 int iVolume=3;
 int iXAPitch=0;
-int iUseTimer=0;
-int iSPUIRQWait=1;
+int iSynchMethod=0;
 int iRecordMode=0;
 int iUseReverb=1;
 int iUseInterpolation=2;
-
-FORCEINLINE bool isStreamingMode() { return iUseTimer==2; }
 
 // MAIN infos struct for each channel
 
 u32 dwNoiseVal=1;                          // global noise generator
 
-u16 spuCtrl=0;                             // some vars to store psx reg infos
-u16 spuStat=0;
-u16 spuIrq=0;
+
 
 int bSpuInit=0;
 int bSPUIsOpen=0;
@@ -223,7 +219,7 @@ INLINE int iGetNoiseVal(SPU_chan* pChannel)
 	else fa=(dwNoiseVal>>2)&0x7fff;
 
 //// mmm... depending on the noise freq we allow bigger/smaller changes to the previous val
-	fa=pChannel->iOldNoise+((fa-pChannel->iOldNoise)/((0x001f-((spuCtrl&0x3f00)>>9))+1));
+	fa=pChannel->iOldNoise+((fa-pChannel->iOldNoise)/((0x001f-((pChannel->spu->spuCtrl&0x3f00)>>9))+1));
 	if (fa>32767L)  fa=32767L;
 	if (fa<-32767L) fa=-32767L;
 	pChannel->iOldNoise=fa;
@@ -374,10 +370,16 @@ SPU_struct::SPU_struct(bool _isCore)
 , iLeftXAVol(32767)
 , iRightXAVol(32767)
 , spuAddr(0xffffffff)
+, spuCtrl(0)
+, spuStat(0)
+, spuIrq(0)
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
+	{
 		channels[i].ch = i;
+		channels[i].spu = this;
+	}
 
 	memset(spuMem,0,sizeof(spuMem));
 
@@ -595,14 +597,14 @@ void mixAudio(bool kill, SPU_struct* spu, int length)
 		}
 
 		//handle spu mute
-		if ((spuCtrl&0x4000)==0) {
+		if ((spu->spuCtrl&0x4000)==0) {
 			left_accum = 0;
 			right_accum = 0;
 		}
 
 		s16 output[] = { limit(left_accum), limit(right_accum) };
 
-		if(isStreamingMode())
+		if(iSoundMode == SOUND_MODE_SYNCH)
 			synchronizer->enqueue_samples(output,1);
 		else
 		{
@@ -710,8 +712,14 @@ void SPU_struct::SPUwriteDMAMem(u16 * pusPSXMem,int iSize)
 
 u16 SPUreadDMA() { return SPU_core->SPUreadDMA(); }
 void SPUreadDMAMem(u16 * pusPSXMem,int iSize) { SPU_core->SPUreadDMAMem(pusPSXMem,iSize); }
-void SPUwriteDMA(u16 val) { SPU_core->SPUwriteDMA(val); }
-void SPUwriteDMAMem(u16 * pusPSXMem,int iSize) { SPU_core->SPUwriteDMAMem(pusPSXMem,iSize); }
+void SPUwriteDMA(u16 val) {
+	SPU_core->SPUwriteDMA(val);
+	if(SPU_user) SPU_user->SPUwriteDMA(val);
+}
+void SPUwriteDMAMem(u16 * pusPSXMem,int iSize) { 
+	SPU_core->SPUwriteDMAMem(pusPSXMem,iSize);
+	if(SPU_user) SPU_user->SPUwriteDMAMem(pusPSXMem,iSize);
+}
 
 //measured 16123034 cycles per second
 //this is around 15.3761 MHZ
@@ -740,6 +748,8 @@ _ADSRInfo::_ADSRInfo()
 	int zzz=9;
 }
 
+		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+
 void SPUasync(unsigned long cycle)
 {
 	u32 SNDDXGetAudioSpace();
@@ -749,44 +759,53 @@ void SPUasync(unsigned long cycle)
 	int mixtodo = (int)mixtime;
 	mixtime -= mixtodo;
 
-	if(isStreamingMode())
+	switch(iSoundMode)
 	{
-		//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
-
-		mixAudio(false,SPU_core,mixtodo);
-
-		if(len>0)
+	case SOUND_MODE_ASYNCH:
 		{
-			static std::vector<s16> outbuf;
-			if(outbuf.size() < len*2)
-				outbuf.resize(len*2
-				);
-
-			int done = synchronizer->output_samples(&outbuf[0],len);
-			void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
-			for(int j=0;j<done;j++)
-				SNDDXUpdateAudio(&outbuf[j*2],1);
-		}
-
-	}
-	else
-	{
-		void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
-		if(iUseTimer==1)
-		{
-			//dual synch/asynch mode
-			//(do timing with core and mixing with user)
-			mixAudio(false,SPU_user,len);
-			mixAudio(true,SPU_core,mixtodo);
-			SNDDXUpdateAudio(SPU_user->outbuf,len);
-		}
-		else
-		{
-			//pure asynch mode
+			//produce the amount of sound that the sound driver needs
+			//and feed it right now.
 			mixAudio(false,SPU_core,len);
 			SNDDXUpdateAudio(SPU_core->outbuf,len);
 		}
-		
+		break;
+	case SOUND_MODE_DUAL:
+		{
+			//produce the amount of sound that the sound driver needs
+			//and feed it right now
+			mixAudio(false,SPU_user,len);
+			SNDDXUpdateAudio(SPU_user->outbuf,len);
+
+			//produce the logically correct amount of sound, just for emulation's sake (output will be discarded)
+			//TODO (as an optimization, the output could actually be non-mixed. i think this may be done in desmume)
+			mixAudio(true,SPU_core,mixtodo);
+		}
+		break;
+	case SOUND_MODE_SYNCH:
+		{
+			//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
+
+			//produce the logically correct amount of sound. 
+			//these will get enqueued in the synchronizer
+			mixAudio(false,SPU_core,mixtodo);
+
+			//take this opportunity (we have none other in pcsx) to grab samples from the synchronizer
+			//to feed the sound driver
+			if(len>0)
+			{
+				static std::vector<s16> outbuf;
+				if(outbuf.size() < len*2)
+					outbuf.resize(len*2
+					);
+
+				int done = synchronizer->output_samples(&outbuf[0],len);
+				void SNDDXUpdateAudio(s16 *buffer, u32 num_samples);
+				for(int j=0;j<done;j++)
+					SNDDXUpdateAudio(&outbuf[j*2],1);
+			}
+
+		}
+		break;
 	}
 }
 
@@ -855,11 +874,35 @@ long SPUinit(void)
 	SPU_core = new SPU_struct(true);
 	SPU_user = new SPU_struct(false);
 	mixtime = 0;
-	InitADSR();
+	StaticInitADSR();
+	SPUReset();
 	return 0;
 }
 
+void SPUReset()
+{
+	ESynchMethod method;
+	switch(iSynchMethod)
+	{
+	case 0: method = ESynchMethod_N; break;
+	case 1: method = ESynchMethod_Z; break;
+	case 2: method = ESynchMethod_P; break;
+	}
 
+	delete synchronizer;
+	synchronizer = metaspu_construct(method);
+	
+	//call this from reset as well (then we wont have to track the user spu during non-dual modes)
+	//TODO - make same optimization in desmume
+	SPUcloneUser();
+}
+
+void SPUcloneUser()
+{
+	*SPU_user = *SPU_core;
+	for(int i=0;i<24;i++)
+		SPU_user->channels[i].spu = SPU_user;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // SETUPSTREAMS: init most of the spu buffers
@@ -915,8 +958,6 @@ long SPUopen(void)
 
 	iUseXA=1;                                             // just small setup
 	iVolume=3;
-	spuIrq=0;
-	iSPUIRQWait=1;
 
 #ifdef _WINDOWS
 //	LastWrite=0xffffffff;

@@ -41,7 +41,7 @@
 
 void StartREVERB(SPU_chan * pChannel)
 {
-	if (pChannel->bReverb && (spuCtrl&0x80))              // reverb possible?
+	if (pChannel->bReverb && (pChannel->spu->spuCtrl&0x80))              // reverb possible?
 	{
 		//if (iUseReverb==1) 
 			pChannel->bRVBActive=1;
