@@ -439,22 +439,27 @@ int Load(char *ExePath) {
 
 // STATES
 
+#define gzwrite(x,y,z) fwrite(y,1,z,x)
+#define gzread(x,y,z) fread(y,1,z,x)
+#define gzseek(x,y,z) fseek(x,y,z);
+
 const char PcsxHeader[32] = "STv3 PCSX v" PCSX_VERSION;
 
 int SaveState(char *file) {
-	gzFile f;
+	FILE* f;
 	GPUFreeze_t *gpufP;
 	int Size;
 	unsigned char *pMem;
 
-	f = gzopen(file, "wb0");
+	f = fopen(file, "wb");
 	if (f == NULL) return -1;
 
 	gzwrite(f, (void*)PcsxHeader, 32);
 
 	pMem = (unsigned char *) malloc(128*96*3);
 	if (pMem == NULL) return -1;
-	GPU_getScreenPic(pMem);
+	//zero 08-nov-2010: this annoys me. it contains HUD data and isnt deterministic. make it always blank.
+	memset(pMem,0,128*96*3);
 	gzwrite(f, pMem, 128*96*3);
 	free(pMem);
 
@@ -473,6 +478,8 @@ int SaveState(char *file) {
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
 	free(gpufP);
 
+	long pos = ftell(f);
+
 	sioFreeze(f, 1);
 	cdrFreeze(f, 1);
 	psxHwFreeze(f, 1);
@@ -486,25 +493,25 @@ int SaveState(char *file) {
 	gzwrite(f, &Size, 4);
 	gzwrite(f, memfile.buf(),Size);
 
-	gzclose(f);
+	fclose(f);
 
 	return 0;
 }
 
 int LoadState(char *file) {
-	gzFile f;
+	FILE* f;
 	GPUFreeze_t *gpufP;
 	int Size;
 	char header[32];
 
-	f = gzopen(file, "rb");
+	f = fopen(file, "rb");
 	if (f == NULL) return -1;
 
 	psxCpu->Reset();
 
 	gzread(f, header, 32);
 
-	if (strncmp("STv3 PCSX", header, 9)) { gzclose(f); return -1; }
+	if (strncmp("STv3 PCSX", header, 9)) { fclose(f); return -1; }
 
 	gzseek(f, 128*96*3, SEEK_CUR);
 
@@ -537,23 +544,23 @@ int LoadState(char *file) {
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
 
-	gzclose(f);
+	fclose(f);
 
 	return 0;
 }
 
 int CheckState(char *file) {
-	gzFile f;
+	FILE* f;
 	char header[32];
 
-	f = gzopen(file, "rb");
+	f = fopen(file, "rb");
 	if (f == NULL) return -1;
 
 	psxCpu->Reset();
 
 	gzread(f, header, 32);
 
-	gzclose(f);
+	fclose(f);
 
 	if (strncmp("STv3 PCSX", header, 9)) return -1;
 
@@ -561,12 +568,12 @@ int CheckState(char *file) {
 }
 
 int SaveStateEmbed(char *file) {
-	gzFile f;
+	FILE* f;
 	GPUFreeze_t *gpufP;
 	int Size;
 	unsigned char *pMem;
 
-	f = gzopen(file, "ab");
+	f = fopen(file, "ab");
 	if (f == NULL) return -1;
 
 	gzwrite(f, (void*)PcsxHeader, 32);
@@ -606,13 +613,13 @@ int SaveStateEmbed(char *file) {
 	psxRcntFreeze(f, 1);
 	mdecFreeze(f, 1);
 
-	gzclose(f);
+	fclose(f);
 
 	return 0;
 }
 
 int LoadStateEmbed(char *file) {
-	gzFile f;
+	FILE* f;
 	GPUFreeze_t *gpufP;
 	int Size;
 	char header[32];
@@ -630,14 +637,14 @@ int LoadStateEmbed(char *file) {
 	fclose(fp);
 	fclose(fp2);
 
-	f = gzopen("embsave.tmp", "rb");
+	f = fopen("embsave.tmp", "rb");
 	if (f == NULL) return -1;
 
 	psxCpu->Reset();
 
 	gzread(f, header, 32);
 
-	if (strncmp("STv3 PCSX", header, 9)) { gzclose(f); return -1; }
+	if (strncmp("STv3 PCSX", header, 9)) { fclose(f); return -1; }
 
 	gzseek(f, 128*96*3, SEEK_CUR);
 
@@ -669,7 +676,7 @@ int LoadStateEmbed(char *file) {
 	psxRcntFreeze(f, 0);
 	mdecFreeze(f, 0);
 
-	gzclose(f);
+	fclose(f);
 	remove("embsave.tmp");
 
 	return 0;
