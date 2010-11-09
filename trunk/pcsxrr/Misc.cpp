@@ -617,6 +617,7 @@ int SaveStateEmbed(char *file) {
 	free(pMem);
 
 	gzwrite(f, psxM, 0x00200000);
+	gzwrite(f, psxP, 0x00010000);
 	gzwrite(f, psxR, 0x00080000);
 	gzwrite(f, psxH, 0x00010000);
 	gzwrite(f, (void*)&psxRegs, sizeof(psxRegs));
@@ -628,8 +629,20 @@ int SaveStateEmbed(char *file) {
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
 	GPU_freeze(1, gpufP);
+	void* temp = gpufP->extraData;
+	gpufP->extraData = 0;
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
+	gzwrite(f, temp, gpufP->extraDataSize);
+	GPU_freeze(3, gpufP);
 	free(gpufP);
+
+	sioFreeze(f, 1);
+	cdrFreeze(f, 1);
+	psxHwFreeze(f, 1);
+	CDRisoFreeze(f,1);
+	psxRcntFreeze(f, 1);
+	mdecFreeze(f, 1);
+	//TODO - no movie state? are you sure?
 
 	// spu
 	EMUFILE_MEMORY memfile;
@@ -637,13 +650,6 @@ int SaveStateEmbed(char *file) {
 	Size = memfile.size();
 	gzwrite(f, &Size, 4);
 	gzwrite(f, memfile.buf(),Size);
-
-
-	sioFreeze(f, 1);
-	cdrFreeze(f, 1);
-	psxHwFreeze(f, 1);
-	psxRcntFreeze(f, 1);
-	mdecFreeze(f, 1);
 
 	fclose(f);
 
@@ -692,8 +698,19 @@ int LoadStateEmbed(char *file) {
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
+	gpufP->extraData = malloc(gpufP->extraDataSize);
+	gzread(f, gpufP->extraData, gpufP->extraDataSize);
 	GPU_freeze(0, gpufP);
+	free(gpufP->extraData);
 	free(gpufP);
+
+	sioFreeze(f, 0);
+	cdrFreeze(f, 0);
+	psxHwFreeze(f, 0);
+	CDRisoFreeze(f,0);
+	psxRcntFreeze(f, 0);
+	mdecFreeze(f, 0);
+	//TODO - no movie state? are you sure?
 
 	// spu
 	gzread(f, &Size, 4);
@@ -702,12 +719,6 @@ int LoadStateEmbed(char *file) {
 	gzread(f, memfile.buf(), Size);
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
-
-	sioFreeze(f, 0);
-	cdrFreeze(f, 0);
-	psxHwFreeze(f, 0);
-	psxRcntFreeze(f, 0);
-	mdecFreeze(f, 0);
 
 	fclose(f);
 	remove("embsave.tmp");
