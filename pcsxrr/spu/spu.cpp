@@ -173,7 +173,10 @@ void SPU_chan::keyon()
 void SPU_chan::keyoff()
 {
 	//printf("[%02d] keyoff\n",ch);
-	status = CHANSTATUS_KEYOFF;
+	
+	//SPECULATIVE: keyoff if we're not playing? probably not
+	if(status == CHANSTATUS_PLAY)
+		status = CHANSTATUS_KEYOFF;
 }
 
 //---------------------------------------
@@ -798,6 +801,7 @@ void _ADSRInfo::save(EMUFILE* fp) {
 	fp->write32le(&SustainIncrease);
 	fp->write32le(&SustainRate);
 	fp->write32le(&ReleaseModeExp);
+	fp->write32le(&ReleaseRate);
 	fp->write32le(&EnvelopeVol);
 	fp->write32le(&lVolume);
 }
@@ -812,6 +816,7 @@ void _ADSRInfo::load(EMUFILE* fp) {
 	fp->read32le(&SustainIncrease);
 	fp->read32le(&SustainRate);
 	fp->read32le(&ReleaseModeExp);
+	fp->read32le(&ReleaseRate);
 	fp->read32le(&EnvelopeVol);
 	fp->read32le(&lVolume);
 }
@@ -878,6 +883,7 @@ void SPUReset()
 void SPUcloneUser()
 {
 	*SPU_user = *SPU_core;
+	SPU_user->isCore = false;
 	for(int i=0;i<24;i++)
 		SPU_user->channels[i].spu = SPU_user;
 }
