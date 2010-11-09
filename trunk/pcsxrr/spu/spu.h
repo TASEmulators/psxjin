@@ -214,6 +214,8 @@ public:
 	s16 outbuf[100000];
 	void writeRegister(u32 r, u16 val);
 	bool isCore;
+	double mixtime;
+	u32 dwNoiseVal;
 
 	s32 iLeftXAVol, iRightXAVol;
 

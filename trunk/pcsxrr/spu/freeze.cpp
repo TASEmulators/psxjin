@@ -135,6 +135,12 @@ void SPUfreeze_new(EMUFILE* fp)
 	CTASSERT(sizeof(SPU_core->spuMem)==0x80000);
 	fp->fwrite(SPU_core->spuMem,0x80000);
 	fp->fwrite(regArea,0x200);
+	
+	fp->writedouble(&SPU_core->mixtime);
+	fp->write32le(&SPU_core->dwNoiseVal);
+	fp->write32le(&SPU_core->iLeftXAVol);
+	fp->write32le(&SPU_core->iRightXAVol);
+
 	fp->write8le(&SPU_core->iReverbCycle);
 	fp->write32le(&SPU_core->spuAddr);
 	fp->write16le(&SPU_core->spuCtrl);

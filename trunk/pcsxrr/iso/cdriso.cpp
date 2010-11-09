@@ -18,8 +18,9 @@
 #include <string>
 
 #include "cdriso.h"
-#include "PSEmu_Plugin_Defs.h"
 #include "Config.h"
+
+#include "PsxCommon.h"
 
 std::string CDR_iso_fileToOpen;
 
@@ -258,3 +259,10 @@ long CDRtest(void) {
 	return 0;
 }
 
+int CDRisoFreeze(gzFile f, int Mode) {
+	gzfreezelarr(cdbuffer);
+	pbuffer = (unsigned char*)((intptr_t)pbuffer-(intptr_t)cdbuffer);
+	gzfreezel(&pbuffer);
+	pbuffer = (unsigned char*)((intptr_t)pbuffer+(intptr_t)cdbuffer);
+	return 0;
+}

@@ -58,6 +58,7 @@ void inline execI()
 			if (iGpuHasUpdated) {
 				if (iSaveStateTo) {
 					WIN32_SaveState(iSaveStateTo==10?0:iSaveStateTo);
+					//WIN32_SaveState(Movie.currentFrame);
 					iSaveStateTo = 0;
 				}
 				if (iFrameAdvance || iDoPauseAtVSync) {

@@ -29,6 +29,8 @@
 #include "CdRom.h"
 #include "spu/spu.h"
 
+int CDRisoFreeze(gzFile f, int Mode);
+
 // global variables
 char CdromId[10];
 char CdromLabel[33];
@@ -467,6 +469,8 @@ int SaveState(char *file) {
 
 	gzwrite(f, psxM, 0x00200000);
 	pos = ftell(f);
+	gzwrite(f, psxP, 0x00010000);
+	pos = ftell(f);
 	gzwrite(f, psxR, 0x00080000);
 	pos = ftell(f);
 	gzwrite(f, psxH, 0x00010000);
@@ -482,14 +486,21 @@ int SaveState(char *file) {
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
 	GPU_freeze(1, gpufP);
+	void* temp = gpufP->extraData;
+	gpufP->extraData = 0;
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
+	gzwrite(f, temp, gpufP->extraDataSize);
+	GPU_freeze(3, gpufP);
 	free(gpufP);
+
 	pos = ftell(f);
 	sioFreeze(f, 1);
 	pos = ftell(f);
 	cdrFreeze(f, 1);
 	pos = ftell(f);
 	psxHwFreeze(f, 1);
+	pos = ftell(f);
+	CDRisoFreeze(f,1);
 	pos = ftell(f);
 	psxRcntFreeze(f, 1);
 	pos = ftell(f);
@@ -517,6 +528,8 @@ int LoadState(char *file) {
 	int Size;
 	char header[32];
 
+	printf("loadstate---\n");
+
 	f = fopen(file, "rb");
 	if (f == NULL) return -1;
 
@@ -529,6 +542,7 @@ int LoadState(char *file) {
 	gzseek(f, 128*96*3, SEEK_CUR);
 
 	gzread(f, psxM, 0x00200000);
+	gzread(f, psxP, 0x00010000);
 	gzread(f, psxR, 0x00080000);
 	gzread(f, psxH, 0x00010000);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
@@ -539,12 +553,16 @@ int LoadState(char *file) {
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
+	gpufP->extraData = malloc(gpufP->extraDataSize);
+	gzread(f, gpufP->extraData, gpufP->extraDataSize);
 	GPU_freeze(0, gpufP);
+	free(gpufP->extraData);
 	free(gpufP);
 
 	sioFreeze(f, 0);
 	cdrFreeze(f, 0);
 	psxHwFreeze(f, 0);
+	CDRisoFreeze(f,0);
 	psxRcntFreeze(f, 0);
 	mdecFreeze(f, 0);
 	MovieFreeze(f, 0);
@@ -593,7 +611,8 @@ int SaveStateEmbed(char *file) {
 
 	pMem = (unsigned char *) malloc(128*96*3);
 	if (pMem == NULL) return -1;
-	GPU_getScreenPic(pMem);
+	//GPU_getScreenPic(pMem);
+	memset(pMem,0,128*96*3);
 	gzwrite(f, pMem, 128*96*3);
 	free(pMem);
 
@@ -662,6 +681,7 @@ int LoadStateEmbed(char *file) {
 	gzseek(f, 128*96*3, SEEK_CUR);
 
 	gzread(f, psxM, 0x00200000);
+	gzread(f, psxP, 0x00010000);
 	gzread(f, psxR, 0x00080000);
 	gzread(f, psxH, 0x00010000);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
