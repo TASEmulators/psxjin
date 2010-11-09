@@ -194,7 +194,7 @@ signed   long  *psxVsl;
 ////////////////////////////////////////////////////////////////////////
 
 static long       lGPUdataRet;
-long              lGPUstatusRet;
+long              lGPUstatusRet; //!
 char              szDispBuf[64];
 char              szMenuBuf[36];
 char              szDebugText[512];
@@ -215,20 +215,20 @@ static long       gpuDataP = 0;
 
 VRAMLoad_t        VRAMWrite;
 VRAMLoad_t        VRAMRead;
-DATAREGISTERMODES DataWriteMode;
-DATAREGISTERMODES DataReadMode;
+DATAREGISTERMODES DataWriteMode; //!
+DATAREGISTERMODES DataReadMode; //!
 
 BOOL              bSkipNextFrame = FALSE;
 DWORD             dwLaceCnt=0;
 int               iColDepth;
 int               iWindowMode;
 short             sDispWidths[8] = {256,320,512,640,368,384,512,640};
-PSXDisplay_t      PSXDisplay;
-PSXDisplay_t      PreviousPSXDisplay;
+PSXDisplay_t      PSXDisplay; //!
+PSXDisplay_t      PreviousPSXDisplay; //!
 long              lSelectedSlot=0;
 BOOL              bChangeWinMode=FALSE;
 BOOL              bDoLazyUpdate=FALSE;
-unsigned long     lGPUInfoVals[16];
+unsigned long     lGPUInfoVals[16]; //!
 int               iFakePrimBusy=0;
 int               iRumbleVal=0;
 int               iRumbleTime=0;
@@ -2158,18 +2158,209 @@ long CALLBACK GPUtest(void)
 // Freeze
 ////////////////////////////////////////////////////////////////////////
 
+#pragma pack(push, 1)
 typedef struct GPUFREEZETAG
 {
+	void* extraData;
+	int extraDataSize;
 	unsigned long ulFreezeVersion;      // should be always 1 for now (set by main emu)
 	unsigned long ulStatus;             // current gpu status
 	unsigned long ulControl[256];       // latest control register values
 	unsigned char psxVRam[1024*1024*2]; // current VRam image (full 2 MB for ZN)
 } GPUFreeze_t;
+#pragma pack(pop)
 
 ////////////////////////////////////////////////////////////////////////
 
+struct FreezeExtra
+{
+	long           lLowerpart;
+	BOOL           bCheckMask;
+	unsigned short sSetMask;
+	unsigned long  lSetMask;
+
+	long       lGPUdataRet;
+	long              lGPUstatusRet;
+
+	unsigned   long gpuDataM[256];
+	unsigned   char gpuCommand;
+	long       gpuDataC;
+	long       gpuDataP;
+	VRAMLoad_t        VRAMWrite;
+	VRAMLoad_t        VRAMRead;
+	DATAREGISTERMODES DataWriteMode;
+	DATAREGISTERMODES DataReadMode;
+	DWORD             dwLaceCnt;
+
+	PSXDisplay_t      PSXDisplay;
+	PSXDisplay_t      PreviousPSXDisplay; 
+
+	unsigned long     lGPUInfoVals[16];
+
+
+	BOOL           bUsingTWin;
+	TWin_t         TWin;
+	unsigned long  clutid;                                 // global clut
+	unsigned short usMirror;                             // sprite mirror
+	int            iDither;
+	long           drawX;
+	long           drawY;
+	long           drawW;
+	long           drawH;
+
+	short g_m1,g_m2,g_m3;
+	short DrawSemiTrans;
+	short Ymin;
+	short Ymax;
+
+	short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // global psx vertex coords
+	long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP; 
+	long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
+};
+
+void FreezeExtra_save(struct FreezeExtra* extra)
+{
+	extern short g_m1,g_m2,g_m3;
+	extern short DrawSemiTrans;
+	extern short Ymin;
+	extern short Ymax;
+
+	extern short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // global psx vertex coords
+	extern long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP; //!
+	extern long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
+
+	extra->lLowerpart = lLowerpart;
+	extra->bCheckMask= bCheckMask;
+	extra->sSetMask = sSetMask;
+	extra->lSetMask = lSetMask;
+
+	extra->lGPUdataRet = lGPUdataRet;
+	extra->lGPUstatusRet = lGPUstatusRet;
+
+	memcpy(extra->gpuDataM,gpuDataM,sizeof(gpuDataM));
+	extra->gpuCommand = gpuCommand;
+	extra->gpuDataC = gpuDataC;
+	extra->gpuDataP = gpuDataP;
+	extra->VRAMWrite = VRAMWrite;
+	extra->VRAMRead = VRAMRead;
+	extra->DataWriteMode = DataWriteMode;
+	extra->DataReadMode = DataReadMode;
+	extra->dwLaceCnt = dwLaceCnt;
+
+	extra->PSXDisplay = PSXDisplay;
+	extra->PreviousPSXDisplay = PreviousPSXDisplay; 
+
+	memcpy(extra->lGPUInfoVals,lGPUInfoVals,sizeof(lGPUInfoVals));
+
+
+	extra->bUsingTWin = bUsingTWin;
+	extra->TWin = TWin;
+	extra->clutid = clutid;                                 // global clut
+	extra->usMirror = usMirror;                             // sprite mirror
+	extra->iDither = iDither;
+	extra->drawX = drawX;
+	extra->drawY = drawY;
+	extra->drawW = drawW;
+	extra->drawH = drawH;
+
+	extra->g_m1 = g_m1;
+	extra->g_m2 = g_m2;
+	extra->g_m3 = g_m3;
+	extra->DrawSemiTrans = DrawSemiTrans;
+	extra->Ymin = Ymin;
+	extra->Ymax = Ymax;
+
+	extra->ly0 = ly0;
+	extra->lx0 = lx0;
+	extra->ly1 = ly1;
+	extra->lx1 = lx1;
+	extra->ly2 = ly2;
+	extra->lx2 = lx2;
+	extra->ly3 = ly3;
+	extra->lx3 = lx3;
+	extra->GlobalTextAddrX = GlobalTextAddrX;
+	extra->GlobalTextAddrY = GlobalTextAddrY;
+	extra->GlobalTextTP = GlobalTextTP; 
+	extra->GlobalTextREST = GlobalTextREST;
+	extra->GlobalTextABR = GlobalTextABR;
+	extra->GlobalTextPAGE = GlobalTextPAGE;
+};
+
+void FreezeExtra_load(struct FreezeExtra* extra)
+{
+	extern short g_m1,g_m2,g_m3;
+	extern short DrawSemiTrans;
+	extern short Ymin;
+	extern short Ymax;
+
+	extern short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // global psx vertex coords
+	extern long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP; //!
+	extern long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
+
+	lLowerpart = extra->lLowerpart;
+	bCheckMask= extra->bCheckMask;
+	sSetMask = extra->sSetMask;
+	lSetMask = extra->lSetMask;
+
+	lGPUdataRet = extra->lGPUdataRet;
+	lGPUstatusRet = extra->lGPUstatusRet;
+
+	memcpy(gpuDataM,extra->gpuDataM,sizeof(gpuDataM));
+	gpuCommand = extra->gpuCommand;
+	gpuDataC = extra->gpuDataC;
+	gpuDataP = extra->gpuDataP;
+	VRAMWrite = extra->VRAMWrite;
+	VRAMRead = extra->VRAMRead;
+	DataWriteMode = extra->DataWriteMode;
+	DataReadMode = extra->DataReadMode;
+	dwLaceCnt = extra->dwLaceCnt;
+
+	PSXDisplay = extra->PSXDisplay;
+	PreviousPSXDisplay = extra->PreviousPSXDisplay; 
+
+	memcpy(lGPUInfoVals,extra->lGPUInfoVals,sizeof(lGPUInfoVals));
+
+
+	bUsingTWin = extra->bUsingTWin;
+	TWin = extra->TWin;
+	clutid = extra->clutid;                                 // global clut
+	usMirror = extra->usMirror;                             // sprite mirror
+	iDither = extra->iDither;
+	drawX = extra->drawX;
+	drawY = extra->drawY;
+	drawW = extra->drawW;
+	drawH = extra->drawH;
+
+	g_m1 = extra->g_m1;
+	g_m2 = extra->g_m2;
+	g_m3 = extra->g_m3;
+	DrawSemiTrans = extra->DrawSemiTrans;
+	Ymin = extra->Ymin;
+	Ymax = extra->Ymax;
+
+	ly0 = extra->ly0;
+	lx0 = extra->lx0;
+	ly1 = extra->ly1;
+	lx1 = extra->lx1;
+	ly2 = extra->ly2;
+	lx2 = extra->lx2;
+	ly3 = extra->ly3;
+	lx3 = extra->lx3;
+	GlobalTextAddrX = extra->GlobalTextAddrX;
+	GlobalTextAddrY = extra->GlobalTextAddrY;
+	GlobalTextTP = extra->GlobalTextTP; 
+	GlobalTextREST = extra->GlobalTextREST;
+	GlobalTextABR = extra->GlobalTextABR;
+	GlobalTextPAGE = extra->GlobalTextPAGE;
+};
+
 long CALLBACK GPUfreeze(unsigned long ulGetFreezeData,GPUFreeze_t * pF)
 {
+	if(ulGetFreezeData==3)
+	{
+		free(pF->extraData);
+		return;
+	}
 	//----------------------------------------------------//
 	if (ulGetFreezeData==2)                               // 2: info, which save slot is selected? (just for display)
 	{
@@ -2189,27 +2380,34 @@ long CALLBACK GPUfreeze(unsigned long ulGetFreezeData,GPUFreeze_t * pF)
 		pF->ulStatus=lGPUstatusRet;
 		memcpy(pF->ulControl,ulStatusControl,256*sizeof(unsigned long));
 		memcpy(pF->psxVRam,  psxVub,         1024*iGPUHeight*2);
+		pF->extraDataSize = sizeof(struct FreezeExtra);
+		pF->extraData = malloc(pF->extraDataSize);
+		FreezeExtra_save((struct FreezeExtra*)pF->extraData);
 
 		return 1;
 	}
 
 	if (ulGetFreezeData!=0) return 0;                     // 0: set data
 
+	//loadstate:
+
 	lGPUstatusRet=pF->ulStatus;
 	memcpy(ulStatusControl,pF->ulControl,256*sizeof(unsigned long));
 	memcpy(psxVub,         pF->psxVRam,  1024*iGPUHeight*2);
 
+	FreezeExtra_load((struct FreezeExtra*)pF->extraData);
+
 // RESET TEXTURE STORE HERE, IF YOU USE SOMETHING LIKE THAT
 
-	GPUwriteStatus(ulStatusControl[0]);
-	GPUwriteStatus(ulStatusControl[1]);
-	GPUwriteStatus(ulStatusControl[2]);
-	GPUwriteStatus(ulStatusControl[3]);
-	GPUwriteStatus(ulStatusControl[8]);                   // try to repair things
-	GPUwriteStatus(ulStatusControl[6]);
-	GPUwriteStatus(ulStatusControl[7]);
-	GPUwriteStatus(ulStatusControl[5]);
-	GPUwriteStatus(ulStatusControl[4]);
+	//GPUwriteStatus(ulStatusControl[0]);
+	//GPUwriteStatus(ulStatusControl[1]);
+	//GPUwriteStatus(ulStatusControl[2]);
+	//GPUwriteStatus(ulStatusControl[3]);
+	//GPUwriteStatus(ulStatusControl[8]);                   // try to repair things
+	//GPUwriteStatus(ulStatusControl[6]);
+	//GPUwriteStatus(ulStatusControl[7]);
+	//GPUwriteStatus(ulStatusControl[5]);
+	//GPUwriteStatus(ulStatusControl[4]);
 
 	return 1;
 }

@@ -65,12 +65,6 @@ int iRecordMode=0;
 int iUseReverb=1;
 int iUseInterpolation=2;
 
-// MAIN infos struct for each channel
-
-u32 dwNoiseVal=1;                          // global noise generator
-
-
-
 int bSpuInit=0;
 
 #ifdef _WINDOWS
@@ -225,6 +219,7 @@ INLINE int iGetNoiseVal(SPU_chan* pChannel)
 {
 	int fa;
 
+	u32 &dwNoiseVal = pChannel->spu->dwNoiseVal;
 	if ((dwNoiseVal<<=1)&0x80000000L)
 	{
 		dwNoiseVal^=0x0040001L;
@@ -390,6 +385,8 @@ SPU_struct::SPU_struct(bool _isCore)
 , spuStat(0)
 , spuIrq(0)
 , mixIrqCounter(0)
+, mixtime(0)
+, dwNoiseVal(1)
 {
 	//for debugging purposes it is handy for each channel to know what index he is.
 	for(int i=0;i<24;i++)
@@ -743,7 +740,7 @@ void SPUwriteDMAMem(u16 * pusPSXMem,int iSize) {
 //16934400 is half this. we'll go with that assumption for now
 static const double time_per_cycle = (double)1.0/(PSXCLK);
 static const double samples_per_cycle = time_per_cycle * 44100;
-static double mixtime = 0;
+
 
 _ADSRInfo::_ADSRInfo()
 :	State(0)
@@ -767,9 +764,9 @@ void SPUasync(unsigned long cycle)
 {
 	Lock lock;
 
-	mixtime += samples_per_cycle*cycle;
-	int mixtodo = (int)mixtime;
-	mixtime -= mixtodo;
+	SPU_core->mixtime += samples_per_cycle*cycle;
+	int mixtodo = (int)SPU_core->mixtime;
+	SPU_core->mixtime -= mixtodo;
 
 	switch(iSoundMode)
 	{
@@ -855,7 +852,6 @@ long SPUinit(void)
 	//wavout = fopen("c:\\pcsx.raw","wb");
 	SPU_core = new SPU_struct(true);
 	SPU_user = new SPU_struct(false);
-	mixtime = 0;
 	StaticInitADSR();
 	SPUReset();
 	return 0;
@@ -901,6 +897,12 @@ bool SPUunfreeze_new(EMUFILE* fp)
 
 	fp->fread(SPU_core->spuMem,0x80000);
 	fp->fread(regArea,0x200);
+
+	fp->readdouble(&SPU_core->mixtime);
+	fp->read32le(&SPU_core->dwNoiseVal);
+	fp->read32le(&SPU_core->iLeftXAVol);
+	fp->read32le(&SPU_core->iRightXAVol);
+
 	fp->read8le(&SPU_core->iReverbCycle);
 	fp->read32le(&SPU_core->spuAddr);
 	fp->read16le(&SPU_core->spuCtrl);

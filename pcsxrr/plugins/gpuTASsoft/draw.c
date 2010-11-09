@@ -114,9 +114,9 @@ int            iResX;
 int            iResY;
 long           lLowerpart;
 BOOL           bIsFirstFrame = TRUE;
-BOOL           bCheckMask=FALSE;
-unsigned short sSetMask=0;
-unsigned long  lSetMask=0;
+BOOL           bCheckMask=FALSE; //!
+unsigned short sSetMask=0; //!
+unsigned long  lSetMask=0; //!
 int            iDesktopCol=16;
 int            iShowFPS=0;
 int            iWinSize;

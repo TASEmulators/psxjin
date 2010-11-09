@@ -94,15 +94,15 @@
 // globals
 ////////////////////////////////////////////////////////////////////////
 
-BOOL           bUsingTWin=FALSE;
+BOOL           bUsingTWin=FALSE; //!
 TWin_t         TWin;
 unsigned long  clutid;                                 // global clut
-unsigned short usMirror=0;                             // sprite mirror
+unsigned short usMirror=0;                             // sprite mirror //!
 int            iDither=0;
-long           drawX;
-long           drawY;
-long           drawW;
-long           drawH;
+long           drawX; //!
+long           drawY; //!
+long           drawW; //!
+long           drawH; //!
 unsigned long  dwCfgFixes;
 unsigned long  dwActFixes=0;
 unsigned long  dwEmuFixes=0;

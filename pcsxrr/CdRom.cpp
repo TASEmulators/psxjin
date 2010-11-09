@@ -582,7 +582,8 @@ void cdrReadInterrupt() {
     cdr.Result[0] = cdr.StatP;
 
 	buf = CDRgetBuffer();
-	if (buf == NULL) cdr.RErr = -1;
+	if (buf == NULL) 
+		cdr.RErr = -1;
 
 	if (cdr.RErr == -1) {
 #ifdef CDRLOG
@@ -596,6 +597,7 @@ void cdrReadInterrupt() {
 		return;
 	}
 
+	//printf("[%12d] committing cd transfer of address %d %d %d %d\n",psxRegs.cycle,cdr.SetSector[0],cdr.SetSector[1],cdr.SetSector[2],cdr.SetSector[3]);
 	memcpy(cdr.Transfer, buf, 2340);
 	cdr.Stat = DataReady;
 
@@ -1057,17 +1059,10 @@ void cdrReset() {
 }
 
 int cdrFreeze(gzFile f, int Mode) {
-	int tmp;
-
+	cdr.pTransfer = (unsigned char *)( (intptr_t)cdr.pTransfer - (intptr_t)cdr.Transfer);
 	gzfreeze(&cdr, sizeof(cdr));
 	gzfreeze(&stat, sizeof(stat));
-
-	if (Mode == 1) tmp = cdr.pTransfer - cdr.Transfer;
-	gzfreezel(&tmp);
-	if (Mode == 0) cdr.pTransfer = cdr.Transfer + tmp;
-
-	ReadTrack();
-
+	cdr.pTransfer = (unsigned char *)( (intptr_t)cdr.pTransfer + (intptr_t)cdr.Transfer);
 	return 0;
 }
 

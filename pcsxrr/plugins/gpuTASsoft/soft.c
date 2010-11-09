@@ -149,7 +149,7 @@ short Ymin;
 short Ymax;
 
 short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // global psx vertex coords
-long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP;
+long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP; //!
 long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
 
 ////////////////////////////////////////////////////////////////////////

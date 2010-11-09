@@ -105,12 +105,16 @@ typedef void (CALLBACK* GPUabout)(void);
 typedef void (CALLBACK* GPUmakeSnapshot)(void);
 typedef void (CALLBACK* GPUkeypressed)(int);
 typedef void (CALLBACK* GPUdisplayText)(char *);
+#pragma pack(push, 1)
 typedef struct {
+	void* extraData;
+	int extraDataSize;
 	unsigned long ulFreezeVersion;
 	unsigned long ulStatus;
 	unsigned long ulControl[256];
 	unsigned char psxVRam[1024*512*2];
 } GPUFreeze_t;
+#pragma pack(pop)
 typedef long (CALLBACK* GPUfreeze)(unsigned long, GPUFreeze_t *);
 typedef long (CALLBACK* GPUgetScreenPic)(unsigned char *);
 typedef long (CALLBACK* GPUshowScreenPic)(unsigned char *);
