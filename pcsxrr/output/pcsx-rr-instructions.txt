@@ -10,6 +10,7 @@ customizable hotkeys, etc.
 http://code.google.com/p/pcsxrr/
 ----------------------------------------
 
+For more information on input rerecording and movie making, see http://tasvideos.org
 
 ---------------------------------------------------------------------------------
  IMPORTANT: you will have TONS of desyncs if you don't follow these steps FIRST:
