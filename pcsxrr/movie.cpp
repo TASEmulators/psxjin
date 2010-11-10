@@ -364,6 +364,14 @@ static int StartReplay()
 	return 1;
 }
 
+bool IsMovieLoaded()
+{
+	if (Movie.mode == MOVIEMODE_INACTIVE)
+		return true;
+	else
+		return false;
+}
+
 void MOV_StartMovie(int mode)
 {
 	Movie.mode = mode;

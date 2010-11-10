@@ -19,7 +19,7 @@ void MOV_ReadControl();
 void MOV_ProcessControlFlags();
 void MOV_WriteMovieFile();
 int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
-
+bool IsMovieLoaded();
 int MovieFreeze(gzFile f, int Mode);
 
 #endif /* __MOVIE_H__ */

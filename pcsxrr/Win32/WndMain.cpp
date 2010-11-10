@@ -597,6 +597,16 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	char File[256];
 
 	switch (msg) {
+		case WM_ENTERMENULOOP:
+			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED)); //TODO: Find a way for the emulator to know a game has been loaded
+			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
+	
+			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
+			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			return TRUE;
+
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) {
 				case ID_FILE_EXIT:
@@ -615,9 +625,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_STOP_MOVIE:
 					MOV_StopMovie();
-					EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
-					EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
-					EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 					return TRUE;
 
 				case ID_LUA_OPEN:
@@ -1680,9 +1687,6 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&TAS Help"), ID_HELP_HELP);
 	ADDMENUITEM(0, _("&Quick Tutorial"), ID_HELP_TUTORIAL);
-
-	EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
-	EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED);
 }
 
 void CreateMainWindow(int nCmdShow) {
@@ -1723,16 +1727,6 @@ void CreateMainWindow(int nCmdShow) {
 
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
-
-	if (Movie.mode != MOVIEMODE_INACTIVE) {
-		EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_GRAYED);
-		EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_GRAYED);
-		EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_ENABLED);
-	}
-//	if (Movie.capture) {
-//		EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,MF_ENABLED);
-//		EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
-//	}
 
 	ShowWindow(hWnd, nCmdShow);
 }
