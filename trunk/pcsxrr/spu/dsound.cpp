@@ -50,7 +50,9 @@ extern HWND    hWMain;
 static volatile bool doterminate;
 static volatile bool terminated;
 
-volatile int win_sound_samplecounter;
+volatile int win_sound_samplecounter = 0;
+static bool insilence;
+static int samplecounter_fakecontribution = 0;
 
 //DWORD WINAPI SNDDXThread( LPVOID )
 //{
@@ -206,45 +208,88 @@ void SNDDXDeInit()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
+void SNDDXClearAudioBuffer()
 {
+	// we shouldn't need to provide 2 buffers since it's 1 contiguous range
+	// but maybe newer directsound implementations have issues
 	LPVOID buffer1;
 	LPVOID buffer2;
 	DWORD buffer1_size, buffer2_size;
-	DWORD status;
+	HRESULT hr = lpDSB2->Lock(0, 0, &buffer1, &buffer1_size, &buffer2, &buffer2_size, DSBLOCK_ENTIREBUFFER);
+	if(FAILED(hr))
+		return;
+	memset(buffer1, 0, buffer1_size);
+	if(buffer2)
+		memset(buffer2, 0, buffer2_size);
+	lpDSB2->Unlock(buffer1, buffer1_size, buffer2, buffer2_size);
+}
 
+
+void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
+{
 	int samplecounter;
 	{
-		//Lock lock;
-		samplecounter = win_sound_samplecounter -= num_samples;
+		Lock lock;
+		if(num_samples)
+		{
+			samplecounter = win_sound_samplecounter -= num_samples - samplecounter_fakecontribution;
+			samplecounter_fakecontribution = 0;
+		}
+		else
+		{
+			samplecounter = win_sound_samplecounter -= 44100/180;
+			samplecounter_fakecontribution += 44100/180;
+		}
 	}
 
-	//bool silence = (samplecounter<-44100*15/60); //behind by more than a quarter second -> silence
-	bool silence = false;
+	printf("%d\n",samplecounter);
 
-	IDirectSoundBuffer8_GetStatus(lpDSB2, &status);
+	bool silence = (samplecounter<-44100*15/60); //behind by more than a quarter second -> silence
 
-	if (status & DSBSTATUS_BUFFERLOST)
-		return; // fix me
-
-	IDirectSoundBuffer8_Lock(lpDSB2, soundoffset, num_samples * sizeof(s16) * 2, &buffer1, &buffer1_size, &buffer2, &buffer2_size, 0);
-
-	if(silence) {
-		memset(buffer1, 0, buffer1_size);
-		if(buffer2)
-			memset(buffer2, 0, buffer2_size);
+	if(insilence)
+	{
+		if(silence)
+			return;
+		else
+			insilence = false;
 	}
 	else
 	{
-		memcpy(buffer1, buffer, buffer1_size);
-		if (buffer2)
-			memcpy(buffer2, ((u8 *)buffer)+buffer1_size, buffer2_size);
+		if(silence)
+		{
+//#ifndef PUBLIC_RELEASE
+//			extern volatile bool execute;
+//			if(execute)
+//				printf("snddx: emergency cleared sound buffer. (%d, %d, %d)\n", win_sound_samplecounter, num_samples, samplecounter_fakecontribution);
+//#endif
+			samplecounter_fakecontribution = 0;
+			insilence = true;
+			SNDDXClearAudioBuffer();
+			return;
+		}
 	}
+
+	LPVOID buffer1;
+	LPVOID buffer2;
+	DWORD buffer1_size, buffer2_size;
+
+	HRESULT hr = lpDSB2->Lock(soundoffset, num_samples * sizeof(s16) * 2,
+	                          &buffer1, &buffer1_size, &buffer2, &buffer2_size, 0);
+	if(FAILED(hr))
+	{
+		if(hr == DSBSTATUS_BUFFERLOST)
+			lpDSB2->Restore();
+		return;
+	}
+
+	memcpy(buffer1, buffer, buffer1_size);
+	if(buffer2)
+		memcpy(buffer2, ((u8 *)buffer)+buffer1_size, buffer2_size);
 
 	soundoffset += buffer1_size + buffer2_size;
 	soundoffset %= soundbufsize;
 
-	IDirectSoundBuffer8_Unlock(lpDSB2, buffer1, buffer1_size, buffer2, buffer2_size);
+	lpDSB2->Unlock(buffer1, buffer1_size, buffer2, buffer2_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
