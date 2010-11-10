@@ -2359,7 +2359,7 @@ long CALLBACK GPUfreeze(unsigned long ulGetFreezeData,GPUFreeze_t * pF)
 	if(ulGetFreezeData==3)
 	{
 		free(pF->extraData);
-		return;
+		return 1;
 	}
 	//----------------------------------------------------//
 	if (ulGetFreezeData==2)                               // 2: info, which save slot is selected? (just for display)
