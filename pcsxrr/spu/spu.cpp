@@ -78,15 +78,7 @@ static pthread_t thread = -1;                          // thread id (linux)
 #endif
 #endif
 
-class Lock {
-public:
-	Lock(); // defaults to the critical section around NDS_exec
-	Lock(CRITICAL_SECTION& cs);
-	~Lock();
-private:
-	CRITICAL_SECTION* m_cs;
-};
-
+extern volatile int win_sound_samplecounter;
 CRITICAL_SECTION win_execute_sync;
 Lock::Lock() : m_cs(&win_execute_sync) { EnterCriticalSection(m_cs); }
 Lock::Lock(CRITICAL_SECTION& cs) : m_cs(&cs) { EnterCriticalSection(m_cs); }
@@ -771,6 +763,8 @@ void SPUasync(unsigned long cycle)
 	int mixtodo = (int)SPU_core->mixtime;
 	SPU_core->mixtime -= mixtodo;
 
+	win_sound_samplecounter = mixtodo;
+
 	switch(iSoundMode)
 	{
 	case SOUND_MODE_ASYNCH:
@@ -1001,7 +995,7 @@ DWORD WINAPI SNDDXThread( LPVOID )
 			Lock lock;
 			SPU_Emulate_user();
 		}
-		Sleep(10);
+		Sleep(1);
 	}
 	terminated = true;
 	return 0;
