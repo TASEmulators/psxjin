@@ -79,7 +79,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
 				OutputFile="$(OutDir)\pcsxrr-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -188,7 +188,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\pcsxrr-release.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -300,7 +300,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua-5.1.4-x86.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\pcsxrr-releaseFastbuild.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
