@@ -255,7 +255,7 @@ CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 
 	if (cnts >= 5) {
 		if ((psxRegs.cycle - psxCounters[4].sCycle) >= psxCounters[4].Cycle) {
-			SPUasync((psxRegs.cycle - psxCounters[4].sCycle) * BIAS);
+			SPUasync((psxRegs.cycle - psxCounters[4].sCycle));
 			psxRcntReset(4);
 		}
 	}
