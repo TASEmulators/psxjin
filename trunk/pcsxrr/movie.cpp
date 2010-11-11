@@ -381,7 +381,6 @@ void MOV_StartMovie(int mode)
 	cdOpenCase = 0;
 	cheatsEnabled = 0;
 	Config.Sio = 0;
-	Config.SpuIrq = 0;
 	Config.RCntFix = 0;
 	Config.VSyncWA = 0;
 	memset(&MovieControl, 0, sizeof(MovieControl));
@@ -500,7 +499,6 @@ void MOV_ReadControl() {
 	MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
 	MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
 	MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
-	MovieControl.spuIrq = controlFlags&MOVIE_CONTROL_SPUIRQ;
 	MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
 	MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
 	MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA;
@@ -515,8 +513,6 @@ void MOV_WriteControl() {
 		controlFlags |= MOVIE_CONTROL_CDCASE;
 	if (MovieControl.sioIrq)
 		controlFlags |= MOVIE_CONTROL_SIOIRQ;
-	if (MovieControl.spuIrq)
-		controlFlags |= MOVIE_CONTROL_SPUIRQ;
 	if (MovieControl.cheats)
 		controlFlags |= MOVIE_CONTROL_CHEATS;
 	if (MovieControl.RCntFix)
@@ -560,7 +556,7 @@ void MOV_ProcessControlFlags() {
 			SysMessage(_("Could not load Cdrom"));
 		psxCpu->Execute();
 	}
-	if ((MovieControl.spuIrq || MovieControl.sioIrq ||
+	if ((MovieControl.sioIrq ||
 		   MovieControl.RCntFix || MovieControl.VSyncWA) &&
 		   !Movie.irqHacksIncluded && Movie.mode == MOVIEMODE_RECORD) {
 		Movie.irqHacksIncluded = 1;
@@ -568,8 +564,6 @@ void MOV_ProcessControlFlags() {
 	}
 	if (MovieControl.sioIrq && Movie.irqHacksIncluded)
 		Config.Sio ^= 1;
-	if (MovieControl.spuIrq && Movie.irqHacksIncluded)
-		Config.SpuIrq ^= 1;
 	if (MovieControl.RCntFix && Movie.irqHacksIncluded)
 		Config.RCntFix ^= 1;
 	if (MovieControl.VSyncWA && Movie.irqHacksIncluded)
@@ -598,7 +592,6 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&cheatsEnabled);
 	gzfreezel(&Movie.irqHacksIncluded);
 	gzfreezel(&Config.Sio);
-	gzfreezel(&Config.SpuIrq);
 	gzfreezel(&Config.RCntFix);
 	gzfreezel(&Config.VSyncWA);
 	gzfreezel(&Movie.lastPad1);

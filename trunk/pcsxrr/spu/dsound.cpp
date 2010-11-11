@@ -242,7 +242,7 @@ void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 		}
 	}
 
-	printf("%d\n",samplecounter);
+	//printf("%d\n",samplecounter);
 
 	bool silence = (samplecounter<-44100*15/60); //behind by more than a quarter second -> silence
 
