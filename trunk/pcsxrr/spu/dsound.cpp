@@ -34,7 +34,7 @@ void SNDDXUnMuteAudio();
 void SNDDXSetVolume(int volume);
 
 
-LPDIRECTSOUND8 lpDS8;
+LPDIRECTSOUND8 lpDS8 = NULL;
 LPDIRECTSOUNDBUFFER lpDSB, lpDSB2;
 
 static s16 *stereodata16;
@@ -66,6 +66,14 @@ static int samplecounter_fakecontribution = 0;
 //	}
 //	terminated = true;
 //	return 0;
+//}
+
+//void SNDDXSetWindow(HWND hwnd)
+//{
+//	if(!lpDS8) return;
+//	if ((IDirectSound8_SetCooperativeLevel(lpDS8, hwnd, DSSCL_PRIORITY)) != DS_OK)
+//	{
+//	}
 //}
 
 int SNDDXInit(int buffersize)
@@ -102,7 +110,7 @@ int SNDDXInit(int buffersize)
 		return -1;
 	}
 
-	soundbufsize = buffersize * 2 * 2;
+	soundbufsize = buffersize * 2; // caller already multiplies buffersize by 2
 
 	memset(&wfx, 0, sizeof(wfx));
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
@@ -156,7 +164,7 @@ int SNDDXInit(int buffersize)
 
 	IDirectSoundBuffer8_Play(lpDSB2, 0, 0, DSBPLAY_LOOPING);
 
-	if ((stereodata16 = (s16 *)malloc(soundbufsize)) == NULL)
+	if ((stereodata16 = new s16[soundbufsize / sizeof(s16)]) == NULL)
 		return -1;
 
 	memset(stereodata16, 0, soundbufsize);
@@ -166,7 +174,6 @@ int SNDDXInit(int buffersize)
 
 	doterminate = false;
 	terminated = false;
-	//CreateThread(0,0,SNDDXThread,0,0,0);
 
 	return 0;
 }
@@ -242,14 +249,16 @@ void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 		}
 	}
 
-	//printf("%d\n",samplecounter);
+	//printf("%d\n",num_samples);
 
 	bool silence = (samplecounter<-44100*15/60); //behind by more than a quarter second -> silence
 
 	if(insilence)
 	{
 		if(silence)
+		{
 			return;
+		}
 		else
 			insilence = false;
 	}
@@ -265,6 +274,7 @@ void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 			samplecounter_fakecontribution = 0;
 			insilence = true;
 			SNDDXClearAudioBuffer();
+			printf("clearing\n");
 			return;
 		}
 	}
@@ -294,24 +304,33 @@ void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 
 //////////////////////////////////////////////////////////////////////////////
 
+static inline u32 circularDist(u32 from, u32 to, u32 size)
+{
+	if(size == 0)
+		return 0;
+	s32 diff = (s32)(to - from);
+	while(diff < 0)
+		diff += size;
+	return (u32)diff;
+}
+
+
 u32 SNDDXGetAudioSpace()
 {
 	DWORD playcursor, writecursor;
-	u32 freespace=0;
-
-	if (IDirectSoundBuffer8_GetCurrentPosition (lpDSB2, &playcursor, &writecursor) != DS_OK)
+	if(FAILED(lpDSB2->GetCurrentPosition(&playcursor, &writecursor)))
 		return 0;
 
-	if (soundoffset > playcursor)
-		freespace = soundbufsize - soundoffset + playcursor;
-	else
-		freespace = playcursor - soundoffset;
+	u32 curToWrite = circularDist(soundoffset, writecursor, soundbufsize);
+	u32 curToPlay = circularDist(soundoffset, playcursor, soundbufsize);
 
-	//   if (freespace > 512)
-	return (freespace / 2 / 2);
-	//   else
-	//      return 0;
+	if(curToWrite < curToPlay)
+		return 0; // in-between the two cursors. we shouldn't write anything during this time.
+
+	//printf("[%012d] SNDDXGetAudioSpace returns %d\n",timeGetTime(), curToPlay / (sizeof(s16) * 2));
+	return curToPlay / (sizeof(s16) * 2);
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -344,7 +363,7 @@ void SNDDXSetVolume(int volume)
 
 void SetupSound(void)
 {
-	const int sndbuffersize=735*4; //four frames worth
+	const int sndbuffersize=11760;
 	SNDDXInit(sndbuffersize);
 }
 

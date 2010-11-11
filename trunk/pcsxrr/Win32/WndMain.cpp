@@ -261,6 +261,19 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 
 //int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 int main(int argc, char **argv) {
+	TIMECAPS tc;
+	DWORD wmTimerRes;
+	if (timeGetDevCaps(&tc, sizeof(TIMECAPS))== TIMERR_NOERROR)
+	{
+		wmTimerRes = std::min(std::max(tc.wPeriodMin, (UINT)1), tc.wPeriodMax);
+		timeBeginPeriod (wmTimerRes);
+	}
+	else
+	{
+		wmTimerRes = 5;
+		timeBeginPeriod (wmTimerRes);
+	}
+
 	char runcd=0;
 	char loadMovie=0;
 	int i;
@@ -403,10 +416,12 @@ void RunGui() {
 	Running = 1;
 }
 
+void SNDDXSetWindow(HWND hwnd);
 void RestoreWindow() {
 	AccBreak = 1;
 	DestroyWindow(gApp.hWnd);
 	CreateMainWindow(SW_SHOWNORMAL);
+	//SNDDXSetWindow(gApp.hWnd);
 	ShowCursor(TRUE);
 	SetCursor(LoadCursor(gApp.hInstance, IDC_ARROW));
 	ShowCursor(TRUE);

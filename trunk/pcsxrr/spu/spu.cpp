@@ -759,7 +759,7 @@ void SPUasync(unsigned long cycle)
 {
 	Lock lock;
 
-	SPU_core->mixtime += samples_per_cycle*cycle;
+	SPU_core->mixtime += samples_per_cycle*cycle*2;
 	int mixtodo = (int)SPU_core->mixtime;
 	SPU_core->mixtime -= mixtodo;
 
@@ -952,15 +952,6 @@ void SPU_Emulate_user()
 
 	if (audiosize > 0)
 	{
-		//printf("%d %d\n",iPause,iFrameAdvance);
-		if(iPause && !iFrameAdvance)
-		{
-			static std::vector<s16> empty;
-			if(empty.size() < audiosize*2) empty.resize(audiosize*2);
-			SNDDXUpdateAudio(&empty[0],audiosize);
-			return;
-		}
-		//printf("mix %i samples\n", audiosize);
 		//if (audiosize > SPU_user->bufsize)
 		//	audiosize = SPU_user->bufsize;
 
@@ -983,7 +974,10 @@ void SPU_Emulate_user()
 			break;
 		}
 
-		SNDDXUpdateAudio(outbuf,samplesOutput);
+		if(samplesOutput)
+		{
+			SNDDXUpdateAudio(outbuf,samplesOutput);
+		}
 	}
 }
 
@@ -995,18 +989,22 @@ DWORD WINAPI SNDDXThread( LPVOID )
 			Lock lock;
 			SPU_Emulate_user();
 		}
-		Sleep(1);
+		Sleep(10);
 	}
 	terminated = true;
 	return 0;
 }
 
+static bool soundInitialized = false;
 #ifdef _WINDOWS
 long SPUopen(HWND hW)
 #else
 long SPUopen(void)
 #endif
 {
+	if(soundInitialized) return PSE_SPU_ERR_SUCCESS;
+
+	soundInitialized = true;
 	InitializeCriticalSection(&win_execute_sync);
 
 	iUseXA=1;                                             // just small setup
