@@ -412,14 +412,6 @@ void ReadConfigFile(void)
 	if (iXAPitch<0) iXAPitch=0;
 	if (iXAPitch>1) iXAPitch=1;
 
-	strcpy(t,"\nSPUIRQWait");
-	p=strstr(pB,t);
-	if (p)
-	{
-		p=strstr(p,"=");
-		len=1;
-	}
-
 	strcpy(t,"\nUseReverb");
 	p=strstr(pB,t);
 	if (p)

@@ -82,7 +82,6 @@
 #define IDC_CPU                         1015
 #define IDC_IRQDECODE                   1015
 #define IDC_ASMCHECK2                   1016
-#define IDC_SPUIRQ                      1016
 #define MW_ADDR05                       1016
 #define IDC_ASMCHECK3                   1017
 #define IDC_MDEC2                       1017

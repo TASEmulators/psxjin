@@ -461,34 +461,6 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_SPUIRQ].key
-	&& modifiers == EmuCommandTable[EMUCMD_SPUIRQ].keymod)
-	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.spuIrq ^= 1;
-			if (!Config.SpuIrq) {
-				if (MovieControl.spuIrq)
-					GPU_displayText("*PCSX*: Spu Irq Will Activate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Spu Irq Won't Activate On Next Frame");
-			}
-			else {
-				if (MovieControl.spuIrq)
-					GPU_displayText("*PCSX*: Spu Irq Will Deactivate On Next Frame");
-				else
-					GPU_displayText("*PCSX*: Spu Irq Won't Deactivate On Next Frame");
-			}
-		}
-		else {
-			Config.SpuIrq ^= 0x1;
-			if (Config.SpuIrq)
-				GPU_displayText(_("*PCSX*: Spu Irq Always Enabled"));
-			else
-				GPU_displayText(_("*PCSX*: Spu Irq Not Always Enabled"));
-		}
-		return;
-	}
-
 	if(key == EmuCommandTable[EMUCMD_RCNTFIX].key
 	&& modifiers == EmuCommandTable[EMUCMD_RCNTFIX].keymod)
 	{
@@ -665,8 +637,6 @@ void PADhandleKey(int key) {
 		return;
 	}
 }
-
-void CALLBACK SPUirq(void);
 
 char charsTable[4] = { '|', '/', '-', '\\' };
 

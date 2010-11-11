@@ -124,9 +124,6 @@ extern HINSTANCE hInst;
 // psx buffers / addresses
 
 extern unsigned short  regArea[];
-extern unsigned char * spuMemC;
-extern unsigned char * pSpuIrq;
-extern unsigned char * pSpuBuffer;
 
 // user settings
 

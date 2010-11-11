@@ -322,6 +322,7 @@ int main(int argc, char **argv) {
 	GetCurrentDirectory(256, PcsxDir);
 
 	memset(&Config, 0, sizeof(PcsxConfig));
+	Config.Cpu = 1; //enable interpreter by default
 	strcpy(Config.Net, "Disabled");
 	sprintf(Config.PluginsDir, "%splugins\\", szCurrentPath);
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
@@ -1436,7 +1437,6 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
 			Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.PauseAfterPlayback);
 			Button_SetCheck(GetDlgItem(hW,IDC_PSXOUT),  Config.PsxOut);
-			Button_SetCheck(GetDlgItem(hW,IDC_SPUIRQ),  Config.SpuIrq);
 			Button_SetCheck(GetDlgItem(hW,IDC_RCNTFIX), Config.RCntFix);
 			Button_SetCheck(GetDlgItem(hW,IDC_VSYNCWA), Config.VSyncWA);
 			ComboBox_AddString(GetDlgItem(hW,IDC_PSXTYPES),"NTSC");
@@ -1472,7 +1472,6 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 						psxCpu->Reset();
 					}
 					Config.PsxOut  = Button_GetCheck(GetDlgItem(hW,IDC_PSXOUT));
-					Config.SpuIrq  = Button_GetCheck(GetDlgItem(hW,IDC_SPUIRQ));
 					Config.RCntFix = Button_GetCheck(GetDlgItem(hW,IDC_RCNTFIX));
 					Config.VSyncWA = Button_GetCheck(GetDlgItem(hW,IDC_VSYNCWA));
 
