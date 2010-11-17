@@ -530,6 +530,10 @@ int LoadState(char *file) {
 
 	printf("loadstate---\n");
 
+	//Get the directory out of filename
+	//CreateDirectory(path, 0)
+	//If error code 0 return -1
+
 	f = fopen(file, "rb");
 	if (f == NULL) return -1;
 

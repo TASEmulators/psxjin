@@ -119,6 +119,8 @@ typedef struct {
 	char Bios[256];
 	char BiosDir[256];
 	char PluginsDir[256];
+	char SstatesDir[256];
+	char SnapDir[256];
 	char Lang[256];
 	long Xa;
 	long Sio;
