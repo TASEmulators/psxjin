@@ -339,6 +339,8 @@ int main(int argc, char **argv) {
 	strcpy(Config.Net, "Disabled");
 	sprintf(Config.PluginsDir, "%splugins\\", szCurrentPath);
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
+	sprintf(Config.SstatesDir, "%ssstates\\", szCurrentPath);
+	sprintf(Config.SnapDir, "%ssnap\\", szCurrentPath);
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
 		Config.PauseAfterPlayback = 0;
@@ -355,6 +357,10 @@ int main(int argc, char **argv) {
 		SysMessage(_("PCSX-RR now will quit, restart it."));
 		return 0;
 	}
+
+	//If directories don't already exist, create them
+	CreateDirectory(Config.SstatesDir, 0);	
+	CreateDirectory(Config.SnapDir, 0);
 
 	if (SysInit() == -1) return 1;
 
