@@ -448,7 +448,7 @@ __inline static void execute() {
 			if (iGpuHasUpdated) {
 				if (iSaveStateTo) {
 					#ifdef WIN32
-						WIN32_SaveState(iSaveStateTo-1);
+						WIN32_SaveState(iSaveStateTo);
 						iSaveStateTo = 0;
 					#endif
 				}
@@ -491,14 +491,14 @@ __inline static void execute() {
 
 		#ifdef WIN32
 		if (iSaveStateTo) {
-			WIN32_SaveState(iSaveStateTo-1);
+			WIN32_SaveState(iSaveStateTo);
 			iSaveStateTo = 0;
 		}
 		#endif
 	}
 	#ifdef WIN32
 	if (iLoadStateFrom) {
-		WIN32_LoadState(iLoadStateFrom-1);
+		WIN32_LoadState(iLoadStateFrom);
 		iLoadStateFrom = 0;
 	}
 	if (iCallW32Gui) {

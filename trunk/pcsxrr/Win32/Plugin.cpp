@@ -129,7 +129,7 @@ void PADhandleKey(int key) {
 	else if(GetAsyncKeyState(VK_SHIFT))
 		modifiers = VK_SHIFT;
 
-	for (i = EMUCMD_LOADSTATE1; i <= EMUCMD_LOADSTATE1+8; i++) {
+	for (i = EMUCMD_LOADSTATE1; i <= EMUCMD_LOADSTATE1+9; i++) {
 		if(key == EmuCommandTable[i].key
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
@@ -138,7 +138,7 @@ void PADhandleKey(int key) {
 		}
 	}
 
-	for (i = EMUCMD_SAVESTATE1; i <= EMUCMD_SAVESTATE1+8; i++) {
+	for (i = EMUCMD_SAVESTATE1; i <= EMUCMD_SAVESTATE1+9; i++) {
 		if(key == EmuCommandTable[i].key
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
@@ -147,7 +147,7 @@ void PADhandleKey(int key) {
 		}
 	}
 
-	for (i = EMUCMD_SELECTSTATE1; i <= EMUCMD_SELECTSTATE1+8; i++) {
+	for (i = EMUCMD_SELECTSTATE1; i <= EMUCMD_SELECTSTATE1+9; i++) {
 		if(key == EmuCommandTable[i].key
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
