@@ -160,6 +160,36 @@ void PADhandleKey(int key) {
 		}
 	}
 
+	if(key == EmuCommandTable[EMUCMD_PREVIOUSSTATE].key
+	&& modifiers == EmuCommandTable[EMUCMD_PREVIOUSSTATE].keymod)
+	{
+		if (StatesC == 0)
+			StatesC = 9;
+		else
+			StatesC--;
+
+		GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+		if (ShowPic) { ShowPic = 0; gpuShowPic(); }
+		sprintf(Text, "*PCSX*: State %d Selected", StatesC+1);
+		GPU_displayText(Text);
+		return;
+	}
+
+	if(key == EmuCommandTable[EMUCMD_NEXTSTATE].key
+	&& modifiers == EmuCommandTable[EMUCMD_NEXTSTATE].keymod)
+	{
+		if (StatesC == 9)
+			StatesC = 0;
+		else
+			StatesC++;
+
+		GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+		if (ShowPic) { ShowPic = 0; gpuShowPic(); }
+		sprintf(Text, "*PCSX*: State %d Selected", StatesC+1);
+		GPU_displayText(Text);
+		return;
+	}
+
 	if(key == EmuCommandTable[EMUCMD_LOADSTATE].key
 	&& modifiers == EmuCommandTable[EMUCMD_LOADSTATE].keymod)
 	{
