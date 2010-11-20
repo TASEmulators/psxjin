@@ -70,16 +70,16 @@ void gpuShowPic() {
 }
 
 void WIN32_SaveState(int newState) {
-	StatesC=newState;
+	StatesC=newState-1;
 	if (Movie.mode != MOVIEMODE_INACTIVE)
-		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC);
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC+1);
 	else
-		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
+		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC+1);
 	GPU_freeze(2, (GPUFreeze_t *)&StatesC);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PCSX*: Saved State %d"), StatesC);
-	else sprintf(Text, _("*PCSX*: Error Saving State %d"), StatesC);
+		 sprintf(Text, _("*PCSX*: Saved State %d"), StatesC+1);
+	else sprintf(Text, _("*PCSX*: Error Saving State %d"), StatesC+1);
 	GPU_displayText(Text);
 	if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 }
@@ -95,16 +95,16 @@ void WIN32_LoadState(int newState) {
 	else if (Movie.mode == MOVIEMODE_PLAY) {
 		if (!Movie.readOnly) Movie.mode = MOVIEMODE_RECORD;
 	}
-	StatesC=newState;
+	StatesC=newState-1;
 	if (Movie.mode != MOVIEMODE_INACTIVE)
-		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC);
+		sprintf(Text, "%ssstates\\%s.pxm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC+1);
 	else
-		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC);
+		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC+1);
 	ret = LoadState(Text);
 	if (ret == 0)
-		sprintf(Text, _("*PCSX*: Loaded State %d"), StatesC);
+		sprintf(Text, _("*PCSX*: Loaded State %d"), StatesC+1);
 	else {
-		sprintf(Text, _("*PCSX*: Error Loading State %d"), StatesC);
+		sprintf(Text, _("*PCSX*: Error Loading State %d"), StatesC+1);
 		Movie.mode = previousMode;
 	}
 	GPU_displayText(Text);
