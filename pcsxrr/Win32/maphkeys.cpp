@@ -55,6 +55,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ '8',             0,           "Select State 8", },
 	{ '9',             0,           "Select State 9", },
 	{ '0',			   0,			"Select State 10",},
+	{ 0,			   0,			"Previous State",},
+	{ 0,			   0,			"Next State",},
 	{ VK_F7,           VK_CONTROL,  "Load Current State", },
 	{ VK_F5,           VK_CONTROL,  "Save Current State", },
 	{ 'N',             VK_CONTROL,  "Start Recording", },
