@@ -60,7 +60,7 @@
 
 #define MAXMODE 2
 #define MAXMETHOD 2
-
+/*
 void ReadConfig(void)
 {
 	HKEY myKey;
@@ -114,11 +114,12 @@ void ReadConfig(void)
 	if (iVolume<1) iVolume=1;
 	if (iVolume>5) iVolume=5;
 }
-
+*/
 ////////////////////////////////////////////////////////////////////////
 // WRITE CONFIG: in win registry
 ////////////////////////////////////////////////////////////////////////
 
+/*
 void WriteConfig(void)
 {
 	HKEY myKey;
@@ -145,6 +146,45 @@ void WriteConfig(void)
 
 	RegCloseKey(myKey);
 }
+*/
+
+void WriteConfig()
+{
+	char Str_Tmp[1024];
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	
+	wsprintf(Str_Tmp, "%d", iUseXA);
+	WritePrivateProfileString("Sound", "UseXA", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iVolume);
+	WritePrivateProfileString("Sound", "iVolume", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iXAPitch);
+	WritePrivateProfileString("Sound", "iXAPitch", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iSoundMode);
+	WritePrivateProfileString("Sound", "iSoundMode", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iSynchMethod);
+	WritePrivateProfileString("Sound", "iSynchMethod", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iRecordMode);
+	WritePrivateProfileString("Sound", "iRecordMode", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iUseReverb);
+	WritePrivateProfileString("Sound", "iUseReverb", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", iUseInterpolation);
+	WritePrivateProfileString("Sound", "iUseInterpolation", Str_Tmp, Conf_File);
+}
+
+void ReadConfig()
+{
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+
+	iUseXA = GetPrivateProfileInt("Sound", "UseXA", 1, Conf_File);
+	iVolume = GetPrivateProfileInt("Sound", "iVolume", 3, Conf_File);
+	iXAPitch = GetPrivateProfileInt("Sound", "iXAPitch", 0, Conf_File);
+	iSoundMode = GetPrivateProfileInt("Sound", "iSoundMode", 0, Conf_File);
+	iSynchMethod = GetPrivateProfileInt("Sound", "iSynchMethod", 0, Conf_File);
+	iRecordMode = GetPrivateProfileInt("Sound", "iRecordMode", 0, Conf_File);
+	iUseReverb = GetPrivateProfileInt("Sound", "iUseReverb", 0, Conf_File);
+	iUseInterpolation = GetPrivateProfileInt("Sound", "iUseInterpolation", 0, Conf_File);
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 // INIT WIN CFG DIALOG
