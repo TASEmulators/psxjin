@@ -27,118 +27,101 @@
 
 int tempDest; //this is for the compiler to not throw in a million of warnings
 
-#define QueryKeyV(s, name, var) \
-	size = s; \
-	if (RegQueryValueEx(myKey, name, 0, &type, (LPBYTE) var, &size) != 0) { if (err) { RegCloseKey(myKey); return -1; } }
+//adelikat: Changed from storing into the registry to saving into a config file
+void SaveConfig()
+{
+	char Str_Tmp[1024];
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	
+	WritePrivateProfileString("Plugins", "Bios", Config.Bios, Conf_File);
+	WritePrivateProfileString("Plugins", "GPU", Config.Gpu , Conf_File);
+	WritePrivateProfileString("Plugins", "SPU", Config.Spu , Conf_File);
+	WritePrivateProfileString("Plugins", "CDR", Config.Cdr , Conf_File);
+	WritePrivateProfileString("Plugins", "Pad1", Config.Pad1 , Conf_File);
+	WritePrivateProfileString("Plugins", "Pad2", Config.Pad2 , Conf_File);
+	WritePrivateProfileString("Plugins", "MCD1", Config.Mcd1 , Conf_File);
+	WritePrivateProfileString("Plugins", "MCD2", Config.Mcd2 , Conf_File);
+	//WritePrivateProfileString("Plugins", "Net", Config.Net , Conf_File);	//adelikat: Netplay was disabled so let's not save it
+	wsprintf(Str_Tmp, "%d", Config.Xa);
+	WritePrivateProfileString("Plugins", "Xa", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.Sio);
+	WritePrivateProfileString("Plugins", "Sio", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.Mdec);
+	WritePrivateProfileString("Plugins", "Mdec", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.PsxAuto);
+	WritePrivateProfileString("Plugins", "PsxAuto", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.PsxType);
+	WritePrivateProfileString("Plugins", "PsxType", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.QKeys);
+	WritePrivateProfileString("Plugins", "QKeys", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.Cdda);
+	WritePrivateProfileString("Plugins", "Cdda", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.Cpu);
+	WritePrivateProfileString("Plugins", "CPU", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.PauseAfterPlayback);
+	WritePrivateProfileString("Plugins", "PauseAfterPlayback", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.PsxOut);
+	WritePrivateProfileString("Plugins", "PsxOut", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.RCntFix);
+	WritePrivateProfileString("Plugins", "RCntFix", Str_Tmp, Conf_File);
+	wsprintf(Str_Tmp, "%d", Config.VSyncWA);
+	WritePrivateProfileString("Plugins", "VSyncWA", Str_Tmp, Conf_File);
 
-#define SetKeyV(name, var, s, t) \
-	RegSetValueEx(myKey, name, 0, t, (LPBYTE) var, s);
-
-int LoadConfig() {
-	HKEY myKey;
-	DWORD type,size;
-	PcsxConfig *Conf = &Config;
-	int err;
-	int i;
-	char HotkeysKeys[EMUCMDMAX+1];
-	char HotkeysKeymods[EMUCMDMAX+1];
-	DWORD stupidSize;
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,cfgfile,0,KEY_ALL_ACCESS,&myKey)!=ERROR_SUCCESS) return -1;
-
-	err = 1;
-	QueryKeyV(256, "Bios", Conf->Bios);
-	QueryKeyV(256, "PluginGPU",  Conf->Gpu);
-	QueryKeyV(256, "PluginSPU",  Conf->Spu);
-	QueryKeyV(256, "PluginCDR",  Conf->Cdr);
-	QueryKeyV(256, "PluginPAD1", Conf->Pad1);
-	QueryKeyV(256, "PluginPAD2", Conf->Pad2);
-	QueryKeyV(256, "MCD1", Conf->Mcd1);
-	QueryKeyV(256, "MCD2", Conf->Mcd2);
-	err = 0;
-	QueryKeyV(256, "Net",  Conf->Net);
-	QueryKeyV(sizeof(Conf->Xa),      "Xa",      &Conf->Xa);
-	QueryKeyV(sizeof(Conf->Sio),     "Sio",     &Conf->Sio);
-	QueryKeyV(sizeof(Conf->Mdec),    "Mdec",    &Conf->Mdec);
-	QueryKeyV(sizeof(Conf->PsxAuto), "PsxAuto", &Conf->PsxAuto);
-	QueryKeyV(sizeof(Conf->PsxType), "PsxType", &Conf->PsxType);
-	QueryKeyV(sizeof(Conf->QKeys),   "QKeys",   &Conf->QKeys);
-	QueryKeyV(sizeof(Conf->Cdda),    "Cdda",    &Conf->Cdda);
-	QueryKeyV(sizeof(Conf->Cpu),     "Cpu",     &Conf->Cpu);
-	QueryKeyV(sizeof(Conf->PauseAfterPlayback), "Pause", &Conf->PauseAfterPlayback);
-	QueryKeyV(sizeof(Conf->PsxOut),  "PsxOut",  &Conf->PsxOut);
-	QueryKeyV(sizeof(Conf->RCntFix), "RCntFix", &Conf->RCntFix);
-	QueryKeyV(sizeof(Conf->VSyncWA), "VSyncWA", &Conf->VSyncWA);
-
-	stupidSize = sizeof(HotkeysKeys);
-	if (RegQueryValueEx(myKey, "HotkeysKeys", 0, &type, (LPBYTE) &HotkeysKeys, &stupidSize) == ERROR_SUCCESS) {
-		for (i = 0; i <= EMUCMDMAX-1; i++) {
-			if (HotkeysKeys[i] < 0)
-				EmuCommandTable[i].key = HotkeysKeys[i]+0x100; // ugly hack...
-			else
-				EmuCommandTable[i].key = HotkeysKeys[i];
-		}
+	for (int i = 0; i <= EMUCMDMAX; i++) 
+	{
+		wsprintf(Str_Tmp, "%d", EmuCommandTable[i].key);
+		WritePrivateProfileString("Hotkeys", EmuCommandTable[i].name, Str_Tmp, Conf_File);
 	}
 
-	stupidSize = sizeof(HotkeysKeymods);
-	if (RegQueryValueEx(myKey, "HotkeysKeymods", 0, &type, (LPBYTE) &HotkeysKeymods, &stupidSize) == ERROR_SUCCESS) {
-		for (i = 0; i <= EMUCMDMAX-1; i++) {
-			EmuCommandTable[i].keymod = HotkeysKeymods[i];
-		}
+	for (int i = 0; i <= EMUCMDMAX; i++)
+	{
+		wsprintf(Str_Tmp, "%d", EmuCommandTable[i].keymod);
+		WritePrivateProfileString("HotkeysKeyMods", EmuCommandTable[i].name, Str_Tmp, Conf_File);
 	}
-
-	RegCloseKey(myKey);
-
-	return 0;
 }
 
-/////////////////////////////////////////////////////////
+int LoadConfig()
+{
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
 
-void SaveConfig() {
-	HKEY myKey;
-	DWORD myDisp;
-	PcsxConfig *Conf = &Config;
-	int i;
-	char HotkeysKeys[EMUCMDMAX+1];
-	char HotkeysKeymods[EMUCMDMAX+1];
+	GetPrivateProfileString("Plugins", "Bios", "", &Config.Bios[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "GPU", "", &Config.Gpu[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "GPU", "", &Config.Spu[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "CDR", "", &Config.Cdr[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "Pad1", "", &Config.Pad1[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "Pad2", "", &Config.Pad2[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "MCD1", "", &Config.Mcd1[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "MCD2", "", &Config.Mcd2[0], 256, Conf_File);
+	//GetPrivateProfileString("Plugins", "Net", "Disabled", &Config.Net[0], 256, Conf_File);	//adelikat: Netplay was disabled so let's not load it
+	Config.Xa = GetPrivateProfileInt("Plugins", "Xa", 0, Conf_File);
+	Config.Mdec = GetPrivateProfileInt("Plugins", "Mdec", 0, Conf_File);
+	Config.PsxAuto = GetPrivateProfileInt("Plugins", "PsxAuto", 0, Conf_File);
+	Config.PsxType = GetPrivateProfileInt("Plugins", "PsxType", 0, Conf_File);
+	Config.QKeys = GetPrivateProfileInt("Plugins", "QKeys", 0, Conf_File);
+	Config.Cdda = GetPrivateProfileInt("Plugins", "Cdda", 0, Conf_File);
+	Config.Cpu = GetPrivateProfileInt("Plugins", "CPU", 0, Conf_File);
+	Config.PauseAfterPlayback = GetPrivateProfileInt("Plugins", "PauseAfterPlayback", 0, Conf_File);
+	Config.PsxOut = GetPrivateProfileInt("Plugins", "PsxOut", 0, Conf_File);
+	Config.RCntFix = GetPrivateProfileInt("Plugins", "RCntFix", 0, Conf_File);
+	Config.VSyncWA = GetPrivateProfileInt("Plugins", "VSyncWA", 0, Conf_File);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER, cfgfile, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &myKey, &myDisp);
-
-	SetKeyV("Bios", Conf->Bios, strlen(Conf->Bios), REG_SZ);
-	SetKeyV("PluginGPU",  Conf->Gpu,  strlen(Conf->Gpu),  REG_SZ);
-	SetKeyV("PluginSPU",  Conf->Spu,  strlen(Conf->Spu),  REG_SZ);
-	SetKeyV("PluginCDR",  Conf->Cdr,  strlen(Conf->Cdr),  REG_SZ);
-	SetKeyV("PluginPAD1", Conf->Pad1, strlen(Conf->Pad1), REG_SZ);
-	SetKeyV("PluginPAD2", Conf->Pad2, strlen(Conf->Pad2), REG_SZ);
-	SetKeyV("Net",  Conf->Net,  strlen(Conf->Net),  REG_SZ);
-	if (strcmp(Conf->Mcd1, "memcards\\movie001.tmp"))
-		SetKeyV("MCD1", Conf->Mcd1, strlen(Conf->Mcd1), REG_SZ);
-	if (strcmp(Conf->Mcd2, "memcards\\movie002.tmp"))
-		SetKeyV("MCD2", Conf->Mcd2, strlen(Conf->Mcd2), REG_SZ);
-	SetKeyV("Xa",      &Conf->Xa,      sizeof(Conf->Xa),      REG_DWORD);
-	SetKeyV("Sio",     &Conf->Sio,     sizeof(Conf->Sio),     REG_DWORD);
-	SetKeyV("Mdec",    &Conf->Mdec,    sizeof(Conf->Mdec),    REG_DWORD);
-	SetKeyV("PsxAuto", &Conf->PsxAuto, sizeof(Conf->PsxAuto), REG_DWORD);
-	SetKeyV("PsxType", &Conf->PsxType, sizeof(Conf->PsxType), REG_DWORD);
-	SetKeyV("QKeys",   &Conf->QKeys,   sizeof(Conf->QKeys),   REG_DWORD);
-	SetKeyV("Cdda",    &Conf->Cdda,    sizeof(Conf->Cdda),    REG_DWORD);
-	SetKeyV("Cpu",     &Conf->Cpu,     sizeof(Conf->Cpu),     REG_DWORD);
-	SetKeyV("Pause",   &Conf->PauseAfterPlayback, sizeof(Conf->PauseAfterPlayback), REG_DWORD);
-	SetKeyV("PsxOut",  &Conf->PsxOut,  sizeof(Conf->PsxOut),  REG_DWORD);
-	SetKeyV("RCntFix", &Conf->RCntFix, sizeof(Conf->RCntFix), REG_DWORD);
-	SetKeyV("VSyncWA", &Conf->VSyncWA, sizeof(Conf->VSyncWA), REG_DWORD);
-
-	for (i = 0; i <= EMUCMDMAX; i++) {
-		HotkeysKeys[i] = EmuCommandTable[i].key;
+	int temp;
+	for (int i = 0; i <= EMUCMDMAX-1; i++)
+	{
+		temp = GetPrivateProfileInt("Hotkeys", EmuCommandTable[i].name, 65535, Conf_File);
+		if (temp != 65535)
+			EmuCommandTable[i].key = temp;
 	}
-	SetKeyV("HotkeysKeys", &HotkeysKeys,sizeof(HotkeysKeys), REG_BINARY);
 
-	for (i = 0; i <= EMUCMDMAX; i++) {
-		HotkeysKeymods[i] = EmuCommandTable[i].keymod;
+	
+	for (int i = 0; i <= EMUCMDMAX-1; i++) 
+	{
+		temp = GetPrivateProfileInt("HotkeysKeyMods", EmuCommandTable[i].name, 65535, Conf_File);
+		if (temp != 65535)
+			EmuCommandTable[i].keymod = temp;
 	}
-	SetKeyV("HotkeysKeymods", &HotkeysKeymods,sizeof(HotkeysKeymods), REG_BINARY);
 
-	RegCloseKey(myKey);
+	return 0;
 }
 
 /////////////////////////////////////////////////////////
