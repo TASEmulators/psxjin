@@ -2,7 +2,7 @@
 #include <windows.h>
 
 #include "../cdriso.h"
-
+/*
 #define GetKeyV(name, var, s, t) \
 	size = s; type = t; \
 	RegQueryValueEx(myKey, name, 0, &type, (LPBYTE) var, &size);
@@ -40,4 +40,21 @@ void LoadConf() {
 	GetKeyV("IsoFile", IsoFile, sizeof(IsoFile), REG_BINARY);
 
 	RegCloseKey(myKey);
+}
+//adelikat: Emulators should not use the registry!!!
+*/
+
+void SaveConf()
+{
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	
+	WritePrivateProfileString("ISO", "IsoFile", IsoFile, Conf_File);
+
+}
+
+void LoadConf()
+{
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+
+	GetPrivateProfileString("ISO", "IsoFile", "", &IsoFile[0], 256, Conf_File);
 }
