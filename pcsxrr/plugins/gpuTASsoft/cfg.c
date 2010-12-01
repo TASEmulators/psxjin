@@ -126,7 +126,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 int tempDest; //this is for the compiler to not throw in a million of warnings
-char * pConfigFile=NULL;
+char * pConfigFile= ".\\pcsx.ini";
 
 #ifndef _FPSE
 
@@ -181,98 +181,6 @@ char * pConfigFile=NULL;
  }
 
 /////////////////////////////////////////////////////////////////////////////
-
-void ReadConfigFile()
-{
-	struct stat buf;
-	FILE *in;
-	char t[256];
-	int len, size;
-	char * pB, * p;
-
-	if (pConfigFile)
-		strcpy(t,pConfigFile);
-	else
-	{
-		strcpy(t,"cfg/gpuPeopsSoftX.cfg");
-		in = fopen(t,"rb");
-		if (!in)
-		{
-			strcpy(t,"gpuPeopsSoftX.cfg");
-			in = fopen(t,"rb");
-			if (!in) sprintf(t,"%s/gpuPeopsSoftX.cfg",getenv("HOME"));
-			else    fclose(in);
-		}
-		else     fclose(in);
-	}
-
-	if (stat(t, &buf) == -1) return;
-	size = buf.st_size;
-
-	in = fopen(t,"rb");
-	if (!in) return;
-
-	pB=(char *)malloc(size);
-	memset(pB,0,size);
-
-	len = fread(pB, 1, size, in);
-	fclose(in);
-
-	GetValue("ResX", iResX);
-	if (iResX<20) iResX=20;
-	iResX=(iResX/4)*4;
-
-	GetValue("ResY", iResY);
-	if (iResY<20) iResY=20;
-	iResY=(iResY/4)*4;
-
-	iWinSize=MAKELONG(iResX,iResY);
-
-	GetValue("NoStretch", iUseNoStretchBlt);
-
-	GetValue("Dithering", iUseDither);
-
-	GetValue("FullScreen", iWindowMode);
-	if (iWindowMode!=0) iWindowMode=0;
-	else               iWindowMode=1;
-
-	GetValue("ShowFPS", iShowFPS);
-	if (iShowFPS<0) iShowFPS=0;
-	if (iShowFPS>1) iShowFPS=1;
-
-	GetValue("SSSPSXLimit", bSSSPSXLimit);
-	if (iShowFPS<0) iShowFPS=0;
-	if (iShowFPS>1) iShowFPS=1;
-
-	GetValue("ScanLines", iUseScanLines);
-	if (iUseScanLines<0) iUseScanLines=0;
-	if (iUseScanLines>1) iUseScanLines=1;
-
-	GetValue("UseFrameLimit", UseFrameLimit);
-	if (UseFrameLimit<0) UseFrameLimit=0;
-	if (UseFrameLimit>1) UseFrameLimit=1;
-
-	GetValue("UseFrameSkip", UseFrameSkip);
-	if (UseFrameSkip<0) UseFrameSkip=0;
-	if (UseFrameSkip>1) UseFrameSkip=1;
-
-	GetValue("FPSDetection", iFrameLimit);
-	if (iFrameLimit<1) iFrameLimit=1;
-	if (iFrameLimit>2) iFrameLimit=2;
-
-	GetFloatValue("FrameRate", fFrameRate);
-	if (fFrameRate<1.0f)   fFrameRate=1.0f;
-	if (fFrameRate>1000.0f) fFrameRate=1000.0f;
-
-	GetValue("CfgFixes", dwCfgFixes);
-
-	GetValue("UseFixes", iUseFixes);
-	if (iUseFixes<0) iUseFixes=0;
-	if (iUseFixes>1) iUseFixes=1;
-
-	free(pB);
-
-}
 
 #endif
 
@@ -921,184 +829,105 @@ void OnCfgDef2(HWND hW)
 void ReadConfig(void)
 {
 	HKEY myKey;
-	DWORD temp;
 	DWORD type;
 	DWORD size;
-
-// predefines
-	iResX=640;
-	iResY=480;
-	iColDepth=16;
-	iWindowMode=1;
-	UseFrameLimit=1;
-	UseFrameSkip=0;
-	iFrameLimit=2;
-	fFrameRate=200.0f;
-	iWinSize=MAKELONG(640,480);
-	dwCfgFixes=0;
-	iUseFixes=0;
-	iUseGammaVal=2048;
-	iUseScanLines=0;
-	iUseNoStretchBlt=0;
-	iUseDither=0;
-	iShowFPS=1;
-	iSysMemory=0;
-	iStopSaver=0;
-	bVsync=FALSE;
-	bTransparent=FALSE;
-	bSSSPSXLimit=FALSE;
-	iRefreshRate=0;
-	iDebugMode=0;
-	bKkaptureMode=FALSE;
-	lstrcpy(szGPUKeys,szKeyDefaults);
-
+	char Conf_File[256];
+	char Str_Tmp[256];
 	memset(szDevName,0,128);
 	memset(&guiDev,0,sizeof(GUID));
 
-// zn Windows config file
-	if (pConfigFile) ReadConfigFile();
-// standard Windows psx config (registry)
-	else
+	//adelikat: Save to ini not Registry
+	strcpy(Conf_File, ".\\pcsx.ini");	//TODO: make a global for other files
+	
+	iResX = GetPrivateProfileInt("GPU", "iResX", 640, Conf_File);
+	iResY = GetPrivateProfileInt("GPU", "iResY", 480, Conf_File);
+	iRefreshRate = GetPrivateProfileInt("GPU", "iRefreshRate", 0, Conf_File);
+	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(640,480), Conf_File);
+	iWindowMode = GetPrivateProfileInt("GPU", "iWindowMode", 1, Conf_File);
+	iColDepth = GetPrivateProfileInt("GPU", "iColDepth", 16, Conf_File);
+	UseFrameLimit = GetPrivateProfileInt("GPU", "UseFrameLimit", 1, Conf_File);
+	UseFrameSkip = GetPrivateProfileInt("GPU", "UseFrameSkip", 0, Conf_File);
+	iFrameLimit = GetPrivateProfileInt("GPU", "iFrameLimit", 2, Conf_File);
+	dwCfgFixes = GetPrivateProfileInt("GPU", "dwCfgFixes", 0, Conf_File);
+	iUseFixes = GetPrivateProfileInt("GPU", "iUseFixes", 0, Conf_File);
+	iUseScanLines = GetPrivateProfileInt("GPU", "iUseScanLines", 0, Conf_File);
+	iShowFPS = GetPrivateProfileInt("GPU", "iShowFPS", 0, Conf_File);
+	iUseNoStretchBlt = GetPrivateProfileInt("GPU", "iUseNoStretchBlt", 0, Conf_File);
+	iUseDither = GetPrivateProfileInt("GPU", "iUseDither", 0, Conf_File);
+	iUseGammaVal = GetPrivateProfileInt("GPU", "iUseGammaVal", 2048, Conf_File);
+
+	if (!iFrameLimit)
 	{
-		if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
-		{
-			size = 4;
-			if (RegQueryValueEx(myKey,"ResX",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iResX=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"ResY",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iResY=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"RefreshRate",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iRefreshRate=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"WinSize",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iWinSize=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"WindowMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iWindowMode=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"ColDepth",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iColDepth=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseFrameLimit",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				UseFrameLimit=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseFrameSkip",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				UseFrameSkip=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"FrameLimit",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iFrameLimit=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"CfgFixes",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				dwCfgFixes=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseFixes",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iUseFixes=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseScanLines",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iUseScanLines=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"ShowFPS",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iShowFPS=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseNoStrechBlt",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iUseNoStretchBlt=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseDither",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iUseDither=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseGamma",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iUseGammaVal=(int)temp;
-			if (!iFrameLimit)
-			{
-				UseFrameLimit=1;
-				UseFrameSkip=0;
-				iFrameLimit=2;
-			}
-
-			// try to get the float framerate... if none: take int framerate
-			fFrameRate=0.0f;
-			size = 4;
-			if (RegQueryValueEx(myKey,"FrameRateFloat",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				fFrameRate=*(&temp);
-			if (fFrameRate==0.0f)
-			{
-				fFrameRate=200.0f;
-				size = 4;
-				if (RegQueryValueEx(myKey,"FrameRate",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-					fFrameRate=(float)temp;
-			}
-
-			size = 4;
-			if (RegQueryValueEx(myKey,"UseSysMemory",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iSysMemory=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"StopSaver",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iStopSaver=(int)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"WaitVSYNC",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				bVsync=bVsync_Key=(BOOL)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"Transparent",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				bTransparent=(BOOL)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"SSSPSXLimit",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				bSSSPSXLimit=(BOOL)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"DebugMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				iDebugMode=(BOOL)temp;
-			size = 4;
-			if (RegQueryValueEx(myKey,"KkaptureMode",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-				bKkaptureMode=(BOOL)temp;
-			size=11;
-			RegQueryValueEx(myKey,"GPUKeys",0,&type,(LPBYTE)&szGPUKeys,&size);
-			size=128;
-			RegQueryValueEx(myKey,"DeviceName",0,&type,(LPBYTE)szDevName,&size);
-			size=sizeof(GUID);
-			RegQueryValueEx(myKey,"GuiDev",0,&type,(LPBYTE)&guiDev,&size);
-
-//
-// Recording options
-//
-#define GetDWORD(xa,xb) size=4;if(RegQueryValueEx(myKey,xa,0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS) xb=(unsigned long)temp;
-#define GetBINARY(xa,xb) size=sizeof(xb);RegQueryValueEx(myKey,xa,0,&type,(LPBYTE)&xb,&size);
-
-			GetDWORD("RecordingMode",				    RECORD_RECORDING_MODE);
-			GetDWORD("RecordingVideoSize",			    RECORD_VIDEO_SIZE);
-			GetDWORD("RecordingWidth",				    RECORD_RECORDING_WIDTH);
-			GetDWORD("RecordingHeight",				RECORD_RECORDING_HEIGHT);
-			GetDWORD("RecordingFrameRateScale",		RECORD_FRAME_RATE_SCALE);
-			GetDWORD("RecordingCompressionMode",	    RECORD_COMPRESSION_MODE);
-			GetBINARY("RecordingCompression1",		    RECORD_COMPRESSION1);
-			GetBINARY("RecordingCompressionState1",	RECORD_COMPRESSION_STATE1);
-			GetBINARY("RecordingCompression2",		    RECORD_COMPRESSION2);
-			GetBINARY("RecordingCompressionState2",	RECORD_COMPRESSION_STATE2);
-
-			if (RECORD_RECORDING_WIDTH>1024) RECORD_RECORDING_WIDTH = 1024;
-			if (RECORD_RECORDING_HEIGHT>768) RECORD_RECORDING_HEIGHT = 768;
-			if (RECORD_VIDEO_SIZE>2) RECORD_VIDEO_SIZE = 2;
-			if (RECORD_FRAME_RATE_SCALE>7) RECORD_FRAME_RATE_SCALE = 7;
-			if (RECORD_COMPRESSION1.cbSize != sizeof(RECORD_COMPRESSION1))
-			{
-				memset(&RECORD_COMPRESSION1,0,sizeof(RECORD_COMPRESSION1));
-				RECORD_COMPRESSION1.cbSize = sizeof(RECORD_COMPRESSION1);
-			}
-			RECORD_COMPRESSION1.lpState = RECORD_COMPRESSION_STATE1;
-			if (RECORD_COMPRESSION2.cbSize != sizeof(RECORD_COMPRESSION2))
-			{
-				memset(&RECORD_COMPRESSION2,0,sizeof(RECORD_COMPRESSION2));
-				RECORD_COMPRESSION2.cbSize = sizeof(RECORD_COMPRESSION2);
-			}
-			RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
-
-//
-// end of recording options
-//
-
-			RegCloseKey(myKey);
-		}
+		UseFrameLimit=1;
+		UseFrameSkip=0;
+		iFrameLimit=2;
 	}
+	
+	GetPrivateProfileString("GPU", "fFrameRate", "200.0", &Str_Tmp[0], 256, Conf_File);	
+	fFrameRate = atof(&Str_Tmp[0]);
+	iSysMemory = GetPrivateProfileInt("GPU", "iSysMemory", 0, Conf_File);
+	iStopSaver = GetPrivateProfileInt("GPU", "iStopSaver", 0, Conf_File);
+	bVsync = bVsync_Key = GetPrivateProfileInt("GPU", "bVsync", 0, Conf_File);
+	bTransparent = GetPrivateProfileInt("GPU", "bTransparent", 0, Conf_File);
+	bSSSPSXLimit = GetPrivateProfileInt("GPU", "bSSSPSXLimit", 0, Conf_File);
+	iDebugMode = GetPrivateProfileInt("GPU", "iDebugMode", 0, Conf_File);
+	bKkaptureMode = GetPrivateProfileInt("GPU", "bKkaptureMode", 0, Conf_File);
+	
+	GetPrivateProfileString("GPU", "GPUKeys", szKeyDefaults, &szGPUKeys[0], 11, Conf_File);	
+	GetPrivateProfileString("GPU", "DeviceName", 0, &szDevName[0], 128, Conf_File);	
+
+	//Recording options
+	RECORD_RECORDING_MODE = GetPrivateProfileInt("GPU", "RECORD_RECORDING_MODE", 0, Conf_File);
+	RECORD_VIDEO_SIZE = GetPrivateProfileInt("GPU", "RECORD_VIDEO_SIZE", 0, Conf_File);
+	RECORD_RECORDING_WIDTH = GetPrivateProfileInt("GPU", "RECORD_RECORDING_WIDTH", 0, Conf_File);
+	RECORD_RECORDING_HEIGHT = GetPrivateProfileInt("GPU", "RECORD_RECORDING_HEIGHT", 0, Conf_File);
+	RECORD_FRAME_RATE_SCALE = GetPrivateProfileInt("GPU", "RECORD_FRAME_RATE_SCALE", 0, Conf_File);
+	RECORD_COMPRESSION_MODE = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION_MODE", 0, Conf_File);
+	
+//	RECORD_COMPRESSION1 = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION1", 0, Conf_File);
+	
+	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", 0, &RECORD_COMPRESSION_STATE1[0], 4096, Conf_File);
+	
+//	RECORD_COMPRESSION2 = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION2", 0, Conf_File);
+
+	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", 0, &RECORD_COMPRESSION_STATE2[0], 4096, Conf_File);
+	
+	if (RECORD_RECORDING_WIDTH>1024) RECORD_RECORDING_WIDTH = 1024;
+	if (RECORD_RECORDING_HEIGHT>768) RECORD_RECORDING_HEIGHT = 768;
+	if (RECORD_VIDEO_SIZE>2) RECORD_VIDEO_SIZE = 2;
+	if (RECORD_FRAME_RATE_SCALE>7) RECORD_FRAME_RATE_SCALE = 7;
+
+	
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// standard Windows psx config (registry)
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
+	{
+#define GetBINARY(xa,xb) size=sizeof(xb);RegQueryValueEx(myKey,xa,0,&type,(LPBYTE)&xb,&size);
+		size=sizeof(GUID);
+		RegQueryValueEx(myKey,"GuiDev",0,&type,(LPBYTE)&guiDev,&size);
+
+		GetBINARY("RecordingCompression1",		    RECORD_COMPRESSION1);
+		GetBINARY("RecordingCompression2",		    RECORD_COMPRESSION2);
+		if (RECORD_COMPRESSION1.cbSize != sizeof(RECORD_COMPRESSION1))
+		{
+			memset(&RECORD_COMPRESSION1,0,sizeof(RECORD_COMPRESSION1));
+			RECORD_COMPRESSION1.cbSize = sizeof(RECORD_COMPRESSION1);
+		}
+		RECORD_COMPRESSION1.lpState = RECORD_COMPRESSION_STATE1;
+		if (RECORD_COMPRESSION2.cbSize != sizeof(RECORD_COMPRESSION2))
+		{
+			memset(&RECORD_COMPRESSION2,0,sizeof(RECORD_COMPRESSION2));
+			RECORD_COMPRESSION2.cbSize = sizeof(RECORD_COMPRESSION2);
+		}
+		RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
+
+		RegCloseKey(myKey);
+	}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	if (!iColDepth) iColDepth=32;
 	if (iUseFixes) dwActFixes=dwCfgFixes;
@@ -1144,68 +973,68 @@ void ReadWinSizeConfig(void)
 
 void WriteConfig(void)
 {
+	//adelikat: Write to ini not Registry
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Str_Tmp[1024];
+
 	HKEY myKey;
 	DWORD myDisp;
-	DWORD temp;
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
-	temp=iResX;
-	RegSetValueEx(myKey,"ResX",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iResY;
-	RegSetValueEx(myKey,"ResY",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iRefreshRate;
-	RegSetValueEx(myKey,"RefreshRate",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iWinSize;
-	RegSetValueEx(myKey,"WinSize",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iWindowMode;
-	RegSetValueEx(myKey,"WindowMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iColDepth;
-	RegSetValueEx(myKey,"ColDepth",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=UseFrameLimit;
-	RegSetValueEx(myKey,"UseFrameLimit",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=UseFrameSkip;
-	RegSetValueEx(myKey,"UseFrameSkip",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=dwCfgFixes;
-	RegSetValueEx(myKey,"CfgFixes",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iUseFixes;
-	RegSetValueEx(myKey,"UseFixes",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iUseScanLines;
-	RegSetValueEx(myKey,"UseScanLines",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iShowFPS;
-	RegSetValueEx(myKey,"ShowFPS",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iUseNoStretchBlt;
-	RegSetValueEx(myKey,"UseNoStrechBlt",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iUseDither;
-	RegSetValueEx(myKey,"UseDither",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iFrameLimit;
-	RegSetValueEx(myKey,"FrameLimit",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iUseGammaVal;
-	RegSetValueEx(myKey,"UseGamma",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=(DWORD)fFrameRate;
-	RegSetValueEx(myKey,"FrameRate",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=*(&fFrameRate);
-	RegSetValueEx(myKey,"FrameRateFloat",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=bVsync;
-	RegSetValueEx(myKey,"WaitVSYNC",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=bTransparent;
-	RegSetValueEx(myKey,"Transparent",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=bSSSPSXLimit;
-	RegSetValueEx(myKey,"SSSPSXLimit",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iSysMemory;
-	RegSetValueEx(myKey,"UseSysMemory",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iStopSaver;
-	RegSetValueEx(myKey,"StopSaver",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=iDebugMode;
-	RegSetValueEx(myKey,"DebugMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	temp=bKkaptureMode;
-	RegSetValueEx(myKey,"KkaptureMode",0,REG_DWORD,(LPBYTE) &temp,sizeof(temp));
-	RegSetValueEx(myKey,"GPUKeys",0,REG_BINARY,(LPBYTE)szGPUKeys,11);
-	RegSetValueEx(myKey,"DeviceName",0,REG_BINARY,(LPBYTE)szDevName,128);
-	RegSetValueEx(myKey,"GuiDev",0,REG_BINARY,(LPBYTE)&guiDev,sizeof(GUID));
-
-//
-// Recording options
-//
+	sprintf(Str_Tmp, "%d", iResX);
+	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iResY);
+	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iRefreshRate);
+	WritePrivateProfileString("GPU", "iRefreshRate", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iWinSize);
+	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iWindowMode);
+	WritePrivateProfileString("GPU", "iWindowMode", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iColDepth);
+	WritePrivateProfileString("GPU", "iColDepth", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", UseFrameLimit);
+	WritePrivateProfileString("GPU", "UseFrameLimit", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", UseFrameSkip);
+	WritePrivateProfileString("GPU", "UseFrameSkip", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iFrameLimit);
+	WritePrivateProfileString("GPU", "iFrameLimit", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", dwCfgFixes);
+	WritePrivateProfileString("GPU", "dwCfgFixes", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iUseFixes);
+	WritePrivateProfileString("GPU", "iUseFixes", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iUseScanLines);
+	WritePrivateProfileString("GPU", "iUseScanLines", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iShowFPS);
+	WritePrivateProfileString("GPU", "iShowFPS", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iUseNoStretchBlt);
+	WritePrivateProfileString("GPU", "iUseNoStretchBlt", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iUseDither);
+	WritePrivateProfileString("GPU", "iUseDither", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iUseGammaVal);
+	WritePrivateProfileString("GPU", "iUseGammaVal", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%f", fFrameRate);
+	WritePrivateProfileString("GPU", "fFrameRate", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iSysMemory);
+	WritePrivateProfileString("GPU", "iSysMemory", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iStopSaver);
+	WritePrivateProfileString("GPU", "iStopSaver", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", bVsync);
+	WritePrivateProfileString("GPU", "bVsync", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", bTransparent);
+	WritePrivateProfileString("GPU", "bTransparent", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", bSSSPSXLimit);
+	WritePrivateProfileString("GPU", "bSSSPSXLimit", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", iDebugMode);
+	WritePrivateProfileString("GPU", "iDebugMode", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", bKkaptureMode);
+	WritePrivateProfileString("GPU", "bKkaptureMode", Str_Tmp, Conf_File);
+	
+	WritePrivateProfileString("GPU", "GPUKeys", szGPUKeys, Conf_File);
+	WritePrivateProfileString("GPU", "DeviceName", szDevName, Conf_File);
+//*****
+//		WritePrivateProfileString("GPU", "guiDev", &guiDev, Conf_File);
+	
+	//Recording options
 	if (RECORD_COMPRESSION1.cbState>sizeof(RECORD_COMPRESSION_STATE1) || RECORD_COMPRESSION1.lpState!=RECORD_COMPRESSION_STATE1)
 	{
 		memset(&RECORD_COMPRESSION1,0,sizeof(RECORD_COMPRESSION1));
@@ -1221,26 +1050,40 @@ void WriteConfig(void)
 		RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
 	}
 
-#define SetDWORD(xa,xb) RegSetValueEx(myKey,xa,0,REG_DWORD,(LPBYTE)&xb,sizeof(xb));
-#define SetBINARY(xa,xb) RegSetValueEx(myKey,xa,0,REG_BINARY,(LPBYTE)&xb,sizeof(xb));
+	sprintf(Str_Tmp, "%d", RECORD_RECORDING_MODE);
+	WritePrivateProfileString("GPU", "RECORD_RECORDING_MODE", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", RECORD_VIDEO_SIZE);
+	WritePrivateProfileString("GPU", "RECORD_VIDEO_SIZE", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", RECORD_RECORDING_WIDTH);
+	WritePrivateProfileString("GPU", "RECORD_RECORDING_WIDTH", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", RECORD_RECORDING_HEIGHT);
+	WritePrivateProfileString("GPU", "RECORD_RECORDING_HEIGHT", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", RECORD_FRAME_RATE_SCALE);
+	WritePrivateProfileString("GPU", "RECORD_FRAME_RATE_SCALE", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", RECORD_COMPRESSION_MODE);
+	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_MODE", Str_Tmp, Conf_File);
 
-	SetDWORD("RecordingMode",				RECORD_RECORDING_MODE);
-	SetDWORD("RecordingVideoSize",			RECORD_VIDEO_SIZE);
-	SetDWORD("RecordingWidth",				RECORD_RECORDING_WIDTH);
-	SetDWORD("RecordingHeight",				RECORD_RECORDING_HEIGHT);
-	SetDWORD("RecordingFrameRateScale",		RECORD_FRAME_RATE_SCALE);
-	SetDWORD("RecordingCompressionMode",	RECORD_COMPRESSION_MODE);
+	WritePrivateProfileString("GPU", "iDebugMode", Str_Tmp, Conf_File);
+	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", RECORD_COMPRESSION_STATE1, Conf_File);
+	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", RECORD_COMPRESSION_STATE2, Conf_File);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
+	RegSetValueEx(myKey,"GuiDev",0,REG_BINARY,(LPBYTE)&guiDev,sizeof(GUID));
+
+	#define SetBINARY(xa,xb) RegSetValueEx(myKey,xa,0,REG_BINARY,(LPBYTE)&xb,sizeof(xb));
+
 	SetBINARY("RecordingCompression1",		RECORD_COMPRESSION1);
-	SetBINARY("RecordingCompressionState1",	RECORD_COMPRESSION_STATE1);
+	
 	SetBINARY("RecordingCompression2",		RECORD_COMPRESSION2);
-	SetBINARY("RecordingCompressionState2",	RECORD_COMPRESSION_STATE2);
-//
-//
-//
+	
+
 	RegCloseKey(myKey);
 }
 
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HWND gHWND;
 
