@@ -1631,6 +1631,15 @@ int Open_File_Proc(char *file) {
 	sprintf(buf, string); \
 	InsertMenuItem(submenu[menun], 0, TRUE, &item);
 
+#define ADDMENUITEMDISABLED(menun, string, id) \
+	item.fType = MFT_STRING; \
+	item.fMask = MIIM_STATE | MIIM_TYPE | MIIM_ID; \
+	item.fState = MFS_DISABLED; \
+	item.wID = id; \
+	sprintf(buf, string); \
+	InsertMenuItem(submenu[menun], 0, TRUE, &item);
+
+
 #define ADDMENUITEMC(menun, string, id) \
 	item.fType = MFT_STRING; \
 	item.fMask = MIIM_STATE | MIIM_TYPE | MIIM_ID; \
@@ -1680,7 +1689,7 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Configuration"));
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
+	ADDMENUITEMDISABLED(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
 	ADDMENUITEM(0, _("&Controllers"), ID_CONFIGURATION_CONTROLLERS);
