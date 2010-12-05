@@ -1786,6 +1786,45 @@ WIN32_FIND_DATA lFindData;
 HANDLE lFind;
 int lFirst;
 
+void SaveIni()
+{
+	//adelikat: Write to ini not Registry
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Str_Tmp[1024];
+
+	sprintf(Str_Tmp, "%d", AutoRWLoad);
+	WritePrivateProfileString("RamWatch", "AutoLoad", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", RWSaveWindowPos);
+	WritePrivateProfileString("RamWatch", "RWSaveWindowPos", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", ramw_x);
+	WritePrivateProfileString("RamWatch", "ramw_x", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", ramw_y);
+	WritePrivateProfileString("RamWatch", "ramw_y", Str_Tmp, Conf_File);
+
+	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
+	{
+		char str[256];
+		sprintf(str, "Recent Watch %d", i+1);
+		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Conf_File);	
+	}
+}
+
+void LoadIni()
+{
+	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	AutoRWLoad = GetPrivateProfileInt("RamWatch", "AutoLoad", 0, Conf_File);
+	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Conf_File);
+	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Conf_File);
+	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Conf_File);
+
+	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
+	{
+		char str[256];
+		sprintf(str, "Recent Watch %d", i+1);
+		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Conf_File);
+	}
+}
+
 int SysInit() {
 	//if (Config.PsxOut) 
 		//OpenConsole();
@@ -1807,7 +1846,7 @@ int SysInit() {
 		CancelQuit = 0;
 	}
 	LoadMcds(Config.Mcd1, Config.Mcd2);
-
+	LoadIni();
 	return 0;
 }
 
@@ -1815,11 +1854,10 @@ void SysReset() {
 	psxReset();
 }
 
-
 void SysClose() {
 	psxShutdown();
 	ReleasePlugins();
-
+	SaveIni();
 	if (Config.PsxOut) CloseConsole();
 
 	if (emuLog != NULL) fclose(emuLog);
