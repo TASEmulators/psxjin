@@ -897,18 +897,18 @@ void ReadConfig(void)
 	if (RECORD_VIDEO_SIZE>2) RECORD_VIDEO_SIZE = 2;
 	if (RECORD_FRAME_RATE_SCALE>7) RECORD_FRAME_RATE_SCALE = 7;
 
-	
+	guiDev.Data1 = GetPrivateProfileInt("GPU", "GUID1", 0, Conf_File);
+	guiDev.Data2 = GetPrivateProfileInt("GPU", "GUID2", 0, Conf_File);
+	guiDev.Data3 = GetPrivateProfileInt("GPU", "GUID3", 0, Conf_File);
+	GetPrivateProfileString("GPU", "GUID4", 0, &guiDev.Data4[0], 8, Conf_File);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// standard Windows psx config (registry)
+	// Put Record compression info in standard Windows psx config (registry), for now
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
 	{
 #define GetBINARY(xa,xb) size=sizeof(xb);RegQueryValueEx(myKey,xa,0,&type,(LPBYTE)&xb,&size);
-		size=sizeof(GUID);
-		RegQueryValueEx(myKey,"GuiDev",0,&type,(LPBYTE)&guiDev,&size);
-
 		GetBINARY("RecordingCompression1",		    RECORD_COMPRESSION1);
 		GetBINARY("RecordingCompression2",		    RECORD_COMPRESSION2);
 		if (RECORD_COMPRESSION1.cbSize != sizeof(RECORD_COMPRESSION1))
@@ -1067,10 +1067,17 @@ void WriteConfig(void)
 	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", RECORD_COMPRESSION_STATE1, Conf_File);
 	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", RECORD_COMPRESSION_STATE2, Conf_File);
 
+	sprintf(Str_Tmp, "%d", guiDev.Data1);
+	WritePrivateProfileString("GPU", "GUID1", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", guiDev.Data2);
+	WritePrivateProfileString("GPU", "GUID2", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", guiDev.Data3);
+	WritePrivateProfileString("GPU", "GUID3", Str_Tmp, Conf_File);
+	WritePrivateProfileString("GPU", "GUID4", guiDev.Data4, Conf_File);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
-	RegSetValueEx(myKey,"GuiDev",0,REG_BINARY,(LPBYTE)&guiDev,sizeof(GUID));
 
 	#define SetBINARY(xa,xb) RegSetValueEx(myKey,xa,0,REG_BINARY,(LPBYTE)&xb,sizeof(xb));
 
