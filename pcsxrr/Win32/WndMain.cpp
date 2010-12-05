@@ -341,6 +341,8 @@ int main(int argc, char **argv) {
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
 	sprintf(Config.SstatesDir, "%ssstates\\", szCurrentPath);
 	sprintf(Config.SnapDir, "%ssnap\\", szCurrentPath);
+	sprintf(Config.MovieDir, "%smovies\\", szCurrentPath);
+	sprintf(Config.MemCardsDir, "%smemcards\\", szCurrentPath);
 	if (LoadConfig() == -1) {
 		Config.PsxAuto = 1;
 		Config.PauseAfterPlayback = 0;
@@ -361,6 +363,11 @@ int main(int argc, char **argv) {
 	//If directories don't already exist, create them
 	CreateDirectory(Config.SstatesDir, 0);	
 	CreateDirectory(Config.SnapDir, 0);
+	CreateDirectory(Config.BiosDir, 0);
+	CreateDirectory(Config.PluginsDir, 0);
+	CreateDirectory(Config.SstatesDir, 0);
+	CreateDirectory(Config.MovieDir, 0);
+	CreateDirectory(Config.MemCardsDir, 0);
 
 	if (SysInit() == -1) return 1;
 
