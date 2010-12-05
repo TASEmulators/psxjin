@@ -619,6 +619,27 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	char File[256];
 
 	switch (msg) {
+		case WM_DROPFILES:
+		{
+			UINT len;
+			char *ftmp;
+
+			len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
+			if((ftmp=(char*)malloc(len))) 
+			{
+				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
+				DragQueryFile((HDROP)wParam,0,ftmp,len); 
+				std::string fileDropped = ftmp;
+				
+				//-------------------------------------------------------
+				//Check if Ram Watch file
+				//-------------------------------------------------------
+				if (!(fileDropped.find(".wch") == std::string::npos) && (fileDropped.find(".wch") == fileDropped.length()-4)) {
+					SendMessage(hWnd, WM_COMMAND, (WPARAM)ID_RAM_WATCH,(LPARAM)(NULL));
+					Load_Watches(true, fileDropped.c_str());
+				}
+			}
+		}
 		case WM_ENTERMENULOOP:
 			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED)); //TODO: Find a way for the emulator to know a game has been loaded
 			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
@@ -1756,7 +1777,8 @@ void CreateMainWindow(int nCmdShow) {
 
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
-
+	DragAcceptFiles(hWnd, 1);
+	
 	ShowWindow(hWnd, nCmdShow);
 }
 
