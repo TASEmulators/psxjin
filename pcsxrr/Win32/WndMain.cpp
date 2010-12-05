@@ -367,7 +367,9 @@ int main(int argc, char **argv) {
 	CreateMainWindow(SW_SHOW);
 
 	PCSXInitCheatData();
-
+	
+	
+	
 	//process some command line options
 	if (runcd == 1)
 		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUN_CD, 0);
@@ -376,6 +378,9 @@ int main(int argc, char **argv) {
 	else if (loadMovie)
 		WIN32_StartMovieReplay(szMovieToLoad);
 
+	if (AutoRWLoad)
+		RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
+	
 	RunGui();
 
 	CloseAllToolWindows();
