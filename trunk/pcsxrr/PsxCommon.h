@@ -121,6 +121,8 @@ typedef struct {
 	char PluginsDir[256];
 	char SstatesDir[256];
 	char SnapDir[256];
+	char MovieDir[256];
+	char MemCardsDir[256];
 	char Lang[256];
 	long Xa;
 	long Sio;
