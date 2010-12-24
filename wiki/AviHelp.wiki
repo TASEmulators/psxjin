@@ -1,17 +1,29 @@
-#summary How to record AVIs.
+#summary How to record AVIs with PCSX-rr and kkapture .
 
-= How to record AVI files with PCSX and .kkapture =
+Although PCSX-rr itself is able to dump video, it lacks the functionality to sync audio with video, being only able to record audio in real-time with the right plugin. kkapture is able to record both audio and video, keeping them in sync.
 
 == Step 1: Configure PCSX. ==
-  # Go to "Configuration"->"Options" and make sure "Pause After Playback" is unchecked and then press "OK".
-  # Go to "Configuration"->"Graphics" and select the final resolution the video will have.
-  # Make sure these 3 checkboxes are unchecked:
-  # *`*`NEW SINCE v0.0.08`*`* Make sure ".kkapture mode" is checked:
 
-http://i39.tinypic.com/1zflxrq.png
+First, go to "Configuration"->"Options" and make sure "Pause After Playback" is unchecked and then press "OK". This is important.
+
+Now go to "Configuration"->"Graphics" and configure the GPU plugin as follows. Note the red boxes carefully.
+
+*This configuration is only for dumping AVI! Use whatever configuration is suitable for playing the game or making TASes.*
+
+http://i19.photobucket.com/albums/b185/jhchan8/pcsx/gpu.png
+
+
+
 
 == Step 2: Using .kkapture. ==
-  # Download [http://www.farbrausch.de/~fg/kkapture/ .kkapture] and run it.
+
+Download [http://www.farbrausch.de/~fg/kkapture/ .kkapture] and run it.
+
+Select your "pcsx.exe" executable for the demo field using "Browse..." . Then configure kkapture as follows. Note the red boxes carefully.
+
+http://i19.photobucket.com/albums/b185/jhchan8/pcsx/kkapture.png
+
+
   # In the "Demo" field click on "Browse..." and select your "pcsx.exe" file.
   # In the "Arguments" field you can write something like "-play movies/example.pxm" if you want PCSX to load automatically a movie at start.
   # In the "Encoder" field select ".AVI (VfW, segmented)"
@@ -19,8 +31,6 @@ http://i39.tinypic.com/1zflxrq.png
   # Make sure both "Capture Video" and "Capture Audio" boxes are checked.
   # You can leave everything else as you like; I haven't found any difference with those options enabled/disabled.
   # You should end with something like this:
-
-http://i40.tinypic.com/k3unb9.png
 
 Press kkapture! and wait until your movie is over. Then press the "Escape" key on PCSX and close it to finalize your .avi file.
 
