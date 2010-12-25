@@ -2,9 +2,7 @@
 
 = PCSX Tutorial =
 
-When first running PCSX, the plugin and BIOS setup will appear as follows. *Don't use this setup.*
-
-[]
+When first running PCSX, the program will ask you to set up plugins and BIOS. *Don't use the default setup.*
 
 === Graphics plugins ===
 
