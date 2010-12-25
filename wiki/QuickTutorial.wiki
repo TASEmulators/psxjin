@@ -18,11 +18,10 @@ There are a number of SPU plugins:
 
  * No Sound plugin, which mutes the sound. Used if sound is a problem. Is stable and has the same timing as TAS SPU plugin with the movie sync flag checked.
  * TAS SPU plugin with movie sync on. This is stable, but some games have their sounds cut off or reduced in quality.
-
-http://i44.tinypic.com/qn4hmu.png
-
  * TAS SPU plugin with movie sync off. This is not as stable, but may have better sound quality.
  * [http://www.emuxhaven.net/emuxhaven/psx/plugin/spuEternal141_win.zip Eternal SPU]. This is not as stable, but has very good sound quality.
+
+http://i44.tinypic.com/qn4hmu.png
 
 Both sound quality and stability are a big deal in TASing, and have to be handled per game so do some tests if you are not sure, and report to the [http://tasvideos.org/forum/ TASVideos forum]. Note that it is possible to encode Eternal SPU sound quality even if the plugin does not sync with the movie, but it requires a lot of work to do, and depends on the game.
 
@@ -40,7 +39,13 @@ http://i42.tinypic.com/ehd7ok.png
 
 Do not use Internal HLE Bios.
 
-Instead, use either SCPHxx01.BIN for NTSC-U games, SCPHxx00.BIN or SCPHxx03.BIN for NTSC-J games, or SCPHxx02.BIN for PAL games. SCPH1001.BIN is recommended for NTSC-U games on TASVideos.org. See [http://en.wikipedia.org/wiki/PlayStation_%28console%29 Wikipedia] for more information.
+Instead, use either
+
+ * SCPHxx01.BIN for NTSC-U games,
+ * SCPHxx00.BIN or SCPHxx03.BIN for NTSC-J games, or
+ * SCPHxx02.BIN for PAL games.
+
+where the xx can be any number. SCPH1001.BIN is recommended for NTSC-U games on TASVideos.org. See [http://en.wikipedia.org/wiki/PlayStation_%28console%29 Wikipedia] for more information.
 
 You must find the BIOS files yourself.
 
