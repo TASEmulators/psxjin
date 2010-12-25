@@ -18,6 +18,8 @@ Stretching should be set to "Stretch to full window size", as it would appear on
 
 Dithering should be set to "Always dither g-shaded polygons (slowest)". The word "slowest" only applies to rendering speed when playing normally in emulator.
 
+You may have to configure the SPU plugin as well. The important thing is to choose one so that the movie does not desync when playing back.
+
 == Step 2: Using .kkapture. ==
 
 Download [http://www.farbrausch.de/~fg/kkapture/ .kkapture] and run it.
