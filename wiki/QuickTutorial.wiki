@@ -2,6 +2,8 @@
 
 = PCSX Tutorial =
 
+== Setting up plugins/BIOS ==
+
 When first running PCSX, the program will ask you to set up plugins and BIOS. *Read this information before using a setup. In particular, do not use the default BIOS (Internal HLE).*
 
 === Graphics plugins ===
@@ -47,4 +49,12 @@ where the xx can be any number. SCPH1001.BIN is recommended for NTSC-U games on 
 
 You must find the BIOS files yourself.
 
-[TODO]
+== Using the emulator ==
+
+ * File -> Run CD if you just want to play.
+ * File -> Movie -> Start Playback to play or continue making a movie.
+ * File -> Movie -> Start Recording to create a movie.
+
+Don't forget to set hotkeys using Tools -> Map Hotkeys.
+
+You can use savestates and frame advance. To access the menu, press Esc. To attempt resuming, use Emulator -> Run. This may not always work, in which case you'll have to load the most recent savestate.
