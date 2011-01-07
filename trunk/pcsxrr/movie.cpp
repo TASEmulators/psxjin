@@ -600,9 +600,13 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Movie.CdromCount);
 	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
 	gzfreezel(&bufSize);
-	if (!(Movie.mode == MOVIEMODE_PLAY && Mode == 0)) {
-		gzfreeze(Movie.inputBuffer, bufSize);
-	}
+
+	uint8* tempBuffer, *deleteTempBuffer = NULL;
+	if (!(Movie.mode == MOVIEMODE_PLAY && Mode == 0))
+		tempBuffer = Movie.inputBuffer;
+	else deleteTempBuffer = tempBuffer = new uint8[bufSize];
+	gzfreeze(tempBuffer, bufSize);
+	if(deleteTempBuffer) delete[] tempBuffer;
 
 	//loading state
 	if (Mode == 0) {
