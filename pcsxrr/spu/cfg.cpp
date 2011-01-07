@@ -90,12 +90,12 @@ void ReadConfig()
 
 	iUseXA = GetPrivateProfileInt("Sound", "UseXA", 1, Conf_File);
 	iVolume = GetPrivateProfileInt("Sound", "iVolume", 3, Conf_File);
-	iXAPitch = GetPrivateProfileInt("Sound", "iXAPitch", 0, Conf_File);
-	iSoundMode = GetPrivateProfileInt("Sound", "iSoundMode", 0, Conf_File);
-	iSynchMethod = GetPrivateProfileInt("Sound", "iSynchMethod", 0, Conf_File);
-	iRecordMode = GetPrivateProfileInt("Sound", "iRecordMode", 0, Conf_File);
-	iUseReverb = GetPrivateProfileInt("Sound", "iUseReverb", 0, Conf_File);
-	iUseInterpolation = GetPrivateProfileInt("Sound", "iUseInterpolation", 0, Conf_File);
+	iXAPitch = GetPrivateProfileInt("Sound", "iXAPitch", iXAPitch, Conf_File);
+	iSoundMode = GetPrivateProfileInt("Sound", "iSoundMode", iSoundMode, Conf_File);
+	iSynchMethod = GetPrivateProfileInt("Sound", "iSynchMethod", iSynchMethod, Conf_File);
+	iRecordMode = GetPrivateProfileInt("Sound", "iRecordMode", iRecordMode, Conf_File);
+	iUseReverb = GetPrivateProfileInt("Sound", "iUseReverb", iUseReverb, Conf_File);
+	iUseInterpolation = GetPrivateProfileInt("Sound", "iUseInterpolation", iUseInterpolation, Conf_File);
 }
 
 
