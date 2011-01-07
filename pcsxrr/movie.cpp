@@ -395,9 +395,12 @@ void MOV_StopMovie()
 	if (Movie.mode == MOVIEMODE_RECORD) {
 		MOV_WriteMovieFile();
 		fclose(fpMovie);
+		fpMovie = NULL;
 		TruncateMovie();
 	}
 	Movie.mode = MOVIEMODE_INACTIVE;
+	if(fpMovie)
+		fclose(fpMovie);
 	fpMovie = NULL;
 	SIO_UnsetTempMemoryCards();
 }
