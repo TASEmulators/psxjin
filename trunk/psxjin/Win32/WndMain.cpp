@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
 
 	//OpenConsole();
 
-	printf ("PCSX\n");
+	printf ("psxjin\n");
 	strcpy(cfgfile, "Software\\PSXJIN");
 
 	//argv = CommandLineToArgvA(GetCommandLine(), &argc);
@@ -493,8 +493,8 @@ void States_Load(int num) {
 	sprintf (Text, "sstates\\%10.10s.%3.3d", CdromLabel, num);
 	ret = LoadState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PCSX*: Loaded State %d"), num);
-	else sprintf(Text, _("*PCSX*: Error Loading State %d"), num);
+		 sprintf(Text, _("*psxjin*: Loaded State %d"), num);
+	else sprintf(Text, _("*psxjin*: Error Loading State %d"), num);
 	GPU_displayText(Text);
 
 	Running = 1;
@@ -517,8 +517,8 @@ void States_Save(int num) {
 	GPU_freeze(2, (GPUFreeze_t *)&num);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PCSX*: Saved State %d"), num);
-	else sprintf(Text, _("*PCSX*: Error Saving State %d"), num);
+		 sprintf(Text, _("*psxjin*: Saved State %d"), num);
+	else sprintf(Text, _("*psxjin*: Error Saving State %d"), num);
 	GPU_displayText(Text);
 
 	Running = 1;
@@ -565,8 +565,8 @@ void OnStates_LoadOther() {
 
 		ret = LoadState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*PCSX*: Loaded State %s"), szFileName);
-		else sprintf(Text, _("*PCSX*: Error Loading State %s"), szFileName);
+			 sprintf(Text, _("*psxjin*: Loaded State %s"), szFileName);
+		else sprintf(Text, _("*psxjin*: Error Loading State %s"), szFileName);
 		GPU_displayText(Text);
 
 		Running = 1;
@@ -618,8 +618,8 @@ void OnStates_SaveOther() {
 
 		ret = SaveState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*PCSX*: Loaded State %s"), szFileName);
-		else sprintf(Text, _("*PCSX*: Error Loading State %s"), szFileName);
+			 sprintf(Text, _("*psxjin*: Loaded State %s"), szFileName);
+		else sprintf(Text, _("*psxjin*: Error Loading State %s"), szFileName);
 		GPU_displayText(Text);
 
 		Running = 1;
@@ -1801,7 +1801,7 @@ int lFirst;
 void SaveIni()
 {
 	//adelikat: Write to ini not Registry
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
 
 	sprintf(Str_Tmp, "%d", AutoRWLoad);
@@ -1823,7 +1823,7 @@ void SaveIni()
 
 void LoadIni()
 {
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	AutoRWLoad = GetPrivateProfileInt("RamWatch", "AutoLoad", 0, Conf_File);
 	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Conf_File);
 	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Conf_File);

@@ -31,7 +31,7 @@ int tempDest; //this is for the compiler to not throw in a million of warnings
 void SaveConfig()
 {
 	char Str_Tmp[1024];
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	
 	WritePrivateProfileString("Plugins", "Bios", Config.Bios, Conf_File);
 	WritePrivateProfileString("Plugins", "GPU", Config.Gpu , Conf_File);
@@ -82,7 +82,7 @@ void SaveConfig()
 
 int LoadConfig()
 {
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 
 	GetPrivateProfileString("Plugins", "Bios", "scph1001.bin", &Config.Bios[0], 256, Conf_File);
 	GetPrivateProfileString("Plugins", "GPU", "gpuTASsoft.dll", &Config.Gpu[0], 256, Conf_File);

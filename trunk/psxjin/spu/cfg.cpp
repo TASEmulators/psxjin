@@ -64,7 +64,7 @@
 void WriteConfig()
 {
 	char Str_Tmp[1024];
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	
 	wsprintf(Str_Tmp, "%d", iUseXA);
 	WritePrivateProfileString("Sound", "UseXA", Str_Tmp, Conf_File);
@@ -86,7 +86,7 @@ void WriteConfig()
 
 void ReadConfig()
 {
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 
 	iUseXA = GetPrivateProfileInt("Sound", "UseXA", 1, Conf_File);
 	iVolume = GetPrivateProfileInt("Sound", "iVolume", 3, Conf_File);
