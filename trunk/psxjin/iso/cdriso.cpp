@@ -88,8 +88,10 @@ long CDRopen(void) {
 		else
 		{
 			CfgOpenFile();
-			LoadConf();
+			LoadConf();	
 		}
+
+		if (IsoFile[0] == 0) return 2; //adelikat: If the user cancelled the open file dialog don't try to open stuff!  Returning 2 as a hacky fix, 2 shall mean "do nothing"
 
 		strcpy(temp, IsoFile);
 		*IsoFile = 0;
