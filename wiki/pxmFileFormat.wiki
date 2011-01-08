@@ -1,5 +1,5 @@
 #summary PXM file format description.
-
+ 
 == Header ==
 {{{
 000 4-byte signature: "PXM "
