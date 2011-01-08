@@ -906,7 +906,7 @@ void ReadConfig(void)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Put Record compression info in standard Windows psx config (registry), for now
 
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PSXJIN\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
 	{
 #define GetBINARY(xa,xb) size=sizeof(xb);RegQueryValueEx(myKey,xa,0,&type,(LPBYTE)&xb,&size);
 		GetBINARY("RecordingCompression1",		    RECORD_COMPRESSION1);
@@ -951,7 +951,7 @@ void ReadWinSizeConfig(void)
 	iResY=480;
 	iWinSize=MAKELONG(320,240);
 
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PSXJIN\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
 	{
 		size = 4;
 		if (RegQueryValueEx(myKey,"ResX",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
@@ -1077,7 +1077,7 @@ void WriteConfig(void)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PCSX-RR\\GPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PSXJIN\\GPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
 
 	#define SetBINARY(xa,xb) RegSetValueEx(myKey,xa,0,REG_BINARY,(LPBYTE)&xb,sizeof(xb));
 

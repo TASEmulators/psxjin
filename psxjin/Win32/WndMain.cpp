@@ -242,7 +242,7 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 //	*stderr = *fp;
 //
 //	memset(buf,0,256);
-//	sprintf(buf,"pcsx-rr OUTPUT");
+//	sprintf(buf,"PSXJIN OUTPUT");
 //	SetConsoleTitle(TEXT(buf));
 //	csize.X = 60;
 //	csize.Y = 800;
@@ -255,7 +255,7 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 //	SetConsoleCP(GetACP());
 //	SetConsoleOutputCP(GetACP());
 //	if(attached) printf("\n");
-//	printf("pcsx-rr\n");
+//	printf("PSXJIN\n");
 //	printf("- compiled: %s %s\n\n",__DATE__,__TIME__);
 //}
 
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
 	//OpenConsole();
 
 	printf ("PCSX\n");
-	strcpy(cfgfile, "Software\\PCSX-RR");
+	strcpy(cfgfile, "Software\\PSXJIN");
 
 	//argv = CommandLineToArgvA(GetCommandLine(), &argc);
 	int runcdarg=-2;
@@ -352,11 +352,11 @@ int main(int argc, char **argv) {
 		strcpy(Config.Cdr,        "cdrTASiso.dll");
 		strcpy(Config.Pad1,       "padSeguDPP.dll");
 		strcpy(Config.Pad2,       "padSeguDPP.dll");
-		SysMessage(_("PCSX-RR needs to be configured."));
+		SysMessage(_("PSXJIN needs to be configured."));
 		ConfPlug=1;
 		ConfigurePlugins(gApp.hWnd);
 		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), gApp.hWnd, (DLGPROC)ConfigureMcdsDlgProc);
-		SysMessage(_("PCSX-RR now will quit, restart it."));
+		SysMessage(_("PSXJIN now will quit, restart it."));
 		return 0;
 	}
 
@@ -860,7 +860,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_HELP_HELP:
-					ShellExecute(NULL, "open", "pcsx-rr-instructions.txt", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "psxjin-instructions.txt", NULL, NULL, SW_SHOWNORMAL);
 					return TRUE;
 
 				case ID_HELP_ABOUT:
@@ -1904,7 +1904,7 @@ void SysMessage(char *fmt, ...) {
 	va_start(list,fmt);
 	vsprintf(tmp,fmt,list);
 	va_end(list);
-	MessageBox(0, tmp, _("PCSX-RR Message"), 0);
+	MessageBox(0, tmp, _("PSXJIN Message"), 0);
 }
 
 static char *err = N_("Error Loading Symbol");

@@ -85,7 +85,7 @@ static const int SndOutVolumeShift = 0;
 //edit - nitsuja: make it use the global sample rate define
 //#include "..\SPU.h" //desmume
 //static const int SampleRate = DESMUME_SAMPLE_RATE; //desmume
-static const int SampleRate = 44100; //pcsx-rr
+static const int SampleRate = 44100; //PSXJIN
 
 extern int FindOutputModuleById( const wchar_t* omodid );
 

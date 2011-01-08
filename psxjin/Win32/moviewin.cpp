@@ -17,7 +17,7 @@ extern AppData gApp;
 
 static void MakeOfn(char* pszFilter)
 {
-	sprintf(pszFilter, "%s Input Recording Files", "PCSX-RR");
+	sprintf(pszFilter, "%s Input Recording Files", "PSXJIN");
 	memcpy(pszFilter + strlen(pszFilter), " (*.pxm)\0*.pxm\0\0", 14 * sizeof(char));
 
 	memset(&ofn, 0, sizeof(ofn));
@@ -162,7 +162,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	sprintf(szLengthString, "%02d:%02d:%02d", nHours, nMinutes % 60, nSeconds % 60);
 	sprintf(szUndoCountString, "%lu", dataMovie.rerecordCount);
 	sprintf(szPcsxVersion,"%3.3lu",dataMovie.emuVersion);
-	sprintf(szPcsxVersion,"PCSX-RR v%c.%c.%c",szPcsxVersion[0],szPcsxVersion[1],szPcsxVersion[2]);
+	sprintf(szPcsxVersion,"PSXJIN v%c.%c.%c",szPcsxVersion[0],szPcsxVersion[1],szPcsxVersion[2]);
 
 	//write strings to dialog
 	SetDlgItemTextA(hDlg, IDC_LENGTH, szLengthString);

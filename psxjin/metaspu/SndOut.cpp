@@ -17,7 +17,7 @@
 
 //#include "Global.h"
 //#include "types.h" //desmume
-#include "PsxCommon.h" //pcsx-rr
+#include "PsxCommon.h" //PSXJIN
 #include "SndOut.h"
 #include <assert.h>
 

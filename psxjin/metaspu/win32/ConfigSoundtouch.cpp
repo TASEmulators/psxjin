@@ -20,7 +20,7 @@
 
 //#include "types.h" //desmume
 //#include "Global.h" //?
-#include "PsxCommon.h" //pcsx-rr
+#include "PsxCommon.h" //PSXJIN
 #include "Dialogs.h"
 
 #include "../metaspu.h"
