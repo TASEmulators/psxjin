@@ -51,8 +51,11 @@ int _GetFile(char *out) {
     ofn.lpstrInitialDir		= NULL;
     ofn.lpstrFileTitle		= szFileTitle;
     ofn.nMaxFileTitle		= MAXFILENAME;
-    ofn.lpstrTitle			= NULL;
+    ofn.lpstrTitle			= "PSXjin Open CD...";
     ofn.lpstrDefExt			= "ISO";
+	char temp[2048];
+	GetModuleFileName(0, temp, 2048);
+	ofn.lpstrInitialDir = temp;
     ofn.Flags				= OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
 
 	if (GetOpenFileName ((LPOPENFILENAME)&ofn)) {
