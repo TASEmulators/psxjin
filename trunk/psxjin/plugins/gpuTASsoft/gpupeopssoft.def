@@ -1,7 +1,6 @@
 ; gpuPeopsSoft.def : Declares the module parameters for the DLL.
 
 LIBRARY      "gpuTASsoft"
-DESCRIPTION  'gpuTASsoft GPU Windows Dynamic Link Library'
 EXPORTS
 		; Explicit exports can go here
 		PSEgetLibType       @2
