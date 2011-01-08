@@ -820,19 +820,19 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 					OpenToolWindow(new CMemView());
 					return 0;
-
+/*
 				case ID_CONFIGURATION_MEMWATCH:
 						CreateMemWatch();
 					return TRUE;
-
+*/
 				case ID_CONFIGURATION_MEMPOKE:
 						CreateMemPoke();
 					return TRUE;
-
+/*
 				case ID_CONFIGURATION_MEMSEARCH:
 						CreateMemSearch();
 					return TRUE;
-
+*/
 				case ID_CONFIGURATION_CHEATS:
 						PCSXRemoveCheats();
 						CreateCheatEditor();
@@ -1725,6 +1725,7 @@ void CreateMainMenu() {
 	ADDMENUITEMDISABLED(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
+	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 	ADDMENUITEM(0, _("&Controllers"), ID_CONFIGURATION_CONTROLLERS);
 	ADDMENUITEM(0, _("CD-&ROM"), ID_CONFIGURATION_CDROM);
 	ADDMENUITEM(0, _("&Sound"), ID_CONFIGURATION_SOUND);
@@ -1732,17 +1733,16 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Plugins && Bios"), ID_CONFIGURATION);
 
-	ADDSUBMENU(0, _("&Tools"));
 
-	ADDMENUITEM(0, _("RAM &Watch"), ID_RAM_WATCH);
-	ADDMENUITEM(0, _("RAM &Watch (Old)"), ID_CONFIGURATION_MEMWATCH);
-	ADDMENUITEM(0, _("RAM &Poke"), ID_CONFIGURATION_MEMPOKE);
-	ADDMENUITEM(0, _("RAM &Search"), ID_RAM_SEARCH);
-	ADDMENUITEM(0, _("RAM &Search (Old)"), ID_CONFIGURATION_MEMSEARCH);
-	ADDMENUITEM(0, _("View Memory"), IDM_MEMORY);
+	ADDSUBMENU(0, _("&Tools"));
+	//ADDMENUITEM(0, _("RAM &Watch (Old)"), ID_CONFIGURATION_MEMWATCH);	//adelikat; Getting rid of the outdated dialogs
+	//ADDMENUITEM(0, _("RAM &Search (Old)"), ID_CONFIGURATION_MEMSEARCH); //adelikat; Getting rid of the outdated dialogs
+	
 	ADDMENUITEM(0, _("&Cheat Editor"), ID_CONFIGURATION_CHEATS);
-	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
+	ADDMENUITEM(0, _("View Memory"), IDM_MEMORY);
+	ADDMENUITEM(0, _("RAM &Poke"), ID_CONFIGURATION_MEMPOKE);
+	ADDMENUITEM(0, _("RAM &Watch"), ID_RAM_WATCH);
+	ADDMENUITEM(0, _("RAM &Search"), ID_RAM_SEARCH);
 
 	ADDSUBMENU(0, _("&Help"));
 	ADDMENUITEM(0, _("&About..."), ID_HELP_ABOUT);
