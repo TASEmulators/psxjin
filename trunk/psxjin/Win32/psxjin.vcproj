@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="pcsx"
+	Name="psxjin"
 	ProjectGUID="{66893A12-B867-4F74-B698-38DB297CDDA5}"
 	RootNamespace="pcsx"
 	TargetFrameworkVersion="131072"
@@ -80,7 +80,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
-				OutputFile="$(OutDir)\pcsxrr-debug.exe"
+				OutputFile="$(OutDir)\psxjin-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
@@ -96,7 +96,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				AdditionalManifestFiles="pcsx_x86.manifest"
+				AdditionalManifestFiles="psxjin_x86.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -189,7 +189,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
-				OutputFile="$(OutDir)\pcsxrr-release.exe"
+				OutputFile="$(OutDir)\psxjin-release.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
@@ -207,7 +207,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				AdditionalManifestFiles="pcsx_x86.manifest"
+				AdditionalManifestFiles="psxjin_x86.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -301,7 +301,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
-				OutputFile="$(OutDir)\pcsxrr-releaseFastbuild.exe"
+				OutputFile="$(OutDir)\psxjin-releaseFastbuild.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng;libbzip2"
@@ -320,7 +320,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				AdditionalManifestFiles="pcsx_x86.manifest"
+				AdditionalManifestFiles="psxjin_x86.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -978,19 +978,15 @@
 			>
 		</File>
 		<File
-			RelativePath="pcsx.rc"
-			>
-		</File>
-		<File
-			RelativePath="..\pcsxAbout.bmp"
-			>
-		</File>
-		<File
 			RelativePath="..\PSEmu_Plugin_Defs.h"
 			>
 		</File>
 		<File
 			RelativePath="..\PsxCommon.h"
+			>
+		</File>
+		<File
+			RelativePath=".\psxjin.rc"
 			>
 		</File>
 	</Files>

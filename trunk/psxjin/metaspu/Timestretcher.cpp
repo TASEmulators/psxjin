@@ -18,7 +18,7 @@
 //#include "Global.h"
 #include <math.h>
 //#include "types.h" //desmume
-#include "PsxCommon.h" //pcsx-rr
+#include "PsxCommon.h" //PSXJIN
 #include "SoundTouch/SoundTouch.h"
 #include "SndOut.h"
 //#include "SoundTouch/WavFile.h"
