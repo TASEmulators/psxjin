@@ -60,7 +60,7 @@ int Continue=0;
 char PcsxDir[256];
 
 // Recent Menus
-//RecentMenu RecentRoms;
+RecentMenu RecentCDs;
 
 extern bool OpenPlugins(HWND hWnd);
 
