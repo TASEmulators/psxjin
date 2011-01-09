@@ -630,20 +630,23 @@ void OnStates_SaveOther() {
 
 void ExitPSXjin()
 {
-	if (!AccBreak) 
+	if (AskSave())	//RamWatch ask's to save changes if needed, if the user cancels, don't close
 	{
-		if (Movie.mode != MOVIEMODE_INACTIVE)
-			MOV_StopMovie();
-		if (Movie.capture)
-			WIN32_StopAviRecord();
-		if (Running)
-			ClosePlugins();
-		SysClose();
-		exit(0);
+		if (!AccBreak) 
+		{
+			if (Movie.mode != MOVIEMODE_INACTIVE)
+				MOV_StopMovie();
+			if (Movie.capture)
+				WIN32_StopAviRecord();
+			if (Running)
+				ClosePlugins();
+			SysClose();
+			exit(0);
+		}
+		else
+			AccBreak = 0;
+		return;
 	}
-	else
-		AccBreak = 0;
-	return;
 }
 
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
