@@ -44,7 +44,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/pcsx.tlb"
+				TypeLibraryName=".\Debug/psxjin.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -52,7 +52,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;_MSC_VER_;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;_MSC_VER_;NOMINMAX"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				StructMemberAlignment="5"
@@ -79,7 +79,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
+				AdditionalDependencies="shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
 				OutputFile="$(OutDir)\psxjin-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -104,7 +104,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/pcsx.bsc"
+				OutputFile=".\Debug/psxjin.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -147,7 +147,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/pcsx.tlb"
+				TypeLibraryName=".\Release/psxjin.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -160,7 +160,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;NOMINMAX"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				StructMemberAlignment="5"
@@ -188,7 +188,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
+				AdditionalDependencies="shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\psxjin-release.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -215,7 +215,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/pcsx.bsc"
+				OutputFile=".\Release/psxjin.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -258,7 +258,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/pcsx.tlb"
+				TypeLibraryName=".\Release/psxjin.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -271,7 +271,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;pcsx\&quot;;NOMINMAX"
+				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;NOMINMAX"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				StructMemberAlignment="5"
@@ -300,7 +300,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
+				AdditionalDependencies="shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\psxjin-releaseFastbuild.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -328,7 +328,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/pcsx.bsc"
+				OutputFile=".\Release/psxjin.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
