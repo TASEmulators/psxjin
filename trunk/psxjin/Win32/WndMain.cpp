@@ -45,6 +45,7 @@
 #include "CWindow.h"
 #include "memView.h"
 #include "../spu/spu.h"
+#include "recentmenu.h"
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -57,6 +58,9 @@ char cfgfile[256];
 int Running;
 int Continue=0;
 char PcsxDir[256];
+
+// Recent Menus
+//RecentMenu RecentRoms;
 
 extern bool OpenPlugins(HWND hWnd);
 
