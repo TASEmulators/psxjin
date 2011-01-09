@@ -627,6 +627,25 @@ void OnStates_SaveOther() {
 	}
 } 
 
+
+void ExitPSXjin()
+{
+	if (!AccBreak) 
+	{
+		if (Movie.mode != MOVIEMODE_INACTIVE)
+			MOV_StopMovie();
+		if (Movie.capture)
+			WIN32_StopAviRecord();
+		if (Running)
+			ClosePlugins();
+		SysClose();
+		exit(0);
+	}
+	else
+		AccBreak = 0;
+	return;
+}
+
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	char File[256];
 
@@ -665,9 +684,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) {
 				case ID_FILE_EXIT:
-					SysClose();
-					PostQuitMessage(0);
-					exit(0);
+					ExitPSXjin();
 					return TRUE;
 
 				case ID_FILE_RECORD_MOVIE:
@@ -902,26 +919,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 	
 		case WM_DESTROY:
-			if (!AccBreak) {
-				if (Movie.mode != MOVIEMODE_INACTIVE)
-					MOV_StopMovie();
-				if (Movie.capture)
-					WIN32_StopAviRecord();
-				if (Running)
-					ClosePlugins();
-				SysClose();
-				PostQuitMessage(0);
-				exit(0);
-			}
-			else AccBreak = 0;
+			ExitPSXjin();
 			return TRUE;
 
 		case WM_QUIT:
-			if (Movie.capture)
-				WIN32_StopAviRecord();
-			if (Movie.mode != MOVIEMODE_INACTIVE)
-				MOV_StopMovie();
-			exit(0);
+			ExitPSXjin();
 			break;
 
 		default:
