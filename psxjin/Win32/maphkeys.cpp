@@ -78,9 +78,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'C',             VK_SHIFT,    "Cheats Enable/Disable", },
 	{ 'O',             VK_CONTROL,  "CD Case Open/Close", },
 	{ 0,               0,           "SIO IRQ Enable/Disable", },
-	{ 0,               0,           "SPU IRQ Enable/Disable", },
-	{ 0,               0,           "Parasite Eve 2 Fix E/D", },
-	{ 0,               0,           "Resident Evil 2/3 Fix E/D", },
+	{ 0,               0,           "Parasite Eve 2 Fix E/D", },		//RCntFix
+	{ 0,               0,           "Resident Evil 2/3 Fix E/D", },		//VSYNCWA
 	{ VK_F3,           VK_CONTROL,  "Reset", },
 	{ 0,               0,           "VSync Advance", },
 	{ 'L',             VK_CONTROL,  "New Lua Script Window", },
@@ -88,7 +87,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'L',             VK_SHIFT,    "Reload Lua Script", },
 	{ 0,               0,           "RAM Search Perform", },
 	{ 0,               0,           "RAM Search Refresh", },
-	{ 0,               0,           "RAM Search Reset", }
+	{ 0,               0,           "RAM Search Reset", },
+	{ 0,               0,           "SPU IRQ Enable/Disable", }			//dirty fix, this key is missing from maphkeys.h, putting it on botom of the list prevent keys to be offset and seem to remove it from hotkeys map list
 };
 
 static HWND hMHkeysList = NULL;

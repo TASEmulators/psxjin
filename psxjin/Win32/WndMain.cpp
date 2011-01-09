@@ -876,7 +876,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_HELP_TUTORIAL:
-					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "http://code.google.com/p/psxjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
 					break;
 
 				case ID_HELP_HELP:
