@@ -1,5 +1,5 @@
 #include "recentmenu.h"
-#include <shlwapi.h>	//For CompactPath()
+#include <shlwapi.h>	//For CompactPath() Note: shlwapi.lib must be included as a dependency
 
 using namespace std;
 
@@ -220,7 +220,7 @@ void RecentMenu::UpdateRecentItemsMenu()
 		string tmp = RecentItems[x];
 		LPSTR tmp2 = (LPSTR)tmp.c_str();
 
-		//PathCompactPath(dc, tmp2, 500);	//TODO: figure out how to use this without unresolved external
+		PathCompactPath(dc, tmp2, 500);	//TODO: figure out how to use this without unresolved external
 
 		moo.cbSize = sizeof(moo);
 		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
