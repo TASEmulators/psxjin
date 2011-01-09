@@ -421,6 +421,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\recentmenu.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\recentmenu.h"
+				>
+			</File>
+			<File
 				RelativePath="resource.h"
 				>
 			</File>
