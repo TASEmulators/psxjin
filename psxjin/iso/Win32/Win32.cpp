@@ -12,7 +12,6 @@
 #include "../cdriso.h"
 #include "resource.h"
 
-//TODO: remove this
 #include "recentmenu.h"
 
 HINSTANCE hInst;
@@ -24,6 +23,8 @@ HWND hProgress;
 HWND hIsoFile;
 HWND hMethod;
 int stop;
+
+extern RecentMenu RecentCDs;
 
 void SysMessage(char *fmt, ...);
 //	va_list list;
@@ -62,9 +63,6 @@ int _GetFile(char *out) {
     ofn.Flags				= OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
 
 	if (GetOpenFileName ((LPOPENFILENAME)&ofn)) {
-		//TODO: move this, it should happen after the CD successfully runs
-		extern RecentMenu RecentCDs;
-		RecentCDs.UpdateRecentItems(szFileName);
 		strcpy(out, szFileName);
 		return 1;
 	}
@@ -74,7 +72,10 @@ int _GetFile(char *out) {
 
 void CfgOpenFile() {
 	if (_GetFile(IsoFile) == 1)
+	{
 		SaveConf();
+		RecentCDs.UpdateRecentItems(IsoFile);
+	}
 }
 
 void UpdZmode() {
@@ -292,7 +293,10 @@ static BOOL CALLBACK IsoConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPAR
 			switch(LOWORD(wParam)) {
 				case IDC_SELECTISO:
 					if (_GetFile(IsoFile) == 1)
+					{
 						Edit_SetText(hIsoFile, IsoFile);
+						RecentCDs.UpdateRecentItems(IsoFile);
+					}
 					return TRUE;
 
 				case IDC_COMPRESSISO:
