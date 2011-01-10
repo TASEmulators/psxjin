@@ -11,12 +11,13 @@ class RecentMenu
 public:
 	static const unsigned int MAX_RECENT_ITEMS = 8;		//Max number of items that can be in the recent menu (this class will use MAX + 2 resource numbers, keep that in mind when reserving!)
 	
-	RecentMenu(int baseID, HWND GUI_hWnd, int menuItem); //Constructor - Needs a base ID to start building the menu item list
+	RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuItem); //Constructor - Needs a base ID to start building the menu item list
 	RecentMenu();
 
 	void SetMenuID(int menuID);		 //Set the menu item that the recent submenu will be created on
 	void SetGUI_hWnd(HWND GUI_hWnd); //Handle to the GUI that has the menu
 	void SetID(int base);			 //Set the base & clear ID by giving the starting base ID for the menu items
+	void MakeRecentMenu(HINSTANCE instance);	//Creates the submenu using the HINSTANCE of the main app
 	int GetClearID();				 //Returns the menu item ID for the Clear menu item
 
 	void UpdateRecentItems(std::string filename);	
