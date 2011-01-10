@@ -2,12 +2,13 @@
 #include <shlwapi.h>	//For CompactPath() Note: shlwapi.lib must be included as a dependency
 
 //**************************************************************
-RecentMenu::RecentMenu(int baseID, HWND GUI_hWnd, int menuItem)
+RecentMenu::RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuItem)
 {
 	BaseID = baseID;
 	GhWnd = GUI_hWnd;
 	ClearID = baseID + MAX_RECENT_ITEMS;
 	menuItem = menuItem;
+	recentmenu = LoadMenu(instance, "RECENTROMS");
 }
 
 RecentMenu::RecentMenu()
@@ -15,6 +16,7 @@ RecentMenu::RecentMenu()
 	BaseID = 0;
 	GhWnd = 0;
 	ClearID = BaseID + MAX_RECENT_ITEMS;
+	recentmenu = 0;
 }
 
 //**************************************************************
@@ -37,6 +39,11 @@ void RecentMenu::SetGUI_hWnd(HWND GUI_hWnd)
 void RecentMenu::SetMenuID(int menuID)
 {
 	menuItem = menuID;
+}
+
+void RecentMenu::MakeRecentMenu(HINSTANCE instance)
+{
+	recentmenu = LoadMenu(instance, "RECENTROMS");
 }
 
 //**************************************************************

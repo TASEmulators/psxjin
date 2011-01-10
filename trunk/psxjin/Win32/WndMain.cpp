@@ -1721,6 +1721,7 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
 	ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
+	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Run &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
@@ -1800,6 +1801,12 @@ void CreateMainWindow(int nCmdShow) {
 	SetMenu(gApp.hWnd, gApp.hMenu);
 	DragAcceptFiles(hWnd, 1);
 	
+	RecentCDs.SetGUI_hWnd(gApp.hWnd);
+	RecentCDs.SetID(65000);
+	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
+	RecentCDs.MakeRecentMenu(gApp.hInstance);
+	RecentCDs.GetRecentItemsFromIni(".\\psxjin.ini", "General", "CD");	//TODO: make this a global variable
+
 	ShowWindow(hWnd, nCmdShow);
 }
 
@@ -1828,6 +1835,8 @@ void SaveIni()
 		sprintf(str, "Recent Watch %d", i+1);
 		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Conf_File);	
 	}
+
+	RecentCDs.SaveRecentItemsToIni(".\\psxjin.ini", "General", "CD");
 }
 
 void LoadIni()

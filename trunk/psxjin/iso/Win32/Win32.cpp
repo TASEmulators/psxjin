@@ -12,6 +12,9 @@
 #include "../cdriso.h"
 #include "resource.h"
 
+//TODO: remove this
+#include "recentmenu.h"
+
 HINSTANCE hInst;
 #define MAXFILENAME 256
 
@@ -59,6 +62,9 @@ int _GetFile(char *out) {
     ofn.Flags				= OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
 
 	if (GetOpenFileName ((LPOPENFILENAME)&ofn)) {
+		//TODO: move this, it should happen after the CD successfully runs
+		extern RecentMenu RecentCDs;
+		RecentCDs.UpdateRecentItems(szFileName);
 		strcpy(out, szFileName);
 		return 1;
 	}
