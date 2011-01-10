@@ -342,7 +342,7 @@ void LoadMcd(int mcd, char *str) {
 			fread(data, 1, MCD_SIZE, f);
 			fclose(f);
 		}
-		else SysMessage(_("Failed loading MemCard %s\n"), str);
+		//else SysMessage(_("Failed loading MemCard %s\n"), str);
 	}
 	else {
 		struct stat buf;
