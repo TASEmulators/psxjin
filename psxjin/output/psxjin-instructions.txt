@@ -1,3 +1,9 @@
+PSXjin v0.1.4
+----------------------------------------
+PSXjin is an evolution of PCSX-RR, it add new GUI features, fixes movie bugs, and contains a new SPU core
+
+http://code.google.com/p/psxjin/
+
 PCSX-RR v0.1.2
 ----------------------------------------
 
@@ -72,6 +78,8 @@ Command Line Options
 
 What's New?
 -----------
+v0.1.4
+New SPU!  Should be more accurate and reduce a LOT of movie desyncs
 
 v0.1.2
 -Eliminated the major cause of desyncs that could occur when rerecording.
