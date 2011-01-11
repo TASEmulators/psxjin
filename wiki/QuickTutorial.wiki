@@ -1,14 +1,14 @@
-#summary PCSX-rr quick tutorial for first-time users.
+#summary PSXjin quick tutorial for first-time users.
 
-= PCSX Tutorial =
+= PSXjin Tutorial =
 
 == Setting up plugins/BIOS ==
 
-When first running PCSX, the program will ask you to set up plugins and BIOS. *Read this information before using a setup. In particular, do not use the default BIOS (Internal HLE).*
+When first running PSXjin, the program will ask you to set up plugins and BIOS. *Read this information before using a setup. In particular, do not use the default BIOS (Internal HLE).*
 
 === Graphics plugins ===
 
-If you are TASing, the only plugin you should use is the TAS GPU Plugin that comes with PCSX-rr. Otherwise, you can use whatever you want.
+If you are TASing, the only plugin you should use is the TAS GPU Plugin that comes with PSXjin. Otherwise, you can use whatever you want.
 
 === Sound plugins ===
 
@@ -27,7 +27,7 @@ Both sound quality and stability are a big deal in TASing, and have to be handle
 
 === Input plugins ===
 
-Segu plugins come with PCSX-rr but you can also choose [http://www.emulator-zone.com/doc.php/psx/psxplugins-tools.html NRage plugin], which has the advantage of saving controller profiles, although there is a config interface bug ("L2" is L1, "R2" is L2, "L1" is R2).
+Segu plugins come with PSXjin but you can also choose [http://www.emulator-zone.com/doc.php/psx/psxplugins-tools.html NRage plugin], which has the advantage of saving controller profiles, although there is a config interface bug ("L2" is L1, "R2" is L2, "L1" is R2).
 
 === CD-ROM plugins ===
 
