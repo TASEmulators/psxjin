@@ -443,7 +443,7 @@ void RestoreWindow() {
 	AccBreak = 1;
 	DestroyWindow(gApp.hWnd);
 	CreateMainWindow(SW_SHOWNORMAL);
-	//SNDDXSetWindow(gApp.hWnd);
+	SNDDXSetWindow(gApp.hWnd);
 	ShowCursor(TRUE);
 	SetCursor(LoadCursor(gApp.hInstance, IDC_ARROW));
 	ShowCursor(TRUE);

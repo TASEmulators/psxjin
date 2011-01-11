@@ -68,13 +68,13 @@ static int samplecounter_fakecontribution = 0;
 //	return 0;
 //}
 
-//void SNDDXSetWindow(HWND hwnd)
-//{
-//	if(!lpDS8) return;
-//	if ((IDirectSound8_SetCooperativeLevel(lpDS8, hwnd, DSSCL_PRIORITY)) != DS_OK)
-//	{
-//	}
-//}
+void SNDDXSetWindow(HWND hwnd)
+{
+	if(!lpDS8) return;
+	if ((IDirectSound8_SetCooperativeLevel(lpDS8, hwnd, DSSCL_PRIORITY)) != DS_OK)
+	{
+	}
+}
 
 int SNDDXInit(int buffersize)
 {
