@@ -475,7 +475,8 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
 	const char mouse_mnemonics[] = "LR";
-	const char pad_mnemonics[] = "^#OX1234LDRUSsLR";
+//	const char pad_mnemonics[] = "^#OX1234LDRUSsLR";
+	const char pad_mnemonics[] = "?#XO^1234LDRUSsLR";
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+13)-Movie.inputBuffer));
