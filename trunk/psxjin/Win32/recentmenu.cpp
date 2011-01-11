@@ -8,7 +8,7 @@ RecentMenu::RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuIt
 	GhWnd = GUI_hWnd;
 	ClearID = baseID + MAX_RECENT_ITEMS;
 	menuItem = menuItem;
-	recentmenu = LoadMenu(instance, "RECENTROMS");
+	//recentmenu = LoadMenu(instance, "RECENTROMS");
 }
 
 RecentMenu::RecentMenu()

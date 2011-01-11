@@ -1252,6 +1252,13 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 	int i, j;
 
 	switch(uMsg) {
+		case WM_INITMENU:
+			RecentCDs.SetGUI_hWnd(gApp.hWnd);
+			RecentCDs.SetID(65000);
+			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
+			//RecentCDs.MakeRecentMenu(gApp.hInstance);
+			RecentCDs.GetRecentItemsFromIni(".\\psxjin.ini", "General", "CD");	//TODO: make this a global variable
+			break;
 		case WM_INITDIALOG:
 			mcdDlg = hW;
 
@@ -1800,12 +1807,6 @@ void CreateMainWindow(int nCmdShow) {
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
 	DragAcceptFiles(hWnd, 1);
-	
-	RecentCDs.SetGUI_hWnd(gApp.hWnd);
-	RecentCDs.SetID(65000);
-	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-	RecentCDs.MakeRecentMenu(gApp.hInstance);
-	RecentCDs.GetRecentItemsFromIni(".\\psxjin.ini", "General", "CD");	//TODO: make this a global variable
 
 	ShowWindow(hWnd, nCmdShow);
 }
