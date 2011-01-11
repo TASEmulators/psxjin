@@ -179,9 +179,9 @@ if (Movie.mode == MOVIEMODE_PLAY) {
 
 // write/read joypad information for this frame
 if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
-	if (Movie.mode == MOVIEMODE_RECORD) {
+	if (Movie.mode == MOVIEMODE_RECORD) {		
 		MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
-		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
+		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);		
 	}
 	else if (Movie.mode == MOVIEMODE_PLAY) {
 		MOV_ReadJoy(&paddtemp,Movie.padType1);
@@ -196,11 +196,12 @@ else if (iJoysToPoll == 1) { //this should never happen, but one can never be su
 	else if (Movie.mode == MOVIEMODE_PLAY)
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
-
+	
 // write/read control byte for this frame
-if (Movie.mode == MOVIEMODE_RECORD)
+if (Movie.mode == MOVIEMODE_RECORD)	
 	MOV_WriteControl();
 else if (Movie.mode == MOVIEMODE_PLAY)
+
 	MOV_ReadControl();
 
 MOV_ProcessControlFlags();
