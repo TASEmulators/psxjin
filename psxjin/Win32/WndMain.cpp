@@ -744,7 +744,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					Running = 1;
 					psxCpu->Execute();
 					return TRUE;
-
+/*
 				case ID_FILE_RUNCDBIOS:
 					LoadCdBios = 1;
 					SetMenu(hWnd, NULL);
@@ -755,7 +755,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					Running = 1;
 					psxCpu->Execute();
 					return TRUE;
-/*
+
 				case ID_FILE_RUN_EXE:
 					if (!Open_File_Proc(File)) return TRUE;
 					SetMenu(hWnd, NULL);
@@ -1727,7 +1727,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
 	ADDSEPARATOR(0);
 	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
-	ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
+	//ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Run &CD"), ID_FILE_RUN_CD);
 
