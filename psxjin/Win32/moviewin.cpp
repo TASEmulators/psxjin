@@ -18,7 +18,7 @@ extern AppData gApp;
 static void MakeOfn(char* pszFilter)
 {
 	sprintf(pszFilter, "%s Input Recording Files", "PSXJIN");
-	memcpy(pszFilter + strlen(pszFilter), " (*.pxm)\0*.pxm\0\0", 14 * sizeof(char));
+	memcpy(pszFilter + strlen(pszFilter), " (*.pjm)\0*.pjm\0\0", 14 * sizeof(char));
 
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -28,7 +28,7 @@ static void MakeOfn(char* pszFilter)
 	ofn.nMaxFile = sizeof(szChoice) / sizeof(char);
 	ofn.lpstrInitialDir = ".\\movies";
 	ofn.Flags = OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
-	ofn.lpstrDefExt = "pxm";
+	ofn.lpstrDefExt = "pjm";
 
 	return;
 }
@@ -240,9 +240,9 @@ static BOOL CALLBACK ReplayDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 
 		memset(&wfd, 0, sizeof(WIN32_FIND_DATA));
 //		if (bDrvOkay) {
-//			_stprintf(szFindPath, _T("movies\\%.8s*.pxm"), BurnDrvGetText(DRV_NAME));
+//			_stprintf(szFindPath, _T("movies\\%.8s*.pjm"), BurnDrvGetText(DRV_NAME));
 //		}
-		sprintf(szFindPath, "%smovies\\*.pxm", szCurrentPath);
+		sprintf(szFindPath, "%smovies\\*.pjm", szCurrentPath);
 
 		hFind = FindFirstFile(szFindPath, &wfd);
 		if (hFind != INVALID_HANDLE_VALUE) {
@@ -375,13 +375,13 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 		char szPath[256];
 		char szFilename[256];
 		int i = 0;
-//		sprintf(szFilename, "%.8s.pxm", BurnDrvGetText(DRV_NAME));
+//		sprintf(szFilename, "%.8s.pjm", BurnDrvGetText(DRV_NAME));
 		//TODO: make it use the CD label name?
-		sprintf(szFilename, "%.8s.pxm", defaultFilename);
+		sprintf(szFilename, "%.8s.pjm", defaultFilename);
 		strncpy(szPath, szFilename, 256);
 		while(VerifyRecordingAccessMode(szPath, 0) == 1) {
-//			sprintf(szFilename, _T("%.8s-%d.pxm"), BurnDrvGetText(DRV_NAME), ++i);
-			sprintf(szFilename, "%.8s-%d.pxm", defaultFilename, ++i);
+//			sprintf(szFilename, _T("%.8s-%d.pjm"), BurnDrvGetText(DRV_NAME), ++i);
+			sprintf(szFilename, "%.8s-%d.pjm", defaultFilename, ++i);
 			strncpy(szPath, szFilename, 256);
 		}
 

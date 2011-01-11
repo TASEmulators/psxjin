@@ -189,7 +189,7 @@ struct MovieType {
 	unsigned long formatVersion;         //movie file format version number
 	unsigned long emuVersion;            //emulator version used in recording
 	char movieFilenameMini[256];         //short movie filename (ex: "movie") used for savestates
-	char movieFilename[256];             //full path file name (ex:"c:/pcsx/movies/movie.pxm")
+	char movieFilename[256];             //full path file name (ex:"c:/pcsx/movies/movie.pjm")
 	char bytesPerFrame;                  //size of each frame in bytes
 	char palTiming;                      //PAL mode (50 FPS instead of 60)
 	char currentCdrom;                   //in which CD number are we at now?
