@@ -3,7 +3,7 @@ upx ..\output\psxjin-release.exe
 IF ERRORLEVEL 1 IF NOT ERRORLEVEL 2 GOTO UPXFailed
 cd ..\output
 copy psxjin-release.exe psxjin.exe
-..\output\zip -X -9 -r ..\vc\PSXjin.zip psxjin.exe bios lua51.dll psxjin-instructions.txt plugins
+..\win32\zip -X -9 -r ..\output\PSXjin.zip psxjin.exe bios\*.txt lua51.dll psxjin-instructions.txt plugins\*.dll
 cd ..\win32
 GOTO end
 
