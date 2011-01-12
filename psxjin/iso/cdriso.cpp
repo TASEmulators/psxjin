@@ -107,8 +107,7 @@ long CDRopen(void) {
 
 	//If we got this far, there is a game to load
 */
-long CDRopen(char* filename) {
-	strcpy(IsoFile, filename);
+long CDRopen(char filename[256]) {
 	struct stat buf;
 	UpdateZmode();
 
@@ -117,7 +116,7 @@ long CDRopen(char* filename) {
 		char table[256];
 
 		fmode = Zmode;
-		strcpy(table, IsoFile);
+		strcpy(table, filename);
 		if (Zmode == 1) strcat(table, ".table");
 		else strcat(table, ".index");
 		if (stat(table, &buf) == -1) {		
@@ -138,9 +137,9 @@ long CDRopen(char* filename) {
 		pbuffer = cdbuffer;
 	}
 
-	cdHandle = fopen(IsoFile, "rb");
+	cdHandle = fopen(filename, "rb");
 	if (cdHandle == NULL) {
-		SysMessage("Error loading %s\n", IsoFile);
+		SysMessage("Error loading %s\n", filename);
 		return -1;
 	}
 
