@@ -644,7 +644,7 @@ void PADhandleKey(int key) {
 			else {
 				GPU_displayText(_("*PSXjin*: CD Case Closed"));
 				CDRclose();
-				CDRopen();
+				CDRopen(IsoFile);
 				CheckCdrom();
 				if (LoadCdrom() == -1)
 					SysMessage(_("Could not load Cdrom"));
@@ -707,7 +707,7 @@ bool OpenPlugins(HWND hWnd) {
 
 	GPU_clearDynarec(clearDynarec);
 
-	ret = CDRopen();
+	ret = CDRopen(IsoFile);
 	if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancels the open file dialog
 	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return false; }
 
