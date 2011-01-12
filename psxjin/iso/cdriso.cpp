@@ -68,7 +68,7 @@ void UpdateZmode() {
 
 	Zmode = 0;
 }
-
+/*
 //This function is called by lots of things
 //Movie code does this to close/reopen the game, it doesn't seem to take any care to make sure it won't get itself to an openfile dialog or squash the ISofile saved in the ini
 //PADhandleKey() calls it for Open Case, again I think it assumes it will safely load the game that was running
@@ -106,6 +106,10 @@ long CDRopen(void) {
 	}
 
 	//If we got this far, there is a game to load
+*/
+long CDRopen(char* filename) {
+	strcpy(IsoFile, filename);
+	struct stat buf;
 	UpdateZmode();
 
 	if (Zmode) {

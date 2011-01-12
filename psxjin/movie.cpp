@@ -567,7 +567,7 @@ void MOV_ProcessControlFlags() {
 		}
 		else {
 			CDRclose();
-			CDRopen();
+			CDRopen(IsoFile);
 			CheckCdrom();
 			if (LoadCdrom() == -1)
 				SysMessage(_("Could not load Cdrom"));
