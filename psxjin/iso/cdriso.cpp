@@ -69,36 +69,43 @@ void UpdateZmode() {
 	Zmode = 0;
 }
 
+//This function is called by lots of things
+//Movie code does this to close/reopen the game, it doesn't seem to take any care to make sure it won't get itself to an openfile dialog or squash the ISofile saved in the ini
+//PADhandleKey() calls it for Open Case, again I think it assumes it will safely load the game that was running
+//OpenPlugins runs it and this function is called pretty much anytime the main GUI does something, again with no knowledge of what's going on with the game state
+//This function tries to handle the situation of re-running a game, running a game for the first time, selecting a game, and auto-running a game specified in the commandline parameters
+//In the end it doesn't communicate any of these situations to the rest of the program
 long CDRopen(void) {
 	struct stat buf;
 
 	if (cdHandle != NULL)
-		return 0;				/* it's already open */
+		return 0;				//We must already have a game open, ...and running? or it was just specified at some point?
 
-	LoadConf();
+	LoadConf();					//If no game is loaded, use the one saved in the ISO config //adelikat: Do we want this behavior?
 
-	if (*IsoFile == 0) {
+	if (*IsoFile == 0) {		//If no game specified in the .ini file create a temp file!
 		char temp[256];
 
-		if(CDR_iso_fileToOpen != "") {
-			LoadConf();
-			strcpy(IsoFile,CDR_iso_fileToOpen.c_str());
-			CDR_iso_fileToOpen = "";
+		if(CDR_iso_fileToOpen != "") {	//adelikat: I think this is the command line game to open, implemented by mz, seems bad placement here, if it exists, perhaps LoadConf() shouldn't have already been called?
+			LoadConf();					//If it exists, LoadConf again??
+			strcpy(IsoFile,CDR_iso_fileToOpen.c_str());	//The commandline option is now the IsoFile 
+			CDR_iso_fileToOpen = "";	//No need for the commandline file anymore!
 		}
 		else
 		{
-			CfgOpenFile();
-			LoadConf();	
+			CfgOpenFile();	//Commandline parameter wasn't specified, and there wasn't one saved in the .ini, and there isn't one already open, then it is time use an OPENFILE dialog
+			LoadConf();		//The previous function just saved what the user chose into the ini file, so for some reason we want to load it back from there and store in ISOfile...even though we already have this information stored in ISOFile
 		}
 
 		if (IsoFile[0] == 0) return 2; //adelikat: If the user cancelled the open file dialog don't try to open stuff!  Returning 2 as a hacky fix, 2 shall mean "do nothing"
 
-		strcpy(temp, IsoFile);
-		*IsoFile = 0;
-		SaveConf();
-		strcpy(IsoFile, temp);
+		strcpy(temp, IsoFile);	//Since there was no isofile, lets save it in this temp parameter we created
+		*IsoFile = 0;			//Let's squash the IsoFile so that it saves nothing NULL instead of the filename we just saved there
+		SaveConf();				//And let's save to the ini, so that pesky filename we just added isn't there anymore
+		strcpy(IsoFile, temp);  //Let's make sure IsoFile is the game the user just opened now.
 	}
 
+	//If we got this far, there is a game to load
 	UpdateZmode();
 
 	if (Zmode) {

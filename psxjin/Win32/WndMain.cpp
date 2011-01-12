@@ -654,8 +654,6 @@ void ExitPSXjin()
 }
 
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	char File[256];
-
 	switch (msg) {
 		case WM_DROPFILES:
 		{
@@ -679,8 +677,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		case WM_ENTERMENULOOP:
-			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED)); //TODO: Find a way for the emulator to know a game has been loaded
-			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
+			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (cdHandle ? MF_ENABLED:MF_GRAYED)); //TODO: Find a way for the emulator to know a game has been loaded
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
 	
 			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
@@ -726,7 +724,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_FILE_RUN_CD:
-					LoadCdBios = 0;
+					LoadCdBios = 0;	//adelikat: In PSXjin we shall not allow CD BIOS files, until someone proves to me otherwise
 
 					ClosePlugins();
 					if(!OpenPlugins(hWnd)) return FALSE;
@@ -1729,7 +1727,7 @@ void CreateMainMenu() {
 	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
 	//ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
-	ADDMENUITEM(0, _("Run &CD"), ID_FILE_RUN_CD);
+	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
