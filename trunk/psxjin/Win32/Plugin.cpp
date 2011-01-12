@@ -708,7 +708,7 @@ bool OpenPlugins(HWND hWnd) {
 	GPU_clearDynarec(clearDynarec);
 
 	ret = CDRopen();
-	if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancells the open file dialog
+	if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancels the open file dialog
 	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return false; }
 
 	SetCurrentDirectory(PcsxDir);
