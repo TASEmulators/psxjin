@@ -78,13 +78,8 @@ void psxMemReset() {
 	fread(psxR, 1, 0x80000, f);
 	fclose(f);
 	
-
 	memset(psxM, 0, 0x00200000);
 	memset(psxP, 0, 0x00010000);
-
-	
-	
-
 
 	Config.HLE = 0; //adelikat: Meh, just in case, TODO: delete this variable
 }

@@ -293,11 +293,8 @@ int main(int argc, char **argv) {
 	int runcdarg=-2;
 	if( argc > 1 )
 	for( i=1; i < argc; i++ ) {
-//		MessageBox( NULL, argv[i], "Argument list", MB_ICONINFORMATION );
 		if (!strcmp(argv[i], "-runcd"))
 		{ runcd = 1; runcdarg = i; }
-		else if (!strcmp(argv[i], "-runcdbios"))
-		{ runcd = 2; runcdarg = i; }
 		else if (!strcmp(argv[i], "-play")) {
 			loadMovie = 1;
 			sprintf(szMovieToLoad,"%s",argv[++i]);
@@ -382,10 +379,8 @@ int main(int argc, char **argv) {
 	
 	
 	//process some command line options
-	if (runcd == 1)
+	if (runcd == 1 || runcd == 2)
 		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUN_CD, 0);
-	else if (runcd == 2)
-		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUNCDBIOS, 0);
 	else if (loadMovie)
 		WIN32_StartMovieReplay(szMovieToLoad);
 
