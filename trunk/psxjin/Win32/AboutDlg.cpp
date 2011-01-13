@@ -28,7 +28,7 @@ LRESULT WINAPI AboutDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			SetWindowText(hDlg, _("About"));
 
 			Button_SetText(GetDlgItem(hDlg, IDOK), _("OK"));
-			Static_SetText(GetDlgItem(hDlg, IDC_PCSX_ABOUT_TEXT), _("PCSX EMU\n"));
+			Static_SetText(GetDlgItem(hDlg, IDC_PCSX_ABOUT_TEXT), _("PSXjin\n"));
 			Static_SetText(GetDlgItem(hDlg, IDC_PCSX_ABOUT_AUTHORS), _(LabelAuthors));
 			Static_SetText(GetDlgItem(hDlg, IDC_PCSX_ABOUT_GREETS), _(LabelGreets));
 			Button_SetText(GetDlgItem(hDlg,IDOK), _("OK"));
