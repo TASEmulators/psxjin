@@ -1950,11 +1950,7 @@ int SysInit() {
 	setvbuf(emuLog, NULL,  _IONBF, 0);
 #endif
 
-	while (LoadPlugins() == -1) {
-		CancelQuit = 1;
-		ConfigurePlugins(gApp.hWnd);
-		CancelQuit = 0;
-	}
+	LoadPlugins();	//adelikat: remove while loop here, LoadPlugins will always be successful, as it handles its own defaults
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 	LoadIni();
 	return 0;
