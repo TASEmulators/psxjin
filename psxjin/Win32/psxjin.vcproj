@@ -844,10 +844,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\iso\Win32\Config.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\iso\Win32\Win32.cpp"
 					>
 				</File>

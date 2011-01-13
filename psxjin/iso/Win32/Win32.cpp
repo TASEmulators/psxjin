@@ -8,7 +8,6 @@
 #include <zlib.h>
 #include <bzlib.h>
 
-#include "../Config.h"
 #include "../cdriso.h"
 #include "resource.h"
 
@@ -73,7 +72,6 @@ int _GetFile(char *out) {
 void CfgOpenFile() {
 	if (_GetFile(IsoFile) == 1)
 	{
-		SaveConf();
 		RecentCDs.UpdateRecentItems(IsoFile);
 	}
 }
@@ -273,8 +271,6 @@ static BOOL CALLBACK IsoConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPAR
 	switch(uMsg) {
 		case WM_INITDIALOG:
 			hDlg = hW;
-			LoadConf();
-
 			hProgress = GetDlgItem(hW, IDC_PROGRESS);
 			hIsoFile  = GetDlgItem(hW, IDC_ISOFILE);
 			hMethod   = GetDlgItem(hW, IDC_METHOD);
@@ -316,8 +312,6 @@ static BOOL CALLBACK IsoConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPAR
 					return TRUE;
 				case IDOK:
 					Edit_GetText(hIsoFile, IsoFile, 256);
-
-					SaveConf();
 					EndDialog(hW, FALSE);
 					return TRUE;
 			}
@@ -331,6 +325,6 @@ long CDRconfigure() {
               MAKEINTRESOURCE(IDD_ISOCONFIG),
               GetActiveWindow(),  
               (DLGPROC)IsoConfigureDlgProc);
-	return 0;
 */
+	return 0;
 }
