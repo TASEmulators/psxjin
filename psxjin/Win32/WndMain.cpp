@@ -2052,21 +2052,26 @@ void WIN32_StartMovieReplay(char* szFilename)
 		nRet = MOV_W32_StartReplayDialog();
 	if (nRet) {
 		if (IsoFile[0] == 0) CfgOpenFile();	//If no game loaded, ask the user for a game
-		LoadCdBios = 0;
-		SetMenu(gApp.hWnd, NULL);
-		OpenPlugins(gApp.hWnd);
-		SysReset();
-		NeedReset = 0;
-		CheckCdrom();
-		if (LoadCdrom() == -1) {
-			ClosePlugins();
-			RestoreWindow();
-			SysMessage(_("Could not load Cdrom"));
-			return;
+		
+		//If still no ISO file selected (because the user cancelled), don't attempt to run the movie
+		if (!IsoFile[0] == 0) //adelikat:  Having CfgOpenFile() be value returning is more elegant but this gets the job done
+		{
+			LoadCdBios = 0;
+			SetMenu(gApp.hWnd, NULL);
+			OpenPlugins(gApp.hWnd);
+			SysReset();
+			NeedReset = 0;
+			CheckCdrom();
+			if (LoadCdrom() == -1) {
+				ClosePlugins();
+				RestoreWindow();
+				SysMessage(_("Could not load Cdrom"));
+				return;
+			}
+			Running = 1;
+			MOV_StartMovie(MOVIEMODE_PLAY);
+			psxCpu->Execute();
 		}
-		Running = 1;
-		MOV_StartMovie(MOVIEMODE_PLAY);
-		psxCpu->Execute();
 	}
 }
 
