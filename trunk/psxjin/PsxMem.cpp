@@ -70,8 +70,22 @@ int psxMemInit() {
 }
 
 void psxMemReset() {
+	FILE *f = NULL;
+	char Bios[256];
+
+	sprintf(Bios, "%s%s", Config.BiosDir, Config.Bios);
+	f = fopen(Bios, "rb");
+	fread(psxR, 1, 0x80000, f);
+	fclose(f);
+	
+
 	memset(psxM, 0, 0x00200000);
 	memset(psxP, 0, 0x00010000);
+
+	
+	
+
+
 	Config.HLE = 0; //adelikat: Meh, just in case, TODO: delete this variable
 }
 
