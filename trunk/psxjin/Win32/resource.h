@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by pcsx.rc
+// Used by psxjin.rc
 //
 #define IDS_TITLE                       1
 #define W_OK                            2
@@ -391,6 +391,8 @@
 #define IDC_BUTTON_LUAEDIT              1321
 #define IDC_LUACONSOLE_CLEAR            1322
 #define IDC_LUACONSOLE_CHOOSEFONT       1323
+#define IDC_IS_TEXT                     1324
+#define IDC_USE_BINARY                  1324
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
@@ -523,7 +525,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         40044
-#define _APS_NEXT_CONTROL_VALUE         1324
+#define _APS_NEXT_CONTROL_VALUE         1325
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
