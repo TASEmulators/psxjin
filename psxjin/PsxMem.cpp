@@ -75,22 +75,30 @@ void psxMemReset() {
 
 	memset(psxM, 0, 0x00200000);
 	memset(psxP, 0, 0x00010000);
-
-	if (strcmp(Config.Bios, "HLE")) {
+/*
+	if (strcmp(Config.Bios, "HLE")) 
+	{
 		sprintf(Bios, "%s%s", Config.BiosDir, Config.Bios);
 		f = fopen(Bios, "rb");
-
-		if (f == NULL) {
-			SysMessage (_("Could not open bios:\"%s\". Enabling HLE Bios\n"), Bios);
+		if (f == NULL) 
+		{
+			SysMessage (_("Could not open bios:\"%s\". This program will likely crash after this box disappears, if it doesn't close immediately\n"), Bios);
 			memset(psxR, 0, 0x80000);
-			Config.HLE = 1;
+			//Config.HLE = 1;	//adelikat: We never want HLE to be 1, at somepoint we want to delete its existence
 		}
-		else {
+		else 
+		{
 			fread(psxR, 1, 0x80000, f);
 			fclose(f);
 			Config.HLE = 0;
 		}
-	} else Config.HLE = 1;
+	} //else Config.HLE = 1; 
+*/
+//adelikat: This whole block has to go, 
+//			#1 the check for if the bios file can open should have already been done before this code!
+//			#2 it should not open the internal bios by default, at best it should at least ask what the user wants to do
+//			#3 We do not want the use of the internal BIOS, ever, in PSXjin
+
 }
 
 void psxMemShutdown() {

@@ -1884,7 +1884,18 @@ int SysInit() {
 	return 0;
 }
 
-void SysReset() {
+void SysReset() 
+{
+	//Let's do a BIOS check here, if the code gets any further without it, it will be disaster.  This code won't prevent that, but at least it will inform the user!
+	FILE *f = NULL;
+	char Bios[256];
+	sprintf(Bios, "%s%s", Config.BiosDir, Config.Bios);
+	f = fopen(Bios, "rb");
+	if (f == NULL) 
+	{
+		SysMessage (_("Could not open bios:\"%s\". This program will likely crash after this box disappears, if it doesn't close immediately then configure your BIOS settings\n"), Bios);
+		return;	//Put the responsiblity of this on the calling function
+	}
 	psxReset();
 }
 

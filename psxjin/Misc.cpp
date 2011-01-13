@@ -693,7 +693,7 @@ int LoadStateEmbed(char *file) {
 	gzread(f, psxH, 0x00010000);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
 
-	if (Config.HLE)
+	if (Config.HLE)	//adelikat: TODO: remove all references to Config.HLE, we will not be using that BIOS, ever
 		psxBiosFreeze(0);
 
 	// gpu
