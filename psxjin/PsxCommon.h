@@ -204,6 +204,7 @@ struct MovieType {
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
+	bool isText;						 //set if Movie type is Text, other wise it is binary
 };
 
 struct MovieControlType {
@@ -222,6 +223,7 @@ struct MovieControlType {
 #define MOVIE_FLAG_MEMORY_CARDS   (1<<3)
 #define MOVIE_FLAG_CHEAT_LIST     (1<<4)
 #define MOVIE_FLAG_IRQ_HACKS      (1<<5)
+#define MOVIE_FLAG_IS_TEXT		  (1<<6)
 
 #define MOVIE_CONTROL_RESET       (1<<1)
 #define MOVIE_CONTROL_CDCASE      (1<<2)

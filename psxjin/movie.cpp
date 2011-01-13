@@ -25,6 +25,8 @@ static const char szFileHeader[] = "PJM "; //movie file identifier
 
 static void SetBytesPerFrame()
 {
+	if (Movie.isText)
+	{
 	Movie.bytesPerFrame = 3;
 	switch (Movie.padType1) {
 		case PSE_PAD_TYPE_STANDARD:
@@ -49,6 +51,35 @@ static void SetBytesPerFrame()
 		case PSE_PAD_TYPE_ANALOGJOY:
 			Movie.bytesPerFrame += 33;
 			break;
+	}
+	}
+	else
+	{
+		Movie.bytesPerFrame = 1;
+		switch (Movie.padType1) {
+		case PSE_PAD_TYPE_STANDARD:
+			Movie.bytesPerFrame += 2;
+			break;
+		case PSE_PAD_TYPE_MOUSE:
+			Movie.bytesPerFrame += 4;
+			break;
+		case PSE_PAD_TYPE_ANALOGPAD:
+		case PSE_PAD_TYPE_ANALOGJOY:
+			Movie.bytesPerFrame += 6;
+			break;
+	}
+	switch (Movie.padType2) {
+		case PSE_PAD_TYPE_STANDARD:
+			Movie.bytesPerFrame += 2;
+			break;
+		case PSE_PAD_TYPE_MOUSE:
+			Movie.bytesPerFrame += 4;
+			break;
+		case PSE_PAD_TYPE_ANALOGPAD:
+		case PSE_PAD_TYPE_ANALOGJOY:
+			Movie.bytesPerFrame += 6;
+			break;
+	}
 	}
 }
 
@@ -104,6 +135,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->cheatListIncluded = tempMovie->movieFlags&MOVIE_FLAG_CHEAT_LIST;
 		tempMovie->irqHacksIncluded = tempMovie->movieFlags&MOVIE_FLAG_IRQ_HACKS;
 		tempMovie->palTiming = tempMovie->movieFlags&MOVIE_FLAG_PAL_TIMING;
+		tempMovie->isText = tempMovie->movieFlags&MOVIE_FLAG_IS_TEXT;
 	}
 	fread(&empty, 1, 1, fd);  //reserved for more flags
 
@@ -199,6 +231,8 @@ static void WriteMovieHeader()
 		Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
 	if (Config.PsxType)
 		Movie.movieFlags |= MOVIE_FLAG_PAL_TIMING;
+	if (Movie.isText)
+		Movie.movieFlags |= MOVIE_FLAG_IS_TEXT;
 
 	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
 	fwrite(&movieVersion, 1, 4, fpMovie);          //movie version
@@ -409,7 +443,8 @@ void MOV_StopMovie()
 #ifdef _MSC_VER_
 #define inline __inline
 #endif
-/*
+
+
 inline static uint8 JoyRead8()
 {
 	uint8 v=Movie.inputBufferPtr[0];
@@ -421,11 +456,13 @@ inline static uint16 JoyRead16()
 	uint16 v=(Movie.inputBufferPtr[0] | (Movie.inputBufferPtr[1]<<8));
 	Movie.inputBufferPtr += 2;
 	return v;
-}*/
+}
 
 
 void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 {
+	if (Movie.isText)
+	{
 	pad->buttonStatus = 0;
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
@@ -436,9 +473,9 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 				pad->buttonStatus |= ((Movie.inputBufferPtr[i]==(uint8)'.')?0:1);
 			}	
 			Movie.inputBufferPtr += 3;		
-			pad->moveX = strtoul((char*)Movie.inputBufferPtr,NULL,10);
+			pad->moveX = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
-			pad->moveY = strtoul((char*)Movie.inputBufferPtr,NULL,10);
+			pad->moveY = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
@@ -449,13 +486,13 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 				pad->buttonStatus |= ((Movie.inputBufferPtr[i]=='.')?0:1);
 			}	
 			Movie.inputBufferPtr += 16;
-			pad->leftJoyX  = strtoul((char*)Movie.inputBufferPtr,NULL,10);
+			pad->leftJoyX = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
-			pad->leftJoyY = strtoul((char*)Movie.inputBufferPtr,NULL,10);
+			pad->leftJoyY = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
-			pad->rightJoyX = strtoul((char*)Movie.inputBufferPtr,NULL,10);
+			pad->rightJoyX = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
-			pad->rightJoyY = strtoul((char*)Movie.inputBufferPtr,NULL,10);
+			pad->rightJoyY = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
 			break;	
 		case PSE_PAD_TYPE_STANDARD:
@@ -470,13 +507,57 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 	}
 	pad->buttonStatus ^= 0xffff;
 	pad->controllerType = type;
+	}
+	else
+	{
+		switch (type) {
+		case PSE_PAD_TYPE_MOUSE:
+			pad->buttonStatus = JoyRead16();
+			pad->moveX = JoyRead8();
+			pad->moveY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+			pad->buttonStatus = JoyRead16();
+			pad->leftJoyX = JoyRead8();
+			pad->leftJoyY = JoyRead8();
+			pad->rightJoyX = JoyRead8();
+			pad->rightJoyY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+			pad->buttonStatus = JoyRead16();
+			pad->leftJoyX = JoyRead8();
+			pad->leftJoyY = JoyRead8();
+			pad->rightJoyX = JoyRead8();
+			pad->rightJoyY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_STANDARD:
+		default:
+			pad->buttonStatus = JoyRead16();
+		}
+	pad->buttonStatus ^= 0xffff;
+	pad->controllerType = type;
+	}
 }
+
+static void JoyWrite8(uint8 v)
+{
+	Movie.inputBufferPtr[0]=(uint8)v;
+	Movie.inputBufferPtr += 1;
+}
+static void JoyWrite16(uint16 v)
+{
+	Movie.inputBufferPtr[0]=(uint8)v;
+	Movie.inputBufferPtr[1]=(uint8)(v>>8);
+	Movie.inputBufferPtr += 2;
+}
+
 
 void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
-	const char mouse_mnemonics[] = "LR";
-//	const char pad_mnemonics[] = "^#OX1234LDRUSsLR";
-	const char pad_mnemonics[] = "?#XO^1234LDRUSsLR";
+	if (Movie.isText)
+	{
+		const char mouse_mnemonics[] = "LR";
+		const char pad_mnemonics[] = "?#XO^1234LDRUSsLR";
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+13)-Movie.inputBuffer));
@@ -517,40 +598,99 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}				
 			Movie.inputBufferPtr[15] = (uint8)'|';
-			Movie.inputBufferPtr += 17;
+			Movie.inputBufferPtr += 17;			
+			}	
+	}
+	else
+	{
+		switch (type) {
+		case PSE_PAD_TYPE_MOUSE:
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+4)-Movie.inputBuffer));
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+			JoyWrite8(pad->moveX);
+			JoyWrite8(pad->moveY);
+			break;
+		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+			JoyWrite8(pad->leftJoyX);
+			JoyWrite8(pad->leftJoyY);
+			JoyWrite8(pad->rightJoyX);
+			JoyWrite8(pad->rightJoyY);
+			break;
+		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+			JoyWrite8(pad->leftJoyX);
+			JoyWrite8(pad->leftJoyY);
+			JoyWrite8(pad->rightJoyX);
+			JoyWrite8(pad->rightJoyY);
+			break;
+		case PSE_PAD_TYPE_STANDARD:
+		default:
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+2)-Movie.inputBuffer));
+			JoyWrite16(pad->buttonStatus^0xFFFF);
+		}
 	}
 }
 
 void MOV_ReadControl() {	
-	int contFlg = atoi((char*)Movie.inputBufferPtr);
-	Movie.inputBufferPtr += 3;
-	char controlFlags = (1 << contFlg);
-	controlFlags >>= 1;
+	if (Movie.isText)
+	{
+		int contFlg = atoi((char*)Movie.inputBufferPtr);
+		Movie.inputBufferPtr += 3;
+		char controlFlags = (1 << contFlg);
+		controlFlags >>= 1;
+		MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
+		MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
+		MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
+		MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
+		MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
+		MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA; 
+	}
+	else
+	{
+		char controlFlags = JoyRead8();
+		MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
+		MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
+		MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
+		MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
+		MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
+		MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA;
+	}
+		
+}
+
+void MOV_WriteControl() {
+	if (Movie.isText)
+	{
+		int controlFlags = 0;
+		if (MovieControl.reset)
+			controlFlags = 1;
+		if (MovieControl.cdCase)
+			controlFlags = 2;
+		if (MovieControl.sioIrq)
+			controlFlags = 3;
+		if (MovieControl.cheats)
+			controlFlags = 4;
+		if (MovieControl.RCntFix)
+			controlFlags = 5;
+		if (MovieControl.VSyncWA)
+			controlFlags = 6;
+		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+3)-Movie.inputBuffer));
+		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\n",controlFlags); 	
+	}
+	else
+	{
+		char controlFlags = JoyRead8();
+
 	MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
 	MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
 	MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
 	MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
 	MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
-	MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA; 
-		
-}
-
-void MOV_WriteControl() {
-	int controlFlags = 0;
-	if (MovieControl.reset)
-		controlFlags = 1;
-	if (MovieControl.cdCase)
-		controlFlags = 2;
-	if (MovieControl.sioIrq)
-		controlFlags = 3;
-	if (MovieControl.cheats)
-		controlFlags = 4;
-	if (MovieControl.RCntFix)
-		controlFlags = 5;
-	if (MovieControl.VSyncWA)
-		controlFlags = 6;
-	ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+3)-Movie.inputBuffer));
-	Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\n",controlFlags); 	
+	MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA;
+	}
 }
 
 void MOV_ProcessControlFlags() {
