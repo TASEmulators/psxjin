@@ -57,7 +57,6 @@ void RunCD(HWND hWnd);
 AppData gApp;
 HANDLE hConsole;
 long LoadCdBios;
-char cfgfile[256];
 int Running;
 int Continue=0;
 char PcsxDir[256];
@@ -293,7 +292,6 @@ int main(int argc, char **argv) {
 	//OpenConsole();
 
 	printf ("psxjin\n");
-	strcpy(cfgfile, "Software\\PSXJIN");
 
 	argv = CommandLineToArgvA(GetCommandLine(), &argc);
 	int runcdarg=-2;
@@ -1950,7 +1948,7 @@ int SysInit() {
 	setvbuf(emuLog, NULL,  _IONBF, 0);
 #endif
 
-	LoadPlugins();	//adelikat: remove while loop here, LoadPlugins will always be successful, as it handles its own defaults
+	LoadPlugins();
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 	LoadIni();
 	return 0;

@@ -52,7 +52,6 @@ extern int AccBreak;
 extern int NeedReset;
 extern int ConfPlug;
 extern int CancelQuit;
-extern char cfgfile[256];
 extern int Running;
 extern char PcsxDir[256];
 

@@ -717,8 +717,6 @@ int LoadPlugins() {
 	int ret;
 	char Plugin[256];
 
-	//sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Cdr);
-	//if (LoadCDRplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Gpu);
 	if (LoadGPUplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad1);
