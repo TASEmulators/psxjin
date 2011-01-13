@@ -746,11 +746,28 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					SendMessage(hWnd, WM_COMMAND, (WPARAM)ID_RAM_WATCH,(LPARAM)(NULL));
 					Load_Watches(true, fileDropped.c_str());
 				}
+				else if (IsFileExtension(fileDropped, ".pjm"))
+				{
+					if (!IsoFile[0] == 0)
+					{
+						WIN32_StartMovieReplay(ftmp);
+					}
+					else
+					{
+						CfgOpenFile();	//If no game selected, ask the user to select one
+						RunCD(hWnd);
+						WIN32_StartMovieReplay(ftmp);	//TODO: This seems to never get run
+					}
+				}
+				else if (IsFileExtension(fileDropped, ".pxm"))
+				{
+					SysMessage("PCSX-rr movies are not supported in PSXjin");
+				}
 			}
 		}
 		case WM_ENTERMENULOOP:
 			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (cdHandle ? MF_ENABLED:MF_GRAYED)); //TODO: Find a way for the emulator to know a game has been loaded
-			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
+			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
 	
 			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
