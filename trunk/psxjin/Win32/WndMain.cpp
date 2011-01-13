@@ -653,6 +653,23 @@ void ExitPSXjin()
 	}
 }
 
+bool BIOSExists()	//Attempts to open the BIOS, if successful, it returns true
+{
+	FILE *f = NULL;
+	char Bios[256];
+	sprintf(Bios, "%s%s", Config.BiosDir, Config.Bios);
+	f = fopen(Bios, "rb");
+	if (f == NULL)
+	{
+		return false;
+	}
+	else
+	{
+		fclose(f);
+		return true;
+	}
+}
+
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_DROPFILES:
@@ -729,22 +746,26 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					CfgOpenFile();	//Open the Open CD dialog, which will set IsoFile if the user chooses one
 					if (!IsoFile[0] == 0)
 					{
-						ClosePlugins();
-						if(!OpenPlugins(hWnd)) return FALSE;
-						
-						SetMenu(hWnd, NULL);
-						SysReset();
-						NeedReset = 0;
-						CheckCdrom();
-						if (LoadCdrom() == -1) {
+						if (BIOSExists())
+						{
 							ClosePlugins();
-							RestoreWindow();
-							SysMessage(_("Could not load Cdrom"));
-							return TRUE;
+							if(!OpenPlugins(hWnd)) return FALSE;
+							
+							SetMenu(hWnd, NULL);
+							SysReset();
+							NeedReset = 0;
+							CheckCdrom();
+							if (LoadCdrom() == -1) {
+								ClosePlugins();
+								RestoreWindow();
+								SysMessage(_("Could not load Cdrom"));
+								return TRUE;
+							}
+							Running = 1;
+							psxCpu->Execute();
 						}
-						Running = 1;
-						psxCpu->Execute();
-						
+						else
+							SysMessage("Failure to open BIOS.  Please reconfigure your BIOS settings");
 					}
 					return true;
 /*
@@ -1887,13 +1908,10 @@ int SysInit() {
 void SysReset() 
 {
 	//Let's do a BIOS check here, if the code gets any further without it, it will be disaster.  This code won't prevent that, but at least it will inform the user!
-	FILE *f = NULL;
-	char Bios[256];
-	sprintf(Bios, "%s%s", Config.BiosDir, Config.Bios);
-	f = fopen(Bios, "rb");
-	if (f == NULL) 
+	//This should have been already checked before the game is even loaded, so in theory this will never appear for the user.
+	if (!BIOSExists()) 
 	{
-		SysMessage (_("Could not open bios:\"%s\". This program will likely crash after this box disappears, if it doesn't close immediately then configure your BIOS settings\n"), Bios);
+		SysMessage ("Could not open bios. This program will likely crash after this box disappears, if it doesn't close immediately then configure your BIOS settings\n");
 		return;	//Put the responsiblity of this on the calling function
 	}
 	psxReset();
