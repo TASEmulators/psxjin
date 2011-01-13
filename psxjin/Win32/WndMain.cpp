@@ -350,22 +350,7 @@ int main(int argc, char **argv) {
 	sprintf(Config.SnapDir, "%ssnap\\", szCurrentPath);
 	sprintf(Config.MovieDir, "%smovies\\", szCurrentPath);
 	sprintf(Config.MemCardsDir, "%smemcards\\", szCurrentPath);
-	if (LoadConfig() == -1) {
-		Config.PsxAuto = 1;
-		Config.PauseAfterPlayback = 0;
-		strcpy(Config.Bios,       "scph1001.bin");
-		strcpy(Config.Gpu,        "gpuTASsoft.dll");
-		strcpy(Config.Spu,        "spuTAS.dll");
-		strcpy(Config.Cdr,        "cdrTASiso.dll");
-		strcpy(Config.Pad1,       "padSeguDPP.dll");
-		strcpy(Config.Pad2,       "padSeguDPP.dll");
-		SysMessage(_("PSXJIN needs to be configured."));
-		ConfPlug=1;
-		ConfigurePlugins(gApp.hWnd);
-		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), gApp.hWnd, (DLGPROC)ConfigureMcdsDlgProc);
-		SysMessage(_("PSXJIN now will quit, restart it."));
-		return 0;
-	}
+	LoadConfig();	//Attempt to load ini, or set default settings
 
 	//If directories don't already exist, create them
 	CreateDirectory(Config.SstatesDir, 0);	
