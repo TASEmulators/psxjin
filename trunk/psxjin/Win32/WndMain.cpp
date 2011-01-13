@@ -848,6 +848,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STATES_SAVE_OTHER: OnStates_SaveOther(); return TRUE;
 
 				case ID_EMULATOR_CONTINUE:
+					if (IsoFile[0] == 0) break;
 					Continue = 1;
 					return TRUE;
 /*
