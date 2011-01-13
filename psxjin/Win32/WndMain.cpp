@@ -726,22 +726,27 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_RUN_CD:
 					LoadCdBios = 0;	//adelikat: In PSXjin we shall not allow CD BIOS files, until someone proves to me otherwise
 
-					ClosePlugins();
-					if(!OpenPlugins(hWnd)) return FALSE;
-					
-					SetMenu(hWnd, NULL);
-					SysReset();
-					NeedReset = 0;
-					CheckCdrom();
-					if (LoadCdrom() == -1) {
+					CfgOpenFile();	//Open the Open CD dialog, which will set IsoFile if the user chooses one
+					if (!IsoFile[0] == 0)
+					{
 						ClosePlugins();
-						RestoreWindow();
-						SysMessage(_("Could not load Cdrom"));
-						return TRUE;
+						if(!OpenPlugins(hWnd)) return FALSE;
+						
+						SetMenu(hWnd, NULL);
+						SysReset();
+						NeedReset = 0;
+						CheckCdrom();
+						if (LoadCdrom() == -1) {
+							ClosePlugins();
+							RestoreWindow();
+							SysMessage(_("Could not load Cdrom"));
+							return TRUE;
+						}
+						Running = 1;
+						psxCpu->Execute();
+						
 					}
-					Running = 1;
-					psxCpu->Execute();
-					return TRUE;
+					return true;
 /*
 				case ID_FILE_RUNCDBIOS:
 					LoadCdBios = 1;
