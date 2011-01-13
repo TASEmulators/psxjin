@@ -318,14 +318,7 @@ int main(int argc, char **argv) {
 			sscanf (argv[++i],"%lu",&Movie.stopCapture);
 		else if (!strcmp(argv[i], "-readonly"))
 			Movie.readOnly = 1;
-		else if (!strcmp(argv[i], "-memwatch")) {
-			CreateMemWatch();
-			if (! LoadMemWatchFile(argv[++i]) ) {
-				char errorMessage[320];
-				sprintf(errorMessage, "RAM Watch file \"%s\" doesn't exist.",argv[i]);
-				MessageBox(NULL, errorMessage, NULL, MB_ICONERROR);
-			}
-		} else if(i==runcdarg+1)
+		else if(i==runcdarg+1)
 		{
 			CDR_iso_fileToOpen = argv[i];
 		}
