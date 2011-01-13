@@ -326,9 +326,11 @@ static BOOL CALLBACK IsoConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPAR
 }
 
 long CDRconfigure() {
+/*
     DialogBox(hInst,
               MAKEINTRESOURCE(IDD_ISOCONFIG),
               GetActiveWindow(),  
               (DLGPROC)IsoConfigureDlgProc);
 	return 0;
+*/
 }
