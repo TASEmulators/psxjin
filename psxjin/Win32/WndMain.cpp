@@ -436,7 +436,7 @@ void RunGui() {
 		if(Continue)
 			break;
 	}
-	SetMenu(gApp.hWnd, NULL);
+//	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	Continue = 0;
 	Running = 1;
@@ -683,7 +683,7 @@ void RunCD(HWND hWnd)
 			ClosePlugins();
 			if(!OpenPlugins(hWnd)) return;
 			
-			SetMenu(hWnd, NULL);
+			//SetMenu(hWnd, NULL);
 			SysReset();
 			NeedReset = 0;
 			CheckCdrom();
