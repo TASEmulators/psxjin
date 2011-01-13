@@ -2051,6 +2051,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 	else
 		nRet = MOV_W32_StartReplayDialog();
 	if (nRet) {
+		if (IsoFile[0] == 0) CfgOpenFile();	//If no game loaded, ask the user for a game
 		LoadCdBios = 0;
 		SetMenu(gApp.hWnd, NULL);
 		OpenPlugins(gApp.hWnd);
