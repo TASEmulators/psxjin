@@ -825,11 +825,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_CONFIGURATION_GRAPHICS:
 					if (GPU_configure) GPU_configure();
 					return TRUE;
-
+/*
 				case ID_CONFIGURATION_CDROM:
 					CDRconfigure();
 					return TRUE;
-
+*/
 				case ID_CONFIGURATION_SOUND:
 					SPUconfigure();
 					return TRUE;
@@ -1768,7 +1768,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
 	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 	ADDMENUITEM(0, _("&Controllers"), ID_CONFIGURATION_CONTROLLERS);
-	ADDMENUITEM(0, _("CD-&ROM"), ID_CONFIGURATION_CDROM);
+	//ADDMENUITEM(0, _("CD-&ROM"), ID_CONFIGURATION_CDROM);
 	ADDMENUITEM(0, _("&Sound"), ID_CONFIGURATION_SOUND);
 	ADDMENUITEM(0, _("&Graphics"), ID_CONFIGURATION_GRAPHICS);
 	ADDSEPARATOR(0);
