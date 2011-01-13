@@ -1767,8 +1767,8 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Help"));
 	ADDMENUITEM(0, _("&About..."), ID_HELP_ABOUT);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&TAS Help"), ID_HELP_HELP);
-	ADDMENUITEM(0, _("&Quick Tutorial"), ID_HELP_TUTORIAL);
+	ADDMENUITEM(0, _("&Help File"), ID_HELP_HELP);
+	ADDMENUITEM(0, _("&Online Tutorial"), ID_HELP_TUTORIAL);
 }
 
 void CreateMainWindow(int nCmdShow) {
