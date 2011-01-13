@@ -850,7 +850,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_EMULATOR_CONTINUE:
 					Continue = 1;
 					return TRUE;
-
+/*
 				case ID_EMULATOR_RUN:
 					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
@@ -859,7 +859,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					Running = 1;
 					psxCpu->Execute();
 					return TRUE;
-
+*/
 				case ID_EMULATOR_RESET:
 					NeedReset = 1;
 					return TRUE;
@@ -1799,7 +1799,7 @@ void CreateMainMenu() {
 
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
-	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
+//	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
 	ADDMENUITEM(0, _("&Continue"), ID_EMULATOR_CONTINUE);
 
 	ADDSUBMENU(0, _("&Configuration"));
