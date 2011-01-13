@@ -62,6 +62,9 @@ int Running;
 int Continue=0;
 char PcsxDir[256];
 
+int MainWindow_wndx = 0;
+int MainWindow_wndy = 0;
+
 // Recent Menus
 RecentMenu RecentCDs;
 
@@ -698,6 +701,16 @@ void RunCD(HWND hWnd)
 	}
 }
 
+void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRight)
+{
+		if (windowRight < 59) {
+		windowPosX = 0;
+		}
+		if (windowPosY < -18) {
+		windowPosY = -18;
+		} 
+}
+
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_DROPFILES:
@@ -730,7 +743,16 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			return TRUE;
-
+		case WM_MOVE:
+		{
+			if (!IsIconic(hWnd)) {
+			RECT wrect;
+			GetWindowRect(hWnd,&wrect);
+			MainWindow_wndx = wrect.left;
+			MainWindow_wndy = wrect.top;
+			WindowBoundsCheckNoResize(MainWindow_wndx,MainWindow_wndy,wrect.right);
+			}
+		}
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) {
 				case ID_FILE_EXIT:
@@ -1822,8 +1844,8 @@ void CreateMainWindow(int nCmdShow) {
 	hWnd = CreateWindow("PCSX Main",
 						PCSXRR_NAME_AND_VERSION,
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
-						20,
-						20,
+						MainWindow_wndx,
+						MainWindow_wndy,
 						320,
 						240,
 						NULL,
@@ -1851,6 +1873,11 @@ void SaveIni()
 	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
 
+	sprintf(Str_Tmp, "%d", MainWindow_wndx);
+	WritePrivateProfileString("General", "Main_x", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", MainWindow_wndy);
+	WritePrivateProfileString("General", "Main_y", Str_Tmp, Conf_File);
+
 	sprintf(Str_Tmp, "%d", AutoRWLoad);
 	WritePrivateProfileString("RamWatch", "AutoLoad", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", RWSaveWindowPos);
@@ -1877,6 +1904,11 @@ void LoadIni()
 	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Conf_File);
 	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Conf_File);
 	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Conf_File);
+	MainWindow_wndx = GetPrivateProfileInt("General", "main_x", 0, Conf_File);
+	MainWindow_wndy = GetPrivateProfileInt("General", "main_y", 0, Conf_File);
+
+	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
+	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
 
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
 	{
