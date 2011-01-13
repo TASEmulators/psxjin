@@ -1811,7 +1811,7 @@ void CreateMainWindow(int nCmdShow) {
 	wc.hInstance = gApp.hInstance;
 	wc.hIcon = LoadIcon(gApp.hInstance, MAKEINTRESOURCE(IDI_APP_ICON));
 	wc.hCursor = NULL;
-	wc.hbrBackground = hBrush;
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = 0;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
