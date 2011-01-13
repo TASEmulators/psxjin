@@ -40,20 +40,17 @@ FILE *emuLog;
 int Log = 0;
 
 char *LabelAuthors = { N_(
-	"PCSX a psx emulator\n\n"
-	"written by:\n"
-	"main coder: linuzappz\n"
-	"co-coders: shadow\n"
-	"ex-coders: Nocomp, Pete Bernett, nik3d\n"
-	"Webmaster: AkumaX")
+	"PSXjin a open source rerecording psx emulator using PCSX core\n\n"
+	"http://code.google.com/p/psxjin/\n"
+	"http://tasvideos.org/\n"
 };
 
 char *LabelGreets = { N_(
-	"Greets to: Duddie, Tratax, Kazzuya, JNS, Bobbi, Psychojak, Shunt,\n"
-	"           Keith, DarkWatcher, Xeven, Liquid, Dixon, Prafull\n"
-	"Special thanks to:\n"
-	"Twin (we Love you twin0r), Roor (love for you too),\n"
-	"calb (Thanks for help :) ), now3d (for great help to my psxdev stuff :) )")
+	"original PCSX written by:\n"
+	"main coder: linuzappz\n"
+	"co-coders: shadow\n"
+	"ex-coders: Nocomp, Pete Bernett, nik3d\n"
+	"Webmaster: AkumaX"))
 };
 
 
