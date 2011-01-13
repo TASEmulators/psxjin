@@ -711,6 +711,14 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 		} 
 }
 
+bool IsFileExtension(std::string filename, std::string ext)
+{
+	if (!(filename.find(ext) == std::string::npos) && (filename.find(ext) == filename.length()-4))
+		return true;
+	else
+		return false;
+}
+
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_DROPFILES:
@@ -728,7 +736,13 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				//-------------------------------------------------------
 				//Check if Ram Watch file
 				//-------------------------------------------------------
-				if (!(fileDropped.find(".wch") == std::string::npos) && (fileDropped.find(".wch") == fileDropped.length()-4)) {
+				if (IsFileExtension(fileDropped, ".img") || IsFileExtension(fileDropped, ".bin") || IsFileExtension(fileDropped, ".iso"))
+				{
+					strcpy(IsoFile, fileDropped.c_str());
+					RunCD(hWnd);
+				}
+				else if (IsFileExtension(fileDropped, ".wch")) 
+				{
 					SendMessage(hWnd, WM_COMMAND, (WPARAM)ID_RAM_WATCH,(LPARAM)(NULL));
 					Load_Watches(true, fileDropped.c_str());
 				}
