@@ -50,6 +50,9 @@
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
+//Prototypes
+void RunCD(HWND hWnd);
+
 // global variables
 AppData gApp;
 HANDLE hConsole;
@@ -289,7 +292,7 @@ int main(int argc, char **argv) {
 	printf ("psxjin\n");
 	strcpy(cfgfile, "Software\\PSXJIN");
 
-	//argv = CommandLineToArgvA(GetCommandLine(), &argc);
+	argv = CommandLineToArgvA(GetCommandLine(), &argc);
 	int runcdarg=-2;
 	if( argc > 1 )
 	for( i=1; i < argc; i++ ) {
@@ -380,7 +383,10 @@ int main(int argc, char **argv) {
 	
 	//process some command line options
 	if (runcd == 1 || runcd == 2)
-		PostMessage(gApp.hWnd, WM_COMMAND, ID_FILE_RUN_CD, 0);
+	{
+		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
+		RunCD(gApp.hWnd);
+	}
 	else if (loadMovie)
 		WIN32_StartMovieReplay(szMovieToLoad);
 
@@ -665,6 +671,33 @@ bool BIOSExists()	//Attempts to open the BIOS, if successful, it returns true
 	}
 }
 
+void RunCD(HWND hWnd)
+{
+	if (!IsoFile[0] == 0)
+	{
+		if (BIOSExists())
+		{
+			ClosePlugins();
+			if(!OpenPlugins(hWnd)) return;
+			
+			SetMenu(hWnd, NULL);
+			SysReset();
+			NeedReset = 0;
+			CheckCdrom();
+			if (LoadCdrom() == -1) {
+				ClosePlugins();
+				RestoreWindow();
+				SysMessage(_("Could not load Cdrom"));
+				return;
+			}
+			Running = 1;
+			psxCpu->Execute();
+		}
+		else
+			SysMessage("Failure to open BIOS.  Please reconfigure your BIOS settings");
+	}
+}
+
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_DROPFILES:
@@ -739,29 +772,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					LoadCdBios = 0;	//adelikat: In PSXjin we shall not allow CD BIOS files, until someone proves to me otherwise
 
 					CfgOpenFile();	//Open the Open CD dialog, which will set IsoFile if the user chooses one
-					if (!IsoFile[0] == 0)
-					{
-						if (BIOSExists())
-						{
-							ClosePlugins();
-							if(!OpenPlugins(hWnd)) return FALSE;
-							
-							SetMenu(hWnd, NULL);
-							SysReset();
-							NeedReset = 0;
-							CheckCdrom();
-							if (LoadCdrom() == -1) {
-								ClosePlugins();
-								RestoreWindow();
-								SysMessage(_("Could not load Cdrom"));
-								return TRUE;
-							}
-							Running = 1;
-							psxCpu->Execute();
-						}
-						else
-							SysMessage("Failure to open BIOS.  Please reconfigure your BIOS settings");
-					}
+					RunCD(hWnd);
 					return true;
 /*
 				case ID_FILE_RUNCDBIOS:
