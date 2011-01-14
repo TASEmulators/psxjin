@@ -970,7 +970,7 @@ long CALLBACK GPUopen(HWND hwndGPU)                    // GPU OPEN
 	if (bChangeWinMode) ReadWinSizeConfig();              // alt+enter toggle?
 	else                                                  // or first time startup?
 	{
-		ReadConfig();                                       // read registry
+		ReadConfig();                                       // read config
 		InitFPS();
 	}
 
