@@ -839,8 +839,8 @@ void ReadConfig(void)
 	//adelikat: Save to ini not Registry
 	strcpy(Conf_File, ".\\pcsx.ini");	//TODO: make a global for other files
 	
-	iResX = GetPrivateProfileInt("GPU", "iResX", 640, Conf_File);
-	iResY = GetPrivateProfileInt("GPU", "iResY", 480, Conf_File);
+	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
+	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
 	iRefreshRate = GetPrivateProfileInt("GPU", "iRefreshRate", 0, Conf_File);
 	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(640,480), Conf_File);
 	iWindowMode = GetPrivateProfileInt("GPU", "iWindowMode", 1, Conf_File);
