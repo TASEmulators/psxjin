@@ -803,6 +803,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					RunCD(hWnd);
 					return true;
 				case ID_FILE_CLOSE_CD:
+					strcpy(IsoFile, "");
 					iCallW32Gui = 1;
 					break;
 /*
