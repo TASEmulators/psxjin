@@ -126,7 +126,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 int tempDest; //this is for the compiler to not throw in a million of warnings
-char * pConfigFile= ".\\pcsx.ini";
+char * pConfigFile= ".\\psxjin.ini";
 
 #ifndef _FPSE
 
@@ -837,7 +837,7 @@ void ReadConfig(void)
 	memset(&guiDev,0,sizeof(GUID));
 
 	//adelikat: Load from ini not Registry
-	strcpy(Conf_File, ".\\pcsx.ini");	//TODO: make a global for other files
+	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
@@ -943,7 +943,7 @@ void ReadWinSizeConfig(void)
 	char Conf_File[256];
 
 	//adelikat: Load from ini not Registry
-	strcpy(Conf_File, ".\\pcsx.ini");	//TODO: make a global for other files
+	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
@@ -958,7 +958,7 @@ void ReadWinSizeConfig(void)
 void WriteConfig(void)
 {
 	//adelikat: Write to ini not Registry
-	char Conf_File[1024] = ".\\pcsx.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
 
 	HKEY myKey;
