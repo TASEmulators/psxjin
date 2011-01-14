@@ -878,6 +878,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					{
 						GPU_configure();
 						UpdateWindowSizeFromConfig();
+						MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					}
 					return TRUE;
 /*
