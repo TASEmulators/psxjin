@@ -742,7 +742,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		case WM_ENTERMENULOOP:
-			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED)); //TODO: Obsolete this
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
@@ -842,11 +841,12 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STATES_SAVE_SLOT4: States_Save(3); return TRUE;
 				case ID_FILE_STATES_SAVE_SLOT5: States_Save(4); return TRUE;
 				case ID_FILE_STATES_SAVE_OTHER: OnStates_SaveOther(); return TRUE;
-
+/*
 				case ID_EMULATOR_CONTINUE:
 					if (IsoFile[0] == 0) break;
 					Continue = 1;
 					return TRUE;
+*/
 /*
 				case ID_EMULATOR_RUN:
 					SetMenu(hWnd, NULL);
@@ -1798,7 +1798,7 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
 //	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
-	ADDMENUITEM(0, _("&Continue"), ID_EMULATOR_CONTINUE);
+//	ADDMENUITEM(0, _("&Continue"), ID_EMULATOR_CONTINUE);
 
 	ADDSUBMENU(0, _("&Configuration"));
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
