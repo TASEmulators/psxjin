@@ -803,6 +803,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					CfgOpenFile();	//Open the Open CD dialog, which will set IsoFile if the user chooses one
 					RunCD(hWnd);
 					return true;
+				case ID_FILE_CLOSE_CD:
+					iCallW32Gui = 1;
+					break;
 /*
 				case ID_FILE_RUNCDBIOS:
 					LoadCdBios = 1;
@@ -1788,6 +1791,7 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
 	//ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
+	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
