@@ -698,6 +698,16 @@ void UpdateWindowSizeFromConfig()
 	MainWindow_height = HIWORD(winsize);
 }
 
+void WriteWindowSizeToConfig()
+{
+	char Conf_File[256];
+	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
+	char Str_Tmp[1024];
+	int winsize = MAKELONG(MainWindow_width,MainWindow_height);
+	sprintf(Str_Tmp, "%d", winsize);
+	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);
+}
+
 bool IsFileExtension(std::string filename, std::string ext)
 {
 	if (!(filename.find(ext) == std::string::npos) && (filename.find(ext) == filename.length()-4))
@@ -880,6 +890,19 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						UpdateWindowSizeFromConfig();
 						MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					}
+					return TRUE;
+				case ID_EMULATOR_1X:
+					MainWindow_width = 320;
+					MainWindow_height = 240;
+					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
+					WriteWindowSizeToConfig();
+					return TRUE;
+
+				case ID_EMULATOR_2X:
+					MainWindow_width = 640;
+					MainWindow_height = 480;
+					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
+					WriteWindowSizeToConfig();
 					return TRUE;
 /*
 				case ID_CONFIGURATION_CDROM:
@@ -1813,6 +1836,9 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
+	ADDMENUITEM(0, _("2x"), ID_EMULATOR_2X);
+	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
+	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
 //	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
 //	ADDMENUITEM(0, _("&Continue"), ID_EMULATOR_CONTINUE);
