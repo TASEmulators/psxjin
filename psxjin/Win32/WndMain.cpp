@@ -742,9 +742,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		case WM_ENTERMENULOOP:
-			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (cdHandle ? MF_ENABLED:MF_GRAYED)); //TODO: Find a way for the emulator to know a game has been loaded
-			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (Running ? MF_ENABLED:MF_GRAYED));    //TODO: Find a way for the emulator to know a game has been loaded
-	
+			//EnableMenuItem(gApp.hMenu,ID_EMULATOR_CONTINUE,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED)); //TODO: Obsolete this
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
