@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
 
 	//OpenConsole();
 
-	printf ("psxjin\n");
+	printf ("PSXjin\n");
 
 	argv = CommandLineToArgvA(GetCommandLine(), &argc);
 	int runcdarg=-2;
@@ -477,8 +477,8 @@ void States_Load(int num) {
 	sprintf (Text, "sstates\\%10.10s.%3.3d", CdromLabel, num);
 	ret = LoadState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*psxjin*: Loaded State %d"), num);
-	else sprintf(Text, _("*psxjin*: Error Loading State %d"), num);
+		 sprintf(Text, _("*PSXjin*: Loaded State %d"), num);
+	else sprintf(Text, _("*PSXjin*: Error Loading State %d"), num);
 	GPU_displayText(Text);
 
 	Running = 1;
@@ -501,8 +501,8 @@ void States_Save(int num) {
 	GPU_freeze(2, (GPUFreeze_t *)&num);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*psxjin*: Saved State %d"), num);
-	else sprintf(Text, _("*psxjin*: Error Saving State %d"), num);
+		 sprintf(Text, _("*PSXjin*: Saved State %d"), num);
+	else sprintf(Text, _("*PSXjin*: Error Saving State %d"), num);
 	GPU_displayText(Text);
 
 	Running = 1;
@@ -549,8 +549,8 @@ void OnStates_LoadOther() {
 
 		ret = LoadState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*psxjin*: Loaded State %s"), szFileName);
-		else sprintf(Text, _("*psxjin*: Error Loading State %s"), szFileName);
+			 sprintf(Text, _("*PSXjin*: Loaded State %s"), szFileName);
+		else sprintf(Text, _("*PSXjin*: Error Loading State %s"), szFileName);
 		GPU_displayText(Text);
 
 		Running = 1;
@@ -602,8 +602,8 @@ void OnStates_SaveOther() {
 
 		ret = SaveState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*psxjin*: Loaded State %s"), szFileName);
-		else sprintf(Text, _("*psxjin*: Error Loading State %s"), szFileName);
+			 sprintf(Text, _("*PSXjin*: Loaded State %s"), szFileName);
+		else sprintf(Text, _("*PSXjin*: Error Loading State %s"), szFileName);
 		GPU_displayText(Text);
 
 		Running = 1;
@@ -940,11 +940,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_HELP_TUTORIAL:
-					ShellExecute(NULL, "open", "http://code.google.com/p/psxjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "http://code.google.com/p/PSXjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
 					break;
 
 				case ID_HELP_HELP:
-					ShellExecute(NULL, "open", "psxjin-instructions.txt", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "PSXjin-instructions.txt", NULL, NULL, SW_SHOWNORMAL);
 					return TRUE;
 
 				case ID_HELP_ABOUT:
@@ -1317,7 +1317,7 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 			RecentCDs.SetID(65000);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
 			//RecentCDs.MakeRecentMenu(gApp.hInstance);
-			RecentCDs.GetRecentItemsFromIni(".\\psxjin.ini", "General", "CD");	//TODO: make this a global variable
+			RecentCDs.GetRecentItemsFromIni(".\\PSXjin.ini", "General", "CD");	//TODO: make this a global variable
 			break;
 		case WM_INITDIALOG:
 			mcdDlg = hW;
@@ -1878,7 +1878,7 @@ int lFirst;
 void SaveIni()
 {
 	//adelikat: Write to ini not Registry
-	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
 
 	sprintf(Str_Tmp, "%d", MainWindow_wndx);
@@ -1902,12 +1902,12 @@ void SaveIni()
 		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Conf_File);	
 	}
 
-	RecentCDs.SaveRecentItemsToIni(".\\psxjin.ini", "General", "CD");
+	RecentCDs.SaveRecentItemsToIni(".\\PSXjin.ini", "General", "CD");
 }
 
 void LoadIni()
 {
-	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 	AutoRWLoad = GetPrivateProfileInt("RamWatch", "AutoLoad", 0, Conf_File);
 	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Conf_File);
 	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Conf_File);

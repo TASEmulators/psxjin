@@ -10,8 +10,9 @@
 #include "Win32/moviewin.h"
 #endif
 
-struct MovieType Movie;
+struct MovieType Movie = {};
 struct MovieControlType MovieControl;
+
 
 FILE* fpMovie = 0;
 int iDoPauseAtVSync = 0; //if 1 call pause at next VSync
@@ -20,7 +21,6 @@ int iFrameAdvance = 0;   //1: advance one frame while key is down
 int iGpuHasUpdated = 0;  //has the GPUchain function been called already?
 int iVSyncFlag = 0;      //has a VSync already occured? (we can only save just after a VSync+iGpuHasUpdated)
 int iJoysToPoll = 0;     //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
-
 static const char szFileHeader[] = "PJM "; //movie file identifier
 
 static void SetBytesPerFrame()
@@ -108,7 +108,6 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	int nMetaLen;
 	int i;
 	int nCdidsLen;
-
 	strncpy(tempMovie->movieFilename,szChoice,256);
 
 	fd = fopen(tempMovie->movieFilename, "rb");
@@ -597,7 +596,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			else //otherwise write an unset bit
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}				
-			Movie.inputBufferPtr[15] = (uint8)'|';
+			Movie.inputBufferPtr[16] = (uint8)'|';
 			Movie.inputBufferPtr += 17;			
 			}	
 	}
@@ -682,14 +681,21 @@ void MOV_WriteControl() {
 	}
 	else
 	{
-		char controlFlags = JoyRead8();
-
-	MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
-	MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
-	MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
-	MovieControl.cheats = controlFlags&MOVIE_CONTROL_CHEATS;
-	MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
-	MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA;
+		char controlFlags = 0;
+		if (MovieControl.reset)
+			controlFlags |= MOVIE_CONTROL_RESET;
+		if (MovieControl.cdCase)
+			controlFlags |= MOVIE_CONTROL_CDCASE;
+		if (MovieControl.sioIrq)
+			controlFlags |= MOVIE_CONTROL_SIOIRQ;
+		if (MovieControl.cheats)
+			controlFlags |= MOVIE_CONTROL_CHEATS;
+		if (MovieControl.RCntFix)
+			controlFlags |= MOVIE_CONTROL_RCNTFIX;
+		if (MovieControl.VSyncWA)
+			controlFlags |= MOVIE_CONTROL_VSYNCWA;
+		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+1)-Movie.inputBuffer));
+		JoyWrite8(controlFlags);
 	}
 }
 
