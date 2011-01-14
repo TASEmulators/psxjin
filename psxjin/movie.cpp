@@ -30,26 +30,26 @@ static void SetBytesPerFrame()
 	Movie.bytesPerFrame = 3;
 	switch (Movie.padType1) {
 		case PSE_PAD_TYPE_STANDARD:
-			Movie.bytesPerFrame += 17;
+			Movie.bytesPerFrame += STANDARD_PAD_SIZE;
 			break;
 		case PSE_PAD_TYPE_MOUSE:
-			Movie.bytesPerFrame += 12;
+			Movie.bytesPerFrame += MOUSE_PAD_SIZE;
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD:
 		case PSE_PAD_TYPE_ANALOGJOY:
-			Movie.bytesPerFrame += 33;
+			Movie.bytesPerFrame += ANALOG_PAD_SIZE;
 			break;
 	}
 	switch (Movie.padType2) {
 		case PSE_PAD_TYPE_STANDARD:
-			Movie.bytesPerFrame += 17;
+			Movie.bytesPerFrame += STANDARD_PAD_SIZE;
 			break;
 		case PSE_PAD_TYPE_MOUSE:
-			Movie.bytesPerFrame += 12;
+			Movie.bytesPerFrame += MOUSE_PAD_SIZE;
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD:
 		case PSE_PAD_TYPE_ANALOGJOY:
-			Movie.bytesPerFrame += 33;
+			Movie.bytesPerFrame += ANALOG_PAD_SIZE;
 			break;
 	}
 	}
@@ -496,12 +496,13 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 			break;	
 		case PSE_PAD_TYPE_STANDARD:
 		default:
-			for(int i=0;i<16;i++)
+			for(int i=0;i<14;i++)
 			{
 				pad->buttonStatus <<= 1;
 				pad->buttonStatus |= ((Movie.inputBufferPtr[i]==(uint8)'.')?0:1);
 			}	
-			Movie.inputBufferPtr += 17;
+			pad->buttonStatus <<= 2;
+			Movie.inputBufferPtr += STANDARD_PAD_SIZE;
 		break;
 	}
 	pad->buttonStatus ^= 0xffff;
@@ -556,10 +557,10 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 	if (Movie.isText)
 	{
 		const char mouse_mnemonics[] = "LR";
-		const char pad_mnemonics[] = "?#XO^1234LDRUSsLR";
+		const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
-			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+13)-Movie.inputBuffer));
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+MOUSE_PAD_SIZE)-Movie.inputBuffer));
 			for(int i=0;i<2;i++)
 			{			
 			int bitmask = (1<<(15-i));
@@ -573,7 +574,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
 		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
-			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+33)-Movie.inputBuffer));
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+ANALOG_PAD_SIZE)-Movie.inputBuffer));
 			for(int i=0;i<16;i++)
 			{			
 			int bitmask = (1<<(16-i));
@@ -587,17 +588,17 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
-			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+17)-Movie.inputBuffer));
-			for(int i=0;i<16;i++)
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+STANDARD_PAD_SIZE)-Movie.inputBuffer));
+			for(int i=0;i<14;i++)
 			{			
-			int bitmask = (1<<(16-i));
+			int bitmask = (1<<(13-i+2));
 			if((pad->buttonStatus^0xffff) & bitmask)
 				Movie.inputBufferPtr[i] = (uint8)pad_mnemonics[i];
 			else //otherwise write an unset bit
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}				
-			Movie.inputBufferPtr[16] = (uint8)'|';
-			Movie.inputBufferPtr += 17;			
+			Movie.inputBufferPtr[14] = (uint8)'|';
+			Movie.inputBufferPtr += STANDARD_PAD_SIZE;			
 			}	
 	}
 	else
