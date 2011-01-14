@@ -160,7 +160,8 @@ typedef struct
 #define MOVIE_MAX_METADATA 512
 #define MOVIE_MAX_CDROM_IDS 252
 
-struct MovieType {
+struct MovieType {	
+	int isText;							 //set if Movie type is Text, other wise it is binary
 	PadDataS lastPad1;                   //last joypad1 buttons polled
 	PadDataS lastPad2;                   //last joypad2 buttons polled
 	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
@@ -204,7 +205,7 @@ struct MovieType {
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
-	bool isText;						 //set if Movie type is Text, other wise it is binary
+	
 };
 
 struct MovieControlType {
