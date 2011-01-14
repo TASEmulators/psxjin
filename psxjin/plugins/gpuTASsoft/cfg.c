@@ -836,13 +836,13 @@ void ReadConfig(void)
 	memset(szDevName,0,128);
 	memset(&guiDev,0,sizeof(GUID));
 
-	//adelikat: Save to ini not Registry
+	//adelikat: Load from ini not Registry
 	strcpy(Conf_File, ".\\pcsx.ini");	//TODO: make a global for other files
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
 	iRefreshRate = GetPrivateProfileInt("GPU", "iRefreshRate", 0, Conf_File);
-	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(640,480), Conf_File);
+	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320,240), Conf_File);
 	iWindowMode = GetPrivateProfileInt("GPU", "iWindowMode", 1, Conf_File);
 	iColDepth = GetPrivateProfileInt("GPU", "iColDepth", 16, Conf_File);
 	UseFrameLimit = GetPrivateProfileInt("GPU", "UseFrameLimit", 1, Conf_File);
@@ -940,31 +940,15 @@ void ReadConfig(void)
 
 void ReadWinSizeConfig(void)
 {
-	HKEY myKey;
-	DWORD temp;
-	DWORD type;
-	DWORD size;
+	char Conf_File[256];
 
-	if (pConfigFile) return;                              // no need to read stuff in ZN config file mode
-
-	iResX=640;
-	iResY=480;
-	iWinSize=MAKELONG(320,240);
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PSXJIN\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
-	{
-		size = 4;
-		if (RegQueryValueEx(myKey,"ResX",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iResX=(int)temp;
-		size = 4;
-		if (RegQueryValueEx(myKey,"ResY",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iResY=(int)temp;
-		size = 4;
-		if (RegQueryValueEx(myKey,"WinSize",0,&type,(LPBYTE)&temp,&size)==ERROR_SUCCESS)
-			iWinSize=(int)temp;
-
-		RegCloseKey(myKey);
-	}
+	//adelikat: Load from ini not Registry
+	strcpy(Conf_File, ".\\pcsx.ini");	//TODO: make a global for other files
+	
+	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
+	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
+	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320,240), Conf_File);
+	
 }
 
 ////////////////////////////////////////////////////////////////////////
