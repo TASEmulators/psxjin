@@ -63,6 +63,8 @@ char PcsxDir[256];
 
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
+int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
+int MainWindow_height = 240;
 
 // Recent Menus
 RecentMenu RecentCDs;
@@ -687,6 +689,15 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 		} 
 }
 
+void UpdateWindowSizeFromConfig()
+{
+	char Conf_File[256];
+	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
+	int winsize = GetPrivateProfileInt("GPU", "iWinSize", 320, Conf_File);
+	MainWindow_width = LOWORD(winsize);
+	MainWindow_height = HIWORD(winsize);
+}
+
 bool IsFileExtension(std::string filename, std::string ext)
 {
 	if (!(filename.find(ext) == std::string::npos) && (filename.find(ext) == filename.length()-4))
@@ -863,7 +874,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_CONFIGURATION_GRAPHICS:
-					if (GPU_configure) GPU_configure();
+					if (GPU_configure) 
+					{
+						GPU_configure();
+						UpdateWindowSizeFromConfig();
+					}
 					return TRUE;
 /*
 				case ID_CONFIGURATION_CDROM:
@@ -1853,20 +1868,15 @@ void CreateMainWindow(int nCmdShow) {
 
 	RegisterClass(&wc);
 
-	//Get the window size values from the config
-	char Conf_File[256];
-	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
-	int winsize = GetPrivateProfileInt("GPU", "iWinSize", 320, Conf_File);
-	int wWidth = LOWORD(winsize);
-	int wHeight = HIWORD(winsize);
+	UpdateWindowSizeFromConfig();
 
 	hWnd = CreateWindow("PCSX Main",
 						PCSXRR_NAME_AND_VERSION,
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						MainWindow_wndx,
 						MainWindow_wndy,
-						wWidth,
-						wHeight,
+						MainWindow_width,
+						MainWindow_height,
 						NULL,
 						NULL,
 						gApp.hInstance,
