@@ -1856,16 +1856,17 @@ void CreateMainWindow(int nCmdShow) {
 	//Get the window size values from the config
 	char Conf_File[256];
 	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
-	int width = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
-	int height = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
+	int winsize = GetPrivateProfileInt("GPU", "iWinSize", 320, Conf_File);
+	int wWidth = LOWORD(winsize);
+	int wHeight = HIWORD(winsize);
 
 	hWnd = CreateWindow("PCSX Main",
 						PCSXRR_NAME_AND_VERSION,
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						MainWindow_wndx,
 						MainWindow_wndy,
-						width,
-						height,
+						wWidth,
+						wHeight,
 						NULL,
 						NULL,
 						gApp.hInstance,

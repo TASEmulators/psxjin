@@ -294,7 +294,7 @@ BOOL OnInitSoftDialog(HWND hW)
 	int i;
 	DEVMODE dv;
 
-	ReadConfig();                                         // read registry stuff
+	ReadConfig();
 
 	if (szDevName[0])
 		SetDlgItemText(hW,IDC_DEVICETXT,szDevName);
@@ -515,7 +515,7 @@ void OnSoftOK(HWND hW)
 		return;
 	}
 
-	WriteConfig();                                        // write registry
+	WriteConfig();
 
 	EndDialog(hW,TRUE);
 }
@@ -823,7 +823,7 @@ void OnCfgDef2(HWND hW)
 }
 
 ////////////////////////////////////////////////////////////////////////
-// read registry
+// read config
 ////////////////////////////////////////////////////////////////////////
 
 void ReadConfig(void)
@@ -952,7 +952,7 @@ void ReadWinSizeConfig(void)
 }
 
 ////////////////////////////////////////////////////////////////////////
-// write registry
+// write config
 ////////////////////////////////////////////////////////////////////////
 
 void WriteConfig(void)
