@@ -207,7 +207,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_MENU].key
 	&& modifiers == EmuCommandTable[EMUCMD_MENU].keymod)
 	{
-		iCallW32Gui=1;
+		//iCallW32Gui=1;	//adelikat: Disabling this now obsolete item
 		return;
 	}
 

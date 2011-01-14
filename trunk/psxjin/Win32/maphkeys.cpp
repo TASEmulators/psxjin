@@ -12,7 +12,7 @@ HWND hMHkeysDlg = NULL;
 
 struct EMUCMDTABLE EmuCommandTable[]=
 {
-	{ VK_ESCAPE,       0,           "Call Menu", },
+	{ 0,       0,					"Disabled", },
 	{ VK_PAUSE,        0,           "Pause", },
 	{ VK_TAB,          0,           "Fast Forward", },
 	{ VK_SPACE,        0,           "Frame Advance", },
