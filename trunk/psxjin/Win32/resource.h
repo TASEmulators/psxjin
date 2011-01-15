@@ -394,8 +394,10 @@
 #define IDC_IS_TEXT                     1324
 #define IDC_USE_BINARY                  1324
 #define IDC_C_WATCH_SEPARATE            1999
-#define ID_EMULATOR_1X	                39998
-#define ID_EMULATOR_2X	                39999
+#define ID_EMULATOR_1X	                39996
+#define ID_EMULATOR_2X	                39997
+#define ID_EMULATOR_3X	                39998
+#define ID_EMULATOR_4X	                39999
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
 #define ID_FILE_RUN_CD                  40003
