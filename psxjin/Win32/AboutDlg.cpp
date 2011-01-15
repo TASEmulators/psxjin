@@ -37,9 +37,14 @@ LRESULT WINAPI AboutDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_COMMAND:
 			switch(wParam) {
 				case IDOK:
+				case IDCANCEL:
 					EndDialog(hDlg, TRUE);
 					return TRUE;
 			}
+			break;
+
+		case WM_CLOSE:
+			EndDialog(hDlg, TRUE);
 			break;
 	}
 	return FALSE;
