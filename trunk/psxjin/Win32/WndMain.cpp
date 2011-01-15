@@ -693,7 +693,7 @@ void UpdateWindowSizeFromConfig()
 {
 	char Conf_File[256];
 	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
-	int winsize = GetPrivateProfileInt("GPU", "iWinSize", 320, Conf_File);
+	int winsize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320, 240), Conf_File);
 	MainWindow_width = LOWORD(winsize);
 	MainWindow_height = HIWORD(winsize);
 }
