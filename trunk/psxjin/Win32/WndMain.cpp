@@ -471,7 +471,7 @@ void States_Load(int num) {
 	char Text[256];
 	int ret;
 
-	SetMenu(gApp.hWnd, NULL);
+//	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	SysReset();
 	NeedReset = 0;
@@ -491,7 +491,7 @@ void States_Save(int num) {
 	char Text[256];
 	int ret;
 
-	SetMenu(gApp.hWnd, NULL);
+//	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	if (NeedReset) {
 		SysReset();
@@ -838,7 +838,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 /*
 				case ID_FILE_RUNCDBIOS:
 					LoadCdBios = 1;
-					SetMenu(hWnd, NULL);
+					//SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
 					CheckCdrom();
 					SysReset();
@@ -849,7 +849,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_RUN_EXE:
 					if (!Open_File_Proc(File)) return TRUE;
-					SetMenu(hWnd, NULL);
+					//SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
 					SysReset();
 					NeedReset = 0;
@@ -2235,7 +2235,7 @@ void WIN32_StartAviRecord()
 
 	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
-	SetMenu(gApp.hWnd, NULL);
+	//SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	GPU_startAvi(Movie.aviFilename);
 	SPUstartWav(Movie.wavFilename);
