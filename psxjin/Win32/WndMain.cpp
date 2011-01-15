@@ -2127,7 +2127,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 		if (!IsoFile[0] == 0) //adelikat:  Having CfgOpenFile() be value returning is more elegant but this gets the job done
 		{
 			LoadCdBios = 0;
-			SetMenu(gApp.hWnd, NULL);
+			//SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			SysReset();
 			NeedReset = 0;
@@ -2160,7 +2160,7 @@ void WIN32_StartMovieRecord()
 			return;
 		}
 		LoadCdBios = 0;
-		SetMenu(gApp.hWnd, NULL);
+		//SetMenu(gApp.hWnd, NULL);
 		OpenPlugins(gApp.hWnd);
 		SysReset();
 		NeedReset = 0;
