@@ -204,10 +204,10 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_MENU].key
-	&& modifiers == EmuCommandTable[EMUCMD_MENU].keymod)
+	if(key == EmuCommandTable[EMUCMD_OPENCD].key
+	&& modifiers == EmuCommandTable[EMUCMD_OPENCD].keymod)
 	{
-		//iCallW32Gui=1;	//adelikat: Disabling this now obsolete item
+		SendMessage(gApp.hWnd, WM_COMMAND, (WPARAM)ID_FILE_RUN_CD,(LPARAM)(NULL));
 		return;
 	}
 
