@@ -821,8 +821,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_START_CAPTURE:
-					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/AviHelp", NULL, NULL, SW_SHOWNORMAL);
-//					WIN32_StartAviRecord();
+//					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/AviHelp", NULL, NULL, SW_SHOWNORMAL);
+					WIN32_StartAviRecord();
 					break;
 
 				case ID_FILE_RUN_CD:
@@ -2263,6 +2263,8 @@ INT_PTR CALLBACK DlgMemPoke(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			SetDlgItemText(hDlg, IDC_NC_NEWVAL, bufPokeNewval);
 		}
 		return TRUE;
+		case WM_QUIT:
+		case WM_CLOSE:
 		case WM_DESTROY: {
 			memPokeHWND = NULL;
 			GetDlgItemText(hDlg, IDC_NC_ADDRESS, bufPokeAddress, 7);
