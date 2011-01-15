@@ -769,6 +769,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+
+			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+
+			
 			return TRUE;
 		case WM_MOVE:
 		{
@@ -901,6 +909,18 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_EMULATOR_2X:
 					MainWindow_width = 640;
 					MainWindow_height = 480;
+					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
+					WriteWindowSizeToConfig();
+					return TRUE;
+				case ID_EMULATOR_3X:
+					MainWindow_width = 960;
+					MainWindow_height = 720;
+					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
+					WriteWindowSizeToConfig();
+					return TRUE;
+				case ID_EMULATOR_4X:
+					MainWindow_width = 1280;
+					MainWindow_height = 960;
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
@@ -1836,6 +1856,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
+	ADDMENUITEM(0, _("4x"), ID_EMULATOR_4X);
+	ADDMENUITEM(0, _("3x"), ID_EMULATOR_3X);
 	ADDMENUITEM(0, _("2x"), ID_EMULATOR_2X);
 	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
 	ADDSEPARATOR(0);
