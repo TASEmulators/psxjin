@@ -628,6 +628,7 @@ void ExitPSXjin()
 				ClosePlugins();
 			SysClose();
 			exit(0);
+			SaveConfig();
 		}
 		else
 			AccBreak = 0;
