@@ -629,7 +629,8 @@ void ExitPSXjin()
 				ClosePlugins();
 			SysClose();
 			exit(0);
-			SaveConfig();
+			SaveConfig();	//Various settings	//TODO: A single save config file function!
+			SaveIni();		//Main Window settings
 		}
 		else
 			AccBreak = 0;
