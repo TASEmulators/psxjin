@@ -5214,14 +5214,14 @@ unsigned long ulInitDisplay(void)
 
 		if (iUseScanLines)
 			SetWindowPos(hWGPU,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
-/*
+
 		MoveWindow(hWGPU,                            // -> move wnd
 		           GetSystemMetrics(SM_CXFULLSCREEN)/2-iResX/2,
 		           GetSystemMetrics(SM_CYFULLSCREEN)/2-iResY/2,
 		           iResX+GetSystemMetrics(SM_CXFIXEDFRAME)+3,
 		           iResY+GetSystemMetrics(SM_CYFIXEDFRAME)+GetSystemMetrics(SM_CYCAPTION)+3,
 		           TRUE);
-*/	//adelikat: Respect the existing window position
+	//adelikat: Respect the existing window position
 		UpdateWindow(hWGPU);                         // -> let windows do some update
 	}
 	else                                                  // no window mode:
