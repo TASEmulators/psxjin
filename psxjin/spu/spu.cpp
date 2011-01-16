@@ -658,6 +658,8 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 	//	else printf(" ");
 	//}
 	//printf("\n");
+
+	if (spu == SPU_core) RecordBuffer(&spu->outbuf[0], length*4);
 }
 
 u16 SPU_struct::SPUreadDMA(void)

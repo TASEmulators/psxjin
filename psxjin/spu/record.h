@@ -3,7 +3,7 @@
 
 #ifdef _WINDOWS
 void RecordStart();
-void RecordBuffer(unsigned char* pSound,long lBytes);
+void RecordBuffer(s16* pSound,long lBytes);
 void RecordStop();
 BOOL CALLBACK RecordDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern char szRecFileName[MAX_PATH];
