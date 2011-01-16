@@ -80,7 +80,7 @@ void SaveConfig()
 	}
 }
 
-int LoadConfig()
+void LoadConfig()
 {
 	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 
@@ -119,8 +119,6 @@ int LoadConfig()
 		if (temp != 65535)
 			EmuCommandTable[i].keymod = temp;
 	}
-
-	return 0;
 }
 
 /////////////////////////////////////////////////////////
