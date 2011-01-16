@@ -68,7 +68,7 @@ void CreateMainWindow(int nCmdShow);
 void RunGui();
 void PADhandleKey(int key);
 
-int  LoadConfig();
+void LoadConfig();
 void SaveConfig();
 
 void UpdateMenuSlots();

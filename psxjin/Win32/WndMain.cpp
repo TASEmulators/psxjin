@@ -52,6 +52,7 @@ extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, L
 
 //Prototypes
 void RunCD(HWND hWnd);
+void SaveIni();
 
 // global variables
 AppData gApp;
