@@ -60,6 +60,7 @@ long LoadCdBios;
 int Running;
 int Continue=0;
 char PcsxDir[256];
+char Conf_File[256] = ".\\psxjin.ini";
 
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
@@ -692,8 +693,6 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 
 void UpdateWindowSizeFromConfig()
 {
-	char Conf_File[256];
-	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	int winsize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320, 240), Conf_File);
 	MainWindow_width = LOWORD(winsize);
 	MainWindow_height = HIWORD(winsize);
@@ -701,8 +700,6 @@ void UpdateWindowSizeFromConfig()
 
 void WriteWindowSizeToConfig()
 {
-	char Conf_File[256];
-	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	char Str_Tmp[1024];
 	int winsize = MAKELONG(MainWindow_width,MainWindow_height);
 	sprintf(Str_Tmp, "%d", winsize);
@@ -1381,7 +1378,7 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 			RecentCDs.SetID(65000);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
 			//RecentCDs.MakeRecentMenu(gApp.hInstance);
-			RecentCDs.GetRecentItemsFromIni(".\\PSXjin.ini", "General", "CD");	//TODO: make this a global variable
+			RecentCDs.GetRecentItemsFromIni(Conf_File, "General", "CD");	//TODO: make this a global variable
 			break;
 		case WM_INITDIALOG:
 			mcdDlg = hW;
@@ -1948,8 +1945,6 @@ int lFirst;
 
 void SaveIni()
 {
-	//adelikat: Write to ini not Registry
-	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
 
 	sprintf(Str_Tmp, "%d", MainWindow_wndx);
@@ -1973,12 +1968,11 @@ void SaveIni()
 		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Conf_File);	
 	}
 
-	RecentCDs.SaveRecentItemsToIni(".\\PSXjin.ini", "General", "CD");
+	RecentCDs.SaveRecentItemsToIni(Conf_File, "General", "CD");
 }
 
 void LoadIni()
 {
-	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 	AutoRWLoad = GetPrivateProfileInt("RamWatch", "AutoLoad", 0, Conf_File);
 	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Conf_File);
 	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Conf_File);
