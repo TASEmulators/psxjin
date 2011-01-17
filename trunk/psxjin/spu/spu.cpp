@@ -612,11 +612,9 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 
 		if(iSoundMode == SOUND_MODE_SYNCH)
 			synchronizer->enqueue_samples(output,1);
-		else
-		{
-			spu->outbuf[j*2] = output[0];
-			spu->outbuf[j*2+1] = output[1];
-		}
+
+		spu->outbuf[j*2] = output[0];
+		spu->outbuf[j*2+1] = output[1];
 
 		//fwrite(&left_out,2,1,wavout);
 		//fwrite(&right_out,2,1,wavout);
@@ -659,7 +657,8 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 	//}
 	//printf("\n");
 
-	if (spu == SPU_core) RecordBuffer(&spu->outbuf[0], length*4);
+	if (spu == SPU_core) 
+		RecordBuffer(&spu->outbuf[0], length*4);
 }
 
 u16 SPU_struct::SPUreadDMA(void)
