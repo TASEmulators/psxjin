@@ -761,6 +761,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				{
 					SysMessage("PCSX-rr movies are not supported in PSXjin");
 				}
+				else if (IsFileExtension(fileDropped, ".lua"))
+				{
+					PCSX_LoadLuaCode(fileDropped.c_str());
+				}
 			}
 		}
 		case WM_ENTERMENULOOP:
