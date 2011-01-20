@@ -3369,6 +3369,11 @@ void CALLBACK GPUshowframecounter()
 	}
 }
 
+void CALLBACK GPUshowInput()
+{
+	dispInput ^= 1;
+}
+
 void CALLBACK GPUsetcurrentmode(char newModeFlags)
 {
 	modeFlags = newModeFlags;
