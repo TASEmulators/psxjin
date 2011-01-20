@@ -211,7 +211,7 @@ extern long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
 extern short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;
 extern long           lLowerpart;
 extern BOOL           bIsFirstFrame;
-extern int            iWinSize;
+//extern int            iWinSize;
 extern BOOL           bCheckMask;
 extern unsigned short sSetMask;
 extern unsigned long  lSetMask;
