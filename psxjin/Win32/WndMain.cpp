@@ -2055,6 +2055,8 @@ int SysInit() {
 	LoadIni();
 	if (dispFrameCounter)
 		GPU_showframecounter();
+	if (dispInput)
+		GPU_showInput();
 	return 0;
 }
 
