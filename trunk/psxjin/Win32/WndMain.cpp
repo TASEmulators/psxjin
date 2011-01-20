@@ -62,6 +62,7 @@ int Running;
 int Continue=0;
 char PcsxDir[256];
 char Conf_File[256] = ".\\psxjin.ini";
+bool AVIisCapturing = false;
 
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
@@ -695,21 +696,13 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 
 void UpdateWindowSizeFromConfig()
 {
-	/*
-	int winsize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320, 240), Conf_File);
-	MainWindow_width = LOWORD(winsize);
-	MainWindow_height = HIWORD(winsize); */
 	MainWindow_width = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File)+MENUSIZE;
-
 }
 
 void WriteWindowSizeToConfig()
 {
 	char Str_Tmp[1024];
-	/*int winsize = MAKELONG(MainWindow_width,MainWindow_height);
-	sprintf(Str_Tmp, "%d", winsize);
-	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);*/
 	sprintf(Str_Tmp, "%d", MainWindow_width);
 	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", MainWindow_height-MENUSIZE);
@@ -777,6 +770,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 
 			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -831,6 +826,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_START_CAPTURE:
 //					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/AviHelp", NULL, NULL, SW_SHOWNORMAL);
 					WIN32_StartAviRecord();
+					break;
+
+				case ID_END_CAPTURE:
+					WIN32_StopAviRecord();
 					break;
 
 				case ID_FILE_RUN_CD:
@@ -1847,11 +1846,14 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&File"));
 	ADDMENUITEM(0, _("E&xit"), ID_FILE_EXIT);
 	ADDSEPARATOR(0);
+	ADDMENUITEM(0, _("Stop AVI"), ID_END_CAPTURE);
+	ADDMENUITEM(0, _("Record &AVI"), ID_START_CAPTURE);
+	ADDSEPARATOR(0);
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDSUBMENUS(0, 1, _("&Movie"));
-	ADDMENUITEM(1, _("Record &AVI Help..."), ID_START_CAPTURE);
+
 	ADDSEPARATOR(1);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
@@ -2231,7 +2233,7 @@ void WIN32_StartAviRecord()
 		return;
 
 	Movie.capture = 1;
-	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_GRAYED);
+	AVIisCapturing = true;
 	fszDrive[0] = '\0';
 	fszDirectory[0] = '\0';
 	fszFilename[0] = '\0';
@@ -2256,7 +2258,7 @@ void WIN32_StopAviRecord()
 	GPU_stopAvi();
 	SPUstopWav();
 	Movie.capture = 0;
-	EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,MF_ENABLED);
+	AVIisCapturing = false;
 }
 
 
