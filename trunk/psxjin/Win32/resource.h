@@ -419,6 +419,7 @@
 #define ID_FILE_RUNCDBIOS               40026
 #define ID_FILE_RECENT_CD               40027
 #define ID_FILE_CLOSE_CD                40028
+#define ID_FILE_SCREENSHOT				40029
 #define ID_FILE_STATES_LOAD_SLOT1       40031
 #define ID_FILE_STATES_LOAD_SLOT2       40032
 #define ID_FILE_STATES_LOAD_SLOT3       40033

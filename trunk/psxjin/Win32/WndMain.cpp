@@ -772,6 +772,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 
 			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -865,6 +866,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					psxCpu->Execute();
 					return TRUE;
 */
+				case ID_FILE_SCREENSHOT:
+					GPU_makeSnapshot();
+					return TRUE;
+
 				case ID_FILE_STATES_LOAD_SLOT1: States_Load(0); return TRUE;
 				case ID_FILE_STATES_LOAD_SLOT2: States_Load(1); return TRUE;
 				case ID_FILE_STATES_LOAD_SLOT3: States_Load(2); return TRUE;
@@ -1849,12 +1854,12 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Stop AVI"), ID_END_CAPTURE);
 	ADDMENUITEM(0, _("Record &AVI"), ID_START_CAPTURE);
 	ADDSEPARATOR(0);
+	ADDMENUITEM(0, _("Screenshot"), ID_FILE_SCREENSHOT);
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDSUBMENUS(0, 1, _("&Movie"));
 
-	ADDSEPARATOR(1);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
