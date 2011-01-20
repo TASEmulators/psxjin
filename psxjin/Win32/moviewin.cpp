@@ -365,23 +365,40 @@ static void VerifyRecordingFilename(HWND hDlg)
 	}
 }
 
+//adelikat: This is probably more useful in Wndmain + header
+//Strips path and extension off IsoFile and returns the result
+std::string MakeMovieName()
+{
+	std::string str;
+	if (IsoFile[0])
+	{
+		str = IsoFile;
+		int x = str.find_last_of('\\') + 1;
+		str = str.substr(x, str.length() - x - 4);
+	}
+	else
+	{
+		str = "movie";
+	}
+
+	return str;
+}
+
 static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	int nRet;
 	LONG lIndex;
-	char* defaultFilename = "movie";
+	char defaultFilename[1024];
 	if (Msg == WM_INITDIALOG) {
 		// come up with a unique name
 		char szPath[256];
 		char szFilename[256];
 		int i = 0;
-//		sprintf(szFilename, "%.8s.pjm", BurnDrvGetText(DRV_NAME));
-		//TODO: make it use the CD label name?
-		sprintf(szFilename, "%.8s.pjm", defaultFilename);
+		strncpy(defaultFilename, MakeMovieName().c_str(), 1024);
+		sprintf(szFilename, "%.252s.pjm", defaultFilename);
 		strncpy(szPath, szFilename, 256);
 		while(VerifyRecordingAccessMode(szPath, 0) == 1) {
-//			sprintf(szFilename, _T("%.8s-%d.pjm"), BurnDrvGetText(DRV_NAME), ++i);
-			sprintf(szFilename, "%.8s-%d.pjm", defaultFilename, ++i);
+			sprintf(szFilename, "%.252s-%d.pjm", defaultFilename, ++i);
 			strncpy(szPath, szFilename, 256);
 		}
 
