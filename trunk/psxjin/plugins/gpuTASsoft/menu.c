@@ -251,7 +251,7 @@ void DisplayInput(void)
 		SetBkMode(hdc,TRANSPARENT);
 	else SetBkColor(hdc,RGB(0,0,0));
 
-	ExtTextOut(hdc,3,PSXDisplay.DisplayMode.y-22,0,NULL,cCurrentInput,36,NULL);
+	ExtTextOut(hdc,3,/*PSXDisplay.DisplayMode.y-*/22,0,NULL,cCurrentInput,36,NULL);
 
 	SelectObject(hdc,hFO);
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
