@@ -224,7 +224,6 @@ extern int            iUseGammaVal;
 extern int            iUseScanLines;
 extern int            iDesktopCol;
 extern int            iUseNoStretchBlt;
-extern int            iShowFPS;
 extern int            iFastFwd;
 extern int            iDebugMode;
 extern int            iFVDisplay;

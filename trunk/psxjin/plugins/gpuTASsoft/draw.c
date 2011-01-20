@@ -118,7 +118,7 @@ BOOL           bCheckMask=FALSE; //!
 unsigned short sSetMask=0; //!
 unsigned long  lSetMask=0; //!
 int            iDesktopCol=16;
-int            iShowFPS=0;
+//int            iShowFPS=0;
 //int            iWinSize;
 int            iUseScanLines=0;
 int            iUseNoStretchBlt=0;
@@ -5146,14 +5146,14 @@ int DXinitialize()
 	bUsingTWin=FALSE;
 
 	InitMenu();                                           // menu init
-
+/*
 	if (iShowFPS)                                         // fps on startup
 	{
 		ulKeybits|=KEY_SHOWFPS;
 		szDispBuf[0]=0;
 		BuildDispMenu(0);
 	}
-
+*/	//adelikat: TODO: remove this block
 	bIsFirstFrame = FALSE;                                // done
 
 	return 0;
