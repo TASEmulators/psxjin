@@ -64,6 +64,9 @@ char PcsxDir[256];
 char Conf_File[256] = ".\\psxjin.ini";
 bool AVIisCapturing = false;
 
+//TODO: remove me and use the gpu one!
+int dispInput = 0;
+
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
 int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
@@ -784,7 +787,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-
+		
+			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
 			
 			return TRUE;
 		case WM_MOVE:
@@ -940,6 +944,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					MainWindow_height = 960+MENUSIZE;
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
+					return TRUE;
+				case ID_EMULATOR_DISPINPUT:
+					dispInput ^= 1;
 					return TRUE;
 /*
 				case ID_CONFIGURATION_CDROM:
@@ -1876,6 +1883,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
+	ADDMENUITEM(0, _("Display Input"), ID_EMULATOR_DISPINPUT);
+	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("4x"), ID_EMULATOR_4X);
 	ADDMENUITEM(0, _("3x"), ID_EMULATOR_3X);
 	ADDMENUITEM(0, _("2x"), ID_EMULATOR_2X);

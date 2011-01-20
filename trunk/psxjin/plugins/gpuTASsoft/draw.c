@@ -4586,8 +4586,13 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 		DisplayText();              // paint menu text
 		DisplayFrames();
 		DisplayLag();
-		DisplayInput();
+	//	DisplayInput();
 		DisplayMovMode();
+	}
+
+	if (dispInput)
+	{
+		DisplayInput();
 	}
 
 	if (pExtraBltFunc)
