@@ -75,6 +75,7 @@ GPUupdateframe      GPU_updateframe;
 GPUsetcurrentmode   GPU_setcurrentmode;
 GPUsetspeedmode     GPU_setspeedmode;
 GPUshowframecounter GPU_showframecounter;
+GPUshowInput		GPU_showInput;
 GPUstartAvi         GPU_startAvi;
 GPUstopAvi          GPU_stopAvi;
 GPUsendFpLuaGui     GPU_sendFpLuaGui;
