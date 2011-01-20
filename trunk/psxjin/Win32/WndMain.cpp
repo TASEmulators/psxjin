@@ -695,17 +695,25 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 
 void UpdateWindowSizeFromConfig()
 {
+	/*
 	int winsize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320, 240), Conf_File);
 	MainWindow_width = LOWORD(winsize);
-	MainWindow_height = HIWORD(winsize);
+	MainWindow_height = HIWORD(winsize); */
+	MainWindow_width = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
+	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File)+65;
+
 }
 
 void WriteWindowSizeToConfig()
 {
 	char Str_Tmp[1024];
-	int winsize = MAKELONG(MainWindow_width,MainWindow_height);
+	/*int winsize = MAKELONG(MainWindow_width,MainWindow_height);
 	sprintf(Str_Tmp, "%d", winsize);
-	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);
+	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);*/
+	sprintf(Str_Tmp, "%d", MainWindow_width);
+	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", MainWindow_height-65);
+	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Conf_File);
 }
 
 bool IsFileExtension(std::string filename, std::string ext)

@@ -5208,8 +5208,8 @@ unsigned long ulInitDisplay(void)
 		dw|=WS_BORDER|WS_CAPTION;
 		SetWindowLong(hWGPU, GWL_STYLE, dw);
 */	//adelikat: We want to just keep the window style the same as it was, thanks
-		iResX=LOWORD(iWinSize);
-		iResY=HIWORD(iWinSize);
+		//iResX=LOWORD(iWinSize);
+		//iResY=HIWORD(iWinSize);
 		ShowWindow(hWGPU,SW_SHOWNORMAL);
 
 		if (iUseScanLines)
