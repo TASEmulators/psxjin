@@ -67,7 +67,7 @@ int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
 int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
 int MainWindow_height = 240;
-
+const int MENUSIZE = 65;
 // Recent Menus
 RecentMenu RecentCDs;
 
@@ -700,7 +700,7 @@ void UpdateWindowSizeFromConfig()
 	MainWindow_width = LOWORD(winsize);
 	MainWindow_height = HIWORD(winsize); */
 	MainWindow_width = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
-	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File)+65;
+	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File)+MENUSIZE;
 
 }
 
@@ -712,7 +712,7 @@ void WriteWindowSizeToConfig()
 	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);*/
 	sprintf(Str_Tmp, "%d", MainWindow_width);
 	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Conf_File);
-	sprintf(Str_Tmp, "%d", MainWindow_height-65);
+	sprintf(Str_Tmp, "%d", MainWindow_height-MENUSIZE);
 	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Conf_File);
 }
 
@@ -909,26 +909,26 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 				case ID_EMULATOR_1X:
 					MainWindow_width = 320;
-					MainWindow_height = 240;
+					MainWindow_height = 240+MENUSIZE;
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 
 				case ID_EMULATOR_2X:
 					MainWindow_width = 640;
-					MainWindow_height = 480;
+					MainWindow_height = 480+MENUSIZE;
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 				case ID_EMULATOR_3X:
 					MainWindow_width = 960;
-					MainWindow_height = 720;
+					MainWindow_height = 720+MENUSIZE;
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 				case ID_EMULATOR_4X:
 					MainWindow_width = 1280;
-					MainWindow_height = 960;
+					MainWindow_height = 960+MENUSIZE;
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
