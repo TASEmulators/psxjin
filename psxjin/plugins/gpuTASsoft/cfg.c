@@ -360,7 +360,6 @@ BOOL OnInitSoftDialog(HWND hW)
 	if (iSysMemory)       CheckDlgButton(hW,IDC_SYSMEMORY,TRUE);
 	if (iStopSaver)       CheckDlgButton(hW,IDC_STOPSAVER,TRUE);
 	if (iUseFixes)        CheckDlgButton(hW,IDC_GAMEFIX,TRUE);
-	if (iShowFPS)         CheckDlgButton(hW,IDC_SHOWFPS,TRUE);
 	if (bVsync)           CheckDlgButton(hW,IDC_VSYNC,TRUE);
 	if (bTransparent)     CheckDlgButton(hW,IDC_TRANSPARENT,TRUE);
 	if (iDebugMode)       CheckDlgButton(hW,IDC_DEBUGMODE,TRUE);
@@ -476,10 +475,6 @@ void GetSettings(HWND hW)
 	if (IsDlgButtonChecked(hW,IDC_SSSPSXLIMIT))           // SSSPSX fps limit mode
 		bSSSPSXLimit=TRUE;
 	else bSSSPSXLimit=FALSE;
-
-	if (IsDlgButtonChecked(hW,IDC_SHOWFPS))               // show fps
-		iShowFPS=1;
-	else iShowFPS=0;
 
 	if (IsDlgButtonChecked(hW,IDC_DEBUGMODE))             // debug mode
 		iDebugMode=1;
@@ -850,7 +845,6 @@ void ReadConfig(void)
 	dwCfgFixes = GetPrivateProfileInt("GPU", "dwCfgFixes", 0, Conf_File);
 	iUseFixes = GetPrivateProfileInt("GPU", "iUseFixes", 0, Conf_File);
 	iUseScanLines = GetPrivateProfileInt("GPU", "iUseScanLines", 0, Conf_File);
-	iShowFPS = GetPrivateProfileInt("GPU", "iShowFPS", 0, Conf_File);
 	iUseNoStretchBlt = GetPrivateProfileInt("GPU", "iUseNoStretchBlt", 0, Conf_File);
 	iUseDither = GetPrivateProfileInt("GPU", "iUseDither", 0, Conf_File);
 	iUseGammaVal = GetPrivateProfileInt("GPU", "iUseGammaVal", 2048, Conf_File);
@@ -981,8 +975,6 @@ void WriteConfig(void)
 	WritePrivateProfileString("GPU", "iUseFixes", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", iUseScanLines);
 	WritePrivateProfileString("GPU", "iUseScanLines", Str_Tmp, Conf_File);
-	sprintf(Str_Tmp, "%d", iShowFPS);
-	WritePrivateProfileString("GPU", "iShowFPS", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", iUseNoStretchBlt);
 	WritePrivateProfileString("GPU", "iUseNoStretchBlt", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", iUseDither);
@@ -1567,7 +1559,6 @@ void ReadConfig(void)
 	iUseFixes=0;
 	iUseNoStretchBlt=1;
 	iUseDither=0;
-	iShowFPS=0;
 	bSSSPSXLimit=FALSE;
 
 // read sets
@@ -1625,7 +1616,6 @@ void WriteConfig(void)
 		iUseFixes=0;
 		iUseNoStretchBlt=1;
 		iUseDither=0;
-		iShowFPS=0;
 		bSSSPSXLimit=FALSE;
 
 		size = 0;
@@ -1646,7 +1636,6 @@ void WriteConfig(void)
 	SetValue("NoStretch", iUseNoStretchBlt);
 	SetValue("Dithering", iUseDither);
 	SetValue("FullScreen", !iWindowMode);
-	SetValue("ShowFPS", iShowFPS);
 	SetValue("SSSPSXLimit", bSSSPSXLimit);
 	SetValue("ScanLines", iUseScanLines);
 	SetValue("UseFrameLimit", UseFrameLimit);

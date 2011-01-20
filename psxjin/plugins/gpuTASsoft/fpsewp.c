@@ -153,8 +153,6 @@ void WriteConfig(void)
 	g->WriteCfg("GpuPeopsSDL","WindowMode",buf);
 	sprintf(buf,"%i",iUseScanLines);
 	g->WriteCfg("GpuPeopsSDL","iUseScanLines",buf);
-	sprintf(buf,"%i",iShowFPS);
-	g->WriteCfg("GpuPeopsSDL","ShowFPS", buf);
 	sprintf(buf,"%i",UseFrameLimit);
 	g->WriteCfg("GpuPeopsSDL","UseFrameLimit",buf);
 	sprintf(buf,"%i",UseFrameSkip);

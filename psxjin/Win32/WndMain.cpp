@@ -47,6 +47,8 @@
 #include "../spu/spu.h"
 #include "recentmenu.h"
 
+#include "plugins.h"
+
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -64,8 +66,9 @@ char PcsxDir[256];
 char Conf_File[256] = ".\\psxjin.ini";
 bool AVIisCapturing = false;
 
-//TODO: remove me and use the gpu one!
+//TODO: remove me and use the gpu ones!
 int dispInput = 0;
+int dispFrameCounter = 0;
 
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
@@ -787,7 +790,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-		
+
+			
+			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
 			
 			return TRUE;
@@ -947,6 +952,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 				case ID_EMULATOR_DISPINPUT:
 					dispInput ^= 1;
+					return TRUE;
+				case ID_EMULATOR_DISPFRAMECOUNTER:
+					dispFrameCounter ^= 1;
+					GPU_showframecounter();
 					return TRUE;
 /*
 				case ID_CONFIGURATION_CDROM:
@@ -1884,6 +1893,7 @@ void CreateMainMenu() {
 
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Display Input"), ID_EMULATOR_DISPINPUT);
+	ADDMENUITEM(0, _("Display Frame counter"), ID_EMULATOR_DISPFRAMECOUNTER);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("4x"), ID_EMULATOR_4X);
 	ADDMENUITEM(0, _("3x"), ID_EMULATOR_3X);
@@ -1982,6 +1992,8 @@ void SaveIni()
 	WritePrivateProfileString("General", "Main_x", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", MainWindow_wndy);
 	WritePrivateProfileString("General", "Main_y", Str_Tmp, Conf_File);
+	sprintf(Str_Tmp, "%d", dispFrameCounter);
+	WritePrivateProfileString("General", "FrameCounter", Str_Tmp, Conf_File);
 
 	sprintf(Str_Tmp, "%d", AutoRWLoad);
 	WritePrivateProfileString("RamWatch", "AutoLoad", Str_Tmp, Conf_File);
@@ -2010,6 +2022,7 @@ void LoadIni()
 	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Conf_File);
 	MainWindow_wndx = GetPrivateProfileInt("General", "main_x", 0, Conf_File);
 	MainWindow_wndy = GetPrivateProfileInt("General", "main_y", 0, Conf_File);
+	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Conf_File);
 
 	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
 	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
@@ -2040,6 +2053,8 @@ int SysInit() {
 	LoadPlugins();
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 	LoadIni();
+	if (dispFrameCounter)
+		GPU_showframecounter();
 	return 0;
 }
 
