@@ -277,6 +277,7 @@ extern char           szMenuBuf[];
 extern char           szDebugText[];
 extern short          sDispWidths[];
 extern BOOL           bDebugText;
+extern int			  dispInput;
 //extern unsigned int   iMaxDMACommandCounter;
 //extern unsigned long  dwDMAChainStop;
 extern PSXDisplay_t   PSXDisplay;

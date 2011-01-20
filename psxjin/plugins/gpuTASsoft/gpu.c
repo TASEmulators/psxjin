@@ -222,6 +222,7 @@ BOOL              bSkipNextFrame = FALSE;
 DWORD             dwLaceCnt=0;
 int               iColDepth;
 int               iWindowMode;
+int				  dispInput = 0;
 short             sDispWidths[8] = {256,320,512,640,368,384,512,640};
 PSXDisplay_t      PSXDisplay; //!
 PSXDisplay_t      PreviousPSXDisplay; //!
