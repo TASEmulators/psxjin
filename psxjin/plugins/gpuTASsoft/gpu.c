@@ -372,7 +372,7 @@ char * pGetConfigInfos(int iCfg)
 	strcat(pB,szTxt);
 	//----------------------------------------------------//
 	if (iCfg && iWindowMode)
-		sprintf(szTxt,"Resolution/Color:\r\n- %dx%d ",LOWORD(iWinSize),HIWORD(iWinSize));
+		sprintf(szTxt,"Resolution/Color:\r\n- %dx%d ",iResX,iResY);
 	else
 		sprintf(szTxt,"Resolution/Color:\r\n- %dx%d ",iResX,iResY);
 	strcat(pB,szTxt);

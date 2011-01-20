@@ -119,7 +119,7 @@ unsigned short sSetMask=0; //!
 unsigned long  lSetMask=0; //!
 int            iDesktopCol=16;
 int            iShowFPS=0;
-int            iWinSize;
+//int            iWinSize;
 int            iUseScanLines=0;
 int            iUseNoStretchBlt=0;
 int            iFastFwd=0;
@@ -5208,8 +5208,6 @@ unsigned long ulInitDisplay(void)
 		dw|=WS_BORDER|WS_CAPTION;
 		SetWindowLong(hWGPU, GWL_STYLE, dw);
 */	//adelikat: We want to just keep the window style the same as it was, thanks
-		iResX=LOWORD(iWinSize);
-		iResY=HIWORD(iWinSize);
 		ShowWindow(hWGPU,SW_SHOWNORMAL);
 
 		if (iUseScanLines)

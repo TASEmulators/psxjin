@@ -350,8 +350,8 @@ BOOL OnInitSoftDialog(HWND hW)
 	tempDest = ComboBox_AddString(hWC,"Scanlines enabled (double blitting - nVidia fix)");
 	tempDest = ComboBox_SetCurSel(hWC,iUseScanLines);
 
-	SetDlgItemInt(hW,IDC_WINX,LOWORD(iWinSize),FALSE);    // window size
-	SetDlgItemInt(hW,IDC_WINY,HIWORD(iWinSize),FALSE);
+	SetDlgItemInt(hW,IDC_WINX,iResX,FALSE);    // window size
+	SetDlgItemInt(hW,IDC_WINY,iResY,FALSE);
 
 	if (UseFrameLimit)    CheckDlgButton(hW,IDC_USELIMIT,TRUE);
 	if (UseFrameSkip)     CheckDlgButton(hW,IDC_USESKIPPING,TRUE);
@@ -438,7 +438,8 @@ void GetSettings(HWND hW)
 	j=GetDlgItemInt(hW,IDC_WINY,NULL,FALSE);
 	if (j<50) j=50;
 	if (j>20000) j=20000;
-	iWinSize=MAKELONG(i,j);
+	iResX = i;
+	iResY = j;
 
 	if (IsDlgButtonChecked(hW,IDC_DISPMODE2))             // win mode
 		iWindowMode=1;
@@ -841,7 +842,6 @@ void ReadConfig(void)
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
 	iRefreshRate = GetPrivateProfileInt("GPU", "iRefreshRate", 0, Conf_File);
-	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320,240), Conf_File);
 	iWindowMode = GetPrivateProfileInt("GPU", "iWindowMode", 1, Conf_File);
 	iColDepth = GetPrivateProfileInt("GPU", "iColDepth", 16, Conf_File);
 	UseFrameLimit = GetPrivateProfileInt("GPU", "UseFrameLimit", 1, Conf_File);
@@ -944,9 +944,7 @@ void ReadWinSizeConfig(void)
 	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
-	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
-	iWinSize = GetPrivateProfileInt("GPU", "iWinSize", MAKELONG(320,240), Conf_File);
-	
+	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);	
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -967,8 +965,6 @@ void WriteConfig(void)
 	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", iRefreshRate);
 	WritePrivateProfileString("GPU", "iRefreshRate", Str_Tmp, Conf_File);
-	sprintf(Str_Tmp, "%d", iWinSize);
-	WritePrivateProfileString("GPU", "iWinSize", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", iWindowMode);
 	WritePrivateProfileString("GPU", "iWindowMode", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", iColDepth);
