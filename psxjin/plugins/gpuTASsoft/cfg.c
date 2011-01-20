@@ -836,7 +836,6 @@ void ReadConfig(void)
 	memset(szDevName,0,128);
 	memset(&guiDev,0,sizeof(GUID));
 
-	//adelikat: Load from ini not Registry
 	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
@@ -942,7 +941,6 @@ void ReadWinSizeConfig(void)
 {
 	char Conf_File[256];
 
-	//adelikat: Load from ini not Registry
 	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
@@ -957,7 +955,6 @@ void ReadWinSizeConfig(void)
 
 void WriteConfig(void)
 {
-	//adelikat: Write to ini not Registry
 	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
 
