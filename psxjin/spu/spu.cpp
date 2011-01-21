@@ -977,6 +977,15 @@ void SPU_Emulate_user()
 
 		if(samplesOutput)
 		{
+			//1 - loudest
+			//5 - mute
+			int vol = 5-iVolume;
+			for(int i=0;i<samplesOutput*2;i++)
+			{
+				int s = outbuf[i];
+				s = s*vol/4;
+				outbuf[i] = s;
+			}
 			SNDDXUpdateAudio(outbuf,samplesOutput);
 		}
 	}
