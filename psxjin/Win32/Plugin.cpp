@@ -311,7 +311,12 @@ void PADhandleKey(int key) {
 		GPUshowframecounter();
 		return;
 	}
-
+	if(key == EmuCommandTable[EMUCMD_INPUTDISPLAY].key
+	&& modifiers == EmuCommandTable[EMUCMD_INPUTDISPLAY].keymod)
+	{
+		GPUshowInput();
+		return;
+	}
 	if(key == EmuCommandTable[EMUCMD_CONFCPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFCPU].keymod)
 	{
