@@ -814,6 +814,7 @@ void psxBASIC() {
 
 void psxHLE() {
 	psxHLEt[psxRegs.code & 0xffff]();
+	printf("RABBITS!!\n");
 }
 
 void (*psxBSC[64])() = {
