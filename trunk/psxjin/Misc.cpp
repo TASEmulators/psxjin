@@ -726,62 +726,6 @@ int LoadStateEmbed(char *file) {
 
 	return 0;
 }
-// NET Function Helpers
-
-int SendPcsxInfo() {
-	if (NET_recvData == NULL || NET_sendData == NULL)
-		return 0;
-
-//	SysPrintf("SendPcsxInfo\n");
-
-	NET_sendData(&Config.Xa, sizeof(Config.Xa), PSE_NET_BLOCKING);
-	NET_sendData(&Config.Sio, sizeof(Config.Sio), PSE_NET_BLOCKING);
-	NET_sendData(&Config.RCntFix, sizeof(Config.RCntFix), PSE_NET_BLOCKING);
-	NET_sendData(&Config.PsxType, sizeof(Config.PsxType), PSE_NET_BLOCKING);
-	//NET_sendData(&Config.Cpu, sizeof(Config.Cpu), PSE_NET_BLOCKING);
-
-//	SysPrintf("Send OK\n");
-
-	return 0;
-}
-
-int RecvPcsxInfo() {
-	int tmp;
-
-	if (NET_recvData == NULL || NET_sendData == NULL)
-		return 0;
-
-//	SysPrintf("RecvPcsxInfo\n");
-
-	NET_recvData(&Config.Xa, sizeof(Config.Xa), PSE_NET_BLOCKING);
-	NET_recvData(&Config.Sio, sizeof(Config.Sio), PSE_NET_BLOCKING);
-	NET_recvData(&Config.RCntFix, sizeof(Config.RCntFix), PSE_NET_BLOCKING);
-	NET_recvData(&Config.PsxType, sizeof(Config.PsxType), PSE_NET_BLOCKING);
-	psxUpdateVSyncRate();
-
-	SysUpdate();
-
-	//tmp = Config.Cpu;
-	/*NET_recvData(&Config.Cpu, sizeof(Config.Cpu), PSE_NET_BLOCKING);
-	if (tmp != Config.Cpu) {
-		psxCpu->Shutdown();
-#ifdef PSXREC
-		if (Config.Cpu)	
-			 psxCpu = &psxInt;
-		else psxCpu = &psxRec;
-#else
-		psxCpu = &psxInt;
-#endif
-		if (psxCpu->Init() == -1) {
-			SysClose(); return -1;
-		}
-		psxCpu->Reset();
-	}*/
-
-//	SysPrintf("Recv OK\n");
-
-	return 0;
-}
 
 
 void __Log(char *fmt, ...) {

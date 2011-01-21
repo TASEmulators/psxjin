@@ -126,23 +126,6 @@ PADstartPoll        PAD2_startPoll;
 PADpoll             PAD2_poll;
 PADsetSensitive     PAD2_setSensitive;
 
-// NET function pointers 
-NETinit               NET_init;
-NETshutdown           NET_shutdown;
-NETopen               NET_open;
-NETclose              NET_close; 
-NETtest               NET_test;
-NETconfigure          NET_configure;
-NETabout              NET_about;
-NETpause              NET_pause;
-NETresume             NET_resume;
-NETqueryPlayer        NET_queryPlayer;
-NETsendData           NET_sendData;
-NETrecvData           NET_recvData;
-NETsendPadData        NET_sendPadData;
-NETrecvPadData        NET_recvPadData;
-NETsetInfo            NET_setInfo;
-NETkeypressed         NET_keypressed;
 
 END_EXTERN_C
 
@@ -618,51 +601,6 @@ int LoadPAD2plugin(char *PAD2dll) {
 	return 0;
 }
 
-void *hNETDriver;
-
-void CALLBACK NET__setInfo(netInfo *info) {}
-void CALLBACK NET__keypressed(int key) {}
-long CALLBACK NET__configure(void) { return 0; }
-long CALLBACK NET__test(void) { return 0; }
-void CALLBACK NET__about(void) {}
-
-#define LoadNetSym1(dest, name) \
-	LoadSym(NET_##dest, NET##dest, name, 1);
-
-#define LoadNetSymN(dest, name) \
-	LoadSym(NET_##dest, NET##dest, name, 0);
-
-#define LoadNetSym0(dest, name) \
-	LoadSym(NET_##dest, NET##dest, name, 0); \
-	if (NET_##dest == NULL) NET_##dest = (NET##dest) NET__##dest;
-
-int LoadNETplugin(char *NETdll) {
-	void *drv;
-
-	hNETDriver = SysLoadLibrary(NETdll);
-	if (hNETDriver == NULL) {
-		SysMessage (_("Could Not load NET plugin %s"), NETdll); return -1;
-	}
-	drv = hNETDriver;
-	LoadNetSym1(init, "NETinit");
-	LoadNetSym1(shutdown, "NETshutdown");
-	LoadNetSym1(open, "NETopen");
-	LoadNetSym1(close, "NETclose");
-	LoadNetSymN(sendData, "NETsendData");
-	LoadNetSymN(recvData, "NETrecvData");
-	LoadNetSym1(sendPadData, "NETsendPadData");
-	LoadNetSym1(recvPadData, "NETrecvPadData");
-	LoadNetSym1(queryPlayer, "NETqueryPlayer");
-	LoadNetSym1(pause, "NETpause");
-	LoadNetSym1(resume, "NETresume");
-	LoadNetSym0(setInfo, "NETsetInfo");
-	LoadNetSym0(keypressed, "NETkeypressed");
-	LoadNetSym0(configure, "NETconfigure");
-	LoadNetSym0(test, "NETtest");
-	LoadNetSym0(about, "NETabout");
-
-	return 0;
-}
 
 void CALLBACK clearDynarec(void) {
 	psxCpu->Reset();
@@ -677,13 +615,6 @@ int LoadPlugins() {
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad2);
 	if (LoadPAD2plugin(Plugin) == -1) return -1;
 
-	if (!strcmp("Disabled", Config.Net)) Config.UseNet = 0;
-	else {
-		Config.UseNet = 1;
-		sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Net);
-		if (LoadNETplugin(Plugin) == -1) return -1;
-	}
-
 	ret = CDRinit();
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
 	ret = GPUinit();
@@ -694,10 +625,6 @@ int LoadPlugins() {
 	if (ret < 0) { SysMessage (_("PAD1init error: %d"), ret); return -1; }
 	ret = PAD2_init(2);
 	if (ret < 0) { SysMessage (_("PAD2init error: %d"), ret); return -1; }
-	if (Config.UseNet) {
-		ret = NET_init();
-		if (ret < 0) { SysMessage (_("NETinit error: %d"), ret); return -1; }
-	}
 
 	return 0;
 }
@@ -706,23 +633,12 @@ void ReleasePlugins() {
 	if (hCDRDriver  == NULL ||
 		hPAD1Driver == NULL || hPAD2Driver == NULL) return;
 
-	if (Config.UseNet) {
-		int ret = NET_close();
-		if (ret < 0) Config.UseNet = 0;
-		NetOpened = 0;
-	}
-
 	CDRshutdown();
 	GPUshutdown();
 	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
-	if (Config.UseNet && hNETDriver != NULL) NET_shutdown(); 
 
-	//SysCloseLibrary(hCDRDriver); hCDRDriver = NULL;
 	SysCloseLibrary(hPAD1Driver); hPAD1Driver = NULL;
 	SysCloseLibrary(hPAD2Driver); hPAD2Driver = NULL;
-	if (Config.UseNet && hNETDriver != NULL) {
-		SysCloseLibrary(hNETDriver); hNETDriver = NULL;
-	}
 }

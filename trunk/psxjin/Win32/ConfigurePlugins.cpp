@@ -336,10 +336,6 @@ void ConfigureCDR(HWND hW) {
 	CDRconfigure();
 }
 
-void ConfigureNET(HWND hW) {
-	ConfPlugin(NETconfigure, IDC_LISTNET, "NETconfigure");
-}
-
 void ConfigurePAD1(HWND hW) {
 	ConfPlugin(PADconfigure, IDC_LISTPAD1, "PADconfigure");
 }
@@ -361,9 +357,6 @@ void ConfigurePAD2(HWND hW) {
 //	ConfPlugin(CDRabout, IDC_LISTCDR, "CDRabout");
 //}
 
-void AboutNET(HWND hW) {
-	ConfPlugin(NETabout, IDC_LISTNET, "NETabout");
-}
 
 void AboutPAD1(HWND hW) {
 	ConfPlugin(PADabout, IDC_LISTPAD1, "PADabout");
@@ -405,10 +398,6 @@ void AboutPAD2(HWND hW) {
 //void TestCDR(HWND hW) {
 //	TestPlugin(CDRtest, IDC_LISTCDR, "CDRtest");
 //}
-
-void TestNET(HWND hW) {
-	TestPlugin(NETtest, IDC_LISTNET, "NETtest");
-}
 
 void TestPAD1(HWND hW) {
 	TestPlugin(PADtest, IDC_LISTPAD1, "PADtest");
@@ -589,10 +578,6 @@ BOOL CALLBACK ConfigureNetPlayDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 
 		case WM_COMMAND: {
      		switch (LOWORD(wParam)) {
-				case IDC_CONFIGNET:  ConfigureNET(hW); return TRUE;
-				case IDC_TESTNET:    TestNET(hW);   return TRUE;
-				case IDC_ABOUTNET:   AboutNET(hW);  return TRUE;
-
 				case IDCANCEL: 
 					CleanCombo(IDC_LISTNET);
 					EndDialog(hW,FALSE); 
