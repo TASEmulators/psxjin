@@ -41,6 +41,8 @@
 //#define KEY_BLACKWHITE    64
 #define KEY_BADTEXTURES   128
 #define KEY_CHECKTHISOUT  256
+#define KEY_SHOWINPUT	  512
+#define KEY_SHOWFPSALL	  1024
 
 
 #ifndef _FPSE

@@ -154,9 +154,17 @@ void DisplayText(void)                                 // DISPLAY TEXT
 	else                                                  // else standard gpu menu
 	{
 		szDebugText[0]=0;
-		lstrcat(szDispBuf,szMenuBuf);
-		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szDispBuf,lstrlen(szDispBuf),NULL);
+		if (ulKeybits&KEY_SHOWFPSALL)
+		{
+			lstrcat(szDispBuf,szMenuBuf);
+			ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,szDispBuf,lstrlen(szDispBuf),NULL);
+		}
 	}
+	if  (ulKeybits&KEY_SHOWINPUT)
+	{
+		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szInputBuf,36,NULL);
+	}
+
 
 	SelectObject(hdc,hFO);
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
@@ -236,26 +244,20 @@ void DisplayMovMode(void)
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
-
 void DisplayInput(void)
 {
-#ifdef _WINDOWS
-	HDC hdc;
-	HFONT hFO;
-
-	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
-	hFO=(HFONT)SelectObject(hdc,hGFont);
-
-	SetTextColor(hdc,RGB(0,255,0));
-	if (bTransparent)
-		SetBkMode(hdc,TRANSPARENT);
-	else SetBkColor(hdc,RGB(0,0,0));
-
-	ExtTextOut(hdc,3,/*PSXDisplay.DisplayMode.y-*/22,0,NULL,cCurrentInput,36,NULL);
-
-	SelectObject(hdc,hFO);
-	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
-#endif
+	if (ulKeybits&KEY_SHOWINPUT)
+	{
+		DestroyPic();
+		ulKeybits&=~KEY_SHOWINPUT;
+		DoClearScreenBuffer();
+	}
+	else
+	{
+		ulKeybits|=KEY_SHOWINPUT;
+		szDispBuf[0]=0;
+		BuildDispMenu(0);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -344,7 +346,7 @@ void BuildDispMenu(int iInc)
 	cCurrentInput[33] = currentInput&0x1000000?' ':'2'; //l2
 	cCurrentInput[34] = currentInput&0x2000000?' ':'R'; //r2
 	cCurrentInput[35] = currentInput&0x2000000?' ':'2'; //r2
-
+    strcpy(szInputBuf,cCurrentInput);
 	if (dwCoreFlags&1)  szMenuBuf[23]  = 'A';
 	if (dwCoreFlags&2)  szMenuBuf[23]  = 'M';
 	if (dwCoreFlags&0xff00)                               //A/M/G/D
