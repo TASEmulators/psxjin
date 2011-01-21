@@ -273,6 +273,7 @@ extern int            iColDepth;
 extern int            iWindowMode;
 extern char           szDispBuf[];
 extern char           szMenuBuf[];
+extern char			  szInputBuf[];
 extern char           szDebugText[];
 extern short          sDispWidths[];
 extern BOOL           bDebugText;

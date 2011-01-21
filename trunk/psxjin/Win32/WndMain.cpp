@@ -948,6 +948,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 				case ID_EMULATOR_DISPINPUT:
 					dispInput ^= 1;
+					GPUshowInput();
 					return TRUE;
 				case ID_EMULATOR_DISPFRAMECOUNTER:
 					dispFrameCounter ^= 1;

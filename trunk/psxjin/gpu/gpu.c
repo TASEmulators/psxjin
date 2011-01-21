@@ -197,6 +197,7 @@ static long       lGPUdataRet;
 long              lGPUstatusRet; //!
 char              szDispBuf[64];
 char              szMenuBuf[36];
+char			  szInputBuf[36];
 char              szDebugText[512];
 unsigned long     ulStatusControl[256];
 int               currentFrame=0;
@@ -3369,9 +3370,21 @@ void CALLBACK GPUshowframecounter()
 	}
 }
 
+
 void CALLBACK GPUshowInput()
 {
-	dispInput ^= 1;
+	if (ulKeybits&KEY_SHOWINPUT)
+	{
+		DestroyPic();
+		ulKeybits&=~KEY_SHOWINPUT;
+		DoClearScreenBuffer();
+	}
+	else
+	{
+		ulKeybits|=KEY_SHOWINPUT;
+		szDispBuf[0]=0;
+		BuildDispMenu(0);
+	}
 }
 
 void CALLBACK GPUsetcurrentmode(char newModeFlags)
