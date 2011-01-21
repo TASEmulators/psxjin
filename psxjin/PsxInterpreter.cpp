@@ -86,9 +86,9 @@ void inline execI()
 			modeFlags |= MODE_FLAG_RECORD;
 		if (Movie.mode == MOVIEMODE_PLAY)
 			modeFlags |= MODE_FLAG_REPLAY;
-		GPU_setcurrentmode(modeFlags);
+		GPUsetcurrentmode(modeFlags);
 
-		GPU_updateframe();
+		GPUupdateframe();
 		SysUpdate();
 
 		if (iSaveStateTo) {
@@ -132,9 +132,9 @@ void inline execI()
 			modeFlags |= MODE_FLAG_RECORD;
 		if (Movie.mode == MOVIEMODE_PLAY)
 			modeFlags |= MODE_FLAG_REPLAY;
-		GPU_setcurrentmode(modeFlags);
+		GPUsetcurrentmode(modeFlags);
 
-		GPU_updateframe();
+		GPUupdateframe();
 		SysUpdate();
 	}
 }

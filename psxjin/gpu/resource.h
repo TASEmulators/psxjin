@@ -12,8 +12,8 @@
 #define IDD_ABOUT                       135
 #define IDD_FIXES                       136
 #define IDB_GPU                         137
-#define IDD_KEYS                        138
-#define IDD_RECORDING                   139
+#define IDD_GPUKEYS                        138
+#define IDD_GPURECORDING                   139
 #define IDC_CURSOR1                     142
 #define IDD_CFGDLG                      500
 #define IDD_CFGSOFT                     501

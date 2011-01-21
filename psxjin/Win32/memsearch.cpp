@@ -461,7 +461,7 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 					}
 					if (!cheatsEnabled) {
 						cheatsEnabled = 1;
-						GPU_displayText(_("*PCSX*: Cheats Enabled"));
+						GPUdisplayText(_("*PCSX*: Cheats Enabled"));
 					}
 					PCSXApplyCheats();
 					UpdateMemWatch();

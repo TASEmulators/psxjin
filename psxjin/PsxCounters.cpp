@@ -132,7 +132,7 @@ void psxRcntUpdate() {
 				psxCounters[3].mode&=~0x10000;
 				psxUpdateVSyncRate();
 				psxRcntUpd(3);
-				GPU_updateLace(); // updateGPU
+				GPUupdateLace(); // updateGPU
 				SysUpdate();
 	#ifdef GTE_LOG
 				GTE_LOG("VSync\n");
@@ -145,7 +145,7 @@ iVSyncFlag = 1;
 // start capture?
 if ( (Movie.startAvi) || (Movie.startWav) ) {
 	if (Movie.startAvi)
-		GPU_startAvi(Movie.aviFilename);
+		GPUstartAvi(Movie.aviFilename);
 	if (Movie.startWav)
 		SPUstartWav(Movie.wavFilename);
 	Movie.startAvi = 0;
@@ -155,7 +155,7 @@ if ( (Movie.startAvi) || (Movie.startWav) ) {
 
 // stop capture?
 if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
-	GPU_stopAvi();
+	GPUstopAvi();
 	SPUstopWav();
 	Movie.capture = 0;
 }
@@ -163,7 +163,7 @@ if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
 Movie.currentFrame++;
 
 // update OSD information
-GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
+GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
 
 // handle movie end while in replay mode
 if (Movie.mode == MOVIEMODE_PLAY) {
@@ -172,7 +172,7 @@ if (Movie.mode == MOVIEMODE_PLAY) {
 		iPause = 1;
 	// stop if we're beyond last frame
 	if (Movie.currentFrame>Movie.totalFrames) {
-		GPU_displayText("*PCSX*: Movie End");
+		GPUdisplayText("*PCSX*: Movie End");
 		MOV_StopMovie();
 	}
 }
@@ -188,7 +188,7 @@ if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 	}
 	Movie.lagCounter++;
-	GPU_setlagcounter(Movie.lagCounter);
+	GPUsetlagcounter(Movie.lagCounter);
 }
 else if (iJoysToPoll == 1) { //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
 	if (Movie.mode == MOVIEMODE_RECORD)
@@ -213,7 +213,7 @@ if ((Movie.mode == MOVIEMODE_RECORD) && (Movie.currentFrame%1800 == 0))
 buttonToSend = 0;
 buttonToSend = Movie.lastPad1.buttonStatus;
 buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
-GPU_inputdisplay(buttonToSend);
+GPUinputdisplay(buttonToSend);
 
 modeFlags = 0;
 if (iPause)
@@ -222,7 +222,7 @@ if (Movie.mode == MOVIEMODE_RECORD)
 	modeFlags |= MODE_FLAG_RECORD;
 if (Movie.mode == MOVIEMODE_PLAY)
 	modeFlags |= MODE_FLAG_REPLAY;
-GPU_setcurrentmode(modeFlags);
+GPUsetcurrentmode(modeFlags);
 
 // update WIN32 tools
 #ifdef WIN32

@@ -20,8 +20,6 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
-typedef long (CALLBACK* GPUopen)(HWND);
-
 typedef long (CALLBACK* PADopen)(HWND);
 
 typedef long (CALLBACK* NETopen)(HWND);

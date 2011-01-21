@@ -61,7 +61,7 @@
 
 #ifdef _WINDOWS
 
-#include "record.h"
+#include "gpu_record.h"
 int speedModifierFlag;
 
 ////////////////////////////////////////////////////////////////////////

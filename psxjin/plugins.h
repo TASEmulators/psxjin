@@ -88,23 +88,23 @@ typedef unsigned long (CALLBACK* PSEgetLibVersion)(void);
 typedef char *(CALLBACK* PSEgetLibName)(void);
 
 ///GPU PLUGIN STUFF 
-typedef long (CALLBACK* GPUinit)(void);
-typedef long (CALLBACK* GPUshutdown)(void);
-typedef long (CALLBACK* GPUclose)(void);
-typedef void (CALLBACK* GPUwriteStatus)(unsigned long);
-typedef void (CALLBACK* GPUwriteData)(unsigned long);
-typedef void (CALLBACK* GPUwriteDataMem)(u32 *, int);
-typedef unsigned long (CALLBACK* GPUreadStatus)(void);
-typedef unsigned long (CALLBACK* GPUreadData)(void);
-typedef void (CALLBACK* GPUreadDataMem)(u32 *, int);
-typedef long (CALLBACK* GPUdmaChain)(u32 *,unsigned long);
-typedef void (CALLBACK* GPUupdateLace)(void);
-typedef long (CALLBACK* GPUconfigure)(void);
-typedef long (CALLBACK* GPUtest)(void);
-typedef void (CALLBACK* GPUabout)(void);
-typedef void (CALLBACK* GPUmakeSnapshot)(void);
-typedef void (CALLBACK* GPUkeypressed)(int);
-typedef void (CALLBACK* GPUdisplayText)(char *);
+long CALLBACK  GPUinit(void);
+long CALLBACK  GPUshutdown(void);
+long CALLBACK  GPUclose(void);
+void CALLBACK  GPUwriteStatus(unsigned long);
+void CALLBACK  GPUwriteData(unsigned long);
+void CALLBACK  GPUwriteDataMem(u32 *, int);
+unsigned long CALLBACK  GPUreadStatus(void);
+unsigned long CALLBACK  GPUreadData(void);
+void CALLBACK  GPUreadDataMem(u32 *, int);
+long CALLBACK  GPUdmaChain(u32 *,unsigned long);
+void CALLBACK  GPUupdateLace(void);
+long CALLBACK  GPUconfigure(void);
+long CALLBACK  GPUtest(void);
+void CALLBACK  GPUabout(void);
+void CALLBACK  GPUmakeSnapshot(void);
+void CALLBACK  GPUkeypressed(int);
+void CALLBACK  GPUdisplayText(char *);
 #pragma pack(push, 1)
 typedef struct {
 	void* extraData;
@@ -115,61 +115,61 @@ typedef struct {
 	unsigned char psxVRam[1024*512*2];
 } GPUFreeze_t;
 #pragma pack(pop)
-typedef long (CALLBACK* GPUfreeze)(unsigned long, GPUFreeze_t *);
-typedef long (CALLBACK* GPUgetScreenPic)(unsigned char *);
-typedef long (CALLBACK* GPUshowScreenPic)(unsigned char *);
-typedef void (CALLBACK* GPUclearDynarec)(void (CALLBACK *callback)(void));
+long CALLBACK  GPUfreeze(unsigned long, GPUFreeze_t *);
+long CALLBACK  GPUgetScreenPic(unsigned char *);
+long CALLBACK  GPUshowScreenPic(unsigned char *);
+void CALLBACK  GPUclearDynarec(void (CALLBACK *callback)(void));
 
-typedef void (CALLBACK* GPUsetframelimit)(unsigned long);
-typedef void (CALLBACK* GPUsetframecounter)(unsigned long, unsigned long);
-typedef void (CALLBACK* GPUsetlagcounter)(unsigned long);
-typedef void (CALLBACK* GPUinputdisplay)(unsigned long);
-typedef void (CALLBACK* GPUupdateframe)(void);
-typedef void (CALLBACK* GPUsetcurrentmode)(char);
-typedef void (CALLBACK* GPUsetspeedmode)(unsigned long);
-typedef void (CALLBACK* GPUshowframecounter)(void);
-typedef void (CALLBACK* GPUshowInput)(void);
-typedef long (CALLBACK* GPUstartAvi)(char* filename);
-typedef long (CALLBACK* GPUstopAvi)(void);
-typedef long (CALLBACK* GPUsendFpLuaGui)(void (*fpPCSX_LuaGui)(void *,int,int,int,int));
+void CALLBACK  GPUsetframelimit(unsigned long);
+void CALLBACK  GPUsetframecounter(unsigned long, unsigned long);
+void CALLBACK  GPUsetlagcounter(unsigned long);
+void CALLBACK  GPUinputdisplay(unsigned long);
+void CALLBACK  GPUupdateframe(void);
+void CALLBACK  GPUsetcurrentmode(char);
+void CALLBACK  GPUsetspeedmode(unsigned long);
+void CALLBACK  GPUshowframecounter(void);
+void CALLBACK  GPUshowInput(void);
+long CALLBACK  GPUstartAvi(char* filename);
+long CALLBACK  GPUstopAvi(void);
+long CALLBACK  GPUsendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int));
 
-//plugin stuff From Shadow
-// *** walking in the valley of your darking soul i realize that i was alone
-//Gpu function pointers
-extern GPUupdateLace       GPU_updateLace;
-extern GPUinit             GPU_init;
-extern GPUshutdown         GPU_shutdown; 
-extern GPUconfigure        GPU_configure;
-extern GPUtest             GPU_test;
-extern GPUabout            GPU_about;
-extern GPUopen             GPU_open;
-extern GPUclose            GPU_close;
-extern GPUreadStatus       GPU_readStatus;
-extern GPUreadData         GPU_readData;
-extern GPUreadDataMem      GPU_readDataMem;
-extern GPUwriteStatus      GPU_writeStatus; 
-extern GPUwriteData        GPU_writeData;
-extern GPUwriteDataMem     GPU_writeDataMem;
-extern GPUdmaChain         GPU_dmaChain;
-extern GPUkeypressed       GPU_keypressed;
-extern GPUdisplayText      GPU_displayText;
-extern GPUmakeSnapshot     GPU_makeSnapshot;
-extern GPUfreeze           GPU_freeze;
-extern GPUgetScreenPic     GPU_getScreenPic;
-extern GPUshowScreenPic    GPU_showScreenPic;
-extern GPUclearDynarec     GPU_clearDynarec;
-extern GPUsetframelimit    GPU_setframelimit;
-extern GPUsetframecounter  GPU_setframecounter;
-extern GPUsetlagcounter    GPU_setlagcounter;
-extern GPUinputdisplay     GPU_inputdisplay;
-extern GPUupdateframe      GPU_updateframe;
-extern GPUsetcurrentmode   GPU_setcurrentmode;
-extern GPUsetspeedmode     GPU_setspeedmode;
-extern GPUshowframecounter GPU_showframecounter;
-extern GPUshowInput		   GPU_showInput;
-extern GPUstartAvi         GPU_startAvi;
-extern GPUstopAvi          GPU_stopAvi;
-extern GPUsendFpLuaGui     GPU_sendFpLuaGui;
+////plugin stuff From Shadow
+//// *** walking in the valley of your darking soul i realize that i was alone
+////Gpu function pointers
+//extern GPUupdateLace       GPU_updateLace;
+//extern GPUinit             GPU_init;
+//extern GPUshutdown         GPU_shutdown; 
+//extern GPUconfigure        GPU_configure;
+//extern GPUtest             GPU_test;
+//extern GPUabout            GPU_about;
+//extern GPUopen             GPU_open;
+//extern GPUclose            GPU_close;
+//extern GPUreadStatus       GPU_readStatus;
+//extern GPUreadData         GPU_readData;
+//extern GPUreadDataMem      GPU_readDataMem;
+//extern GPUwriteStatus      GPU_writeStatus; 
+//extern GPUwriteData        GPU_writeData;
+//extern GPUwriteDataMem     GPU_writeDataMem;
+//extern GPUdmaChain         GPU_dmaChain;
+//extern GPUkeypressed       GPU_keypressed;
+//extern GPUdisplayText      GPUdisplayText;
+//extern GPUmakeSnapshot     GPU_makeSnapshot;
+//extern GPUfreeze           GPU_freeze;
+//extern GPUgetScreenPic     GPU_getScreenPic;
+//extern GPUshowScreenPic    GPU_showScreenPic;
+//extern GPUclearDynarec     GPU_clearDynarec;
+//extern GPUsetframelimit    GPU_setframelimit;
+//extern GPUsetframecounter  GPU_setframecounter;
+//extern GPUsetlagcounter    GPU_setlagcounter;
+//extern GPUinputdisplay     GPU_inputdisplay;
+//extern GPUupdateframe      GPU_updateframe;
+//extern GPUsetcurrentmode   GPUsetcurrentmode;
+//extern GPUsetspeedmode     GPU_setspeedmode;
+//extern GPUshowframecounter GPU_showframecounter;
+//extern GPUshowInput		   GPU_showInput;
+//extern GPUstartAvi         GPU_startAvi;
+//extern GPUstopAvi          GPU_stopAvi;
+//extern GPUsendFpLuaGui     GPU_sendFpLuaGui;
 
 //cd rom plugin ;)
 //typedef long (CALLBACK* CDRinit)(void);
@@ -286,8 +286,8 @@ typedef struct {
 	char CdromID[10];	// ie. 'SCPH12345', no \0 trailing character
 	char CdromLabel[33];
 	void *psxMem;
-	GPUshowScreenPic GPU_showScreenPic;
-	GPUdisplayText GPU_displayText;
+	//GPUshowScreenPic GPU_showScreenPic;
+	//GPUdisplayText GPUdisplayText;
 	PADsetSensitive PAD_setSensitive;
 	char GPUpath[256];	// paths must be absolute
 	char SPUpath[256];
@@ -324,7 +324,6 @@ extern NETkeypressed         NET_keypressed;
 END_EXTERN_C
 
 //int LoadCDRplugin(char *CDRdll);
-int LoadGPUplugin(char *GPUdll);
 //int LoadSPUplugin(char *SPUdll);
 int LoadPAD1plugin(char *PAD1dll);
 int LoadPAD2plugin(char *PAD2dll);

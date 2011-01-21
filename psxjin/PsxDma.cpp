@@ -84,7 +84,7 @@ void psxDma2(u32 madr, u32 bcr, u32 chcr) { // GPU
 				break;
 			}
 			size = (bcr >> 16) * (bcr & 0xffff);
-			GPU_readDataMem(ptr, size);
+			GPUreadDataMem(ptr, size);
 			psxCpu->Clear(madr, size);
 			break;
 
@@ -100,7 +100,7 @@ void psxDma2(u32 madr, u32 bcr, u32 chcr) { // GPU
 				break;
 			}
 			size = (bcr >> 16) * (bcr & 0xffff);
-			GPU_writeDataMem(ptr, size);
+			GPUwriteDataMem(ptr, size);
 			GPUDMA_INT((size / 4) / BIAS);
 			return;
 //			break;
@@ -110,7 +110,7 @@ void psxDma2(u32 madr, u32 bcr, u32 chcr) { // GPU
 			PSXDMA_LOG("*** DMA 2 - GPU dma chain *** %lx addr = %lx size = %lx\n", chcr, madr, bcr);
 #endif
 			iGpuHasUpdated=1;
-			GPU_dmaChain((u32 *)psxM, madr & 0x1fffff);
+			GPUdmaChain((u32 *)psxM, madr & 0x1fffff);
 			break;
 
 #ifdef PSXDMA_LOG

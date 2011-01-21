@@ -128,13 +128,13 @@
 #define _IN_GPU
 
 #ifdef _WINDOWS
-#include "record.h"
+#include "gpu_record.h"
 #endif
 
 #include "externals.h"
 #include "gpu.h"
 #include "draw.h"
-#include "cfg.h"
+#include "gpu_cfg.h"
 #include "prim.h"
 #include "psemu.h"
 #include "menu.h"

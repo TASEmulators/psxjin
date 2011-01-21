@@ -238,7 +238,7 @@ typedef struct {
 	char CdromLabel[11];
 	void *psxMem;
 	GPUshowScreenPic GPU_showScreenPic;
-	GPUdisplayText GPU_displayText;
+	GPUdisplayText GPUdisplayText;
 	PADsetSensitive PAD_setSensitive;
 	char GPUpath[256];
 	char SPUpath[256];

@@ -99,12 +99,12 @@
 #ifdef _WINDOWS
 
 #include "stdafx.h"
-#include "record.h"
+#include "gpu_record.h"
 #include <vfw.h>
 #include <stdio.h>
 
 #include "externals.h"
-#include "cfg.h"
+#include "gpu_cfg.h"
 #include "gpu.h"
 
 //-------------------------------------------------------------------------// linux headers
@@ -745,7 +745,7 @@ BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void OnRecording(HWND hW)
 {
-	DialogBox(hInst,MAKEINTRESOURCE(IDD_RECORDING),
+	DialogBox(hInst,MAKEINTRESOURCE(IDD_GPURECORDING),
 	          hW,(DLGPROC)RecordingDlgProc);
 
 }
@@ -1471,7 +1471,7 @@ BOOL CALLBACK KeyDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void OnKeyConfig(HWND hW)
 {
-	DialogBox(hInst,MAKEINTRESOURCE(IDD_KEYS),
+	DialogBox(hInst,MAKEINTRESOURCE(IDD_GPUKEYS),
 	          hW,(DLGPROC)KeyDlgProc);
 }
 

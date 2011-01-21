@@ -791,11 +791,11 @@ int MovieFreeze(gzFile f, int Mode) {
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
 		
 		//update information GPU OSD after loading a savestate
-		GPU_setlagcounter(Movie.lagCounter);
-		GPU_setframecounter(Movie.currentFrame,Movie.totalFrames);
+		GPUsetlagcounter(Movie.lagCounter);
+		GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
 		buttonToSend = Movie.lastPad1.buttonStatus;
 		buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
-		GPU_inputdisplay(buttonToSend);
+		GPUinputdisplay(buttonToSend);
 	}
 
 	return 0;
