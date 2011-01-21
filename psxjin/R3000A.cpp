@@ -31,7 +31,7 @@ int psxInit() {
 
 	psxCpu = &psxInt;
 #if defined(__i386__) || defined(__sh__)
-	if (!Config.Cpu) psxCpu = &psxRec;
+	//if (!Config.Cpu) psxCpu = &psxRec;
 #endif
 	Log=0;
 

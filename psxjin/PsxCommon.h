@@ -132,7 +132,6 @@ typedef struct {
 	long QKeys;
 	long Cdda;
 	long HLE;
-	long Cpu;
 	long PsxOut;
 	long RCntFix;
 	long UseNet;
