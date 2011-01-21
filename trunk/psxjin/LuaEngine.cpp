@@ -569,7 +569,7 @@ char pcsx_message_buffer[1024];
 static int pcsx_message(lua_State *L) {
 	const char *msg = luaL_checkstring(L,1);
 	sprintf(pcsx_message_buffer, "%s", msg);
-	GPU_displayText(pcsx_message_buffer);
+	GPUdisplayText(pcsx_message_buffer);
 
 	return 0;
 }
@@ -3230,7 +3230,7 @@ void PCSX_LuaFrameBoundary() {
 
 	} else {
 		PCSX_LuaOnStop();
-		//GPU_displayText("Script died of natural causes.\n");
+		//GPUdisplayText("Script died of natural causes.\n");
 	}
 
 	// Past here, the nes actually runs, so any Lua code is called mid-frame. We must
@@ -3379,7 +3379,7 @@ int PCSX_LoadLuaCode(const char *filename) {
 void PCSX_ReloadLuaCode()
 {
 	if (!luaScriptName)
-		GPU_displayText("There's no script to reload.");
+		GPUdisplayText("There's no script to reload.");
 	else
 		PCSX_LoadLuaCode(luaScriptName);
 }

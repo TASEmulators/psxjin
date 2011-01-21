@@ -31,6 +31,8 @@
 #include "Win32.h"
 #endif
 
+#
+
 u32 *psxRecLUT;
 
 #undef PC_REC
@@ -484,9 +486,9 @@ __inline static void execute() {
 			modeFlags |= MODE_FLAG_RECORD;
 		if (Movie.mode == MOVIEMODE_PLAY)
 			modeFlags |= MODE_FLAG_REPLAY;
-		GPU_setcurrentmode(modeFlags);
+		GPUsetcurrentmode(modeFlags);
 
-		GPU_updateframe();
+		GPUupdateframe();
 		SysUpdate();
 
 		#ifdef WIN32
@@ -1507,7 +1509,7 @@ static void recLW() {
 					if (!_Rt_) return;
 					iRegs[_Rt_].state = ST_UNK;
 
-					CALL32M((u32)&GPU_readData);
+					CALL32M((u32)&GPUreadData);
 					MOV32RtoM((u32)&psxRegs.GPR.r[_Rt_], EAX);
 					return;
 
@@ -1515,7 +1517,7 @@ static void recLW() {
 					if (!_Rt_) return;
 					iRegs[_Rt_].state = ST_UNK;
 
-					CALL32M((u32)&GPU_readStatus);
+					CALL32M((u32)&GPUreadStatus);
 					MOV32RtoM((u32)&psxRegs.GPR.r[_Rt_], EAX);
 					return;
 			}
@@ -1910,7 +1912,7 @@ static void recSW() {
 					} else {
 						PUSH32M((u32)&psxRegs.GPR.r[_Rt_]);
 					}
-					CALL32M((u32)&GPU_writeData);
+					CALL32M((u32)&GPUwriteData);
 #ifndef __WIN32__
 					resp+= 4;
 #endif
@@ -1922,7 +1924,7 @@ static void recSW() {
 					} else {
 						PUSH32M((u32)&psxRegs.GPR.r[_Rt_]);
 					}
-					CALL32M((u32)&GPU_writeStatus);
+					CALL32M((u32)&GPUwriteStatus);
 #ifndef __WIN32__
 					resp+= 4;
 #endif

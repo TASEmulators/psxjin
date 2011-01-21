@@ -52,7 +52,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;_MSC_VER_;NOMINMAX"
+				PreprocessorDefinitions="_WINDOWS;WIN32;_WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION=\&quot;1.5\&quot;;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;_MSC_VER_;NOMINMAX"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				StructMemberAlignment="5"
@@ -79,7 +79,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
+				AdditionalDependencies="directx/ddraw.lib directx/dxguid.lib vfw32.lib shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Debug.lib"
 				OutputFile="$(OutDir)\psxjin-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -160,7 +160,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;NOMINMAX"
+				PreprocessorDefinitions="_WINDOWS;WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;NOMINMAX"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				StructMemberAlignment="5"
@@ -188,7 +188,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
+				AdditionalDependencies="directx/ddraw.lib directx/dxguid.lib vfw32.lib shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\psxjin-release.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -271,7 +271,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..;.;./includes;&quot;lua/lua-5.1.4/src&quot;;zlib;libpng;userconfig;defaultconfig;libbzip2;directx"
-				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;NOMINMAX"
+				PreprocessorDefinitions="_WINDOWS;WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION=\&quot;1.5\&quot;;__i386__;ENABLE_NLS;PACKAGE=\&quot;psxjin\&quot;;NOMINMAX"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				StructMemberAlignment="5"
@@ -300,7 +300,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
+				AdditionalDependencies="directx/ddraw.lib directx/dxguid.lib vfw32.lib shlwapi.lib winmm.lib odbc32.lib odbccp32.lib comctl32.lib lua51.lib zlib-2008-x32.lib libpng-2008-x32.lib directx/dsound.lib directx/dxerr8.lib libbz2-vs2008-x86-Release.lib"
 				OutputFile="$(OutDir)\psxjin-releaseFastbuild.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -976,6 +976,305 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="gpu"
+			>
+			<File
+				RelativePath="..\gpu\draw.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\draw.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\DrawString.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\DrawString.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\DrawStringFont.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\externals.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\fps.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\fps.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpu.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpu.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpu_cfg.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpu_cfg.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpu_record.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpu_record.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpupeopssoft.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\gpuPeopsSoft.rc"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\hq2x.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\hq2x16.asm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\gpu\hq2x32.asm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\gpu\hq3x.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\hq3x16.asm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\gpu\hq3x32.asm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\gpu\i386.asm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -I..\gpu\ -f win32 -D__WIN32__ -D__i386__ $(InputPath) -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -I..\gpu\ -f win32 -D__WIN32__ -D__i386__ $(InputPath) -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release FastBuild|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="nasmw.exe -I..\gpu\ -f win32 -D__WIN32__ -D__i386__ $(InputPath) -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\gpu\interp.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\key.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\key.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\macros.inc"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\menu.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\menu.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\mingw_d3d.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\mingw_d3dtypes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\mingw_ddraw.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\prim.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\prim.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\psemu.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\resource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\soft.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\soft.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\zn.c"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="Cdrom02.ico"

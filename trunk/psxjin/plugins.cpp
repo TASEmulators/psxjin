@@ -43,42 +43,42 @@
 #endif
 
 START_EXTERN_C
-
-//Gpu function pointers
-GPUupdateLace       GPU_updateLace;
-GPUinit             GPU_init;
-GPUshutdown         GPU_shutdown; 
-GPUconfigure        GPU_configure;
-GPUtest             GPU_test;
-GPUabout            GPU_about;
-GPUopen             GPU_open;
-GPUclose            GPU_close;
-GPUreadStatus       GPU_readStatus;
-GPUreadData         GPU_readData;
-GPUreadDataMem      GPU_readDataMem;
-GPUwriteStatus      GPU_writeStatus; 
-GPUwriteData        GPU_writeData;
-GPUwriteDataMem     GPU_writeDataMem;
-GPUdmaChain         GPU_dmaChain;
-GPUkeypressed       GPU_keypressed;
-GPUdisplayText      GPU_displayText;
-GPUmakeSnapshot     GPU_makeSnapshot;
-GPUfreeze           GPU_freeze;
-GPUgetScreenPic     GPU_getScreenPic;
-GPUshowScreenPic    GPU_showScreenPic;
-GPUclearDynarec     GPU_clearDynarec;
-GPUsetframelimit    GPU_setframelimit;
-GPUsetframecounter  GPU_setframecounter;
-GPUsetlagcounter    GPU_setlagcounter;
-GPUinputdisplay     GPU_inputdisplay;
-GPUupdateframe      GPU_updateframe;
-GPUsetcurrentmode   GPU_setcurrentmode;
-GPUsetspeedmode     GPU_setspeedmode;
-GPUshowframecounter GPU_showframecounter;
-GPUshowInput		GPU_showInput;
-GPUstartAvi         GPU_startAvi;
-GPUstopAvi          GPU_stopAvi;
-GPUsendFpLuaGui     GPU_sendFpLuaGui;
+//
+////Gpu function pointers
+//GPUupdateLace       GPU_updateLace;
+//GPUinit             GPU_init;
+//GPUshutdown         GPU_shutdown; 
+//GPUconfigure        GPU_configure;
+//GPUtest             GPU_test;
+//GPUabout            GPU_about;
+//GPUopen             GPU_open;
+//GPUclose            GPU_close;
+//GPUreadStatus       GPU_readStatus;
+//GPUreadData         GPU_readData;
+//GPUreadDataMem      GPU_readDataMem;
+//GPUwriteStatus      GPU_writeStatus; 
+//GPUwriteData        GPU_writeData;
+//GPUwriteDataMem     GPU_writeDataMem;
+//GPUdmaChain         GPU_dmaChain;
+//GPUkeypressed       GPU_keypressed;
+//GPUdisplayText      GPUdisplayText;
+//GPUmakeSnapshot     GPU_makeSnapshot;
+//GPUfreeze           GPU_freeze;
+//GPUgetScreenPic     GPU_getScreenPic;
+//GPUshowScreenPic    GPU_showScreenPic;
+//GPUclearDynarec     GPU_clearDynarec;
+//GPUsetframelimit    GPU_setframelimit;
+//GPUsetframecounter  GPU_setframecounter;
+//GPUsetlagcounter    GPU_setlagcounter;
+//GPUinputdisplay     GPU_inputdisplay;
+//GPUupdateframe      GPU_updateframe;
+//GPUsetcurrentmode   GPUsetcurrentmode;
+//GPUsetspeedmode     GPU_setspeedmode;
+//GPUshowframecounter GPU_showframecounter;
+//GPUshowInput		GPU_showInput;
+//GPUstartAvi         GPU_startAvi;
+//GPUstopAvi          GPU_stopAvi;
+//GPUsendFpLuaGui     GPU_sendFpLuaGui;
 
 //cd rom function pointers 
 //CDRinit               CDR_init;
@@ -149,13 +149,11 @@ END_EXTERN_C
 static const char *err;
 static int errval;
 
-void *hGPUDriver;
-
 void ConfigurePlugins();
 
 void CALLBACK GPU__readDataMem(unsigned long *pMem, int iSize) {
 	while (iSize > 0) {
-		*pMem = GPU_readData();
+		*pMem = GPUreadData();
 		iSize--;
 		pMem++;
 	}		
@@ -163,7 +161,7 @@ void CALLBACK GPU__readDataMem(unsigned long *pMem, int iSize) {
 
 void CALLBACK GPU__writeDataMem(unsigned long *pMem, int iSize) {
 	while (iSize > 0) {
-		GPU_writeData(*pMem);
+		GPUwriteData(*pMem);
 		iSize--;
 		pMem++;
 	}
@@ -178,25 +176,25 @@ long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 	if (ulGetFreezeData == 0) {
 		int val;
 
-		val = GPU_readStatus();
+		val = GPUreadStatus();
 		val = 0x04000000 | ((val >> 29) & 0x3);
-		GPU_writeStatus(0x04000003);
-		GPU_writeStatus(0x01000000);
-		GPU_writeData(0xa0000000);
-		GPU_writeData(0x00000000);
-		GPU_writeData(0x02000400);
-		GPU_writeDataMem((u32*)pF->psxVRam, 0x100000/4);
-		GPU_writeStatus(val);
+		GPUwriteStatus(0x04000003);
+		GPUwriteStatus(0x01000000);
+		GPUwriteData(0xa0000000);
+		GPUwriteData(0x00000000);
+		GPUwriteData(0x02000400);
+		GPUwriteDataMem((u32*)pF->psxVRam, 0x100000/4);
+		GPUwriteStatus(val);
 
 		val = pF->ulStatus;
-		GPU_writeStatus(0x00000000);
-		GPU_writeData(0x01000000);
-		GPU_writeStatus(0x01000000);
-		GPU_writeStatus(0x03000000 | ((val>>24)&0x1));
-		GPU_writeStatus(0x04000000 | ((val>>29)&0x3));
-		GPU_writeStatus(0x08000000 | ((val>>17)&0x3f) | ((val>>10)&0x40));
-		GPU_writeData(0xe1000000 | (val&0x7ff));
-		GPU_writeData(0xe6000000 | ((val>>11)&3));
+		GPUwriteStatus(0x00000000);
+		GPUwriteData(0x01000000);
+		GPUwriteStatus(0x01000000);
+		GPUwriteStatus(0x03000000 | ((val>>24)&0x1));
+		GPUwriteStatus(0x04000000 | ((val>>29)&0x3));
+		GPUwriteStatus(0x08000000 | ((val>>17)&0x3f) | ((val>>10)&0x40));
+		GPUwriteData(0xe1000000 | (val&0x7ff));
+		GPUwriteData(0xe6000000 | ((val>>11)&3));
 
 /*		GPU_writeData(0xe3000000 | pF->ulControl[0] & 0xffffff);
 		GPU_writeData(0xe4000000 | pF->ulControl[1] & 0xffffff);
@@ -206,17 +204,17 @@ long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 	if (ulGetFreezeData == 1) {
 		int val;
 
-		val = GPU_readStatus();
+		val = GPUreadStatus();
 		val = 0x04000000 | ((val >> 29) & 0x3);
-		GPU_writeStatus(0x04000003);
-		GPU_writeStatus(0x01000000);
-		GPU_writeData(0xc0000000);
-		GPU_writeData(0x00000000);
-		GPU_writeData(0x02000400);
-		GPU_readDataMem((u32*)pF->psxVRam, 0x100000/4);
-		GPU_writeStatus(val);
+		GPUwriteStatus(0x04000003);
+		GPUwriteStatus(0x01000000);
+		GPUwriteData(0xc0000000);
+		GPUwriteData(0x00000000);
+		GPUwriteData(0x02000400);
+		GPUreadDataMem((u32*)pF->psxVRam, 0x100000/4);
+		GPUwriteStatus(val);
 
-		pF->ulStatus = GPU_readStatus();
+		pF->ulStatus = GPUreadStatus();
 
 /*		GPU_writeStatus(0x10000003);
 		pF->ulControl[0] = GPU_readData();
@@ -231,7 +229,7 @@ long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 		char Text[32];
 
 		sprintf (Text, "*PCSX*: Selected State %ld", lSlotNum+1);
-		GPU_displayText(Text);
+		GPUdisplayText(Text);
 		return 1;
 	}
 	return 0;
@@ -269,52 +267,6 @@ void CALLBACK GPU__sendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int)) {
 #define LoadGpuSymN(dest, name) \
 	LoadSym(GPU_##dest, GPU##dest, name, 0);
 
-int LoadGPUplugin(char *GPUdll) {
-	void *drv;
-
-	hGPUDriver = SysLoadLibrary(GPUdll);
-	if (hGPUDriver == NULL) { 
-		GPU_configure = NULL;
-		SysMessage (_("Could Not Load GPU Plugin %s"), GPUdll); return -1; 
-	}
-	drv = hGPUDriver;
-	LoadGpuSym1(init, "GPUinit");
-	LoadGpuSym1(shutdown, "GPUshutdown");
-	LoadGpuSym1(open, "GPUopen");
-	LoadGpuSym1(close, "GPUclose");
-	LoadGpuSym1(readData, "GPUreadData");
-	LoadGpuSym0(readDataMem, "GPUreadDataMem");
-	LoadGpuSym1(readStatus, "GPUreadStatus");
-	LoadGpuSym1(writeData, "GPUwriteData");
-	LoadGpuSym0(writeDataMem, "GPUwriteDataMem");
-	LoadGpuSym1(writeStatus, "GPUwriteStatus");
-	LoadGpuSym1(dmaChain, "GPUdmaChain");
-	LoadGpuSym1(updateLace, "GPUupdateLace");
-	LoadGpuSym0(keypressed, "GPUkeypressed");
-	LoadGpuSym0(displayText, "GPUdisplayText");
-	LoadGpuSym0(makeSnapshot, "GPUmakeSnapshot");
-	LoadGpuSym0(freeze, "GPUfreeze");
-	LoadGpuSym0(getScreenPic, "GPUgetScreenPic");
-	LoadGpuSym0(showScreenPic, "GPUshowScreenPic");
-	LoadGpuSym0(clearDynarec, "GPUclearDynarec");
-	LoadGpuSym0(configure, "GPUconfigure");
-	LoadGpuSym0(test, "GPUtest");
-	LoadGpuSym0(about, "GPUabout");
-	LoadGpuSym0(setframelimit, "GPUsetframelimit");
-	LoadGpuSym0(setframecounter, "GPUsetframecounter");
-	LoadGpuSym0(setlagcounter, "GPUsetlagcounter");
-	LoadGpuSym0(inputdisplay, "GPUinputdisplay");
-	LoadGpuSym0(updateframe, "GPUupdateframe");
-	LoadGpuSym0(setcurrentmode, "GPUsetcurrentmode");
-	LoadGpuSym0(setspeedmode, "GPUsetspeedmode");
-	LoadGpuSym0(showframecounter, "GPUshowframecounter");
-	LoadGpuSym0(showInput, "GPUshowInput");
-	LoadGpuSym0(startAvi, "GPUstartAvi");
-	LoadGpuSym0(stopAvi, "GPUstopAvi");
-	LoadGpuSym0(sendFpLuaGui, "GPUsendFpLuaGui");
-
-	return 0;
-}
 
 void *hCDRDriver;
 
@@ -720,8 +672,6 @@ int LoadPlugins() {
 	int ret;
 	char Plugin[256];
 
-	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Gpu);
-	if (LoadGPUplugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad1);
 	if (LoadPAD1plugin(Plugin) == -1) return -1;
 	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad2);
@@ -736,7 +686,7 @@ int LoadPlugins() {
 
 	ret = CDRinit();
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
-	ret = GPU_init();
+	ret = GPUinit();
 	if (ret < 0) { SysMessage (_("GPUinit error: %d"), ret); return -1; }
 	ret = SPUinit();
 	if (ret < 0) { SysMessage (_("SPUinit error: %d"), ret); return -1; }
@@ -753,7 +703,7 @@ int LoadPlugins() {
 }
 
 void ReleasePlugins() {
-	if (hCDRDriver  == NULL || hGPUDriver  == NULL ||
+	if (hCDRDriver  == NULL ||
 		hPAD1Driver == NULL || hPAD2Driver == NULL) return;
 
 	if (Config.UseNet) {
@@ -763,14 +713,13 @@ void ReleasePlugins() {
 	}
 
 	CDRshutdown();
-	GPU_shutdown();
+	GPUshutdown();
 	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
 	if (Config.UseNet && hNETDriver != NULL) NET_shutdown(); 
 
 	//SysCloseLibrary(hCDRDriver); hCDRDriver = NULL;
-	SysCloseLibrary(hGPUDriver); hGPUDriver = NULL;
 	SysCloseLibrary(hPAD1Driver); hPAD1Driver = NULL;
 	SysCloseLibrary(hPAD2Driver); hPAD2Driver = NULL;
 	if (Config.UseNet && hNETDriver != NULL) {

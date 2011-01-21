@@ -54,7 +54,7 @@ void gpuShowPic() {
 		if (pMem == NULL) return;
 		sprintf(Text, "sstates\\%10.10s.%3.3d", CdromLabel, StatesC);
 
-		GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+		GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 
 		f = gzopen(Text, "rb");
 		if (f != NULL) {
@@ -62,11 +62,11 @@ void gpuShowPic() {
 			gzread(f, pMem, 128*96*3);
 			gzclose(f);
 		}
-		GPU_showScreenPic(pMem);
+		GPUshowScreenPic(pMem);
 
 		free(pMem);
 		ShowPic = 1;
-	} else { GPU_showScreenPic(NULL); ShowPic = 0; }
+	} else { GPUshowScreenPic(NULL); ShowPic = 0; }
 }
 
 void WIN32_SaveState(int newState) {
@@ -75,12 +75,12 @@ void WIN32_SaveState(int newState) {
 		sprintf(Text, "%ssstates\\%s.pjm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC+1);
 	else
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC+1);
-	GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+	GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 	ret = SaveState(Text);
 	if (ret == 0)
 		 sprintf(Text, _("*PSXjin*: Saved State %d"), StatesC+1);
 	else sprintf(Text, _("*PSXjin*: Error Saving State %d"), StatesC+1);
-	GPU_displayText(Text);
+	GPUdisplayText(Text);
 	if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 }
 
@@ -107,7 +107,7 @@ void WIN32_LoadState(int newState) {
 		sprintf(Text, _("*PSXjin*: Error Loading State %d"), StatesC+1);
 		Movie.mode = previousMode;
 	}
-	GPU_displayText(Text);
+	GPUdisplayText(Text);
 	UpdateToolWindows();
 }
 
@@ -152,10 +152,10 @@ void PADhandleKey(int key) {
 		&& modifiers == EmuCommandTable[i].keymod)
 		{
 			StatesC=i-EMUCMD_SELECTSTATE1;
-			GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+			GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 			if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 			sprintf(Text, "*PSXjin*: State %d Selected", StatesC+1);
-			GPU_displayText(Text);
+			GPUdisplayText(Text);
 			return;
 		}
 	}
@@ -168,10 +168,10 @@ void PADhandleKey(int key) {
 		else
 			StatesC--;
 
-		GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+		GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 		if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 		sprintf(Text, "*PSXjin*: State %d Selected", StatesC+1);
-		GPU_displayText(Text);
+		GPUdisplayText(Text);
 		return;
 	}
 
@@ -183,10 +183,10 @@ void PADhandleKey(int key) {
 		else
 			StatesC++;
 
-		GPU_freeze(2, (GPUFreeze_t *)&StatesC);
+		GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 		if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 		sprintf(Text, "*PSXjin*: State %d Selected", StatesC+1);
-		GPU_displayText(Text);
+		GPUdisplayText(Text);
 		return;
 	}
 
@@ -241,9 +241,9 @@ void PADhandleKey(int key) {
 	{
 		Movie.readOnly^=1;
 		if (Movie.readOnly)
-			GPU_displayText("*PSXjin*: Read-Only mode");
+			GPUdisplayText("*PSXjin*: Read-Only mode");
 		else
-			GPU_displayText("*PSXjin*: Read+Write mode");
+			GPUdisplayText("*PSXjin*: Read+Write mode");
 		return;
 	}
 
@@ -251,14 +251,14 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].keymod)
 	{
 		Movie.lagCounter=0;
-		GPU_setlagcounter(Movie.lagCounter);
+		GPUsetlagcounter(Movie.lagCounter);
 		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_SCREENSHOT].key
 	&& modifiers == EmuCommandTable[EMUCMD_SCREENSHOT].keymod)
 	{
-		GPU_makeSnapshot();
+		GPUmakeSnapshot();
 		return;
 	}
 
@@ -308,7 +308,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_FRAMECOUNTER].key
 	&& modifiers == EmuCommandTable[EMUCMD_FRAMECOUNTER].keymod)
 	{
-		GPU_showframecounter();
+		GPUshowframecounter();
 		return;
 	}
 
@@ -352,7 +352,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CONFGPU].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFGPU].keymod)
 	{
-		if (GPU_configure) GPU_configure();
+		GPUconfigure();
 		return;
 	}
 
@@ -391,7 +391,7 @@ void PADhandleKey(int key) {
 		if (Movie.mode == MOVIEMODE_INACTIVE)
 			WIN32_StartMovieRecord();
 		else
-			GPU_displayText("*PSXjin*: error: Movie Already Active");
+			GPUdisplayText("*PSXjin*: error: Movie Already Active");
 		return;
 	}
 
@@ -401,7 +401,7 @@ void PADhandleKey(int key) {
 		if (Movie.mode == MOVIEMODE_INACTIVE)
 			WIN32_StartMovieReplay(0);
 		else
-			GPU_displayText("*PSXjin*: error: Movie Already Active");
+			GPUdisplayText("*PSXjin*: error: Movie Already Active");
 		return;
 	}
 
@@ -413,7 +413,7 @@ void PADhandleKey(int key) {
 			WIN32_StartMovieReplay(Movie.movieFilename);
 		}
 		else
-			GPU_displayText("*PSXjin*: error: No Movie To Play");
+			GPUdisplayText("*PSXjin*: error: No Movie To Play");
 		return;
 	}
 
@@ -422,13 +422,13 @@ void PADhandleKey(int key) {
 	{
 		if (Movie.mode != MOVIEMODE_INACTIVE) {
 			MOV_StopMovie();
-			GPU_displayText("*PSXjin*: Stop Movie");
+			GPUdisplayText("*PSXjin*: Stop Movie");
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 		}
 		else
-			GPU_displayText("*PSXjin*: error: No Movie To Stop");
+			GPUdisplayText("*PSXjin*: error: No Movie To Stop");
 		return;
 	}
 
@@ -440,24 +440,24 @@ void PADhandleKey(int key) {
 				MovieControl.cheats ^= 1;
 				if (!cheatsEnabled) {
 					if (MovieControl.cheats)
-						GPU_displayText("*PSXjin*: Cheats Will Activate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats Will Activate On Next Frame");
 					else
-						GPU_displayText("*PSXjin*: Cheats Won't Activate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats Won't Activate On Next Frame");
 				}
 				else {
 					if (MovieControl.cheats)
-						GPU_displayText("*PSXjin*: Cheats Will Deactivate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats Will Deactivate On Next Frame");
 					else
-						GPU_displayText("*PSXjin*: Cheats Won't Deactivate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats Won't Deactivate On Next Frame");
 				}
 			}
 		}
 		else {
 			cheatsEnabled ^= 1;
 			if (cheatsEnabled)
-				GPU_displayText(_("*PSXjin*: Cheats Enabled"));
+				GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
 			else
-				GPU_displayText(_("*PSXjin*: Cheats Disabled"));
+				GPUdisplayText(_("*PSXjin*: Cheats Disabled"));
 			PCSXApplyCheats();
 		}
 		return;
@@ -470,23 +470,23 @@ void PADhandleKey(int key) {
 			MovieControl.sioIrq ^= 1;
 			if (!Config.Sio) {
 				if (MovieControl.sioIrq)
-					GPU_displayText("*PSXjin*: Sio Irq Will Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: Sio Irq Will Activate On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: Sio Irq Won't Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: Sio Irq Won't Activate On Next Frame");
 			}
 			else {
 				if (MovieControl.sioIrq)
-					GPU_displayText("*PSXjin*: Sio Irq Will Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: Sio Irq Will Deactivate On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: Sio Irq Won't Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: Sio Irq Won't Deactivate On Next Frame");
 			}
 		}
 		else {
 			Config.Sio ^= 0x1;
 			if (Config.Sio)
-				GPU_displayText(_("*PSXjin*: Sio Irq Always Enabled"));
+				GPUdisplayText(_("*PSXjin*: Sio Irq Always Enabled"));
 			else
-				GPU_displayText(_("*PSXjin*: Sio Irq Not Always Enabled"));
+				GPUdisplayText(_("*PSXjin*: Sio Irq Not Always Enabled"));
 		}
 		return;
 	}
@@ -498,23 +498,23 @@ void PADhandleKey(int key) {
 			MovieControl.RCntFix ^= 1;
 			if (!Config.RCntFix) {
 				if (MovieControl.RCntFix)
-					GPU_displayText("*PSXjin*: PE2 Fix Will Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: PE2 Fix Will Activate On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: PE2 Fix Won't Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: PE2 Fix Won't Activate On Next Frame");
 			}
 			else {
 				if (MovieControl.RCntFix)
-					GPU_displayText("*PSXjin*: PE2 Fix Will Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: PE2 Fix Will Deactivate On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: PE2 Fix Won't Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: PE2 Fix Won't Deactivate On Next Frame");
 			}
 		}
 		else {
 			Config.RCntFix ^= 0x1;
 			if (Config.RCntFix)
-				GPU_displayText(_("*PSXjin*: Parasite Eve 2 Fix Enabled"));
+				GPUdisplayText(_("*PSXjin*: Parasite Eve 2 Fix Enabled"));
 			else
-				GPU_displayText(_("*PSXjin*: Parasite Eve 2 Fix Disabled"));
+				GPUdisplayText(_("*PSXjin*: Parasite Eve 2 Fix Disabled"));
 		}
 		return;
 	}
@@ -526,23 +526,23 @@ void PADhandleKey(int key) {
 			MovieControl.VSyncWA ^= 1;
 			if (!Config.VSyncWA) {
 				if (MovieControl.VSyncWA)
-					GPU_displayText("*PSXjin*: RE 2/3 Fix Will Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: RE 2/3 Fix Will Activate On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: RE 2/3 Fix Won't Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: RE 2/3 Fix Won't Activate On Next Frame");
 			}
 			else {
 				if (MovieControl.VSyncWA)
-					GPU_displayText("*PSXjin*: RE 2/3 Fix Will Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: RE 2/3 Fix Will Deactivate On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: RE 2/3 Fix Won't Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: RE 2/3 Fix Won't Deactivate On Next Frame");
 			}
 		}
 		else {
 			Config.VSyncWA ^= 0x1;
 			if (Config.VSyncWA)
-				GPU_displayText(_("*PSXjin*: Resident Evil 2/3 Fix Enabled"));
+				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 Fix Enabled"));
 			else
-				GPU_displayText(_("*PSXjin*: Resident Evil 2/3 Fix Disabled"));
+				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 Fix Disabled"));
 		}
 		return;
 	}
@@ -600,12 +600,12 @@ void PADhandleKey(int key) {
 		if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.reset ^= 1;
 			if (MovieControl.reset)
-				GPU_displayText("*PSXjin*: CPU Will Reset On Next Frame");
+				GPUdisplayText("*PSXjin*: CPU Will Reset On Next Frame");
 			else
-				GPU_displayText("*PSXjin*: CPU Won't Reset On Next Frame");
+				GPUdisplayText("*PSXjin*: CPU Won't Reset On Next Frame");
 		}
 		else {
-			GPU_displayText("*PSXjin*: CPU Reset");
+			GPUdisplayText("*PSXjin*: CPU Reset");
 			LoadCdBios = 0;
 			SysReset();
 			NeedReset = 0;
@@ -625,24 +625,24 @@ void PADhandleKey(int key) {
 			MovieControl.cdCase ^= 1;
 			if (cdOpenCase < 0) {
 				if (MovieControl.cdCase)
-					GPU_displayText("*PSXjin*: CD Case Will Close On Next Frame");
+					GPUdisplayText("*PSXjin*: CD Case Will Close On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: CD Case Won't Close On Next Frame");
+					GPUdisplayText("*PSXjin*: CD Case Won't Close On Next Frame");
 			}
 			else {
 				if (MovieControl.cdCase)
-					GPU_displayText("*PSXjin*: CD Case Will Open On Next Frame");
+					GPUdisplayText("*PSXjin*: CD Case Will Open On Next Frame");
 				else
-					GPU_displayText("*PSXjin*: CD Case Won't Open On Next Frame");
+					GPUdisplayText("*PSXjin*: CD Case Won't Open On Next Frame");
 			}
 		}
 		else {
 			cdOpenCase ^= -1;
 			if (cdOpenCase < 0) {
-				GPU_displayText(_("*PSXjin*: CD Case Opened"));
+				GPUdisplayText(_("*PSXjin*: CD Case Opened"));
 			}
 			else {
-				GPU_displayText(_("*PSXjin*: CD Case Closed"));
+				GPUdisplayText(_("*PSXjin*: CD Case Closed"));
 				CDRclose();
 				CDRopen(IsoFile);
 				CheckCdrom();
@@ -701,11 +701,11 @@ BOOL CALLBACK ConnectDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 int NetOpened = 0;
-
+extern "C" long CALLBACK GPUopen(HWND hwndGPU)   ;
 bool OpenPlugins(HWND hWnd) {
 	int ret;
 
-	GPU_clearDynarec(clearDynarec);
+	//GPUclearDynarec(clearDynarec);
 
 	ret = CDRopen(IsoFile);
 	if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancels the open file dialog
@@ -720,9 +720,9 @@ bool OpenPlugins(HWND hWnd) {
 		strncpy(info.CdromID, CdromId, 9);
 		strncpy(info.CdromLabel, CdromLabel, 9);
 		info.psxMem = psxM;
-		info.GPU_showScreenPic = GPU_showScreenPic;
-		info.GPU_displayText = GPU_displayText;
-		info.GPU_showScreenPic = GPU_showScreenPic;
+		//info.GPU_showScreenPic = GPU_showScreenPic;
+		//info.GPUdisplayText = GPUdisplayText;
+		//info.GPU_showScreenPic = GPU_showScreenPic;
 		info.PAD_setSensitive = PAD1_setSensitive;
 		sprintf(path, "%s%s", Config.BiosDir, Config.Bios);
 		strcpy(info.BIOSpath, path);
@@ -755,7 +755,8 @@ bool OpenPlugins(HWND hWnd) {
 		NET_resume();
 	}
 
-	ret = GPU_open(hWnd);
+	
+	ret = GPUopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
 	ret = SPUopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
@@ -766,7 +767,7 @@ bool OpenPlugins(HWND hWnd) {
 
 	SetCurrentDirectory(PcsxDir);
 //	ShowCursor(FALSE);
-	GPU_sendFpLuaGui(PCSX_LuaGui);
+	GPUsendFpLuaGui(PCSX_LuaGui);
 	return true;
 }
 
@@ -776,7 +777,7 @@ void ClosePlugins() {
 	UpdateMenuSlots();
 	ret = CDRclose();
 	if (ret < 0) { SysMessage (_("Error Closing CDR Plugin")); return; }
-	ret = GPU_close();
+	ret = GPUclose();
 	if (ret < 0) { SysMessage (_("Error Closing GPU Plugin")); return; }
 	ret = PAD1_close();
 	if (ret < 0) { SysMessage (_("Error Closing PAD1 Plugin")); return; }
@@ -792,7 +793,7 @@ void ResetPlugins() {
 	int ret;
 
 	CDRshutdown();
-	GPU_shutdown();
+	GPUshutdown();
 	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
@@ -800,7 +801,7 @@ void ResetPlugins() {
 
 	ret = CDRinit();
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }
-	ret = GPU_init();
+	ret = GPUinit();
 	if (ret != 0) { SysMessage (_("GPUinit error: %d"), ret); return; }
 	ret = SPUinit();
 	if (ret != 0) { SysMessage (_("SPUinit error: %d"), ret); return; }
@@ -818,21 +819,21 @@ void ResetPlugins() {
 
 void SetEmulationSpeed(int cmd) {
 	if(cmd == EMUSPEED_TURBO)
-		GPU_setspeedmode(0);
+		GPUsetspeedmode(0);
 	else if(cmd == EMUSPEED_MAXIMUM)
-		GPU_setspeedmode(13);
+		GPUsetspeedmode(13);
 	else if(cmd == EMUSPEED_NORMAL)
-		GPU_setspeedmode(7);
+		GPUsetspeedmode(7);
 	else if(cmd == EMUSPEED_FASTEST)
-		GPU_setspeedmode(12);
+		GPUsetspeedmode(12);
 	else if(cmd == EMUSPEED_SLOWEST)
-		GPU_setspeedmode(1);
+		GPUsetspeedmode(1);
 	else if(cmd == EMUSPEED_SLOWER) {
 		if (iSpeedMode>1) iSpeedMode--;
-		GPU_setspeedmode(iSpeedMode);
+		GPUsetspeedmode(iSpeedMode);
 	}
 	else if(cmd == EMUSPEED_FASTER) {
 		if (iSpeedMode<12) iSpeedMode++;
-		GPU_setspeedmode(iSpeedMode);
+		GPUsetspeedmode(iSpeedMode);
 	}
 }

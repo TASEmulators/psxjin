@@ -602,7 +602,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				}
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
-					GPU_displayText(_("*PCSX*: Cheats Enabled"));
+					GPUdisplayText(_("*PCSX*: Cheats Enabled"));
 				}
 				PCSXApplyCheats();
 				UpdateMemWatch();
@@ -869,7 +869,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
-					GPU_displayText(_("*PCSX*: Cheats Enabled"));
+					GPUdisplayText(_("*PCSX*: Cheats Enabled"));
 				}
 				PCSXApplyCheats();
 				UpdateMemWatch();

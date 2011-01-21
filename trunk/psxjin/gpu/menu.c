@@ -55,7 +55,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "record.h"
+#include "gpu_record.h"
 
 #endif
 

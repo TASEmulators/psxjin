@@ -490,7 +490,7 @@ void States_Load(int num) {
 	if (ret == 0)
 		 sprintf(Text, _("*PSXjin*: Loaded State %d"), num);
 	else sprintf(Text, _("*PSXjin*: Error Loading State %d"), num);
-	GPU_displayText(Text);
+	GPUdisplayText(Text);
 
 	Running = 1;
 	psxCpu->Execute();
@@ -506,15 +506,15 @@ void States_Save(int num) {
 		SysReset();
 		NeedReset = 0;
 	}
-	GPU_updateLace();
+	GPUupdateLace();
 
 	sprintf (Text, "sstates/%10.10s.%3.3d", CdromLabel, num);
-	GPU_freeze(2, (GPUFreeze_t *)&num);
+	GPUfreeze(2, (GPUFreeze_t *)&num);
 	ret = SaveState(Text);
 	if (ret == 0)
 		 sprintf(Text, _("*PSXjin*: Saved State %d"), num);
 	else sprintf(Text, _("*PSXjin*: Error Saving State %d"), num);
-	GPU_displayText(Text);
+	GPUdisplayText(Text);
 
 	Running = 1;
 	psxCpu->Execute();
@@ -562,7 +562,7 @@ void OnStates_LoadOther() {
 		if (ret == 0)
 			 sprintf(Text, _("*PSXjin*: Loaded State %s"), szFileName);
 		else sprintf(Text, _("*PSXjin*: Error Loading State %s"), szFileName);
-		GPU_displayText(Text);
+		GPUdisplayText(Text);
 
 		Running = 1;
 		psxCpu->Execute();
@@ -615,7 +615,7 @@ void OnStates_SaveOther() {
 		if (ret == 0)
 			 sprintf(Text, _("*PSXjin*: Loaded State %s"), szFileName);
 		else sprintf(Text, _("*PSXjin*: Error Loading State %s"), szFileName);
-		GPU_displayText(Text);
+		GPUdisplayText(Text);
 
 		Running = 1;
 		psxCpu->Execute();
@@ -881,7 +881,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 */
 				case ID_FILE_SCREENSHOT:
-					GPU_makeSnapshot();
+					GPUmakeSnapshot();
 					return TRUE;
 
 				case ID_FILE_STATES_LOAD_SLOT1: States_Load(0); return TRUE;
@@ -918,12 +918,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_CONFIGURATION_GRAPHICS:
-					if (GPU_configure) 
-					{
-						GPU_configure();
-						UpdateWindowSizeFromConfig();
-						MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
-					}
+					GPUconfigure();
+					UpdateWindowSizeFromConfig();
+					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					return TRUE;
 				case ID_EMULATOR_1X:
 					MainWindow_width = 320;
@@ -955,7 +952,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 				case ID_EMULATOR_DISPFRAMECOUNTER:
 					dispFrameCounter ^= 1;
-					GPU_showframecounter();
+					GPUshowframecounter();
 					return TRUE;
 /*
 				case ID_CONFIGURATION_CDROM:
@@ -2054,9 +2051,9 @@ int SysInit() {
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 	LoadIni();
 	if (dispFrameCounter)
-		GPU_showframecounter();
+		GPUshowframecounter();
 	if (dispInput)
-		GPU_showInput();
+		GPUshowInput();
 	return 0;
 }
 
@@ -2280,7 +2277,7 @@ void WIN32_StartAviRecord()
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
 	//SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
-	GPU_startAvi(Movie.aviFilename);
+	GPUstartAvi(Movie.aviFilename);
 	SPUstartWav(Movie.wavFilename);
 	if (NeedReset) { SysReset(); NeedReset = 0; }
 	Running = 1;
@@ -2291,7 +2288,7 @@ void WIN32_StopAviRecord()
 {
 	if (!Movie.capture)
 		return;
-	GPU_stopAvi();
+	GPUstopAvi();
 	SPUstopWav();
 	Movie.capture = 0;
 	AVIisCapturing = false;

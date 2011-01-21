@@ -37,7 +37,7 @@
 #include <vfw.h>
 #include <math.h>
 #include "externals.h"
-#include "record.h"
+#include "gpu_record.h"
 #include "gpu.h"
 
 BOOL			RECORD_RECORDING = FALSE;

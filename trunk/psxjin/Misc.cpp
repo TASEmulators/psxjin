@@ -482,12 +482,12 @@ int SaveState(char *file) {
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
-	GPU_freeze(1, gpufP);
+	GPUfreeze(1, gpufP);
 	void* temp = gpufP->extraData;
 	gpufP->extraData = 0;
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
 	gzwrite(f, temp, gpufP->extraDataSize);
-	GPU_freeze(3, gpufP);
+	GPUfreeze(3, gpufP);
 	free(gpufP);
 
 	pos = ftell(f);
@@ -556,7 +556,7 @@ int LoadState(char *file) {
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
 	gpufP->extraData = malloc(gpufP->extraDataSize);
 	gzread(f, gpufP->extraData, gpufP->extraDataSize);
-	GPU_freeze(0, gpufP);
+	GPUfreeze(0, gpufP);
 	free(gpufP->extraData);
 	free(gpufP);
 
@@ -629,12 +629,12 @@ int SaveStateEmbed(char *file) {
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
-	GPU_freeze(1, gpufP);
+	GPUfreeze(1, gpufP);
 	void* temp = gpufP->extraData;
 	gpufP->extraData = 0;
 	gzwrite(f, gpufP, sizeof(GPUFreeze_t));
 	gzwrite(f, temp, gpufP->extraDataSize);
-	GPU_freeze(3, gpufP);
+	GPUfreeze(3, gpufP);
 	free(gpufP);
 
 	sioFreeze(f, 1);
@@ -701,7 +701,7 @@ int LoadStateEmbed(char *file) {
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
 	gpufP->extraData = malloc(gpufP->extraDataSize);
 	gzread(f, gpufP->extraData, gpufP->extraDataSize);
-	GPU_freeze(0, gpufP);
+	GPUfreeze(0, gpufP);
 	free(gpufP->extraData);
 	free(gpufP);
 

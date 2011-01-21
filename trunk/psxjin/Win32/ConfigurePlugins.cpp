@@ -324,7 +324,8 @@ void OnOK(HWND hW) {
 	SysCloseLibrary(drv);
 
 void ConfigureGPU(HWND hW) {
-	ConfPlugin(GPUconfigure, IDC_LISTGPU, "GPUconfigure");
+	//ConfPlugin(GPUconfigure, IDC_LISTGPU, "GPUconfigure");
+	GPUconfigure();
 }
 
 void ConfigureSPU(HWND hW) {
@@ -350,9 +351,9 @@ void ConfigurePAD2(HWND hW) {
 }
 
 
-void AboutGPU(HWND hW) {
-	ConfPlugin(GPUabout, IDC_LISTGPU, "GPUabout");
-}
+//void AboutGPU(HWND hW) {
+//	ConfPlugin(GPUabout, IDC_LISTGPU, "GPUabout");
+//}
 
 //void AboutSPU(HWND hW) {
 //	ConfPlugin(SPUabout, IDC_LISTSPU, "SPUabout");
@@ -395,9 +396,9 @@ void AboutPAD2(HWND hW) {
 	} \
 	SysCloseLibrary(drv);
 
-void TestGPU(HWND hW) {
-	TestPlugin(GPUtest, IDC_LISTGPU, "GPUtest");
-}
+//void TestGPU(HWND hW) {
+//	TestPlugin(GPUtest, IDC_LISTGPU, "GPUtest");
+//}
 
 //void TestSPU(HWND hW) {
 //	TestPlugin(SPUtest, IDC_LISTSPU, "SPUtest");
@@ -485,13 +486,13 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
        			case IDC_CONFIGPAD1: ConfigurePAD1(hW); return TRUE;
        			case IDC_CONFIGPAD2: ConfigurePAD2(hW); return TRUE;
 
-				case IDC_TESTGPU:    TestGPU(hW);   return TRUE;
+				//case IDC_TESTGPU:    TestGPU(hW);   return TRUE;
 				//case IDC_TESTSPU:    TestSPU(hW);   return TRUE;
 				//case IDC_TESTCDR:    TestCDR(hW);   return TRUE;
 				case IDC_TESTPAD1:   TestPAD1(hW);  return TRUE;
 				case IDC_TESTPAD2:   TestPAD2(hW);  return TRUE;
 
-				case IDC_ABOUTGPU:   AboutGPU(hW);  return TRUE;
+				//case IDC_ABOUTGPU:   AboutGPU(hW);  return TRUE;
 				//case IDC_ABOUTSPU:   AboutSPU(hW);  return TRUE;
                 //case IDC_ABOUTCDR:   AboutCDR(hW);  return TRUE;
     	        case IDC_ABOUTPAD1:  AboutPAD1(hW); return TRUE;

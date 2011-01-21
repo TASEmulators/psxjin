@@ -699,7 +699,7 @@ BEGIN
     CONTROL         "Disable Xa Decoding",IDC_XA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,121,45,87,10
     CONTROL         "Disable Cd Audio",IDC_CDDA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,121,58,87,10
     GROUPBOX        "CPU",IDC_STATIC2,5,78,220,51
-    CONTROL         "Enable Interpreter Cpu (tasers better leave this on...)",IDC_CPU,
+    CONTROL         "Enable Interpreter Cpu (everyone better leave this on...)",IDC_CPU,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,203,10
     CONTROL         "Resident Evil 2/3 Fix",IDC_VSYNCWA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,101,104,10
     CONTROL         "Parasite Eve 2, Vandal Hearts 1/2 Fix",IDC_RCNTFIX,

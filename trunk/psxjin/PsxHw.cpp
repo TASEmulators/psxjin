@@ -217,13 +217,13 @@ u32 psxHwRead32(u32 add) {
 #endif
 
 		case 0x1f801810:
-			hard = GPU_readData();
+			hard = GPUreadData();
 #ifdef PSXHW_LOG
 			PSXHW_LOG("GPU DATA 32bit read %lx\n", hard);
 #endif
 			return hard;
 		case 0x1f801814:
-			hard = GPU_readStatus();
+			hard = GPUreadStatus();
 #ifdef PSXHW_LOG
 			PSXHW_LOG("GPU STATUS 32bit read %lx\n", hard);
 #endif
@@ -634,12 +634,12 @@ void psxHwWrite32(u32 add, u32 value) {
 #ifdef PSXHW_LOG
 			PSXHW_LOG("GPU DATA 32bit write %lx\n", value);
 #endif
-			GPU_writeData(value); return;
+			GPUwriteData(value); return;
 		case 0x1f801814:
 #ifdef PSXHW_LOG
 			PSXHW_LOG("GPU STATUS 32bit write %lx\n", value);
 #endif
-			GPU_writeStatus(value); return;
+			GPUwriteStatus(value); return;
 
 		case 0x1f801820:
 			mdecWrite0(value); break;
