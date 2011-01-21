@@ -56,8 +56,6 @@ void SaveConfig()
 	WritePrivateProfileString("Plugins", "QKeys", Str_Tmp, Conf_File);
 	wsprintf(Str_Tmp, "%d", Config.Cdda);
 	WritePrivateProfileString("Plugins", "Cdda", Str_Tmp, Conf_File);
-	wsprintf(Str_Tmp, "%d", Config.Cpu);
-	WritePrivateProfileString("Plugins", "CPU", Str_Tmp, Conf_File);
 	wsprintf(Str_Tmp, "%d", Config.PauseAfterPlayback);
 	WritePrivateProfileString("Plugins", "PauseAfterPlayback", Str_Tmp, Conf_File);
 	wsprintf(Str_Tmp, "%d", Config.PsxOut);
@@ -98,7 +96,7 @@ void LoadConfig()
 	Config.PsxType = GetPrivateProfileInt("Plugins", "PsxType", 0, Conf_File);
 	Config.QKeys = GetPrivateProfileInt("Plugins", "QKeys", 0, Conf_File);
 	Config.Cdda = GetPrivateProfileInt("Plugins", "Cdda", 0, Conf_File);
-	Config.Cpu = GetPrivateProfileInt("Plugins", "CPU", 0, Conf_File);
+	//Config.Cpu = GetPrivateProfileInt("Plugins", "CPU", 0, Conf_File);
 	Config.PauseAfterPlayback = GetPrivateProfileInt("Plugins", "PauseAfterPlayback", 0, Conf_File);
 	Config.PsxOut = GetPrivateProfileInt("Plugins", "PsxOut", 0, Conf_File);
 	Config.RCntFix = GetPrivateProfileInt("Plugins", "RCntFix", 0, Conf_File);

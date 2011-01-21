@@ -344,7 +344,6 @@ int main(int argc, char **argv) {
 	GetCurrentDirectory(256, PcsxDir);
 
 	memset(&Config, 0, sizeof(PcsxConfig));
-	Config.Cpu = 1; //enable interpreter by default
 	strcpy(Config.Net, "Disabled");
 	sprintf(Config.PluginsDir, "%splugins\\", szCurrentPath);
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
@@ -1657,7 +1656,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Button_SetCheck(GetDlgItem(hW,IDC_QKEYS),   Config.QKeys);
 			Button_SetCheck(GetDlgItem(hW,IDC_CDDA),    Config.Cdda);
 			Button_SetCheck(GetDlgItem(hW,IDC_PSXAUTO), Config.PsxAuto);
-			Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
+			//Button_SetCheck(GetDlgItem(hW,IDC_CPU),     Config.Cpu);
 			Button_SetCheck(GetDlgItem(hW,IDC_PAUSE),   Config.PauseAfterPlayback);
 			Button_SetCheck(GetDlgItem(hW,IDC_PSXOUT),  Config.PsxOut);
 			Button_SetCheck(GetDlgItem(hW,IDC_RCNTFIX), Config.RCntFix);
@@ -1681,7 +1680,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 					Config.Cdda    = Button_GetCheck(GetDlgItem(hW,IDC_CDDA));
 					Config.PsxAuto = Button_GetCheck(GetDlgItem(hW,IDC_PSXAUTO));
 					Config.PauseAfterPlayback = Button_GetCheck(GetDlgItem(hW,IDC_PAUSE));
-					tmp = Config.Cpu;
+					/*tmp = Config.Cpu;
 					Config.Cpu     = Button_GetCheck(GetDlgItem(hW,IDC_CPU));
 					if (tmp != Config.Cpu) {
 						psxCpu->Shutdown();
@@ -1693,7 +1692,7 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 							exit(1);
 						}
 						psxCpu->Reset();
-					}
+					}*/
 					Config.PsxOut  = Button_GetCheck(GetDlgItem(hW,IDC_PSXOUT));
 					Config.RCntFix = Button_GetCheck(GetDlgItem(hW,IDC_RCNTFIX));
 					Config.VSyncWA = Button_GetCheck(GetDlgItem(hW,IDC_VSYNCWA));

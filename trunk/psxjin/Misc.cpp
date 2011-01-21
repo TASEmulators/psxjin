@@ -738,7 +738,7 @@ int SendPcsxInfo() {
 	NET_sendData(&Config.Sio, sizeof(Config.Sio), PSE_NET_BLOCKING);
 	NET_sendData(&Config.RCntFix, sizeof(Config.RCntFix), PSE_NET_BLOCKING);
 	NET_sendData(&Config.PsxType, sizeof(Config.PsxType), PSE_NET_BLOCKING);
-	NET_sendData(&Config.Cpu, sizeof(Config.Cpu), PSE_NET_BLOCKING);
+	//NET_sendData(&Config.Cpu, sizeof(Config.Cpu), PSE_NET_BLOCKING);
 
 //	SysPrintf("Send OK\n");
 
@@ -761,8 +761,8 @@ int RecvPcsxInfo() {
 
 	SysUpdate();
 
-	tmp = Config.Cpu;
-	NET_recvData(&Config.Cpu, sizeof(Config.Cpu), PSE_NET_BLOCKING);
+	//tmp = Config.Cpu;
+	/*NET_recvData(&Config.Cpu, sizeof(Config.Cpu), PSE_NET_BLOCKING);
 	if (tmp != Config.Cpu) {
 		psxCpu->Shutdown();
 #ifdef PSXREC
@@ -776,7 +776,7 @@ int RecvPcsxInfo() {
 			SysClose(); return -1;
 		}
 		psxCpu->Reset();
-	}
+	}*/
 
 //	SysPrintf("Recv OK\n");
 

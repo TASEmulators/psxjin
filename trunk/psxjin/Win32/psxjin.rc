@@ -699,8 +699,6 @@ BEGIN
     CONTROL         "Disable Xa Decoding",IDC_XA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,121,45,87,10
     CONTROL         "Disable Cd Audio",IDC_CDDA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,121,58,87,10
     GROUPBOX        "CPU",IDC_STATIC2,5,78,220,51
-    CONTROL         "Enable Interpreter Cpu (everyone better leave this on...)",IDC_CPU,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,203,10
     CONTROL         "Resident Evil 2/3 Fix",IDC_VSYNCWA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,101,104,10
     CONTROL         "Parasite Eve 2, Vandal Hearts 1/2 Fix",IDC_RCNTFIX,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,114,135,10
@@ -710,6 +708,7 @@ BEGIN
     COMBOBOX        IDC_PSXTYPES,105,143,53,50,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,55,165,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,125,165,50,14
+    LTEXT           "There is no recompiler CPU core. Live with it.",IDC_STATIC,15,89,142,8
 END
 
 IDD_NETPLAY DIALOG  0, 0, 165, 95
