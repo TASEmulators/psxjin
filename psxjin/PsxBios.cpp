@@ -2120,27 +2120,11 @@ void biosInterrupt() {
 				PAD1_poll(0);
 				data = PAD1_poll(0) << 8;
 				data|= PAD1_poll(0);
-
-				if (NET_sendPadData(&data, 2) == -1)
-					netError();
-
-				if (NET_recvPadData(&((u16*)buf)[0], 1) == -1)
-					netError();
-				if (NET_recvPadData(&((u16*)buf)[1], 2) == -1)
-					netError();
 			}
 
 		}
 		if (Config.UseNet && pad_buf1 && pad_buf2) {
 			psxBios_PADpoll(1);
-
-			if (NET_sendPadData(pad_buf1, i) == -1)
-				netError();
-
-			if (NET_recvPadData(pad_buf1, 1) == -1)
-				netError();
-			if (NET_recvPadData(pad_buf2, 2) == -1)
-				netError();
 		} else {
 			if (pad_buf1) {
 				psxBios_PADpoll(1);

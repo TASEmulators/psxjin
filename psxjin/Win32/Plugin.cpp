@@ -700,7 +700,6 @@ BOOL CALLBACK ConnectDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return FALSE;
 }
 
-int NetOpened = 0;
 extern "C" long CALLBACK GPUopen(HWND hwndGPU)   ;
 bool OpenPlugins(HWND hWnd) {
 	int ret;
@@ -712,49 +711,6 @@ bool OpenPlugins(HWND hWnd) {
 	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return false; }
 
 	SetCurrentDirectory(PcsxDir);
-	if (Config.UseNet && NetOpened == 0) {
-		netInfo info;
-		char path[256];
-
-		strcpy(info.EmuName, "PSXjin v" PCSX_VERSION);
-		strncpy(info.CdromID, CdromId, 9);
-		strncpy(info.CdromLabel, CdromLabel, 9);
-		info.psxMem = psxM;
-		//info.GPU_showScreenPic = GPU_showScreenPic;
-		//info.GPUdisplayText = GPUdisplayText;
-		//info.GPU_showScreenPic = GPU_showScreenPic;
-		info.PAD_setSensitive = PAD1_setSensitive;
-		sprintf(path, "%s%s", Config.BiosDir, Config.Bios);
-		strcpy(info.BIOSpath, path);
-		strcpy(info.MCD1path, Config.Mcd1);
-		strcpy(info.MCD2path, Config.Mcd2);
-		sprintf(path, "%s%s", Config.PluginsDir, Config.Gpu);
-		strcpy(info.GPUpath, path);
-		sprintf(path, "%s%s", Config.PluginsDir, Config.Spu);
-		strcpy(info.SPUpath, path);
-		sprintf(path, "%s%s", Config.PluginsDir, Config.Cdr);
-		strcpy(info.CDRpath, path);
-		NET_setInfo(&info);
-
-		ret = NET_open(hWnd);
-		if (ret < 0) Config.UseNet = 0;
-		else {
-			HWND hW = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_CONNECT), gApp.hWnd, ConnectDlgProc);
-			ShowWindow(hW, SW_SHOW);
-
-			if (NET_queryPlayer() == 1) {
-				if (SendPcsxInfo() == -1) Config.UseNet = 0;
-			} else {
-				if (RecvPcsxInfo() == -1) Config.UseNet = 0;
-			}
-
-			DestroyWindow(hW);
-		}
-		NetOpened = 1;
-	} else if (Config.UseNet) {
-		NET_resume();
-	}
-
 	
 	ret = GPUopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
@@ -783,10 +739,6 @@ void ClosePlugins() {
 	if (ret < 0) { SysMessage (_("Error Closing PAD1 Plugin")); return; }
 	ret = PAD2_close();
 	if (ret < 0) { SysMessage (_("Error Closing PAD2 Plugin")); return; }
-
-	if (Config.UseNet) {
-		NET_pause();
-	}
 }
 
 void ResetPlugins() {
@@ -797,7 +749,6 @@ void ResetPlugins() {
 	SPUshutdown();
 	PAD1_shutdown();
 	PAD2_shutdown();
-	if (Config.UseNet) NET_shutdown(); 
 
 	ret = CDRinit();
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }
@@ -809,12 +760,6 @@ void ResetPlugins() {
 	if (ret != 0) { SysMessage (_("PAD1init error: %d"), ret); return; }
 	ret = PAD2_init(2);
 	if (ret != 0) { SysMessage (_("PAD2init error: %d"), ret); return; }
-	if (Config.UseNet) {
-		ret = NET_init();
-		if (ret < 0) { SysMessage (_("NETinit error: %d"), ret); return; }
-	}
-
-	NetOpened = 0;
 }
 
 void SetEmulationSpeed(int cmd) {

@@ -269,14 +269,6 @@ void sioWrite8(unsigned char value) {
 						buf[i++] = PAD1_poll(0);
 					}
 					bufcount+= 3;
-
-					if (NET_sendPadData(buf, bufcount) == -1)
-						netError();
-
-					if (NET_recvPadData(buf, 1) == -1)
-						netError();
-					if (NET_recvPadData(buf+128, 2) == -1)
-						netError();
 				} else {
 					memcpy(buf, buf+128, 32);
 				}
