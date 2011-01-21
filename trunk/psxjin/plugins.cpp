@@ -254,6 +254,7 @@ void CALLBACK GPU__updateframe(void) {}
 void CALLBACK GPU__setcurrentmode(char newModeFlags) {}
 void CALLBACK GPU__setspeedmode(unsigned long newSpeedMode) {}
 void CALLBACK GPU__showframecounter(void) {}
+void CALLBACK GPU__showInput(void) {}
 void CALLBACK GPU__startAvi(char* filename) {}
 void CALLBACK GPU__stopAvi(void) {}
 void CALLBACK GPU__sendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int)) {}
@@ -307,6 +308,7 @@ int LoadGPUplugin(char *GPUdll) {
 	LoadGpuSym0(setcurrentmode, "GPUsetcurrentmode");
 	LoadGpuSym0(setspeedmode, "GPUsetspeedmode");
 	LoadGpuSym0(showframecounter, "GPUshowframecounter");
+	LoadGpuSym0(showInput, "GPUshowInput");
 	LoadGpuSym0(startAvi, "GPUstartAvi");
 	LoadGpuSym0(stopAvi, "GPUstopAvi");
 	LoadGpuSym0(sendFpLuaGui, "GPUsendFpLuaGui");
