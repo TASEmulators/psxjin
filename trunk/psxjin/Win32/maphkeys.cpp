@@ -23,6 +23,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,               0,           "Turbo Speed", },
 	{ VK_DECIMAL,      0,           "Maximum Speed", },
 	{ VK_OEM_PERIOD,   0,           "Frame Counter", },
+	{ VK_OEM_COMMA,	   0,			"Input Display", },
 	{ 0,               0,           "Lag Counter Reset", },
 	{ VK_F12,          0,           "Take Screenshot", },
 	{ VK_F1,           0,           "Load State 1", },
