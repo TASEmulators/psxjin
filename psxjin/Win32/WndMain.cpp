@@ -74,7 +74,7 @@ int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
 int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
 int MainWindow_height = 240;
-const int MENUSIZE = 65;
+const int MENUSIZE = 48;
 // Recent Menus
 RecentMenu RecentCDs;
 
