@@ -120,6 +120,8 @@
 #include "gpu.h"
 
 #endif
+//extern struct PcsxConfig; //TODO: This instead of pConfigFile
+//extern PcsxConfig Config;
 
 /////////////////////////////////////////////////////////////////////////////
 // CONFIG FILE helpers.... used in (non-fpse) Linux and ZN Windows

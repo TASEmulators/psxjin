@@ -56,7 +56,7 @@ typedef struct {
 } AppData;
 
 extern AppData gApp;
-extern char Conf_File[256];
+
 #elif defined (__LINUX__) || defined (__MACOSX__)
 
 #include <sys/types.h>
@@ -137,6 +137,7 @@ typedef struct {
 	long UseNet;
 	long VSyncWA;
 	long PauseAfterPlayback;
+	char Conf_File[256];
 } PcsxConfig;
 
 extern PcsxConfig Config;
