@@ -75,7 +75,7 @@ void UpdateMenuSlots();
 void ResetMenuSlots();
 
 void CreateMemPoke();
-
+void ResetGame();
 void UpdateToolWindows();
 
 // maphkeys.c

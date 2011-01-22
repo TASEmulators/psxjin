@@ -640,6 +640,28 @@ void WriteWindowSizeToConfig()
 	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Conf_File);
 }
 
+void ResetGame()
+{
+	if (Movie.mode == MOVIEMODE_RECORD) {
+			MovieControl.reset ^= 1;
+			if (MovieControl.reset)
+				GPUdisplayText("*PSXjin*: CPU Will Reset On Next Frame");
+			else
+				GPUdisplayText("*PSXjin*: CPU Won't Reset On Next Frame");
+		}
+		else {
+			GPUdisplayText("*PSXjin*: CPU Reset");
+			LoadCdBios = 0;
+			SysReset();
+			NeedReset = 0;
+			CheckCdrom();
+			if (LoadCdrom() == -1)
+				SysMessage(_("Could not load Cdrom"));
+			Running = 1;
+			psxCpu->Execute();
+	}
+}
+
 bool IsFileExtension(std::string filename, std::string ext)
 {
 	if (!(filename.find(ext) == std::string::npos) && (filename.find(ext) == filename.length()-4))
@@ -801,7 +823,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STATES_SAVE_OTHER: OnStates_SaveOther(); return TRUE;
 
 				case ID_EMULATOR_RESET:
-					NeedReset = 1;
+					ResetGame();
 					return TRUE;
 
 				case ID_CONFIGURATION_GRAPHICS:

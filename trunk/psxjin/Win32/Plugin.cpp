@@ -613,24 +613,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RESET].key
 	&& modifiers == EmuCommandTable[EMUCMD_RESET].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.reset ^= 1;
-			if (MovieControl.reset)
-				GPUdisplayText("*PSXjin*: CPU Will Reset On Next Frame");
-			else
-				GPUdisplayText("*PSXjin*: CPU Won't Reset On Next Frame");
-		}
-		else {
-			GPUdisplayText("*PSXjin*: CPU Reset");
-			LoadCdBios = 0;
-			SysReset();
-			NeedReset = 0;
-			CheckCdrom();
-			if (LoadCdrom() == -1)
-				SysMessage(_("Could not load Cdrom"));
-			Running = 1;
-			psxCpu->Execute();
-		}
+		ResetGame();
 		return;
 	}
 
