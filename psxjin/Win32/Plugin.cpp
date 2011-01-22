@@ -327,7 +327,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RAMWATCH].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMWATCH].keymod)
 	{
-		CreateMemWatch();
+		//adelikat: TODO: Call Ram Watch dialog here
 		return;
 	}
 

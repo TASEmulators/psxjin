@@ -84,13 +84,6 @@ int MHkeysUpdate();
 int MHkeysCreate();
 int MHkeysListMake(int bBuild);
 
-// memwatch.c
-void UpdateMemWatch();
-void CreateMemWatch();
-void AddMemWatch(char memaddress[32]);
-int LoadMemWatchFile(char nameo[2048]);
-extern char * MemWatchDir;
-
 // cheats
 void CreateCheatEditor();
 void CreateMemSearch();

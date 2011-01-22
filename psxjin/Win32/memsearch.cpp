@@ -464,7 +464,6 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 						GPUdisplayText(_("*PCSX*: Cheats Enabled"));
 					}
 					PCSXApplyCheats();
-					UpdateMemWatch();
 					UpdateMemSearch();
 				}
 
@@ -1018,7 +1017,6 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						ScanAddress(buf,&address);
 						memset(buf, 0, 7);
 						sprintf(buf, "%X", address);
-						AddMemWatch(buf);
 					}
 				}
 				break;
