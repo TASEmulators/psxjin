@@ -63,7 +63,6 @@ long LoadCdBios;
 int Running;
 int Continue=0;
 char PcsxDir[256];
-char Conf_File[256] = ".\\psxjin.ini";
 bool AVIisCapturing = false;
 
 //TODO: remove me and use the gpu ones!
@@ -283,6 +282,7 @@ int main(int argc, char **argv) {
 	sprintf(Config.SnapDir, "%ssnap\\", szCurrentPath);
 	sprintf(Config.MovieDir, "%smovies\\", szCurrentPath);
 	sprintf(Config.MemCardsDir, "%smemcards\\", szCurrentPath);
+	sprintf(Config.Conf_File, "%s\\psxjin.ini", szCurrentPath);
 	LoadConfig();	//Attempt to load ini, or set default settings
 
 	//If directories don't already exist, create them
@@ -627,17 +627,17 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 
 void UpdateWindowSizeFromConfig()
 {
-	MainWindow_width = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
-	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File)+MENUSIZE;
+	MainWindow_width = GetPrivateProfileInt("GPU", "iResX", 320, Config.Conf_File);
+	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Config.Conf_File)+MENUSIZE;
 }
 
 void WriteWindowSizeToConfig()
 {
 	char Str_Tmp[1024];
 	sprintf(Str_Tmp, "%d", MainWindow_width);
-	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Conf_File);
+	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", MainWindow_height-MENUSIZE);
-	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Conf_File);
+	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Config.Conf_File);
 }
 
 void ResetGame()
@@ -1316,7 +1316,7 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 			RecentCDs.SetID(65000);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
 			//RecentCDs.MakeRecentMenu(gApp.hInstance);
-			RecentCDs.GetRecentItemsFromIni(Conf_File, "General", "CD");	//TODO: make this a global variable
+			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");	//TODO: make this a global variable
 			break;
 		case WM_INITDIALOG:
 			mcdDlg = hW;
@@ -1883,40 +1883,40 @@ void SaveIni()
 	char Str_Tmp[1024];
 
 	sprintf(Str_Tmp, "%d", MainWindow_wndx);
-	WritePrivateProfileString("General", "Main_x", Str_Tmp, Conf_File);
+	WritePrivateProfileString("General", "Main_x", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", MainWindow_wndy);
-	WritePrivateProfileString("General", "Main_y", Str_Tmp, Conf_File);
+	WritePrivateProfileString("General", "Main_y", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", dispFrameCounter);
-	WritePrivateProfileString("General", "FrameCounter", Str_Tmp, Conf_File);
+	WritePrivateProfileString("General", "FrameCounter", Str_Tmp, Config.Conf_File);
 
 	sprintf(Str_Tmp, "%d", AutoRWLoad);
-	WritePrivateProfileString("RamWatch", "AutoLoad", Str_Tmp, Conf_File);
+	WritePrivateProfileString("RamWatch", "AutoLoad", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", RWSaveWindowPos);
-	WritePrivateProfileString("RamWatch", "RWSaveWindowPos", Str_Tmp, Conf_File);
+	WritePrivateProfileString("RamWatch", "RWSaveWindowPos", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", ramw_x);
-	WritePrivateProfileString("RamWatch", "ramw_x", Str_Tmp, Conf_File);
+	WritePrivateProfileString("RamWatch", "ramw_x", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", ramw_y);
-	WritePrivateProfileString("RamWatch", "ramw_y", Str_Tmp, Conf_File);
+	WritePrivateProfileString("RamWatch", "ramw_y", Str_Tmp, Config.Conf_File);
 
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
 	{
 		char str[256];
 		sprintf(str, "Recent Watch %d", i+1);
-		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Conf_File);	
+		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Config.Conf_File);	
 	}
 
-	RecentCDs.SaveRecentItemsToIni(Conf_File, "General", "CD");
+	RecentCDs.SaveRecentItemsToIni(Config.Conf_File, "General", "CD");
 }
 
 void LoadIni()
 {
-	AutoRWLoad = GetPrivateProfileInt("RamWatch", "AutoLoad", 0, Conf_File);
-	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Conf_File);
-	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Conf_File);
-	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Conf_File);
-	MainWindow_wndx = GetPrivateProfileInt("General", "main_x", 0, Conf_File);
-	MainWindow_wndy = GetPrivateProfileInt("General", "main_y", 0, Conf_File);
-	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Conf_File);
+	AutoRWLoad = GetPrivateProfileInt("RamWatch", "AutoLoad", 0, Config.Conf_File);
+	RWSaveWindowPos = GetPrivateProfileInt("RamWatch", "RWSaveWindowPos", 0, Config.Conf_File);
+	ramw_x = GetPrivateProfileInt("RamWatch", "ramw_x", 0, Config.Conf_File);
+	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Config.Conf_File);
+	MainWindow_wndx = GetPrivateProfileInt("General", "main_x", 0, Config.Conf_File);
+	MainWindow_wndy = GetPrivateProfileInt("General", "main_y", 0, Config.Conf_File);
+	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Config.Conf_File);
 
 	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
 	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
@@ -1925,7 +1925,7 @@ void LoadIni()
 	{
 		char str[256];
 		sprintf(str, "Recent Watch %d", i+1);
-		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Conf_File);
+		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
 }
 

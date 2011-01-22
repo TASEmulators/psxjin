@@ -66,33 +66,33 @@ void WriteConfig()
 	char Str_Tmp[1024];
 
 	wsprintf(Str_Tmp, "%d", iUseXA);
-	WritePrivateProfileString("Sound", "UseXA", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "UseXA", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iVolume);
-	WritePrivateProfileString("Sound", "iVolume", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iVolume", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iXAPitch);
-	WritePrivateProfileString("Sound", "iXAPitch", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iXAPitch", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iSoundMode);
-	WritePrivateProfileString("Sound", "iSoundMode", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iSoundMode", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iSynchMethod);
-	WritePrivateProfileString("Sound", "iSynchMethod", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iSynchMethod", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iRecordMode);
-	WritePrivateProfileString("Sound", "iRecordMode", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iRecordMode", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iUseReverb);
-	WritePrivateProfileString("Sound", "iUseReverb", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iUseReverb", Str_Tmp, Config.Conf_File);
 	wsprintf(Str_Tmp, "%d", iUseInterpolation);
-	WritePrivateProfileString("Sound", "iUseInterpolation", Str_Tmp, Conf_File);
+	WritePrivateProfileString("Sound", "iUseInterpolation", Str_Tmp, Config.Conf_File);
 }
 
 void ReadConfig()
 {
-	iUseXA = GetPrivateProfileInt("Sound", "UseXA", 1, Conf_File);
-	iVolume = GetPrivateProfileInt("Sound", "iVolume", 3, Conf_File);
-	iXAPitch = GetPrivateProfileInt("Sound", "iXAPitch", iXAPitch, Conf_File);
-	iSoundMode = GetPrivateProfileInt("Sound", "iSoundMode", iSoundMode, Conf_File);
-	iSynchMethod = GetPrivateProfileInt("Sound", "iSynchMethod", iSynchMethod, Conf_File);
-	iRecordMode = GetPrivateProfileInt("Sound", "iRecordMode", iRecordMode, Conf_File);
-	iUseReverb = GetPrivateProfileInt("Sound", "iUseReverb", iUseReverb, Conf_File);
-	iUseInterpolation = GetPrivateProfileInt("Sound", "iUseInterpolation", iUseInterpolation, Conf_File);
+	iUseXA = GetPrivateProfileInt("Sound", "UseXA", 1, Config.Conf_File);
+	iVolume = GetPrivateProfileInt("Sound", "iVolume", 3, Config.Conf_File);
+	iXAPitch = GetPrivateProfileInt("Sound", "iXAPitch", iXAPitch, Config.Conf_File);
+	iSoundMode = GetPrivateProfileInt("Sound", "iSoundMode", iSoundMode, Config.Conf_File);
+	iSynchMethod = GetPrivateProfileInt("Sound", "iSynchMethod", iSynchMethod, Config.Conf_File);
+	iRecordMode = GetPrivateProfileInt("Sound", "iRecordMode", iRecordMode, Config.Conf_File);
+	iUseReverb = GetPrivateProfileInt("Sound", "iUseReverb", iUseReverb, Config.Conf_File);
+	iUseInterpolation = GetPrivateProfileInt("Sound", "iUseInterpolation", iUseInterpolation, Config.Conf_File);
 }
 
 
