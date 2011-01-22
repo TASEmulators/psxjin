@@ -654,6 +654,7 @@ void ResetGame()
 			LoadCdBios = 0;
 			SysReset();
 			NeedReset = 0;
+			Movie.currentFrame = 0;
 			CheckCdrom();
 			if (LoadCdrom() == -1)
 				SysMessage(_("Could not load Cdrom"));
