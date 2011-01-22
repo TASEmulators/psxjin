@@ -299,9 +299,7 @@ int main(int argc, char **argv) {
 	CreateMainWindow(SW_SHOW);
 
 	PCSXInitCheatData();
-	
-	
-	
+		
 	//process some command line options
 	if (runcd == 1 || runcd == 2)
 	{
