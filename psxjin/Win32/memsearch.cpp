@@ -10,7 +10,7 @@ extern AppData gApp;
 extern struct SCheatData Cheat;
 
 HWND cheatSearchHWND = NULL;
-
+void UpdateMemSearch();
 typedef enum
 {
     PCSX_LESS_THAN, PCSX_GREATER_THAN, PCSX_LESS_THAN_OR_EQUAL,
