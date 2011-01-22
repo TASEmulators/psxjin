@@ -216,70 +216,6 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 	return argv;
 }
 
-//void OpenConsole() 
-//{
-//	COORD csize;
-//	CONSOLE_SCREEN_BUFFER_INFO csbiInfo; 
-//	SMALL_RECT srect;
-//	char buf[256];
-//
-//	//dont do anything if we're already attached
-//	if (hConsole) return;
-//
-//	//attach to an existing console (if we can; this is circuitous because AttachConsole wasnt added until XP)
-//	//remember to abstract this late bound function notion if we end up having to do this anywhere else
-//	bool attached = false;
-//	HMODULE lib = LoadLibrary("kernel32.dll");
-//	if(lib)
-//	{
-//		typedef BOOL (WINAPI *_TAttachConsole)(DWORD dwProcessId);
-//		_TAttachConsole _AttachConsole  = (_TAttachConsole)GetProcAddress(lib,"AttachConsole");
-//		if(_AttachConsole)
-//		{
-//			if(_AttachConsole(-1))
-//				attached = true;
-//		}
-//		FreeLibrary(lib);
-//	}
-//
-//	//if we failed to attach, then alloc a new console
-//	if(!attached)
-//	{
-//		AllocConsole();
-//	}
-//
-//	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-//
-//	//redirect stdio
-//	long lStdHandle = (long)hConsole;
-//	int hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-//	if(hConHandle == -1)
-//		return; //this fails from a visual studio command prompt
-//	
-//	FILE *fp = _fdopen( hConHandle, "w" );
-//	*stdout = *fp;
-//	//and stderr
-//	*stderr = *fp;
-//
-//	memset(buf,0,256);
-//	sprintf(buf,"PSXJIN OUTPUT");
-//	SetConsoleTitle(TEXT(buf));
-//	csize.X = 60;
-//	csize.Y = 800;
-//	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), csize);
-//	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbiInfo);
-//	srect = csbiInfo.srWindow;
-//	srect.Right = srect.Left + 99;
-//	srect.Bottom = srect.Top + 64;
-//	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &srect);
-//	SetConsoleCP(GetACP());
-//	SetConsoleOutputCP(GetACP());
-//	if(attached) printf("\n");
-//	printf("PSXJIN\n");
-//	printf("- compiled: %s %s\n\n",__DATE__,__TIME__);
-//}
-
-//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 int main(int argc, char **argv) {
 	TIMECAPS tc;
 	DWORD wmTimerRes;
@@ -297,10 +233,6 @@ int main(int argc, char **argv) {
 	char runcd=0;
 	char loadMovie=0;
 	int i;
-		//argc;
-	//PCHAR *argv;
-
-	//OpenConsole();
 
 	printf ("PSXjin\n");
 
@@ -405,7 +337,7 @@ void RunMessageLoop() {
 			if (RamSearchHWnd && IsDialogMessage(RamSearchHWnd, &msg))
 				continue;
 
-			//if(!TranslateAccelerator(gApp.hWnd,hAccel,&msg))
+			//if(!TranslateAccelerator(gApp.hWnd,hAccel,&msg)) //adelikat: TODO: get this hooked back up so Ram Watch can use accel keys
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -422,7 +354,6 @@ void RunGui() {
 		if(Continue)
 			break;
 	}
-//	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	Continue = 0;
 	Running = 1;
@@ -442,8 +373,6 @@ void RestoreWindow() {
 void UpdateToolWindows()
 {
 	Update_RAM_Search();	//Update_RAM_Watch() is also called; hotkey.cpp - HK_StateLoadSlot & State_Load also call these functions
-	UpdateMemWatch();
-
 	RefreshAllToolWindows();
 }
 
@@ -479,7 +408,6 @@ void States_Load(int num) {
 	char Text[256];
 	int ret;
 
-//	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	SysReset();
 	NeedReset = 0;
@@ -499,7 +427,6 @@ void States_Save(int num) {
 	char Text[256];
 	int ret;
 
-//	SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	if (NeedReset) {
 		SysReset();
@@ -671,7 +598,6 @@ void RunCD(HWND hWnd)
 			ClosePlugins();
 			if(!OpenPlugins(hWnd)) return;
 			
-			//SetMenu(hWnd, NULL);
 			SysReset();
 			NeedReset = 0;
 			CheckCdrom();
@@ -838,7 +764,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_START_CAPTURE:
-//					ShellExecute(NULL, "open", "http://code.google.com/p/pcsxrr/wiki/AviHelp", NULL, NULL, SW_SHOWNORMAL);
 					WIN32_StartAviRecord();
 					break;
 
@@ -856,29 +781,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					strcpy(IsoFile, "");
 					iCallW32Gui = 1;
 					break;
-/*
-				case ID_FILE_RUNCDBIOS:
-					LoadCdBios = 1;
-					//SetMenu(hWnd, NULL);
-					OpenPlugins(hWnd);
-					CheckCdrom();
-					SysReset();
-					NeedReset = 0;
-					Running = 1;
-					psxCpu->Execute();
-					return TRUE;
 
-				case ID_FILE_RUN_EXE:
-					if (!Open_File_Proc(File)) return TRUE;
-					//SetMenu(hWnd, NULL);
-					OpenPlugins(hWnd);
-					SysReset();
-					NeedReset = 0;
-					Load(File);
-					Running = 1;
-					psxCpu->Execute();
-					return TRUE;
-*/
 				case ID_FILE_SCREENSHOT:
 					GPUmakeSnapshot();
 					return TRUE;
@@ -896,22 +799,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STATES_SAVE_SLOT4: States_Save(3); return TRUE;
 				case ID_FILE_STATES_SAVE_SLOT5: States_Save(4); return TRUE;
 				case ID_FILE_STATES_SAVE_OTHER: OnStates_SaveOther(); return TRUE;
-/*
-				case ID_EMULATOR_CONTINUE:
-					if (IsoFile[0] == 0) break;
-					Continue = 1;
-					return TRUE;
-*/
-/*
-				case ID_EMULATOR_RUN:
-					SetMenu(hWnd, NULL);
-					OpenPlugins(hWnd);
-//					ShowCursor(FALSE);
-					if (NeedReset) { SysReset(); NeedReset = 0; }
-					Running = 1;
-					psxCpu->Execute();
-					return TRUE;
-*/
+
 				case ID_EMULATOR_RESET:
 					NeedReset = 1;
 					return TRUE;
@@ -954,11 +842,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					dispFrameCounter ^= 1;
 					GPUshowframecounter();
 					return TRUE;
-/*
-				case ID_CONFIGURATION_CDROM:
-					CDRconfigure();
-					return TRUE;
-*/
+
 				case ID_CONFIGURATION_SOUND:
 					SPUconfigure();
 					return TRUE;
@@ -997,11 +881,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 					OpenToolWindow(new CMemView());
 					return 0;
-/*
-				case ID_CONFIGURATION_MEMWATCH:
-						CreateMemWatch();
-					return TRUE;
-*/
+
 				case ID_CONFIGURATION_MEMPOKE:
 						CreateMemPoke();
 					return TRUE;
@@ -1882,8 +1762,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
 	ADDSEPARATOR(0);
-	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
-	//ADDMENUITEM(0, _("Run CD Through &Bios"), ID_FILE_RUNCDBIOS);
+
 	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
@@ -1898,18 +1777,13 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
-//	ADDMENUITEM(0, _("&Run"), ID_EMULATOR_RUN);
-//	ADDMENUITEM(0, _("&Continue"), ID_EMULATOR_CONTINUE);
 
 	ADDSUBMENU(0, _("&Configuration"));
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
-//	ADDMENUITEMDISABLED(0, _("&NetPlay"), ID_CONFIGURATION_NETPLAY);
-//	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
 	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 	ADDMENUITEM(0, _("&Controllers"), ID_CONFIGURATION_CONTROLLERS);
-	//ADDMENUITEM(0, _("CD-&ROM"), ID_CONFIGURATION_CDROM);
 	ADDMENUITEM(0, _("&Sound"), ID_CONFIGURATION_SOUND);
 	ADDMENUITEM(0, _("&Graphics"), ID_CONFIGURATION_GRAPHICS);
 	ADDSEPARATOR(0);
@@ -1917,9 +1791,6 @@ void CreateMainMenu() {
 
 
 	ADDSUBMENU(0, _("&Tools"));
-	//ADDMENUITEM(0, _("RAM &Watch (Old)"), ID_CONFIGURATION_MEMWATCH);	//adelikat; Getting rid of the outdated dialogs
-	//ADDMENUITEM(0, _("RAM &Search (Old)"), ID_CONFIGURATION_MEMSEARCH); //adelikat; Getting rid of the outdated dialogs
-	
 	ADDMENUITEM(0, _("&Cheat Editor"), ID_CONFIGURATION_CHEATS);
 	ADDMENUITEM(0, _("View Memory"), IDM_MEMORY);
 	ADDMENUITEM(0, _("RAM &Poke"), ID_CONFIGURATION_MEMPOKE);
@@ -2167,7 +2038,6 @@ void WIN32_StartMovieReplay(char* szFilename)
 		if (!IsoFile[0] == 0) //adelikat:  Having CfgOpenFile() be value returning is more elegant but this gets the job done
 		{
 			LoadCdBios = 0;
-			//SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			SysReset();
 			NeedReset = 0;
@@ -2275,7 +2145,6 @@ void WIN32_StartAviRecord()
 
 	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
-	//SetMenu(gApp.hWnd, NULL);
 	OpenPlugins(gApp.hWnd);
 	GPUstartAvi(Movie.aviFilename);
 	SPUstartWav(Movie.wavFilename);

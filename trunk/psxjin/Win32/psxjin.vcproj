@@ -393,10 +393,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\memwatch.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\moviewin.cpp"
 				>
 			</File>
@@ -1056,7 +1052,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1065,7 +1061,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1074,7 +1070,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1087,7 +1083,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1096,7 +1092,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1105,7 +1101,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1122,7 +1118,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1131,7 +1127,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1140,7 +1136,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1153,7 +1149,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1162,7 +1158,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
@@ -1171,7 +1167,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj"
+						CommandLine="nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ &quot;$(InputPath)&quot; -o &quot;$(IntDir)&quot;\$(InputName).obj&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
