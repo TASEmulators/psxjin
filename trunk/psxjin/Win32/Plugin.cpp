@@ -707,7 +707,7 @@ bool OpenPlugins(HWND hWnd) {
 
 	ret = CDRopen(IsoFile);
 	if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancels the open file dialog
-	if (ret < 0) { SysMessage (_("Error Opening CDR Plugin")); return false; }
+	if (ret < 0) {/* SysMessage (_("Error Opening CDR Plugin"));*/ return false; }
 
 	SetCurrentDirectory(PcsxDir);
 	
