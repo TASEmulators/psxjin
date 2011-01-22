@@ -101,6 +101,7 @@ long CDRopen(char filename[256]) {
 	cdHandle = fopen(filename, "rb");
 	if (cdHandle == NULL) {
 		SysMessage("Error loading %s\n", filename);
+		strcpy(IsoFile,"");
 		return -1;
 	}
 
