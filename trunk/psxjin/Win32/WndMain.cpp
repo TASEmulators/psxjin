@@ -702,8 +702,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				{
 					if (!IsoFile[0] == 0)
 					{
+						Movie.readOnly = 1;
 						WIN32_StartMovieReplay(ftmp);
-						Movie.readOnly = 1;	//TODO: this seems to not set it to read-only!
+						
 					}
 					else
 					{
