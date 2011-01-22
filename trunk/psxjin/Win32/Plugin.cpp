@@ -589,24 +589,24 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_PERFORM].keymod)
+	if(key == EmuCommandTable[EMUCMD_DISABLED1].key
+	&& modifiers == EmuCommandTable[EMUCMD_DISABLED1].keymod)
 	{
-		MemSearchCommand(IDC_C_SEARCH);
+		//TODO
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_REFRESH].keymod)
+	if(key == EmuCommandTable[EMUCMD_DISABLED2].key
+	&& modifiers == EmuCommandTable[EMUCMD_DISABLED2].keymod)
 	{
-		UpdateMemSearch();
+		//TODO
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].key
-	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH_RESET].keymod)
+	if(key == EmuCommandTable[EMUCMD_DISABLED3].key
+	&& modifiers == EmuCommandTable[EMUCMD_DISABLED3].keymod)
 	{
-		MemSearchCommand(IDC_C_RESET);
+		//TODO
 		return;
 	}
 

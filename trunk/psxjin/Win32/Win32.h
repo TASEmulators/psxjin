@@ -86,8 +86,6 @@ int MHkeysListMake(int bBuild);
 
 // cheats
 void CreateCheatEditor();
-void CreateMemSearch();
-void UpdateMemSearch();
 void PCSXInitCheatData();
 void MemSearchCommand(int command);
 
