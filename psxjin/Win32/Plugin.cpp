@@ -379,10 +379,10 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_CONFCDR].key
-	&& modifiers == EmuCommandTable[EMUCMD_CONFCDR].keymod)
+	if(key == EmuCommandTable[EMUCMD_DISABLED4].key
+	&& modifiers == EmuCommandTable[EMUCMD_DISABLED4].keymod)
 	{
-		CDRconfigure();
+		//TODO
 		return;
 	}
 
