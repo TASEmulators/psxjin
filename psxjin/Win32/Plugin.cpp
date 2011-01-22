@@ -327,7 +327,12 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RAMWATCH].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMWATCH].keymod)
 	{
-		//adelikat: TODO: Call Ram Watch dialog here
+		if(!RamWatchHWnd)
+		{
+			RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
+		}
+		else
+			SetForegroundWindow(RamWatchHWnd);
 		return;
 	}
 
@@ -343,7 +348,13 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RAMSEARCH].key
 	&& modifiers == EmuCommandTable[EMUCMD_RAMSEARCH].keymod)
 	{
-		CreateMemSearch();
+		if(!RamSearchHWnd)
+		{
+			reset_address_info();
+			RamSearchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), NULL, (DLGPROC) RamSearchProc);
+		}
+		else
+			SetForegroundWindow(RamSearchHWnd);
 		return;
 	}
 
