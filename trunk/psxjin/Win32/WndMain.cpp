@@ -2178,6 +2178,7 @@ INT_PTR CALLBACK DlgMemPoke(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			memPokeHWND = NULL;
 			GetDlgItemText(hDlg, IDC_NC_ADDRESS, bufPokeAddress, 7);
 			GetDlgItemText(hDlg, IDC_NC_NEWVAL, bufPokeNewval, 7);
+			DestroyWindow(hDlg);
 			return TRUE;
 		}
 		case WM_COMMAND: {
