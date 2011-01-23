@@ -2,13 +2,14 @@
 #include <shlwapi.h>	//For CompactPath() Note: shlwapi.lib must be included as a dependency
 
 //**************************************************************
+
 RecentMenu::RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuItem)
 {
 	BaseID = baseID;
 	GhWnd = GUI_hWnd;
 	ClearID = baseID + MAX_RECENT_ITEMS;
 	menuItem = menuItem;
-	//recentmenu = LoadMenu(instance, "RECENTROMS");
+	recentmenu = LoadMenu(instance, "RECENTROMS");
 }
 
 RecentMenu::RecentMenu()
@@ -28,7 +29,7 @@ int RecentMenu::GetClearID()
 void RecentMenu::SetID(int base)
 {
 	BaseID = base;
-	ClearID = ClearID = BaseID + MAX_RECENT_ITEMS;
+	//ClearID = ClearID = BaseID + MAX_RECENT_ITEMS;
 }
 
 void RecentMenu::SetGUI_hWnd(HWND GUI_hWnd)
@@ -220,8 +221,9 @@ void RecentMenu::UpdateRecentItemsMenu()
 	//Clear the current menu items
 	for(int x = 0; x < MAX_RECENT_ITEMS; x++)
 	{
-		DeleteMenu(GetSubMenu(recentmenu, 0), BaseID + x, MF_BYCOMMAND);
+		DeleteMenu(GetSubMenu(recentmenu, 0), BaseID + x, MF_BYCOMMAND);	
 	}
+	DeleteMenu(GetSubMenu(recentmenu, 0), ClearID, MF_BYCOMMAND);
 
 	if(RecentItems.size() == 0)
 	{
@@ -232,16 +234,31 @@ void RecentMenu::UpdateRecentItemsMenu()
 
 		moo.cch = 5;
 		moo.fType = 0;
-		moo.wID = BaseID;
-		moo.dwTypeData = "None";
+		moo.wID = ClearID;
+		moo.dwTypeData = "Clear";
 		moo.fState = MF_GRAYED;
 
+		InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
+
+		moo.dwTypeData = "None";
+		moo.wID = BaseID;
 		InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
 
 		return;
 	}
 
+
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_TYPE;
+	moo.cch = 5;
+	moo.fType = 0;
+	moo.wID = ClearID;
+	moo.dwTypeData = "Clear";
+	moo.fState = MF_ENABLED;
+	InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
+
 	EnableMenuItem(GetSubMenu(recentmenu, 0), ClearID, MF_ENABLED);
+	
 	DeleteMenu(GetSubMenu(recentmenu, 0), BaseID, MF_BYCOMMAND);
 
 	HDC dc = GetDC(GhWnd);

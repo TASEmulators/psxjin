@@ -755,7 +755,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			RecentCDs.SetGUI_hWnd(gApp.hWnd);
 			RecentCDs.SetID(RECENTCD_START);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+			//RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 			RecentCDs.MakeRecentMenu(gApp.hInstance);
 			break;
  
@@ -800,6 +800,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				strcpy(IsoFile, RecentCDs.GetRecentItem(wParam - RECENTCD_START).c_str());
 				RunCD(gApp.hWnd);
 				return TRUE;
+			}
+			if (wParam == RecentCDs.GetClearID())
+			{
+				RecentCDs.ClearRecentItems();
 			}
 			switch (LOWORD(wParam)) {
 				case ID_RECENT_CLEAR:
@@ -1920,8 +1924,9 @@ void CreateMainWindow(int nCmdShow) {
 	RecentCDs.SetGUI_hWnd(gApp.hWnd);
 	RecentCDs.SetID(RECENTCD_START);
 	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+	
 	RecentCDs.MakeRecentMenu(gApp.hInstance);
+	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 	DragAcceptFiles(hWnd, 1);
 
 	ShowWindow(hWnd, nCmdShow);
