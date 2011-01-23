@@ -308,7 +308,14 @@ int main(int argc, char **argv) {
 		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
 		RunCD(gApp.hWnd);
 	}
-	else if (loadMovie)
+	else if (RecentCDs.autoload)
+	{
+		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
+		RunCD(gApp.hWnd);
+	}
+	
+
+	if (loadMovie)
 		WIN32_StartMovieReplay(szMovieToLoad);
 
 	if (AutoRWLoad)

@@ -93,6 +93,8 @@ void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string sect
 		if (tempstr[0])
 			RecentItems.push_back(tempstr);
 	}
+
+	autoload = GetPrivateProfileInt(section.c_str(), "Autoload", 0, iniFilename.c_str());	//TODO: Don't just call it autoload, add type parameter to it
 	UpdateRecentItemsMenu();
 }
 
@@ -112,6 +114,11 @@ void RecentMenu::SaveRecentItemsToIni(std::string iniFilename, std::string secti
 		else						//Else, make it empty
 			WritePrivateProfileString(section.c_str(), temp.str().c_str(), "", iniFilename.c_str());
 	}
+	
+	char STR[8];
+	sprintf(STR, "%d", autoload);
+	WritePrivateProfileString(section.c_str(), "Autoload", STR, iniFilename.c_str());	//TODO: Don't just call it autoload, add type parameter to it
+
 }
 
 void RecentMenu::ClearRecentItems()
