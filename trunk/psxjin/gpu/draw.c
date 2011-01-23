@@ -4583,17 +4583,20 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 	if (ulKeybits&KEY_SHOWFPS)
 	{
-		DisplayText();              // paint menu text
-		DisplayFrames();
-		DisplayLag();
-	//	DisplayInput();
+		DisplayText();              // paint menu text			
 		DisplayMovMode();
+		if (ulKeybits&KEY_SHOWFCOUNT)
+		{
+			DisplayFrames();
+			DisplayLag();
+		}
+		if (ulKeybits&KEY_SHOWINPUT)
+		{
+			DisplayInput();
+		}
 	}
 
-	if (dispInput)
-	{
-		DisplayInput();
-	}
+	
 
 	if (pExtraBltFunc)
 	{
