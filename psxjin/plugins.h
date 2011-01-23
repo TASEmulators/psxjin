@@ -87,6 +87,8 @@ typedef unsigned long (CALLBACK* PSEgetLibType)(void);
 typedef unsigned long (CALLBACK* PSEgetLibVersion)(void);
 typedef char *(CALLBACK* PSEgetLibName)(void);
 
+END_EXTERN_C
+
 ///GPU PLUGIN STUFF 
 long CALLBACK  GPUinit(void);
 long CALLBACK  GPUshutdown(void);
@@ -106,18 +108,18 @@ void CALLBACK  GPUmakeSnapshot(void);
 void CALLBACK  GPUkeypressed(int);
 void CALLBACK  GPUdisplayText(char *);
 #pragma pack(push, 1)
-typedef struct {
+struct GPUFreeze_t{
 	void* extraData;
 	int extraDataSize;
 	unsigned long ulFreezeVersion;
 	unsigned long ulStatus;
 	unsigned long ulControl[256];
 	unsigned char psxVRam[1024*512*2];
-} GPUFreeze_t;
+};
 #pragma pack(pop)
 long CALLBACK  GPUfreeze(unsigned long, GPUFreeze_t *);
-long CALLBACK  GPUgetScreenPic(unsigned char *);
-long CALLBACK  GPUshowScreenPic(unsigned char *);
+void CALLBACK  GPUgetScreenPic(unsigned char *);
+void CALLBACK  GPUshowScreenPic(unsigned char *);
 void CALLBACK  GPUclearDynarec(void (CALLBACK *callback)(void));
 
 void CALLBACK  GPUsetframelimit(unsigned long);
@@ -130,9 +132,9 @@ void CALLBACK  GPUsetspeedmode(unsigned long);
 void CALLBACK  GPUshowframecounter(void);
 void CALLBACK  GPUshowInput(void);
 void CALLBACK  GPUshowALL(void);
-long CALLBACK  GPUstartAvi(char* filename);
-long CALLBACK  GPUstopAvi(void);
-long CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
+void CALLBACK  GPUstartAvi(char* filename);
+void CALLBACK  GPUstopAvi(void);
+void CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
 ////plugin stuff From Shadow
 //// *** walking in the valley of your darking soul i realize that i was alone
@@ -222,6 +224,9 @@ long CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 //extern CDRgetBufferSub       CDR_getBufferSub;
 //extern CDRconfigure          CDR_configure;
 //extern CDRabout              CDR_about;
+
+START_EXTERN_C
+
 
 typedef long (CALLBACK* PADconfigure)(void);
 typedef void (CALLBACK* PADabout)(void);

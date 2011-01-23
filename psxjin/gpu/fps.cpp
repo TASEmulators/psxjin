@@ -41,6 +41,8 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+
 #define _IN_FPS
 
 #include "externals.h"
@@ -425,7 +427,7 @@ void calcfps(void)                                     // fps calculations
 		//--------------------------------------------------//
 
 		if (UseFrameSkip && !UseFrameLimit && _ticks_since_last_update)
-			fps_skip=min(fps_skip,(((float)CPUFrequency.LowPart) / ((float)_ticks_since_last_update) +1.0f));
+			fps_skip=std::min(fps_skip,(((float)CPUFrequency.LowPart) / ((float)_ticks_since_last_update) +1.0f));
 
 		LastTime.HighPart = CurrentTime.HighPart;
 		LastTime.LowPart = CurrentTime.LowPart;
@@ -436,7 +438,7 @@ void calcfps(void)                                     // fps calculations
 		_ticks_since_last_update=curticks-lastticks;
 
 		if (UseFrameSkip && !UseFrameLimit && _ticks_since_last_update)
-			fps_skip=min(fps_skip,((float)1000/(float)_ticks_since_last_update+1.0f));
+			fps_skip=std::min(fps_skip,((float)1000/(float)_ticks_since_last_update+1.0f));
 
 		lastticks = curticks;
 	}

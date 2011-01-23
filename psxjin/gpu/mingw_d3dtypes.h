@@ -543,9 +543,9 @@ typedef struct _D3DMATRIX
 #endif /* DIRECT3D_VERSION >= 0x0500 */
 } D3DMATRIX, *LPD3DMATRIX;
 
-#if (defined __cplusplus) && (defined D3D_OVERLOADS)
-#include "d3dvec.inl"
-#endif
+//#if (defined __cplusplus) && (defined D3D_OVERLOADS)
+//#include "d3dvec.inl"
+//#endif
 
 typedef struct _D3DVIEWPORT
 {

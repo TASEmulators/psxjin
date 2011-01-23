@@ -114,6 +114,8 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+
 #ifdef _WINDOWS
 
 #include <stdlib.h>
@@ -141,15 +143,17 @@
 #include "key.h"
 #include "fps.h"
 
+#include "../plugins.h"
+
 //#define SMALLDEBUG
 //#include <dbgout.h>
 
 
-unsigned long dwGPUVersion;
-int           iGPUHeight;
-int           iGPUHeightMask;
-int           GlobalTextIL;
-int           iTileCheat;
+unsigned long dwGPUVersion=0;
+int           iGPUHeight=512;
+int           iGPUHeightMask=511;
+int           GlobalTextIL=0;
+int           iTileCheat=0;
 
 void (*fpPSXjin_LuaGui)(void *s, int width, int height, int bpp, int pitch);
 int iMaximumSpeed=0;
@@ -223,7 +227,7 @@ BOOL              bSkipNextFrame = FALSE;
 DWORD             dwLaceCnt=0;
 int               iColDepth;
 int               iWindowMode;
-int				  dispInput = 0;
+static int				  dispInput = 0;
 short             sDispWidths[8] = {256,320,512,640,368,384,512,640};
 PSXDisplay_t      PSXDisplay; //!
 PSXDisplay_t      PreviousPSXDisplay; //!
@@ -329,31 +333,6 @@ void CALLBACK GPUdisplayFlags(unsigned long dwFlags)   // some info func
 	BuildDispMenu(0);
 }
 
-////////////////////////////////////////////////////////////////////////
-// stuff to make this a true PDK module
-////////////////////////////////////////////////////////////////////////
-
-char * CALLBACK PSEgetLibName(void)
-{
-	return libraryName;
-}
-
-unsigned long CALLBACK PSEgetLibType(void)
-{
-	return  PSE_LT_GPU;
-}
-
-unsigned long CALLBACK PSEgetLibVersion(void)
-{
-	return version<<16|revision<<8|build;
-}
-
-#ifndef _WINDOWS
-char * GPUgetLibInfos(void)
-{
-	return libraryInfo;
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 // Snapshot func
@@ -963,6 +942,8 @@ long CALLBACK GPUinit()                                // GPU INIT
 // Here starts all...
 ////////////////////////////////////////////////////////////////////////
 
+void gpu_ReadConfig(void);
+
 #ifdef _WINDOWS
 long CALLBACK GPUopen(HWND hwndGPU)                    // GPU OPEN
 {
@@ -973,7 +954,7 @@ long CALLBACK GPUopen(HWND hwndGPU)                    // GPU OPEN
 	if (bChangeWinMode) ReadWinSizeConfig();              // alt+enter toggle?
 	else                                                  // or first time startup?
 	{
-		ReadConfig();                                       // read config
+		gpu_ReadConfig();                                       // read config
 		InitFPS();
 	}
 
@@ -1259,9 +1240,9 @@ void updateDisplayIfChanged(void)                      // UPDATE DISPLAY IF CHAN
 	PSXDisplay.DisplayMode.y = PSXDisplay.DisplayModeNew.y;
 	PSXDisplay.DisplayMode.x = PSXDisplay.DisplayModeNew.x;
 	PreviousPSXDisplay.DisplayMode.x=                     // previous will hold
-	  min(640,PSXDisplay.DisplayMode.x);                   // max 640x512... that's
+		std::min(640L,PSXDisplay.DisplayMode.x);                   // max 640x512... that's
 	PreviousPSXDisplay.DisplayMode.y=                     // the size of my
-	  min(512,PSXDisplay.DisplayMode.y);                   // back buffer surface
+	  std::min(512L,PSXDisplay.DisplayMode.y);                   // back buffer surface
 	PSXDisplay.Interlaced    = PSXDisplay.InterlacedNew;
 
 	PSXDisplay.DisplayEnd.x=                              // calc end of display
@@ -1704,7 +1685,7 @@ __inline void FinishedVRAMRead(void)
 // core read from vram
 ////////////////////////////////////////////////////////////////////////
 
-void CALLBACK GPUreadDataMem(unsigned long * pMem, int iSize)
+void CALLBACK GPUreadDataMem(u32 * pMem, int iSize)
 {
 	int i;
 
@@ -1781,9 +1762,9 @@ ENDREAD:
 
 unsigned long CALLBACK GPUreadData(void)
 {
-	unsigned long l;
+	u32 l;
 	GPUreadDataMem(&l,1);
-	return lGPUdataRet;
+	return (long)l;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1861,7 +1842,7 @@ const unsigned char primTableCX[256] =
 	0,0,0,0,0,0,0,0
 };
 
-void CALLBACK GPUwriteDataMem(unsigned long * pMem, int iSize)
+void CALLBACK GPUwriteDataMem(u32* pMem, int iSize)
 {
 	unsigned char command;
 	unsigned long gdata=0;
@@ -1996,7 +1977,8 @@ ENDVRAM:
 
 void CALLBACK GPUwriteData(unsigned long gdata)
 {
-	GPUwriteDataMem(&gdata,1);
+	u32 temp = gdata;
+	GPUwriteDataMem(&temp,1);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -2075,7 +2057,7 @@ __inline BOOL CheckForEndlessLoop(unsigned long laddr)
 	return FALSE;
 }
 
-long CALLBACK GPUdmaChain(unsigned long * baseAddrL, unsigned long addr)
+long CALLBACK GPUdmaChain(u32* baseAddrL, unsigned long addr)
 {
 	unsigned long dmaMem;
 	unsigned char * baseAddrB;
@@ -2098,7 +2080,7 @@ long CALLBACK GPUdmaChain(unsigned long * baseAddrL, unsigned long addr)
 
 		dmaMem=addr+4;
 
-		if (count>0) GPUwriteDataMem(&baseAddrL[dmaMem>>2],count);
+		if (count>0) GPUwriteDataMem((u32*)&baseAddrL[dmaMem>>2],count);
 
 		addr = baseAddrL[addr>>2]&0xffffff;
 	}
@@ -2161,17 +2143,7 @@ long CALLBACK GPUtest(void)
 // Freeze
 ////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 1)
-typedef struct GPUFREEZETAG
-{
-	void* extraData;
-	int extraDataSize;
-	unsigned long ulFreezeVersion;      // should be always 1 for now (set by main emu)
-	unsigned long ulStatus;             // current gpu status
-	unsigned long ulControl[256];       // latest control register values
-	unsigned char psxVRam[1024*1024*2]; // current VRam image (full 2 MB for ZN)
-} GPUFreeze_t;
-#pragma pack(pop)
+
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -3313,11 +3285,11 @@ void CALLBACK GPUvisualVibration(unsigned long iSmall, unsigned long iBig)
 	int iVibVal;
 
 	if (PreviousPSXDisplay.DisplayMode.x)                 // calc min "shake pixel" from screen width
-		iVibVal=max(1,iResX/PreviousPSXDisplay.DisplayMode.x);
+		iVibVal=std::max(1L,iResX/PreviousPSXDisplay.DisplayMode.x);
 	else iVibVal=1;
 	// big rumble: 4...15 sp ; small rumble 1...3 sp
-	if (iBig) iRumbleVal=max(4*iVibVal,min(15*iVibVal,((int)iBig  *iVibVal)/10));
-	else     iRumbleVal=max(1*iVibVal,min( 3*iVibVal,((int)iSmall*iVibVal)/10));
+	if (iBig) iRumbleVal=std::max(4*iVibVal,std::min(15*iVibVal,((int)iBig  *iVibVal)/10));
+	else     iRumbleVal=std::max(1*iVibVal,std::min( 3*iVibVal,((int)iSmall*iVibVal)/10));
 
 	srand(timeGetTime());                                 // init rand (will be used in BufferSwap)
 

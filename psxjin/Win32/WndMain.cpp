@@ -115,7 +115,7 @@ int cheatsEnabled=0;
 int CancelQuit=0;
 int UseGui = 1;
 
-extern "C" char pConfigFile[MAX_PATH*2];
+extern char pConfigFile[MAX_PATH*2];
 #define MAXFILENAME 256
 
 int GetMenuSize()
