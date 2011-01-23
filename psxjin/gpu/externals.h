@@ -360,7 +360,7 @@ extern BOOL           bSSSPSXLimit;
 
 #ifndef _IN_CFG
 
-extern char * pConfigFile;
+extern char pConfigFile[MAX_PATH*2];
 
 #endif
 
