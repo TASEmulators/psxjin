@@ -49,6 +49,8 @@
 
 #include "plugins.h"
 
+const int RECENTCD_START = 65000;
+
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -726,7 +728,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 		case WM_INITMENU:						
 			RecentCDs.SetGUI_hWnd(gApp.hWnd);
-			RecentCDs.SetID(65000);
+			RecentCDs.SetID(RECENTCD_START);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
 			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 			RecentCDs.MakeRecentMenu(gApp.hInstance);
@@ -767,6 +769,12 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		case WM_COMMAND:
+			if(wParam >= RECENTCD_START && wParam <= RECENTCD_START + RecentCDs.MAX_RECENT_ITEMS - 1)
+			{
+				strcpy(IsoFile, RecentCDs.GetRecentItem(wParam - RECENTCD_START).c_str());
+				RunCD(gApp.hWnd);
+				return TRUE;
+			}
 			switch (LOWORD(wParam)) {
 				case ID_FILE_EXIT:
 					ExitPSXjin();
@@ -1870,7 +1878,7 @@ void CreateMainWindow(int nCmdShow) {
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
 	RecentCDs.SetGUI_hWnd(gApp.hWnd);
-	RecentCDs.SetID(65000);
+	RecentCDs.SetID(RECENTCD_START);
 	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
 	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 	RecentCDs.MakeRecentMenu(gApp.hInstance);
