@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 	sprintf(Config.Conf_File, "%s\\psxjin.ini", szCurrentPath);
 	LoadConfig();	//Attempt to load ini, or set default settings
 
-	strcpy (pConfigFile, Config.Conf_File);
+//	strcpy (pConfigFile, Config.Conf_File);
 
 	//If directories don't already exist, create them
 	CreateDirectory(Config.SstatesDir, 0);	
