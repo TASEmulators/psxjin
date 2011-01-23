@@ -3373,7 +3373,6 @@ void CALLBACK GPUshowframecounter()
 
 void CALLBACK GPUshowInput()
 {
-	ulKeybits|=KEY_SHOWFPS;
 	if (ulKeybits&KEY_SHOWINPUT)
 	{
 		DestroyPic();
@@ -3387,6 +3386,24 @@ void CALLBACK GPUshowInput()
 		BuildDispMenu(0);
 	}
 }
+
+
+void CALLBACK GPUshowALL()
+{	
+	if (ulKeybits&KEY_SHOWFPS)
+	{
+		DestroyPic();
+		ulKeybits&=~KEY_SHOWFPS;
+		DoClearScreenBuffer();
+	}
+	else
+	{
+		ulKeybits|=KEY_SHOWFPS;
+		szDispBuf[0]=0;
+		BuildDispMenu(0);
+	}
+}
+
 
 void CALLBACK GPUsetcurrentmode(char newModeFlags)
 {

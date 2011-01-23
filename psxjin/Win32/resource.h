@@ -372,6 +372,7 @@
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_RECENT_CLEAR                 39900
 #define ID_RECENT_AUTO                  39901
+#define ID_EMULATOR_DISPALL			    39994
 #define ID_EMULATOR_DISPFRAMECOUNTER    39995
 #define ID_EMULATOR_1X                  39996
 #define ID_EMULATOR_2X                  39997

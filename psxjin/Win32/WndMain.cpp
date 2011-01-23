@@ -754,7 +754,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
 			CheckMenuItem(gApp.hMenu,ID_RECENT_AUTO,MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
-			
+			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
 			
@@ -889,6 +889,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
+				case ID_EMULATOR_DISPALL:
+					dispAllText ^= 1;
+					GPUshowALL();
+					return true;
 				case ID_EMULATOR_DISPINPUT:
 					dispInput ^= 1;
 					GPUshowInput();
@@ -1814,6 +1818,7 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Emulator"));
 	ADDMENUITEM(0, _("Display Input"), ID_EMULATOR_DISPINPUT);
 	ADDMENUITEM(0, _("Display Frame counter"), ID_EMULATOR_DISPFRAMECOUNTER);
+	ADDMENUITEM(0, _("Display All Text"), ID_EMULATOR_DISPALL);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("4x"), ID_EMULATOR_4X);
 	ADDMENUITEM(0, _("3x"), ID_EMULATOR_3X);
@@ -1982,6 +1987,8 @@ int SysInit() {
 	LoadPlugins();
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 	LoadIni();
+	if (dispAllText)
+		GPUshowALL();
 	if (dispFrameCounter)
 		GPUshowframecounter();
 	if (dispInput)

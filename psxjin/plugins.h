@@ -129,6 +129,7 @@ void CALLBACK  GPUsetcurrentmode(char);
 void CALLBACK  GPUsetspeedmode(unsigned long);
 void CALLBACK  GPUshowframecounter(void);
 void CALLBACK  GPUshowInput(void);
+void CALLBACK  GPUshowALL(void);
 long CALLBACK  GPUstartAvi(char* filename);
 long CALLBACK  GPUstopAvi(void);
 long CALLBACK  GPUsendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int));
