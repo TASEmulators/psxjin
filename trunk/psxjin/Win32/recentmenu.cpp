@@ -265,6 +265,10 @@ void RecentMenu::UpdateRecentItemsMenu()
 
 		InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
 
+		moo.fType = MFT_SEPARATOR;
+		InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
+
+		moo.fType = 0;
 		moo.dwTypeData = "None";
 		moo.wID = BaseID;
 		InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
@@ -272,6 +276,7 @@ void RecentMenu::UpdateRecentItemsMenu()
 		return;
 	}
 
+	
 
 	moo.cbSize = sizeof(moo);
 	moo.fMask = MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_TYPE;
@@ -285,6 +290,9 @@ void RecentMenu::UpdateRecentItemsMenu()
 	moo.wID = ClearID;
 	moo.dwTypeData = "Clear";
 	moo.fState = MF_ENABLED;
+	InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
+
+	moo.fType = MFT_SEPARATOR;
 	InsertMenuItem(GetSubMenu(recentmenu, 0), 0, TRUE, &moo);
 
 	EnableMenuItem(GetSubMenu(recentmenu, 0), ClearID, MF_ENABLED);
