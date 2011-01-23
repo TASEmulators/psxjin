@@ -724,6 +724,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 		}
+		case WM_INITMENU:			
+			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+			RecentCDs.SetGUI_hWnd(gApp.hWnd);
+			RecentCDs.SetID(65000);
+			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
+			RecentCDs.MakeRecentMenu(gApp.hInstance);
+			break;
+
 		case WM_ENTERMENULOOP:
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -1310,13 +1318,6 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 	int i, j;
 
 	switch(uMsg) {
-		case WM_INITMENU:
-			RecentCDs.SetGUI_hWnd(gApp.hWnd);
-			RecentCDs.SetID(65000);
-			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-			RecentCDs.MakeRecentMenu(gApp.hInstance);
-			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
-			break;
 		case WM_INITDIALOG:
 			mcdDlg = hW;
 
