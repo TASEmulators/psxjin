@@ -309,10 +309,10 @@ void sioInterrupt() {
 	StatReg|= IRQ;
 	psxHu32ref(0x1070)|= SWAPu32(0x80);
 }
-
+char str[256];
 char* MakeMemCardPath(const char* filename)
 {
-	char* str = Config.MemCardsDir;
+	strcpy(str,Config.MemCardsDir);
 	strcat(str, filename);
 	return str;
 }
