@@ -3,7 +3,7 @@
 
 //**************************************************************
 
-RecentMenu::RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuItem)
+RecentMenu::RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuItem, std::string type)
 {
 	BaseID = baseID;
 	GhWnd = GUI_hWnd;
@@ -73,7 +73,7 @@ void RecentMenu::RemoveRecentItem(const char* filename)
 
 //**************************************************************
 
-void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string section, std::string type)
+void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string section)
 {
 	//This function retrieves the recent items stored in the .ini file
 	//Then is populates the RecentMenu array
@@ -88,7 +88,7 @@ void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string sect
 	for (int x = 0; x < MAX_RECENT_ITEMS; x++)
 	{
 		temp.str("");
-		temp << "Recent " << type.c_str() << " " << (x+1);
+		temp << "Recent " << rtype.c_str() << " " << (x+1);
 
 		GetPrivateProfileString(section.c_str(), temp.str().c_str(),"", tempstr, 256, iniFilename.c_str());
 		if (tempstr[0])
@@ -99,7 +99,7 @@ void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string sect
 	UpdateRecentItemsMenu();
 }
 
-void RecentMenu::SaveRecentItemsToIni(std::string iniFilename, std::string section, std::string type)
+void RecentMenu::SaveRecentItemsToIni(std::string iniFilename, std::string section)
 {
 	//This function stores the RecentItems vector to the .ini file
 
@@ -109,7 +109,7 @@ void RecentMenu::SaveRecentItemsToIni(std::string iniFilename, std::string secti
 	for (unsigned int x = 0; x < MAX_RECENT_ITEMS; x++)
 	{
 		temp.str("");
-		temp << "Recent " << type.c_str() <<  " " << (x+1);
+		temp << "Recent " << rtype.c_str() <<  " " << (x+1);
 		if (x < RecentItems.size())	//If it exists in the array, save it
 			WritePrivateProfileString(section.c_str(), temp.str().c_str(), RecentItems[x].c_str(), iniFilename.c_str());
 		else						//Else, make it empty
@@ -134,6 +134,16 @@ std::string RecentMenu::GetRecentItem(unsigned int listNum)
 	if (RecentItems.size() <= listNum) return "";
 
 	return RecentItems[listNum];
+}
+
+void RecentMenu::SetType(std::string type)
+{
+	rtype = type;
+}
+
+std::string RecentMenu::GetType()
+{
+	return rtype;
 }
 
 //*******************************************************************
