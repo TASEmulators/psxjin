@@ -129,14 +129,15 @@ PSXPoint_t     ptCursorPoint[8];
 unsigned short usCursorActive=0;
 BOOL           bKkaptureMode=FALSE;
 
-unsigned int   LUT16to32[65536];
-unsigned int   RGBtoYUV[65536];
+
+extern "C" unsigned int   LUT16to32[65536];
+extern "C" unsigned int   RGBtoYUV[65536];
 
 // prototypes
-extern void hq2x_16( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
-extern void hq3x_16( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
-extern void hq2x_32( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
-extern void hq3x_32( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
+extern "C" void hq2x_16( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
+extern "C" void hq3x_16( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
+extern "C" void hq2x_32( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
+extern "C" void hq3x_32( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
 void NoStretchedBlit2x(void);
 void NoStretchedBlit3x(void);
 void StretchedBlit2x(void);
@@ -4732,7 +4733,7 @@ void DXSetGamma(void)
 		int i;
 		LPDIRECTDRAWGAMMACONTROL DD_Gamma = NULL;
 
-		if FAILED(IDirectDrawSurface_QueryInterface(DX.DDSPrimary,&IID_IDirectDrawGammaControl,(void**)&DD_Gamma))
+		if FAILED(IDirectDrawSurface_QueryInterface(DX.DDSPrimary,IID_IDirectDrawGammaControl,(void**)&DD_Gamma))
 			return;
 
 		for (i=0;i<256;i++)
@@ -4896,7 +4897,7 @@ int DXinitialize()
 		if (iRefreshRate)
 		{
 			LPDIRECTDRAW2 DD2;
-			IDirectDraw_QueryInterface(DX.DD,&IID_IDirectDraw2,(LPVOID *)&DD2);
+			IDirectDraw_QueryInterface(DX.DD,IID_IDirectDraw2,(LPVOID *)&DD2);
 			if (IDirectDraw2_SetDisplayMode(DD2,iResX,iResY,iColDepth,iRefreshRate,0))
 				return 0;
 		}

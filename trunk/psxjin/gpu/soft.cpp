@@ -72,6 +72,8 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+
 #define _IN_SOFT
 
 #include "externals.h"
@@ -1171,10 +1173,10 @@ void FillSoftwareAreaTrans(short x0,short y0,short x1, // FILL AREA TRANS
 	if (x0>drawW) return;
 	if (y0>drawH) return;
 
-	x1=min(x1,drawW+1);
-	y1=min(y1,drawH+1);
-	x0=max(x0,drawX);
-	y0=max(y0,drawY);
+	x1=std::min((long)x1,drawW+1);
+	y1=std::min((long)y1,drawH+1);
+	x0=std::max((long)x0,drawX);
+	y0=std::max((long)y0,drawY);
 
 	if (y0>=iGPUHeight)   return;
 	if (x0>1023)          return;
@@ -1329,7 +1331,7 @@ static int left_B, delta_left_B, right_B, delta_right_B;
 // NASM version (external):
 #define shl10idiv i386_shl10idiv
 
-__inline int shl10idiv(int x, int y);
+extern "C" __inline int shl10idiv(int x, int y);
 
 #else
 
@@ -1530,7 +1532,7 @@ __inline BOOL SetupSections_F(short x1, short y1, short x2, short y2, short x3, 
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v3->y-1,drawH);
+	Ymax=std::min((long)v3->y-1,drawH);
 
 	return TRUE;
 }
@@ -1711,7 +1713,7 @@ __inline BOOL SetupSections_G(short x1,short y1,short x2,short y2,short x3,short
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v3->y-1,drawH);
+	Ymax=std::min((long)v3->y-1,drawH);
 
 	delta_right_R=shl10idiv(temp*((v3->R - v1->R)>>10)+((v1->R - v2->R)<<6),longest);
 	delta_right_G=shl10idiv(temp*((v3->G - v1->G)>>10)+((v1->G - v2->G)<<6),longest);
@@ -1892,7 +1894,7 @@ __inline BOOL SetupSections_FT(short x1, short y1, short x2, short y2, short x3,
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v3->y-1,drawH);
+	Ymax=std::min((long)v3->y-1,drawH);
 
 	delta_right_u=shl10idiv(temp*((v3->u - v1->u)>>10)+((v1->u - v2->u)<<6),longest);
 	delta_right_v=shl10idiv(temp*((v3->v - v1->v)>>10)+((v1->v - v2->v)<<6),longest);
@@ -2109,7 +2111,7 @@ __inline BOOL SetupSections_GT(short x1, short y1, short x2, short y2, short x3,
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v3->y-1,drawH);
+	Ymax=std::min((long)v3->y-1,drawH);
 
 	delta_right_R=shl10idiv(temp*((v3->R - v1->R)>>10)+((v1->R - v2->R)<<6),longest);
 	delta_right_G=shl10idiv(temp*((v3->G - v1->G)>>10)+((v1->G - v2->G)<<6),longest);
@@ -2387,7 +2389,7 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v4->y-1,drawH);
+	Ymax=std::min((long)v4->y-1,drawH);
 
 	return TRUE;
 }
@@ -2665,7 +2667,7 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v4->y-1,drawH);
+	Ymax=std::min((long)v4->y-1,drawH);
 
 	return TRUE;
 }
@@ -2975,7 +2977,7 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 	}
 
 	Ymin=v1->y;
-	Ymax=min(v4->y-1,drawH);
+	Ymax=std::min((long)v4->y-1,drawH);
 
 	return TRUE;
 }

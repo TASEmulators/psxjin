@@ -977,7 +977,11 @@
 			Name="gpu"
 			>
 			<File
-				RelativePath="..\gpu\draw.c"
+				RelativePath="..\gpu\cstuff.c"
+				>
+			</File>
+			<File
+				RelativePath="..\gpu\draw.cpp"
 				>
 			</File>
 			<File
@@ -985,7 +989,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\DrawString.c"
+				RelativePath="..\gpu\DrawString.cpp"
 				>
 			</File>
 			<File
@@ -1001,7 +1005,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\fps.c"
+				RelativePath="..\gpu\fps.cpp"
 				>
 			</File>
 			<File
@@ -1009,7 +1013,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\gpu.c"
+				RelativePath="..\gpu\gpu.cpp"
 				>
 			</File>
 			<File
@@ -1017,7 +1021,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\gpu_cfg.c"
+				RelativePath="..\gpu\gpu_cfg.cpp"
 				>
 			</File>
 			<File
@@ -1025,15 +1029,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\gpu_record.c"
+				RelativePath="..\gpu\gpu_record.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\gpu\gpu_record.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gpu\gpupeopssoft.c"
 				>
 			</File>
 			<File
@@ -1208,7 +1208,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\key.c"
+				RelativePath="..\gpu\key.cpp"
 				>
 			</File>
 			<File
@@ -1220,7 +1220,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\menu.c"
+				RelativePath="..\gpu\menu.cpp"
 				>
 			</File>
 			<File
@@ -1240,7 +1240,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\prim.c"
+				RelativePath="..\gpu\prim.cpp"
 				>
 			</File>
 			<File
@@ -1256,7 +1256,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\soft.c"
+				RelativePath="..\gpu\soft.cpp"
 				>
 			</File>
 			<File
@@ -1265,10 +1265,6 @@
 			</File>
 			<File
 				RelativePath="..\gpu\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gpu\zn.c"
 				>
 			</File>
 		</Filter>

@@ -701,7 +701,7 @@ BOOL CALLBACK ConnectDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return FALSE;
 }
 
-extern "C" long CALLBACK GPUopen(HWND hwndGPU)   ;
+long CALLBACK GPUopen(HWND hwndGPU);
 bool OpenPlugins(HWND hWnd) {
 	int ret;
 

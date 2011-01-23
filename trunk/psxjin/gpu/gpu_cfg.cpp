@@ -125,7 +125,7 @@
 // CONFIG FILE helpers.... used in (non-fpse) Linux and ZN Windows
 /////////////////////////////////////////////////////////////////////////////
 
-int tempDest; //this is for the compiler to not throw in a million of warnings
+static int tempDest; //this is for the compiler to not throw in a million of warnings
 char pConfigFile[MAX_PATH*2] = ".\\psxjin.ini";
 
 #ifndef _FPSE
@@ -287,6 +287,8 @@ void ComboBoxAddRes(HWND hWC,char * cs)
 	tempDest = ComboBox_AddString(hWC,cs);
 }
 
+void gpu_WriteConfig(void);
+
 BOOL OnInitSoftDialog(HWND hW)
 {
 	HWND hWC;
@@ -294,7 +296,7 @@ BOOL OnInitSoftDialog(HWND hW)
 	int i;
 	DEVMODE dv;
 
-	ReadConfig();
+	gpu_WriteConfig();
 
 	if (szDevName[0])
 		SetDlgItemText(hW,IDC_DEVICETXT,szDevName);
@@ -511,7 +513,7 @@ void OnSoftOK(HWND hW)
 		return;
 	}
 
-	WriteConfig();
+	gpu_WriteConfig();
 
 	EndDialog(hW,TRUE);
 }
@@ -822,7 +824,7 @@ void OnCfgDef2(HWND hW)
 // read config
 ////////////////////////////////////////////////////////////////////////
 
-void ReadConfig(void)
+void gpu_ReadConfig(void)
 {
 	HKEY myKey;
 	DWORD type;
@@ -879,11 +881,11 @@ void ReadConfig(void)
 	
 //	RECORD_COMPRESSION1 = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION1", 0, Conf_File);
 	
-	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", 0, &RECORD_COMPRESSION_STATE1[0], 4096, Conf_File);
+	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", 0, (LPSTR)&RECORD_COMPRESSION_STATE1[0], 4096, Conf_File);
 	
 //	RECORD_COMPRESSION2 = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION2", 0, Conf_File);
 
-	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", 0, &RECORD_COMPRESSION_STATE2[0], 4096, Conf_File);
+	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", 0, (LPSTR)&RECORD_COMPRESSION_STATE2[0], 4096, Conf_File);
 	
 	if (RECORD_RECORDING_WIDTH>1024) RECORD_RECORDING_WIDTH = 1024;
 	if (RECORD_RECORDING_HEIGHT>768) RECORD_RECORDING_HEIGHT = 768;
@@ -893,7 +895,7 @@ void ReadConfig(void)
 	guiDev.Data1 = GetPrivateProfileInt("GPU", "GUID1", 0, Conf_File);
 	guiDev.Data2 = GetPrivateProfileInt("GPU", "GUID2", 0, Conf_File);
 	guiDev.Data3 = GetPrivateProfileInt("GPU", "GUID3", 0, Conf_File);
-	GetPrivateProfileString("GPU", "GUID4", 0, &guiDev.Data4[0], 8, Conf_File);
+	GetPrivateProfileString("GPU", "GUID4", 0, (LPSTR)&guiDev.Data4[0], 8, Conf_File);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -945,7 +947,7 @@ void ReadWinSizeConfig(void)
 // write config
 ////////////////////////////////////////////////////////////////////////
 
-void WriteConfig(void)
+void gpu_WriteConfig(void)
 {
 	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
@@ -1033,8 +1035,8 @@ void WriteConfig(void)
 	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_MODE", Str_Tmp, Conf_File);
 
 	WritePrivateProfileString("GPU", "iDebugMode", Str_Tmp, Conf_File);
-	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", RECORD_COMPRESSION_STATE1, Conf_File);
-	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", RECORD_COMPRESSION_STATE2, Conf_File);
+	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", (LPSTR)RECORD_COMPRESSION_STATE1, Conf_File);
+	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", (LPSTR)RECORD_COMPRESSION_STATE2, Conf_File);
 
 	sprintf(Str_Tmp, "%d", guiDev.Data1);
 	WritePrivateProfileString("GPU", "GUID1", Str_Tmp, Conf_File);
@@ -1042,7 +1044,7 @@ void WriteConfig(void)
 	WritePrivateProfileString("GPU", "GUID2", Str_Tmp, Conf_File);
 	sprintf(Str_Tmp, "%d", guiDev.Data3);
 	WritePrivateProfileString("GPU", "GUID3", Str_Tmp, Conf_File);
-	WritePrivateProfileString("GPU", "GUID4", guiDev.Data4, Conf_File);
+	WritePrivateProfileString("GPU", "GUID4", (LPSTR)guiDev.Data4, Conf_File);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1074,7 +1076,7 @@ static HRESULT WINAPI Enum3DDevicesCallback( GUID* pGUID, LPSTR strDesc,
 		return D3DENUMRET_CANCEL;
 
 // Handle specific device GUIDs. NullDevice renders nothing
-	if ( IsEqualGUID( pGUID, &IID_IDirect3DNullDevice ) )
+	if ( IsEqualGUID( *pGUID, IID_IDirect3DNullDevice ) )
 		return D3DENUMRET_OK;
 
 	IsHardware = ( 0 != pHALDesc->dwFlags );
@@ -1102,7 +1104,7 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
 	}
 
 // Query the DirectDraw driver for access to Direct3D.
-	if ( FAILED(IDirectDraw_QueryInterface(pDD, &IID_IDirectDraw4, (VOID**)&g_pDD)))
+	if ( FAILED(IDirectDraw_QueryInterface(pDD, IID_IDirectDraw4, (VOID**)&g_pDD)))
 	{
 		IDirectDraw_Release(pDD);
 		return D3DENUMRET_OK;
@@ -1111,7 +1113,7 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
 
 // Query the DirectDraw driver for access to Direct3D.
 
-	if ( FAILED( IDirectDraw4_QueryInterface(g_pDD,&IID_IDirect3D3, (VOID**)&pD3D)))
+	if ( FAILED( IDirectDraw4_QueryInterface(g_pDD,IID_IDirect3D3, (VOID**)&pD3D)))
 	{
 		IDirectDraw4_Release(g_pDD);
 		return D3DENUMRET_OK;
@@ -1324,7 +1326,7 @@ BOOL bTestModes(void)
 	if ( FAILED( DirectDrawCreate(guid, &pDD, 0L ) ) )
 		return FALSE;
 
-	if (FAILED(IDirectDraw_QueryInterface(pDD, &IID_IDirectDraw4, (VOID**)&g_pDD)))
+	if (FAILED(IDirectDraw_QueryInterface(pDD, IID_IDirectDraw4, (VOID**)&g_pDD)))
 	{
 		IDirectDraw_Release(pDD);
 		return FALSE;

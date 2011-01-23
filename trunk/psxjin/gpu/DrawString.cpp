@@ -27,7 +27,7 @@ static void drawChar15(char *ptr, int lPitch, char c, int mw, int mh, int mode)
 	for (y=0; y<h; y++)
 	{
 		optr = (unsigned short*)(ptr + y * lPitch);
-		fptr = font + (fy + y) * 256 + fx;
+		fptr = (char*)(font + (fy + y) * 256 + fx);
 		for (x=0; x<w; x++)
 		{
 			if (fptr[x]) optr[x] = 0x03e0;
@@ -55,7 +55,7 @@ static void drawChar16(char *ptr, int lPitch, char c, int mw, int mh, int mode)
 	for (y=0; y<h; y++)
 	{
 		optr = (unsigned short*)(ptr + y * lPitch);
-		fptr = font + (fy + y) * 256 + fx;
+		fptr = (char*)(font + (fy + y) * 256 + fx);
 		for (x=0; x<w; x++)
 		{
 			if (fptr[x]) optr[x] = 0x07e0;
@@ -83,7 +83,7 @@ static void drawChar24(char *ptr, int lPitch, char c, int mw, int mh, int mode)
 	for (y=0; y<h; y++)
 	{
 		optr = (unsigned char*)(ptr + y * lPitch);
-		fptr = font + (fy + y) * 256 + fx;
+		fptr = (char*)(font + (fy + y) * 256 + fx);
 		for (x=0; x<w; x++)
 		{
 			optr[x*3] = 0;
@@ -113,7 +113,7 @@ static void drawChar32(char *ptr, int lPitch, char c, int mw, int mh, int mode)
 	for (y=0; y<h; y++)
 	{
 		optr = (unsigned long*)(ptr + y * lPitch);
-		fptr = font + (fy + y) * 256 + fx;
+		fptr = (char*)(font + (fy + y) * 256 + fx);
 		for (x=0; x<w; x++)
 		{
 			if (fptr[x]) optr[x] = 0x00ff00;
