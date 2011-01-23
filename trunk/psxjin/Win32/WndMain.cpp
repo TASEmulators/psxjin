@@ -364,8 +364,8 @@ void RestoreWindow() {
 	CreateMainWindow(SW_SHOWNORMAL);
 	SNDDXSetWindow(gApp.hWnd);
 	ShowCursor(TRUE);
-	SetCursor(LoadCursor(gApp.hInstance, IDC_ARROW));
-	ShowCursor(TRUE);
+//	SetCursor(LoadCursor(gApp.hInstance, IDC_ARROW));
+//	ShowCursor(TRUE);
 }
 
 void UpdateToolWindows()
@@ -805,7 +805,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return true;
 				case ID_FILE_CLOSE_CD:
 					strcpy(IsoFile, "");
-//					iCallW32Gui = 1;
+					iCallW32Gui =  1;
+					CDRclose();
+					Movie.currentFrame = 0;
 					break;
 
 				case ID_FILE_SCREENSHOT:
