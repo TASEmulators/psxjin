@@ -709,8 +709,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					else
 					{
 						CfgOpenFile();	//If no game selected, ask the user to select one
+						WIN32_StartMovieReplay(ftmp);
 						RunCD(hWnd);
-						WIN32_StartMovieReplay(ftmp);	//TODO: This seems to never get run
+						
 					}
 				}
 				else if (IsFileExtension(fileDropped, ".pxm"))
