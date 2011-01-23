@@ -378,7 +378,6 @@ BEGIN
     POPUP "Recent"
     BEGIN
         MENUITEM SEPARATOR
-        MENUITEM "Auto-load",                   ID_RECENT_AUTO
     END
 END
 
