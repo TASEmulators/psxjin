@@ -1314,8 +1314,8 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 			RecentCDs.SetGUI_hWnd(gApp.hWnd);
 			RecentCDs.SetID(65000);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-			//RecentCDs.MakeRecentMenu(gApp.hInstance);
-			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");	//TODO: make this a global variable
+			RecentCDs.MakeRecentMenu(gApp.hInstance);
+			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 			break;
 		case WM_INITDIALOG:
 			mcdDlg = hW;
@@ -1926,6 +1926,7 @@ void LoadIni()
 		sprintf(str, "Recent Watch %d", i+1);
 		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
+	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 }
 
 int SysInit() {
@@ -2102,7 +2103,6 @@ void WIN32_StartMovieRecord()
 				return;
 			}
 			LoadCdBios = 0;
-			//SetMenu(gApp.hWnd, NULL);
 			OpenPlugins(gApp.hWnd);
 			SysReset();
 			NeedReset = 0;
