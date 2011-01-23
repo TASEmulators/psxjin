@@ -805,12 +805,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
-				case ID_RECENT_AUTO:
-					if (RecentCDs.autoload)
-						RecentCDs.autoload = false;
-					else
-						RecentCDs.autoload = true;
-					return TRUE;
 				case ID_FILE_EXIT:
 					ExitPSXjin();
 					return TRUE;
