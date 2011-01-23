@@ -605,6 +605,8 @@ void RunCD(HWND hWnd)
 				SysMessage(_("Could not load Cdrom"));
 				return;
 			}
+			if (Movie.mode == MOVIEMODE_INACTIVE)
+				Movie.currentFrame = 0;
 			Running = 1;
 			psxCpu->Execute();
 		}
