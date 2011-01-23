@@ -310,6 +310,14 @@ void sioInterrupt() {
 	psxHu32ref(0x1070)|= SWAPu32(0x80);
 }
 
+char* MakeMemCardPath(const char* filename)
+{
+	char* str = Config.MemCardsDir;
+	strcat(str, filename);
+	return str;
+}
+
+
 void LoadMcd(int mcd, char *str) {
 	FILE *f;
 	char *data = NULL;
@@ -627,11 +635,11 @@ int sioFreeze(gzFile f, int Mode) {
 static void SetTempMemoryCard(char slot) {
 	if (slot == 1) {
 		strncpy(Config.OldMcd1, Config.Mcd1, 256);
-		strncpy(Config.Mcd1, "memcards\\movie001.tmp", 256);
+		strncpy(Config.Mcd1, MakeMemCardPath("movie001.tmp"), 256);
 	}
 	else {
 		strncpy(Config.OldMcd2, Config.Mcd2, 256);
-		strncpy(Config.Mcd2, "memcards\\movie002.tmp", 256);
+		strncpy(Config.Mcd2, MakeMemCardPath("movie002.tmp"), 256);
 	}
 }
 
@@ -685,11 +693,11 @@ static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefil
 
 void SIO_SaveMemoryCardsEmbed(char *file,char slot) {
 	if (slot == 1) {
-		SaveMemoryCardEmbed(Config.Mcd1,"memcards\\movie001.tmp",file);
+		SaveMemoryCardEmbed(Config.Mcd1,MakeMemCardPath("movie001.tmp"),file);
 		SetTempMemoryCard(1);
 	}
 	else {
-		SaveMemoryCardEmbed(Config.Mcd2,"memcards\\movie002.tmp",file);
+		SaveMemoryCardEmbed(Config.Mcd2,MakeMemCardPath("movie001.tmp"),file);
 		SetTempMemoryCard(2);
 	}
 }
@@ -739,13 +747,8 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 }
 
 void SIO_LoadMemoryCardsEmbed(char *file) {
-	char str[1024];
-	strcpy(str, Config.MemCardsDir);
-	strcat(str, "\\movie001.tmp");
-	LoadMemoryCardEmbed(file,str,Movie.memoryCard1Offset,Movie.memoryCard2Offset);
-	strcpy(str, Config.MemCardsDir);
-	strcat(str, "\\movie002.tmp");
-	LoadMemoryCardEmbed(file,str,Movie.memoryCard2Offset,Movie.cheatListOffset);
+	LoadMemoryCardEmbed(file,MakeMemCardPath("movie001.tmp"),Movie.memoryCard1Offset,Movie.memoryCard2Offset);
+	LoadMemoryCardEmbed(file,MakeMemCardPath("movie002.tmp"),Movie.memoryCard2Offset,Movie.cheatListOffset);
 	SetTempMemoryCard(1);
 	SetTempMemoryCard(2);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
@@ -755,6 +758,6 @@ void SIO_ClearMemoryCardsEmbed() {
 	SetTempMemoryCard(1);
 	SetTempMemoryCard(2);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
-	remove("memcards\\movie001.tmp");
-	remove("memcards\\movie002.tmp");
+	remove(MakeMemCardPath("movie001.tmp"));
+	remove(MakeMemCardPath("movie001.tmp"));
 }
