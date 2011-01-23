@@ -4573,8 +4573,8 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 	BlitScreen((unsigned char *)ddsd.lpSurface,x,y);      // fill DDSRender surface
 
-	if(fpPCSX_LuaGui)
-		fpPCSX_LuaGui((void *)ddsd.lpSurface,PreviousPSXDisplay.Range.x1,
+	if(fpPSXjin_LuaGui)
+		fpPSXjin_LuaGui((void *)ddsd.lpSurface,PreviousPSXDisplay.Range.x1,
 		              PreviousPSXDisplay.DisplayMode.y,iColDepth,iUseNoStretchBlt);
 
 	if (usCursorActive) ShowGunCursor((unsigned char *)ddsd.lpSurface);

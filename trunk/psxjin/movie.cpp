@@ -786,7 +786,7 @@ int MovieFreeze(gzFile f, int Mode) {
 
 	//loading state
 	if (Mode == 0) {
-		if (Movie.mode == MOVIEMODE_RECORD && !PCSX_LuaRerecordCountSkip())
+		if (Movie.mode == MOVIEMODE_RECORD && !PSXjin_LuaRerecordCountSkip())
 			Movie.rerecordCount++;
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
 		

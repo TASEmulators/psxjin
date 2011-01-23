@@ -151,7 +151,7 @@ int           iGPUHeightMask;
 int           GlobalTextIL;
 int           iTileCheat;
 
-void (*fpPCSX_LuaGui)(void *s, int width, int height, int bpp, int pitch);
+void (*fpPSXjin_LuaGui)(void *s, int width, int height, int bpp, int pitch);
 int iMaximumSpeed=0;
 
 ////////////////////////////////////////////////////////////////////////
@@ -3433,7 +3433,7 @@ void CALLBACK GPUstopAvi()
 	}
 }
 
-void CALLBACK GPUsendFpLuaGui(void (*fpPCSX_LuaGuiTemp)(void *s, int width, int height, int bpp, int pitch))
+void CALLBACK GPUsendFpLuaGui(void (*fpPSXjin_LuaGuiTemp)(void *s, int width, int height, int bpp, int pitch))
 {
-	fpPCSX_LuaGui = fpPCSX_LuaGuiTemp;
+	fpPSXjin_LuaGui = fpPSXjin_LuaGuiTemp;
 }

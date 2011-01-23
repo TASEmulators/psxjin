@@ -464,7 +464,7 @@ void cdrInterrupt() {
 
         	cdr.Result[2] = 0x00;
         	cdr.Result[3] = 0x00;
-			strncpy((char *)&cdr.Result[4], "PCSX", 4);
+			strncpy((char *)&cdr.Result[4], "PSXj", 4);
 			cdr.Stat = Complete;
 			break;
 

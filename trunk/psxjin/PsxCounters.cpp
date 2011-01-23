@@ -172,7 +172,7 @@ if (Movie.mode == MOVIEMODE_PLAY) {
 		iPause = 1;
 	// stop if we're beyond last frame
 	if (Movie.currentFrame>Movie.totalFrames) {
-		GPUdisplayText("*PCSX*: Movie End");
+		GPUdisplayText("*PSXjin*: Movie End");
 		MOV_StopMovie();
 	}
 }
@@ -226,7 +226,7 @@ GPUsetcurrentmode(modeFlags);
 
 // update WIN32 tools
 #ifdef WIN32
-	PCSXApplyCheats();
+	PSXjinApplyCheats();
 	UpdateToolWindows();
 #endif
 

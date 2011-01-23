@@ -24,7 +24,7 @@ typedef long (CALLBACK* PADopen)(HWND);
 
 typedef long (CALLBACK* NETopen)(HWND);
 
-void PCSX_MOV_FrameCountSaveState();
-void PCSX_MOV_FrameCountLoadState();
+void PSXjin_MOV_FrameCountSaveState();
+void PSXjin_MOV_FrameCountLoadState();
 
 #endif /* __PLUGIN_H__ */

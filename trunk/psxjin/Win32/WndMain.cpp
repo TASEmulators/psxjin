@@ -256,7 +256,7 @@ int main(int argc, char **argv) {
 			sprintf(Movie.wavFilename,"%s",argv[++i]);
 		}
 		else if (!strcmp(argv[i], "-lua")) {
-			PCSX_LoadLuaCode(argv[++i]);
+			PSXjin_LoadLuaCode(argv[++i]);
 		}
 		else if (!strcmp(argv[i], "-stopcapture"))
 			sscanf (argv[++i],"%lu",&Movie.stopCapture);
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 
 	CreateMainWindow(SW_SHOW);
 
-	PCSXInitCheatData();
+	PSXjinInitCheatData();
 		
 	//process some command line options
 	if (runcd == 1 || runcd == 2)
@@ -462,7 +462,7 @@ void OnStates_LoadOther() {
 	memset(&szFileName,  0, sizeof(szFileName));
 	memset(&szFileTitle, 0, sizeof(szFileTitle));
 
-	strcpy(szFilter, _("PCSX State Format"));
+	strcpy(szFilter, _("PSXjin State Format"));
 	strcatz(szFilter, "*.*;*.*");
 
     ofn.lStructSize			= sizeof(OPENFILENAME);
@@ -517,7 +517,7 @@ void OnStates_SaveOther() {
 	memset(&szFileName,  0, sizeof(szFileName));
 	memset(&szFileTitle, 0, sizeof(szFileTitle));
 
-	strcpy(szFilter, _("PCSX State Format"));
+	strcpy(szFilter, _("PSXjin State Format"));
 	strcatz(szFilter, "*.*;*.*");
 
     ofn.lStructSize			= sizeof(OPENFILENAME);
@@ -725,11 +725,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 				else if (IsFileExtension(fileDropped, ".pxm"))
 				{
-					SysMessage("PCSX-rr movies are not supported in PSXjin");
+					SysMessage("PSXjin-rr movies are not supported in PSXjin");
 				}
 				else if (IsFileExtension(fileDropped, ".lua"))
 				{
-					PCSX_LoadLuaCode(fileDropped.c_str());
+					PSXjin_LoadLuaCode(fileDropped.c_str());
 				}
 			}
 		}
@@ -953,9 +953,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_CONFIGURATION_CHEATS:
-						PCSXRemoveCheats();
+						PSXjinRemoveCheats();
 						CreateCheatEditor();
-						PCSXApplyCheats();
+						PSXjinApplyCheats();
 					return TRUE;
 
 				case ID_CONFIGURATION_NETPLAY:
@@ -1867,7 +1867,7 @@ void CreateMainWindow(int nCmdShow) {
 	COLORREF crBkg = RGB(14,90,193);
 	hBrush=CreateSolidBrush(crBkg);
 
-	wc.lpszClassName = "PCSX Main";
+	wc.lpszClassName = "PSXjin Main";
 	wc.lpfnWndProc = MainWndProc;
 	wc.style = 0;
 	wc.hInstance = gApp.hInstance;
@@ -1882,7 +1882,7 @@ void CreateMainWindow(int nCmdShow) {
 
 	UpdateWindowSizeFromConfig();
 
-	hWnd = CreateWindow("PCSX Main",
+	hWnd = CreateWindow("PSXjin Main",
 						PCSXRR_NAME_AND_VERSION,
 						WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX,
 						MainWindow_wndx,

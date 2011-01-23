@@ -70,7 +70,7 @@
 #define IDC_CDDA                        1013
 #define IDC_RECORDMODE                  1013
 #define IDC_CLOSE                       1014
-#define IDC_PCSX_ABOUT_TEXT             1014
+#define IDC_PSXjin_ABOUT_TEXT             1014
 #define IDC_PSXOUT                      1014
 #define IDC_DISSTEREO                   1014
 #define IDC_ASM_SCROLL                  1015
@@ -111,9 +111,9 @@
 #define IDC_LIST2                       1028
 #define IDC_CONNECTSTR                  1028
 #define IDC_ASMCHECK15                  1029
-#define IDC_PCSX_ABOUT_AUTHORS          1029
+#define IDC_PSXjin_ABOUT_AUTHORS          1029
 #define IDC_ASMCHECK16                  1030
-#define IDC_PCSX_ABOUT_GREETS           1030
+#define IDC_PSXjin_ABOUT_GREETS           1030
 #define IDC_ASMCHECK17                  1031
 #define IDC_SELPSX                      1031
 #define IDC_ASMCHECK18                  1032

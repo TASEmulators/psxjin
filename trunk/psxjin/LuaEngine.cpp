@@ -74,10 +74,10 @@ static enum {SPEED_NORMAL, SPEED_NOTHROTTLE, SPEED_TURBO, SPEED_MAXIMUM} speedmo
 static int skipRerecords = FALSE;
 
 // Used by the registry to find our functions
-static const char *frameAdvanceThread = "PCSX.FrameAdvance";
-static const char *memoryWatchTable = "PCSX.Memory";
-static const char *memoryValueTable = "PCSX.MemValues";
-static const char *guiCallbackTable = "PCSX.GUI";
+static const char *frameAdvanceThread = "PSXjin.FrameAdvance";
+static const char *memoryWatchTable = "PSXjin.Memory";
+static const char *memoryValueTable = "PSXjin.MemValues";
+static const char *guiCallbackTable = "PSXjin.GUI";
 
 // True if there's a thread waiting to run after a run of frame-advance.
 static int frameAdvanceWaiting = FALSE;
@@ -131,9 +131,9 @@ static int usingMemoryRegister=0;
 
 /**
  * Resets emulator speed / pause states after script exit.
- * (Actually, PCSX doesn't do any of these. They were very annoying.)
+ * (Actually, PSXjin doesn't do any of these. They were very annoying.)
  */
-static void PCSX_LuaOnStop() {
+static void PSXjin_LuaOnStop() {
 	luaRunning = FALSE;
 	lua_joypads_used = 0;
 	lua_analogjoy_used = 0;
@@ -144,9 +144,9 @@ static void PCSX_LuaOnStop() {
 /**
  * Asks Lua if it wants control of the emulator's speed.
  * Returns 0 if no, 1 if yes. If yes, caller should also
- * consult PCSX_LuaFrameSkip().
+ * consult PSXjin_LuaFrameSkip().
  */
-int PCSX_LuaSpeed() {
+int PSXjin_LuaSpeed() {
 	if (!LUA || !luaRunning)
 		return 0;
 
@@ -166,7 +166,7 @@ int PCSX_LuaSpeed() {
  * Asks Lua if it wants control whether this frame is skipped.
  * Returns 0 if no, 1 if frame should be skipped, -1 if it should not be.
  */
-int PCSX_LuaFrameSkip() {
+int PSXjin_LuaFrameSkip() {
 	if (!LUA || !luaRunning)
 		return 0;
 
@@ -189,7 +189,7 @@ int PCSX_LuaFrameSkip() {
  * When code determines that a write has occurred
  * (not necessarily worth informing Lua), call this.
  */
-void PCSX_LuaWriteInform() {
+void PSXjin_LuaWriteInform() {
 	if (!LUA || !luaRunning || !usingMemoryRegister) return;
 	// Nuke the stack, just in case.
 	lua_settop(LUA,0);
@@ -235,14 +235,14 @@ void PCSX_LuaWriteInform() {
 
 
 
-// pcsx.speedmode(string mode)
+// psxjin.speedmode(string mode)
 //
 //   Takes control of the emulation speed
 //   of the system. Normal is normal speed (60fps, 50 for PAL),
 //   nothrottle disables speed control but renders every frame,
 //   turbo renders only a few frames in order to speed up emulation,
 //   maximum renders no frames
-static int pcsx_speedmode(lua_State *L) {
+static int psxjin_speedmode(lua_State *L) {
 	const char *mode = luaL_checkstring(L,1);
 	
 	if (strcasecmp(mode, "normal")==0) {
@@ -258,21 +258,21 @@ static int pcsx_speedmode(lua_State *L) {
 		speedmode = SPEED_MAXIMUM;
 		SetEmulationSpeed(EMUSPEED_MAXIMUM);
 	} else
-		luaL_error(L, "Invalid mode %s to pcsx.speedmode",mode);
+		luaL_error(L, "Invalid mode %s to psxjin.speedmode",mode);
 
 	return 0;
 }
 
 
-// pcsx.frameadvance()
+// psxjin.frameadvance()
 //
 //  Executes a frame advance. Occurs by yielding the coroutine, then re-running
 //  when we break out.
-static int pcsx_frameadvance(lua_State *L) {
+static int psxjin_frameadvance(lua_State *L) {
 	// We're going to sleep for a frame-advance. Take notes.
 
 	if (frameAdvanceWaiting) 
-		return luaL_error(L, "can't call pcsx.frameadvance() from here");
+		return luaL_error(L, "can't call psxjin.frameadvance() from here");
 
 	frameAdvanceWaiting = TRUE;
 
@@ -281,12 +281,12 @@ static int pcsx_frameadvance(lua_State *L) {
 }
 
 
-// pcsx.pause()
+// psxjin.pause()
 //
 //  Pauses the emulator, function "waits" until the user unpauses.
 //  This function MAY be called from a non-frame boundary, but the frame
 //  finishes executing anyways. In this case, the function returns immediately.
-static int pcsx_pause(lua_State *L) {
+static int psxjin_pause(lua_State *L) {
 	iPause=1;
 	speedmode = SPEED_NORMAL;
 
@@ -296,8 +296,8 @@ static int pcsx_pause(lua_State *L) {
 }
 
 
-// pcsx.unpause()
-static int pcsx_unpause(lua_State *L) {
+// psxjin.unpause()
+static int psxjin_unpause(lua_State *L) {
 	iPause=0;
 
 	return lua_yield(L, 0);
@@ -562,14 +562,14 @@ static int print(lua_State *L)
 	return 0;
 }
 
-char pcsx_message_buffer[1024];
-// pcsx.message(string msg)
+char psxjin_message_buffer[1024];
+// psxjin.message(string msg)
 //
 //  Displays the given message on the screen.
-static int pcsx_message(lua_State *L) {
+static int psxjin_message(lua_State *L) {
 	const char *msg = luaL_checkstring(L,1);
-	sprintf(pcsx_message_buffer, "%s", msg);
-	GPUdisplayText(pcsx_message_buffer);
+	sprintf(psxjin_message_buffer, "%s", msg);
+	GPUdisplayText(psxjin_message_buffer);
 
 	return 0;
 }
@@ -628,7 +628,7 @@ static int addressof(lua_State *L)
 	return 1;
 }
 
-static int pcsx_registerbefore(lua_State *L) {
+static int psxjin_registerbefore(lua_State *L) {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L,1);
@@ -639,7 +639,7 @@ static int pcsx_registerbefore(lua_State *L) {
 }
 
 
-static int pcsx_registerafter(lua_State *L) {
+static int psxjin_registerafter(lua_State *L) {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L,1);
@@ -650,7 +650,7 @@ static int pcsx_registerafter(lua_State *L) {
 }
 
 
-static int pcsx_registerexit(lua_State *L) {
+static int psxjin_registerexit(lua_State *L) {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L,1);
@@ -661,21 +661,22 @@ static int pcsx_registerexit(lua_State *L) {
 }
 
 
-// int pcsx.lagcount()
-int pcsx_lagcount(lua_State *L) {
+// int psxjin.lagcount()
+int psxjin_lagcount(lua_State *L) {
 	lua_pushinteger(L, Movie.lagCounter);
 	return 1;
 }
 
 
-// boolean pcsx.lagged()
-int pcsx_lagged(lua_State *L) {
+// boolean psxjin.lagged()
+int psxjin_lagged(lua_State *L) {
 	int lagged = 0;
 	if(iJoysToPoll == 2)
 		lagged = 1;
 	lua_pushboolean(L, lagged);
 	return 1;
 }
+
 
 
 static int memory_readbyte(lua_State *L)
@@ -891,6 +892,20 @@ static int joypad_set(lua_State *L) {
 	return 0;
 }
 
+int joypad_controltype(lua_State *L) 
+{
+	PadDataS padd; 
+	int which = luaL_checkinteger(L,1);
+	if(which == 1)
+		PAD1_readPort1(&padd);
+	else if(which == 2)
+		PAD2_readPort2(&padd);
+	else
+		luaL_error(L,"Invalid input port (valid range 1-2, specified %d)", which);
+	lua_pushinteger(L,padd.controllerType);	
+	return 1;
+}
+
 static int joypad_getanalog(lua_State *L) {
 
 	// Reads the joypads as inputted by the user
@@ -966,7 +981,7 @@ static char *savestateobj2filename(lua_State *L, int offset) {
 	
 	// Also check that the type entry is set
 	lua_getfield(L, -1, "__metatable");
-	if (strcmp(lua_tostring(L,-1), "PCSX Savestate") != 0)
+	if (strcmp(lua_tostring(L,-1), "PSXjin Savestate") != 0)
 		luaL_error(L, "object not a savestate object");
 	lua_pop(L,1);
 	
@@ -1031,7 +1046,7 @@ static int savestate_create(lua_State *L) {
 	lua_newtable(L);
 	
 	// First, we must protect it
-	lua_pushstring(L, "PCSX Savestate");
+	lua_pushstring(L, "PSXjin Savestate");
 	lua_setfield(L, -2, "__metatable");
 	
 	
@@ -1940,7 +1955,7 @@ static int gui_transparency(lua_State *L) {
 //
 //  undoes uncommitted drawing commands
 static int gui_clearuncommitted(lua_State *L) {
-	PCSX_LuaClearGui();
+	PSXjin_LuaClearGui();
 	return 0;
 }
 
@@ -2950,7 +2965,7 @@ static int bitbit(lua_State *L)
 
 
 // The function called periodically to ensure Lua doesn't run amok.
-static void PCSX_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
+static void PSXjin_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 	if (numTries-- == 0) {
 
 		int kill = 0;
@@ -2981,7 +2996,7 @@ static void PCSX_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
 		if (kill) {
 			luaL_error(L, "Killed by user request.");
-			PCSX_LuaOnStop();
+			PSXjin_LuaOnStop();
 		}
 
 		// else, kill the debug hook.
@@ -3005,7 +3020,7 @@ void HandleCallbackError(lua_State* L)
 		fprintf(stderr, "Lua thread bombed out: %s\n", lua_tostring(LUA,-1));
 #endif
 
-		PCSX_LuaStop();
+		PSXjin_LuaStop();
 	}
 }
 
@@ -3058,18 +3073,18 @@ void CallRegisteredLuaFunctions(int calltype)
 }
 
 
-static const struct luaL_reg pcsxlib [] = {
-	{"speedmode", pcsx_speedmode},
-	{"frameadvance", pcsx_frameadvance},
-	{"pause", pcsx_pause},
-	{"unpause", pcsx_unpause},
+static const struct luaL_reg psxjinlib [] = {
+	{"speedmode", psxjin_speedmode},
+	{"frameadvance", psxjin_frameadvance},
+	{"pause", psxjin_pause},
+	{"unpause", psxjin_unpause},
 	{"framecount", movie_framecount},
-	{"lagcount", pcsx_lagcount},
-	{"lagged", pcsx_lagged},
-	{"registerbefore", pcsx_registerbefore},
-	{"registerafter", pcsx_registerafter},
-	{"registerexit", pcsx_registerexit},
-	{"message", pcsx_message},
+	{"lagcount", psxjin_lagcount},
+	{"lagged", psxjin_lagged},
+	{"registerbefore", psxjin_registerbefore},
+	{"registerafter", psxjin_registerafter},
+	{"registerexit", psxjin_registerexit},
+	{"message", psxjin_message},
 	{"print", print}, // sure, why not
 	{NULL,NULL}
 };
@@ -3113,6 +3128,7 @@ static const struct luaL_reg joypadlib[] = {
 	{"set", joypad_set},
 	{"getanalog", joypad_getanalog},
 	{"setanalog", joypad_setanalog},
+	{"controltype",joypad_controltype},
 	// alternative names
 	{"read", joypad_get},
 	{"write", joypad_set},
@@ -3188,7 +3204,7 @@ static const struct luaL_reg inputlib[] = {
 };
 
 
-void PCSX_LuaFrameBoundary() {
+void PSXjin_LuaFrameBoundary() {
 	lua_State *thread;
 	int result;
 
@@ -3217,7 +3233,7 @@ void PCSX_LuaFrameBoundary() {
 		// Okay, we're fine with that.
 	} else if (result != 0) {
 		// Done execution by bad causes
-		PCSX_LuaOnStop();
+		PSXjin_LuaOnStop();
 		lua_pushnil(LUA);
 		lua_setfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
 		
@@ -3229,7 +3245,7 @@ void PCSX_LuaFrameBoundary() {
 #endif
 
 	} else {
-		PCSX_LuaOnStop();
+		PSXjin_LuaOnStop();
 		//GPUdisplayText("Script died of natural causes.\n");
 	}
 
@@ -3238,7 +3254,7 @@ void PCSX_LuaFrameBoundary() {
 	frameBoundary = FALSE;
 
 	if (!frameAdvanceWaiting) {
-		PCSX_LuaOnStop();
+		PSXjin_LuaOnStop();
 	}
 }
 
@@ -3250,7 +3266,7 @@ void PCSX_LuaFrameBoundary() {
  *
  * Returns true on success, false on failure.
  */
-int PCSX_LoadLuaCode(const char *filename) {
+int PSXjin_LoadLuaCode(const char *filename) {
 	lua_State *thread;
 	int result;
 	char dir[_MAX_PATH];
@@ -3280,8 +3296,8 @@ int PCSX_LoadLuaCode(const char *filename) {
 		LUA = lua_open();
 		luaL_openlibs(LUA);
 
-		luaL_register(LUA, "emu", pcsxlib);
-		luaL_register(LUA, "pcsx", pcsxlib);
+		luaL_register(LUA, "emu", psxjinlib);
+		luaL_register(LUA, "psxjin", psxjinlib);
 		luaL_register(LUA, "memory", memorylib);
 		luaL_register(LUA, "joypad", joypadlib);
 		luaL_register(LUA, "savestate", savestatelib);
@@ -3363,10 +3379,10 @@ int PCSX_LoadLuaCode(const char *filename) {
 		info_onstart(info_uid);
 
 	// And run it right now. :)
-	//PCSX_LuaFrameBoundary();
+	//PSXjin_LuaFrameBoundary();
 
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
-	lua_sethook(thread, PCSX_LuaHookFunction, LUA_MASKCOUNT, 10000);
+	lua_sethook(thread, PSXjin_LuaHookFunction, LUA_MASKCOUNT, 10000);
 
 	// We're done.
 	return 1;
@@ -3374,14 +3390,14 @@ int PCSX_LoadLuaCode(const char *filename) {
 
 
 /**
- * Equivalent to repeating the last PCSX_LoadLuaCode() call.
+ * Equivalent to repeating the last PSXjin_LoadLuaCode() call.
  */
-void PCSX_ReloadLuaCode()
+void PSXjin_ReloadLuaCode()
 {
 	if (!luaScriptName)
 		GPUdisplayText("There's no script to reload.");
 	else
-		PCSX_LoadLuaCode(luaScriptName);
+		PSXjin_LoadLuaCode(luaScriptName);
 }
 
 
@@ -3391,7 +3407,7 @@ void PCSX_ReloadLuaCode()
  * Always safe to call, except from within a lua call itself (duh).
  *
  */
-void PCSX_LuaStop() {
+void PSXjin_LuaStop() {
 	//already killed
 	if (!LUA) return;
 
@@ -3403,7 +3419,7 @@ void PCSX_LuaStop() {
 
 	lua_close(LUA); // this invokes our garbage collectors for us
 	LUA = NULL;
-	PCSX_LuaOnStop();
+	PSXjin_LuaOnStop();
 }
 
 
@@ -3411,7 +3427,7 @@ void PCSX_LuaStop() {
  * Returns true if there is a Lua script running.
  *
  */
-int PCSX_LuaRunning() {
+int PSXjin_LuaRunning() {
 	// FIXME: return false when no callback functions are registered.
 	return (int) (LUA != NULL); // should return true if callback functions are active.
 }
@@ -3420,8 +3436,8 @@ int PCSX_LuaRunning() {
 /**
  * Returns true if Lua would like to steal the given joypad control.
  */
-int PCSX_LuaUsingJoypad(int which) {
-	if (!PCSX_LuaRunning())
+int PSXjin_LuaUsingJoypad(int which) {
+	if (!PSXjin_LuaRunning())
 		return 0;
 	return lua_joypads_used & (1 << which);
 }
@@ -3432,10 +3448,10 @@ int PCSX_LuaUsingJoypad(int which) {
  * format as the OS-specific code.
  *
  * This function must not be called more than once per frame. Ideally exactly once
- * per frame (if PCSX_LuaUsingJoypad says it's safe to do so)
+ * per frame (if PSXjin_LuaUsingJoypad says it's safe to do so)
  */
-uint32 PCSX_LuaReadJoypad(int which) {
-	if (!PCSX_LuaRunning())
+uint32 PSXjin_LuaReadJoypad(int which) {
+	if (!PSXjin_LuaRunning())
 		return 0;
 	if (lua_joypads_used & (1 << which)) {
 		return lua_joypads[which];
@@ -3448,8 +3464,8 @@ uint32 PCSX_LuaReadJoypad(int which) {
 /**
  * Returns true if Lua would like to steal the given analog joypad control.
  */
-int PCSX_LuaUsingAnalogJoy(int which) {
-	if (!PCSX_LuaRunning())
+int PSXjin_LuaUsingAnalogJoy(int which) {
+	if (!PSXjin_LuaRunning())
 		return 0;
 	return lua_analogjoy_used & (1 << which);
 }
@@ -3458,8 +3474,8 @@ int PCSX_LuaUsingAnalogJoy(int which) {
 /**
  * Reads the analog joysticks Lua is feeding for the given joypad.
  */
-LuaAnalogJoy* PCSX_LuaReadAnalogJoy(int which) {
-	if (!PCSX_LuaRunning())
+LuaAnalogJoy* PSXjin_LuaReadAnalogJoy(int which) {
+	if (!PSXjin_LuaRunning())
 		return NULL;
 	if (lua_analogjoy_used & (1 << which)) {
 		return &lua_analogjoy[which];
@@ -3475,7 +3491,7 @@ LuaAnalogJoy* PCSX_LuaReadAnalogJoy(int which) {
  *
  * This function will not return true if a script is not running.
  */
-int PCSX_LuaRerecordCountSkip() {
+int PSXjin_LuaRerecordCountSkip() {
 	// FIXME: return true if (there are any active callback functions && skipRerecords)
 	return LUA && luaRunning && skipRerecords;
 }
@@ -3487,7 +3503,7 @@ int PCSX_LuaRerecordCountSkip() {
  *
  * Currently we only support 256x* resolutions.
  */
-void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
+void PSXjin_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 	int x,y;
 	uint8 r,g,b,gui_alpha,gui_red,gui_green,gui_blue;
 
@@ -3563,18 +3579,18 @@ void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 }
 
 
-void PCSX_LuaClearGui() {
+void PSXjin_LuaClearGui() {
 	gui_used = GUI_CLEAR;
 }
 
-void PCSX_LuaEnableGui(uint8 enabled) {
+void PSXjin_LuaEnableGui(uint8 enabled) {
 	gui_enabled = enabled;
 }
 
 
-lua_State* PCSX_GetLuaState() {
+lua_State* PSXjin_GetLuaState() {
 	return LUA;
 }
-char* PCSX_GetLuaScriptName() {
+char* PSXjin_GetLuaScriptName() {
 	return luaScriptName;
 }

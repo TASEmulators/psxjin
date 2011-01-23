@@ -341,9 +341,9 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CHEATEDITOR].key
 	&& modifiers == EmuCommandTable[EMUCMD_CHEATEDITOR].keymod)
 	{
-		PCSXRemoveCheats();
+		PSXjinRemoveCheats();
 		CreateCheatEditor();
-		PCSXApplyCheats();
+		PSXjinApplyCheats();
 		return;
 	}
 
@@ -476,7 +476,7 @@ void PADhandleKey(int key) {
 				GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
 			else
 				GPUdisplayText(_("*PSXjin*: Cheats Disabled"));
-			PCSXApplyCheats();
+			PSXjinApplyCheats();
 		}
 		return;
 	}
@@ -580,14 +580,14 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_LUA_STOP].key
 	&& modifiers == EmuCommandTable[EMUCMD_LUA_STOP].keymod)
 	{
-		PCSX_LuaStop();
+		PSXjin_LuaStop();
 		return;
 	}
 
 	if(key == EmuCommandTable[EMUCMD_LUA_RELOAD].key
 	&& modifiers == EmuCommandTable[EMUCMD_LUA_RELOAD].keymod)
 	{
-		PCSX_ReloadLuaCode();
+		PSXjin_ReloadLuaCode();
 		return;
 	}
 
@@ -724,7 +724,7 @@ bool OpenPlugins(HWND hWnd) {
 
 	SetCurrentDirectory(PcsxDir);
 //	ShowCursor(FALSE);
-	GPUsendFpLuaGui(PCSX_LuaGui);
+	GPUsendFpLuaGui(PSXjin_LuaGui);
 	return true;
 }
 

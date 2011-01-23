@@ -69,7 +69,7 @@ void inline execI()
 				iGpuHasUpdated = 0;
 			}
 			iVSyncFlag = 0;
-			PCSX_LuaFrameBoundary();
+			PSXjin_LuaFrameBoundary();
 			iJoysToPoll = 2;
 		}
 

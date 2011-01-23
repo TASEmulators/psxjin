@@ -463,11 +463,11 @@ private:
 
 
 #ifdef _MSC_VER
-class PCSX2Synchronizer : public ISynchronizingAudioBuffer
+class PSXjin2Synchronizer : public ISynchronizingAudioBuffer
 {
 public:
 	std::queue<s16> readySamples;
-	PCSX2Synchronizer()
+	PSXjin2Synchronizer()
 	{
 		SndBuffer::Init();
 	}
@@ -510,7 +510,7 @@ ISynchronizingAudioBuffer* metaspu_construct(ESynchMethod method)
 	case ESynchMethod_N: return new NitsujaSynchronizer();
 	case ESynchMethod_Z: return new ZeromusSynchronizer();
 	#ifdef _MSC_VER
-	case ESynchMethod_P: return new PCSX2Synchronizer();
+	case ESynchMethod_P: return new PSXjin2Synchronizer();
 	#endif
 	default: return NULL;
 	}

@@ -62,7 +62,7 @@ enum ESynchMethod
 {
 	ESynchMethod_N, //nitsuja's
 	ESynchMethod_Z, //zero's
-	ESynchMethod_P, //PCSX2 spu2-x
+	ESynchMethod_P, //PSXjin2 spu2-x
 };
 
 ISynchronizingAudioBuffer* metaspu_construct(ESynchMethod method);
