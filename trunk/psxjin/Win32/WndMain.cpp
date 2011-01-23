@@ -724,14 +724,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 		}
-		case WM_INITMENU:			
-			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+		case WM_INITMENU:						
 			RecentCDs.SetGUI_hWnd(gApp.hWnd);
 			RecentCDs.SetID(65000);
 			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
+			RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
 			RecentCDs.MakeRecentMenu(gApp.hInstance);
 			break;
-
+ 
 		case WM_ENTERMENULOOP:
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -1869,6 +1869,11 @@ void CreateMainWindow(int nCmdShow) {
 
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
+	RecentCDs.SetGUI_hWnd(gApp.hWnd);
+	RecentCDs.SetID(65000);
+	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
+	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+	RecentCDs.MakeRecentMenu(gApp.hInstance);
 	DragAcceptFiles(hWnd, 1);
 
 	ShowWindow(hWnd, nCmdShow);

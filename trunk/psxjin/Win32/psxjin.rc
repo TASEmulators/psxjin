@@ -373,6 +373,16 @@ BEGIN
     END
 END
 
+RECENTROMS MENU 
+BEGIN
+    POPUP "Recent"
+    BEGIN
+        MENUITEM "None",                        ID_RECENT_NONE
+        MENUITEM SEPARATOR
+        MENUITEM "Clear",                       ID_RECENT_CLEAR
+    END
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
