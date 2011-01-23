@@ -115,7 +115,7 @@ int cheatsEnabled=0;
 int CancelQuit=0;
 int UseGui = 1;
 
-extern "C" char * pConfigFile;
+extern "C" char pConfigFile[MAX_PATH*2];
 #define MAXFILENAME 256
 
 int GetMenuSize()
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 	sprintf(Config.Conf_File, "%s\\psxjin.ini", szCurrentPath);
 	LoadConfig();	//Attempt to load ini, or set default settings
 
-//	strcpy (pConfigFile, Config.Conf_File);
+	strcpy (pConfigFile, Config.Conf_File);
 
 	//If directories don't already exist, create them
 	CreateDirectory(Config.SstatesDir, 0);	
