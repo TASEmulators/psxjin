@@ -739,8 +739,13 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 }
 
 void SIO_LoadMemoryCardsEmbed(char *file) {
-	LoadMemoryCardEmbed(file,"memcards\\movie001.tmp",Movie.memoryCard1Offset,Movie.memoryCard2Offset);
-	LoadMemoryCardEmbed(file,"memcards\\movie002.tmp",Movie.memoryCard2Offset,Movie.cheatListOffset);
+	char str[1024];
+	strcpy(str, Config.MemCardsDir);
+	strcat(str, "\\movie001.tmp");
+	LoadMemoryCardEmbed(file,str,Movie.memoryCard1Offset,Movie.memoryCard2Offset);
+	strcpy(str, Config.MemCardsDir);
+	strcat(str, "\\movie002.tmp");
+	LoadMemoryCardEmbed(file,str,Movie.memoryCard2Offset,Movie.cheatListOffset);
 	SetTempMemoryCard(1);
 	SetTempMemoryCard(2);
 	LoadMcds(Config.Mcd1, Config.Mcd2);
