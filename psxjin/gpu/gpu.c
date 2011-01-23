@@ -3356,15 +3356,15 @@ void CALLBACK GPUupdateframe()
 
 void CALLBACK GPUshowframecounter()
 {
-	if (ulKeybits&KEY_SHOWFPS)
+	if (ulKeybits&KEY_SHOWFCOUNT)
 	{
 		DestroyPic();
-		ulKeybits&=~KEY_SHOWFPS;
+		ulKeybits&=~KEY_SHOWFCOUNT;
 		DoClearScreenBuffer();
 	}
 	else
 	{
-		ulKeybits|=KEY_SHOWFPS;
+		ulKeybits|=KEY_SHOWFCOUNT;
 		szDispBuf[0]=0;
 		BuildDispMenu(0);
 	}
@@ -3373,6 +3373,7 @@ void CALLBACK GPUshowframecounter()
 
 void CALLBACK GPUshowInput()
 {
+	ulKeybits|=KEY_SHOWFPS;
 	if (ulKeybits&KEY_SHOWINPUT)
 	{
 		DestroyPic();

@@ -146,25 +146,16 @@ void DisplayText(void)                                 // DISPLAY TEXT
 		SetBkMode(hdc,TRANSPARENT);
 	else SetBkColor(hdc,RGB(0,0,0));
 
-	if (szDebugText[0] && ((time(NULL) - tStart) < 2))    // special debug text? show it
+	if (szDebugText[0] && ((time(NULL) - tStart) < 2) && (ulKeybits&KEY_SHOWFPS))    // special debug text? show it
 	{
-		RECT r={2,PSXDisplay.DisplayMode.y-12,1022,1024};
+		RECT r={2,PSXDisplay.DisplayMode.y-200,1022,1024};
 		DrawText(hdc,szDebugText,lstrlen(szDebugText),&r,DT_LEFT|DT_NOCLIP);
 	}
 	else                                                  // else standard gpu menu
 	{
-		szDebugText[0]=0;
-		if (ulKeybits&KEY_SHOWFPSALL)
-		{
-			lstrcat(szDispBuf,szMenuBuf);
-			ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,szDispBuf,lstrlen(szDispBuf),NULL);
-		}
+		szDebugText[0]=0;	
 	}
-	if  (ulKeybits&KEY_SHOWINPUT)
-	{
-		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szInputBuf,36,NULL);
-	}
-
+	
 
 	SelectObject(hdc,hFO);
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
@@ -246,18 +237,21 @@ void DisplayMovMode(void)
 }
 void DisplayInput(void)
 {
-	if (ulKeybits&KEY_SHOWINPUT)
-	{
-		DestroyPic();
-		ulKeybits&=~KEY_SHOWINPUT;
-		DoClearScreenBuffer();
-	}
-	else
-	{
-		ulKeybits|=KEY_SHOWINPUT;
-		szDispBuf[0]=0;
-		BuildDispMenu(0);
-	}
+	#ifdef _WINDOWS
+	HDC hdc;
+	HFONT hFO;
+
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	hFO=(HFONT)SelectObject(hdc,hGFont);
+
+	SetTextColor(hdc,RGB(255,0,0));
+	if (bTransparent)
+		SetBkMode(hdc,TRANSPARENT);
+	else SetBkColor(hdc,RGB(0,0,0));
+	ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szInputBuf,36,NULL);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	#endif
 }
 
 ////////////////////////////////////////////////////////////////////////

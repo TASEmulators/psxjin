@@ -42,7 +42,7 @@
 #define KEY_BADTEXTURES   128
 #define KEY_CHECKTHISOUT  256
 #define KEY_SHOWINPUT	  512
-#define KEY_SHOWFPSALL	  1024
+#define KEY_SHOWFCOUNT	  1024
 
 
 #ifndef _FPSE

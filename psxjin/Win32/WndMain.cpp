@@ -70,7 +70,7 @@ bool AVIisCapturing = false;
 //TODO: remove me and use the gpu ones!
 int dispInput = 0;
 int dispFrameCounter = 0;
-
+int dispAllText = 0;
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
 int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
@@ -1911,6 +1911,14 @@ void SaveIni()
 	sprintf(Str_Tmp, "%d", ramw_y);
 	WritePrivateProfileString("RamWatch", "ramw_y", Str_Tmp, Config.Conf_File);
 
+	sprintf(Str_Tmp, "%d", dispAllText );
+	WritePrivateProfileString("General", "AllDisplay", Str_Tmp, Config.Conf_File);
+	sprintf(Str_Tmp, "%d", dispFrameCounter);
+	WritePrivateProfileString("General", "FrameCounter", Str_Tmp, Config.Conf_File);
+	sprintf(Str_Tmp, "%d", dispInput );
+	WritePrivateProfileString("General", "InputDisplay", Str_Tmp, Config.Conf_File);
+
+
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
 	{
 		char str[256];
@@ -1929,7 +1937,10 @@ void LoadIni()
 	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Config.Conf_File);
 	MainWindow_wndx = GetPrivateProfileInt("General", "main_x", 0, Config.Conf_File);
 	MainWindow_wndy = GetPrivateProfileInt("General", "main_y", 0, Config.Conf_File);
+	dispAllText = GetPrivateProfileInt("General", "AllDisplay", 0, Config.Conf_File);
 	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Config.Conf_File);
+	dispInput = GetPrivateProfileInt("General", "InputDisplay", 0, Config.Conf_File);
+	
 
 	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
 	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
