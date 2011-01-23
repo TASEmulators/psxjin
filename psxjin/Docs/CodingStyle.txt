@@ -1,4 +1,4 @@
-## PCSX CODING STYLE
+## PSXjin CODING STYLE
 
 typedef struct { // { within struct
     int i;

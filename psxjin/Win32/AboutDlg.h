@@ -16,8 +16,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _PCSX_ABOUTDLG_H_
-#define _PCSX_ABOUTDLG_H_
+#ifndef _PSXjin_ABOUTDLG_H_
+#define _PSXjin_ABOUTDLG_H_
 
 LRESULT WINAPI AboutDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

@@ -211,7 +211,7 @@ long CALLBACK GPU__freeze(unsigned long ulGetFreezeData, GPUFreeze_t *pF) {
 		long lSlotNum=*((long *)pF);
 		char Text[32];
 
-		sprintf (Text, "*PCSX*: Selected State %ld", lSlotNum+1);
+		sprintf (Text, "*PSXjin*: Selected State %ld", lSlotNum+1);
 		GPUdisplayText(Text);
 		return 1;
 	}
@@ -238,7 +238,7 @@ void CALLBACK GPU__showframecounter(void) {}
 void CALLBACK GPU__showInput(void) {}
 void CALLBACK GPU__startAvi(char* filename) {}
 void CALLBACK GPU__stopAvi(void) {}
-void CALLBACK GPU__sendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int)) {}
+void CALLBACK GPU__sendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int)) {}
 
 #define LoadGpuSym1(dest, name) \
 	LoadSym(GPU_##dest, GPU##dest, name, 1);
@@ -446,8 +446,8 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 	PAD1_readPort1(&padd);
 
-	if(PCSX_LuaUsingJoypad(0)) padd.buttonStatus = PCSX_LuaReadJoypad(0)^0xffff;
-	LuaAnalogJoy* luaAnalogJoy = PCSX_LuaReadAnalogJoy(0);
+	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
+	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
 	if (luaAnalogJoy != NULL) {
 		padd.leftJoyX = luaAnalogJoy->xleft;
 		padd.leftJoyY = luaAnalogJoy->yleft;
@@ -526,8 +526,8 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 
 	PAD2_readPort2(&padd);
 
-	if(PCSX_LuaUsingJoypad(1)) padd.buttonStatus = PCSX_LuaReadJoypad(1)^0xffff;
-	LuaAnalogJoy* luaAnalogJoy = PCSX_LuaReadAnalogJoy(1);
+	if(PSXjin_LuaUsingJoypad(1)) padd.buttonStatus = PSXjin_LuaReadJoypad(1)^0xffff;
+	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(1);
 	if (luaAnalogJoy != NULL) {
 		padd.leftJoyX = luaAnalogJoy->xleft;
 		padd.leftJoyY = luaAnalogJoy->yleft;

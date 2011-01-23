@@ -13,16 +13,16 @@ HWND cheatSearchHWND = NULL;
 void UpdateMemSearch();
 typedef enum
 {
-    PCSX_LESS_THAN, PCSX_GREATER_THAN, PCSX_LESS_THAN_OR_EQUAL,
-    PCSX_GREATER_THAN_OR_EQUAL, PCSX_EQUAL, PCSX_NOT_EQUAL
-} PCSXCheatComparisonType;
+    PSXjin_LESS_THAN, PSXjin_GREATER_THAN, PSXjin_LESS_THAN_OR_EQUAL,
+    PSXjin_GREATER_THAN_OR_EQUAL, PSXjin_EQUAL, PSXjin_NOT_EQUAL
+} PSXjinCheatComparisonType;
 
 typedef enum
 {
-    PCSX_8_BITS, PCSX_16_BITS, PCSX_24_BITS, PCSX_32_BITS
-} PCSXCheatDataSize;
+    PSXjin_8_BITS, PSXjin_16_BITS, PSXjin_24_BITS, PSXjin_32_BITS
+} PSXjinCheatDataSize;
 
-#define SEARCH_TITLE_CHEATERROR "PCSX Cheat Error"
+#define SEARCH_TITLE_CHEATERROR "PSXjin Cheat Error"
 #define SEARCH_TITLE_RANGEERROR "Range Error"
 #define SEARCH_ERR_INVALIDNEWVALUE "You have entered an out of range or invalid value for the new value"
 #define SEARCH_ERR_INVALIDCURVALUE "You have entered an out of range or invalid value for\n"\
@@ -40,35 +40,35 @@ typedef enum
 ((a)[(v) >> 5] & (1 << ((v) & 31)))
 
 #define _C(c,a,b) \
-((c) == PCSX_LESS_THAN ? (a) < (b) : \
- (c) == PCSX_GREATER_THAN ? (a) > (b) : \
- (c) == PCSX_LESS_THAN_OR_EQUAL ? (a) <= (b) : \
- (c) == PCSX_GREATER_THAN_OR_EQUAL ? (a) >= (b) : \
- (c) == PCSX_EQUAL ? (a) == (b) : \
+((c) == PSXjin_LESS_THAN ? (a) < (b) : \
+ (c) == PSXjin_GREATER_THAN ? (a) > (b) : \
+ (c) == PSXjin_LESS_THAN_OR_EQUAL ? (a) <= (b) : \
+ (c) == PSXjin_GREATER_THAN_OR_EQUAL ? (a) >= (b) : \
+ (c) == PSXjin_EQUAL ? (a) == (b) : \
  (a) != (b))
 
 #define _D(s,m,o) \
-((s) == PCSX_8_BITS ? (uint8) (*((m) + (o))) : \
- (s) == PCSX_16_BITS ? ((uint16) (*((m) + (o)) + (*((m) + (o) + 1) << 8))) : \
- (s) == PCSX_24_BITS ? ((uint32) (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16))) : \
+((s) == PSXjin_8_BITS ? (uint8) (*((m) + (o))) : \
+ (s) == PSXjin_16_BITS ? ((uint16) (*((m) + (o)) + (*((m) + (o) + 1) << 8))) : \
+ (s) == PSXjin_24_BITS ? ((uint32) (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16))) : \
 ((uint32)  (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16) + (*((m) + (o) + 3) << 24))))
 
 #define _DS(s,m,o) \
-((s) == PCSX_8_BITS ? ((int8) *((m) + (o))) : \
- (s) == PCSX_16_BITS ? ((int16) (*((m) + (o)) + (*((m) + (o) + 1) << 8))) : \
- (s) == PCSX_24_BITS ? (((int32) ((*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16)) << 8)) >> 8): \
+((s) == PSXjin_8_BITS ? ((int8) *((m) + (o))) : \
+ (s) == PSXjin_16_BITS ? ((int16) (*((m) + (o)) + (*((m) + (o) + 1) << 8))) : \
+ (s) == PSXjin_24_BITS ? (((int32) ((*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16)) << 8)) >> 8): \
  ((int32) (*((m) + (o)) + (*((m) + (o) + 1) << 8) + (*((m) + (o) + 2) << 16) + (*((m) + (o) + 3) << 24))))
 
-void PCSXStartCheatSearch()
+void PSXjinStartCheatSearch()
 {
 	memmove (Cheat.CRAM, Cheat.RAM, 0x200000);
 	memset ((char *) Cheat.ALL_BITS, 0xff, 0x200000);
 }
 
-void PCSXInitCheatData()
+void PSXjinInitCheatData()
 {
 	Cheat.RAM = (u8*)psxM;
-	PCSXStartCheatSearch();
+	PSXjinStartCheatSearch();
 }
 
 struct ICheat
@@ -83,23 +83,23 @@ struct ICheat
 	int format;
 };
 
-BOOL TestRange(int val_type, PCSXCheatDataSize bytes,  uint32 value)
+BOOL TestRange(int val_type, PSXjinCheatDataSize bytes,  uint32 value)
 {
 	if(val_type!=2)
 	{
-		if(bytes==PCSX_8_BITS)
+		if(bytes==PSXjin_8_BITS)
 		{
 			if(value<256)
 				return TRUE;
 			else return FALSE;
 		}
-		if(bytes==PCSX_16_BITS)
+		if(bytes==PSXjin_16_BITS)
 		{
 			if(value<65536)
 				return TRUE;
 			else return FALSE;
 		}
-		if(bytes==PCSX_24_BITS)
+		if(bytes==PSXjin_24_BITS)
 		{
 			if(value<16777216)
 				return TRUE;
@@ -110,19 +110,19 @@ BOOL TestRange(int val_type, PCSXCheatDataSize bytes,  uint32 value)
 	}
 	else
 	{
-		if(bytes==PCSX_8_BITS)
+		if(bytes==PSXjin_8_BITS)
 		{
 			if((int32)value<128 && (int32)value >= -128)
 				return TRUE;
 			else return FALSE;
 		}
-		if(bytes==PCSX_16_BITS)
+		if(bytes==PSXjin_16_BITS)
 		{
 			if((int32)value<32768 && (int32)value >= -32768)
 				return TRUE;
 			else return FALSE;
 		}
-		if(bytes==PCSX_24_BITS)
+		if(bytes==PSXjin_24_BITS)
 		{
 			if((int32)value<8388608 && (int32)value >= -8388608)
 				return TRUE;
@@ -133,19 +133,19 @@ BOOL TestRange(int val_type, PCSXCheatDataSize bytes,  uint32 value)
 	}
 }
 
-//void PCSXSearchForChange (SCheatData *d, PCSXCheatComparisonType cmp,PCSXCheatDataSize size, bool8 is_signed, bool8 update)
-void PCSXSearchForChange (PCSXCheatComparisonType cmp,PCSXCheatDataSize size, uint8 is_signed, uint8 update)
+//void PSXjinSearchForChange (SCheatData *d, PSXjinCheatComparisonType cmp,PSXjinCheatDataSize size, bool8 is_signed, bool8 update)
+void PSXjinSearchForChange (PSXjinCheatComparisonType cmp,PSXjinCheatDataSize size, uint8 is_signed, uint8 update)
 {
 	int l;
 	int i;
 
 	switch (size)
 	{
-	case PCSX_8_BITS: l = 0; break;
-	case PCSX_16_BITS: l = 1; break;
-	case PCSX_24_BITS: l = 2; break;
+	case PSXjin_8_BITS: l = 0; break;
+	case PSXjin_16_BITS: l = 1; break;
+	case PSXjin_24_BITS: l = 2; break;
 	default:
-	case PCSX_32_BITS: l = 3; break;
+	case PSXjin_32_BITS: l = 3; break;
 	}
 
 	if (is_signed)
@@ -180,8 +180,8 @@ void PCSXSearchForChange (PCSXCheatComparisonType cmp,PCSXCheatDataSize size, ui
 		BIT_CLEAR (Cheat.ALL_BITS, i);
 }
 
-void PCSXSearchForValue (PCSXCheatComparisonType cmp,
-                        PCSXCheatDataSize size, uint32 value,
+void PSXjinSearchForValue (PSXjinCheatComparisonType cmp,
+                        PSXjinCheatDataSize size, uint32 value,
                         uint8 is_signed, uint8 update)
 {
 	int l;
@@ -189,11 +189,11 @@ void PCSXSearchForValue (PCSXCheatComparisonType cmp,
 
 	switch (size)
 	{
-	case PCSX_8_BITS: l = 0; break;
-	case PCSX_16_BITS: l = 1; break;
-	case PCSX_24_BITS: l = 2; break;
+	case PSXjin_8_BITS: l = 0; break;
+	case PSXjin_16_BITS: l = 1; break;
+	case PSXjin_24_BITS: l = 2; break;
 	default:
-	case PCSX_32_BITS: l = 3; break;
+	case PSXjin_32_BITS: l = 3; break;
 	}
 
 	if (is_signed)
@@ -228,19 +228,19 @@ void PCSXSearchForValue (PCSXCheatComparisonType cmp,
 		BIT_CLEAR (Cheat.ALL_BITS, i);
 }
 
-void PCSXSearchForAddress (PCSXCheatComparisonType cmp,
-                          PCSXCheatDataSize size, uint32 value, uint8 update)
+void PSXjinSearchForAddress (PSXjinCheatComparisonType cmp,
+                          PSXjinCheatDataSize size, uint32 value, uint8 update)
 {
 	int l;
 	int i;
 
 	switch (size)
 	{
-	case PCSX_8_BITS: l = 0; break;
-	case PCSX_16_BITS: l = 1; break;
-	case PCSX_24_BITS: l = 2; break;
+	case PSXjin_8_BITS: l = 0; break;
+	case PSXjin_16_BITS: l = 1; break;
+	case PSXjin_24_BITS: l = 2; break;
 	default:
-	case PCSX_32_BITS: l = 3; break;
+	case PSXjin_32_BITS: l = 3; break;
 	}
 
 	{
@@ -396,20 +396,20 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 					int ret = 0;
 					char buf[23];
 					int temp=new_cheat->size;
-					PCSXCheatDataSize tmp = PCSX_8_BITS;
+					PSXjinCheatDataSize tmp = PSXjin_8_BITS;
 					ZeroMemory(new_cheat, sizeof(struct SCheat));
 					new_cheat->size=temp;
 					GetDlgItemText(hDlg, IDC_NC_ADDRESS, buf, 7);
 					ScanAddress(buf,&new_cheat->address);
 
 					if(temp==1)
-						tmp=PCSX_8_BITS;
+						tmp=PSXjin_8_BITS;
 					if(temp==2)
-						tmp=PCSX_16_BITS;
+						tmp=PSXjin_16_BITS;
 					if(temp==3)
-						tmp=PCSX_24_BITS;
+						tmp=PSXjin_24_BITS;
 					if(temp==4)
-						tmp=PCSX_32_BITS;
+						tmp=PSXjin_32_BITS;
 
 					if(0!=GetDlgItemText(hDlg, IDC_NC_NEWVAL, buf, 12))
 					{
@@ -454,16 +454,16 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 						new_cheat->enabled=TRUE;
 						for(p=0; p<new_cheat->size; p++)
 						{
-							PCSXAddCheat(new_cheat->enabled, new_cheat->saved_val, new_cheat->address +p, (new_cheat->new_val>>(8*p)));
+							PSXjinAddCheat(new_cheat->enabled, new_cheat->saved_val, new_cheat->address +p, (new_cheat->new_val>>(8*p)));
 							strcpy(Cheat.c[Cheat.num_cheats-1].name, new_cheat->name);
 						}
 						ret=0;
 					}
 					if (!cheatsEnabled) {
 						cheatsEnabled = 1;
-						GPUdisplayText(_("*PCSX*: Cheats Enabled"));
+						GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
 					}
-					PCSXApplyCheats();
+					PSXjinApplyCheats();
 					UpdateMemSearch();
 				}
 
@@ -479,10 +479,10 @@ INT_PTR CALLBACK DlgCheatSearchAdd(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP
 
 INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static PCSXCheatDataSize bytes;
+	static PSXjinCheatDataSize bytes;
 	static int val_type;
 	static int use_entered;
-	static PCSXCheatComparisonType comp_type;
+	static PSXjinCheatComparisonType comp_type;
 
 	switch(msg)
 	{
@@ -512,23 +512,23 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_UNSIGNED, BM_SETCHECK, BST_CHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 
-			if(comp_type==PCSX_GREATER_THAN) {
+			if(comp_type==PSXjin_GREATER_THAN) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_GREATER_THAN, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(comp_type==PCSX_LESS_THAN_OR_EQUAL) {
+			else if(comp_type==PSXjin_LESS_THAN_OR_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(comp_type==PCSX_GREATER_THAN_OR_EQUAL) {
+			else if(comp_type==PSXjin_GREATER_THAN_OR_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_GREATER_THAN_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(comp_type==PCSX_EQUAL) {
+			else if(comp_type==PSXjin_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(comp_type==PCSX_NOT_EQUAL) {
+			else if(comp_type==PSXjin_NOT_EQUAL) {
 				SendDlgItemMessage(hwndDlg, IDC_LESS_THAN, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_NOT_EQUAL, BM_SETCHECK, BST_CHECKED, 0);
 			}
@@ -542,15 +542,15 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				SendDlgItemMessage(hwndDlg, IDC_HEX, BM_SETCHECK, BST_CHECKED, 0);
 			}
 
-			if(bytes==PCSX_16_BITS) {
+			if(bytes==PSXjin_16_BITS) {
 				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_2_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(bytes==PCSX_24_BITS) {
+			else if(bytes==PSXjin_24_BITS) {
 				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_3_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
-			else if(bytes==PCSX_32_BITS) {
+			else if(bytes==PSXjin_32_BITS) {
 				SendDlgItemMessage(hwndDlg, IDC_1_BYTE, BM_SETCHECK, BST_UNCHECKED, 0);
 				SendDlgItemMessage(hwndDlg, IDC_4_BYTE, BM_SETCHECK, BST_CHECKED, 0);
 			}
@@ -648,10 +648,10 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									switch(bytes)
 									{
 										default:
-										case PCSX_8_BITS:sprintf(buf, "%02X", q&0xFF);break;
-										case PCSX_16_BITS: sprintf(buf, "%04X", q&0xFFFF); break;
-										case PCSX_24_BITS: sprintf(buf, "%06X", q&0xFFFFFF);break;
-										case PCSX_32_BITS: sprintf(buf, "%08X", q);break;
+										case PSXjin_8_BITS:sprintf(buf, "%02X", q&0xFF);break;
+										case PSXjin_16_BITS: sprintf(buf, "%04X", q&0xFFFF); break;
+										case PSXjin_24_BITS: sprintf(buf, "%06X", q&0xFFFFFF);break;
+										case PSXjin_32_BITS: sprintf(buf, "%08X", q);break;
 									}
 								}
 								break;
@@ -660,23 +660,23 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									switch(bytes)
 									{
 										default:
-										case PCSX_8_BITS:
+										case PSXjin_8_BITS:
 											if((q-128)<0)
 												sprintf(buf, "%d", q&0xFF);
 											else sprintf(buf, "%d", q-256);
 											break;
-										case PCSX_16_BITS:
+										case PSXjin_16_BITS:
 											if((q-32768)<0)
 												sprintf(buf, "%d", q&0xFFFF);
 											else sprintf(buf, "%d", q-65536);
 											break;
-										case PCSX_24_BITS:
+										case PSXjin_24_BITS:
 											if((q-0x800000)<0)
 												sprintf(buf, "%d", q&0xFFFFFF);
 											else sprintf(buf, "%d", q-0x1000000);
 											break;
 	
-										case PCSX_32_BITS: sprintf(buf, "%d", q);break;
+										case PSXjin_32_BITS: sprintf(buf, "%d", q);break;
 									}
 									break;
 							}
@@ -699,10 +699,10 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									switch(bytes)
 									{
 										default:
-										case PCSX_8_BITS:sprintf(buf, "%02X", q&0xFF);break;
-										case PCSX_16_BITS: sprintf(buf, "%04X", q&0xFFFF); break;
-										case PCSX_24_BITS: sprintf(buf, "%06X", q&0xFFFFFF);break;
-										case PCSX_32_BITS: sprintf(buf, "%08X", q);break;
+										case PSXjin_8_BITS:sprintf(buf, "%02X", q&0xFF);break;
+										case PSXjin_16_BITS: sprintf(buf, "%04X", q&0xFFFF); break;
+										case PSXjin_24_BITS: sprintf(buf, "%06X", q&0xFFFFFF);break;
+										case PSXjin_32_BITS: sprintf(buf, "%08X", q);break;
 									}
 									break;
 								}
@@ -711,23 +711,23 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									switch(bytes)
 									{
 										default:
-										case PCSX_8_BITS:
+										case PSXjin_8_BITS:
 											if((q-128)<0)
 												sprintf(buf, "%d", q&0xFF);
 											else sprintf(buf, "%d", q-256);
 											break;
-										case PCSX_16_BITS:
+										case PSXjin_16_BITS:
 											if((q-32768)<0)
 												sprintf(buf, "%d", q&0xFFFF);
 											else sprintf(buf, "%d", q-65536);
 											break;
-										case PCSX_24_BITS:
+										case PSXjin_24_BITS:
 											if((q-0x800000)<0)
 												sprintf(buf, "%d", q&0xFFFFFF);
 											else sprintf(buf, "%d", q-0x1000000);
 											break;
 	
-										case PCSX_32_BITS: sprintf(buf, "%d", q);break;
+										case PSXjin_32_BITS: sprintf(buf, "%d", q);break;
 									}
 									break;
 							}
@@ -893,17 +893,17 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			case IDC_EQUAL:
 			case IDC_NOT_EQUAL:
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN))
-					comp_type=PCSX_LESS_THAN;
+					comp_type=PSXjin_LESS_THAN;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN))
-					comp_type=PCSX_GREATER_THAN;
+					comp_type=PSXjin_GREATER_THAN;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN_EQUAL))
-					comp_type=PCSX_LESS_THAN_OR_EQUAL;
+					comp_type=PSXjin_LESS_THAN_OR_EQUAL;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN_EQUAL))
-					comp_type=PCSX_GREATER_THAN_OR_EQUAL;
+					comp_type=PSXjin_GREATER_THAN_OR_EQUAL;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_EQUAL))
-					comp_type=PCSX_EQUAL;
+					comp_type=PSXjin_EQUAL;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_NOT_EQUAL))
-					comp_type=PCSX_NOT_EQUAL;
+					comp_type=PSXjin_NOT_EQUAL;
 				break;
 
 			case IDC_1_BYTE:
@@ -911,12 +911,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			case IDC_3_BYTE:
 			case IDC_4_BYTE:
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_1_BYTE))
-					bytes=PCSX_8_BITS;
+					bytes=PSXjin_8_BITS;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_2_BYTE))
-					bytes=PCSX_16_BITS;
+					bytes=PSXjin_16_BITS;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_3_BYTE))
-					bytes=PCSX_24_BITS;
-				else bytes=PCSX_32_BITS;
+					bytes=PSXjin_24_BITS;
+				else bytes=PSXjin_32_BITS;
 				{
 					int l = CheatCount(bytes);
 					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
@@ -944,13 +944,13 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					ZeroMemory(&cht, sizeof(struct SCheat));
 
 					//retrieve and convert to SCheat
-					if(bytes==PCSX_8_BITS)
+					if(bytes==PSXjin_8_BITS)
 						cht.size=1;
-					else if (bytes==PCSX_16_BITS)
+					else if (bytes==PSXjin_16_BITS)
 						cht.size=2;
-					else if (bytes==PCSX_24_BITS)
+					else if (bytes==PSXjin_24_BITS)
 						cht.size=3;
-					else if (bytes==PCSX_32_BITS)
+					else if (bytes==PSXjin_32_BITS)
 						cht.size=4;
 
 					ITEM_QUERY(lvi, IDC_ADDYS, 0, buf, 7);
@@ -990,7 +990,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						int p;
 						for(p=0; p<cht.size; p++)
 						{
-							PCSXAddCheat(TRUE, cht.saved, cht.address +p, ((cht.new_val>>(8*p))&0xFF));
+							PSXjinAddCheat(TRUE, cht.saved, cht.address +p, ((cht.new_val>>(8*p))&0xFF));
 							strcpy(Cheat.c[Cheat.num_cheats-1].name, cht.name);
 						}
 					}
@@ -998,7 +998,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				break;
 
 			case IDC_C_RESET:
-				PCSXStartCheatSearch();
+				PSXjinStartCheatSearch();
 				{
 					int l = CheatCount(bytes);
 					ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);
@@ -1052,16 +1052,16 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				val_type=0;
 
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN))
-					comp_type=PCSX_LESS_THAN;
+					comp_type=PSXjin_LESS_THAN;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN))
-					comp_type=PCSX_GREATER_THAN;
+					comp_type=PSXjin_GREATER_THAN;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_LESS_THAN_EQUAL))
-					comp_type=PCSX_LESS_THAN_OR_EQUAL;
+					comp_type=PSXjin_LESS_THAN_OR_EQUAL;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_GREATER_THAN_EQUAL))
-					comp_type=PCSX_GREATER_THAN_OR_EQUAL;
+					comp_type=PSXjin_GREATER_THAN_OR_EQUAL;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_EQUAL))
-					comp_type=PCSX_EQUAL;
-				else comp_type=PCSX_NOT_EQUAL;
+					comp_type=PSXjin_EQUAL;
+				else comp_type=PSXjin_NOT_EQUAL;
 
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_UNSIGNED))
 					val_type=1;
@@ -1070,12 +1070,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				else val_type=3;
 
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_1_BYTE))
-					bytes=PCSX_8_BITS;
+					bytes=PSXjin_8_BITS;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_2_BYTE))
-					bytes=PCSX_16_BITS;
+					bytes=PSXjin_16_BITS;
 				else if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_3_BYTE))
-					bytes=PCSX_24_BITS;
-				else bytes=PCSX_32_BITS;
+					bytes=PSXjin_24_BITS;
+				else bytes=PSXjin_32_BITS;
 
 				if(BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTERED) ||
 				   BST_CHECKED==IsDlgButtonChecked(hwndDlg, IDC_ENTEREDADDRESS))
@@ -1087,7 +1087,7 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					if(use_entered==2)
 					{
 						ScanAddress(buf,&value);
-						PCSXSearchForAddress (comp_type, bytes, value, FALSE);
+						PSXjinSearchForAddress (comp_type, bytes, value, FALSE);
 					}
 					else
 					{
@@ -1103,12 +1103,12 @@ INT_PTR CALLBACK DlgCheatSearch(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 							return TRUE;
 						}
 
-						PCSXSearchForValue (comp_type,bytes, value,(val_type==2), FALSE);
+						PSXjinSearchForValue (comp_type,bytes, value,(val_type==2), FALSE);
 					}
 				}
 				else
 				{
-					PCSXSearchForChange (comp_type,bytes, (val_type==2), FALSE);
+					PSXjinSearchForChange (comp_type,bytes, (val_type==2), FALSE);
 				}
 				l = CheatCount(bytes);
 				ListView_SetItemCount (GetDlgItem(hwndDlg, IDC_ADDYS), l);

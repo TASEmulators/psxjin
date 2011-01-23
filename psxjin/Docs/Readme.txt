@@ -141,7 +141,7 @@ Check www.emufanatics.com or www.ngemu.com for compatibility lists.
 5) Credits
    -------
 
-PCSX is the work of the following people:
+PSXjin is the work of the following people:
 
 main coder:
  Linuzappz   , e-mail: linuzappz@pcsx.net

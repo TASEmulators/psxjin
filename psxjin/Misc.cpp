@@ -40,13 +40,13 @@ FILE *emuLog;
 int Log = 0;
 
 char *LabelAuthors = { N_(
-	"PSXjin a open source rerecording psx emulator using PCSX core\n\n"
+	"PSXjin a open source rerecording psx emulator using PSXjin core\n\n"
 	"http://code.google.com/p/psxjin/\n"
 	"http://tasvideos.org/\n"
 };
 
 char *LabelGreets = { N_(
-	"original PCSX written by:\n"
+	"original PSXjin written by:\n"
 	"main coder: linuzappz\n"
 	"co-coders: shadow\n"
 	"ex-coders: Nocomp, Pete Bernett, nik3d\n"
@@ -442,7 +442,7 @@ int Load(char *ExePath) {
 #define gzread(x,y,z) fread(y,1,z,x)
 #define gzseek(x,y,z) fseek(x,y,z);
 
-const char PcsxHeader[32] = "STv3 PCSX v" PCSX_VERSION;
+const char PcsxHeader[32] = "STv3 PSXjin v" PCSX_VERSION;
 
 int SaveState(char *file) {
 	FILE* f;
@@ -538,7 +538,7 @@ int LoadState(char *file) {
 
 	gzread(f, header, 32);
 
-	if (strncmp("STv3 PCSX", header, 9)) { fclose(f); return -1; }
+	if (strncmp("STv3 PSXjin", header, 9)) { fclose(f); return -1; }
 
 	gzseek(f, 128*96*3, SEEK_CUR);
 
@@ -594,7 +594,7 @@ int CheckState(char *file) {
 
 	fclose(f);
 
-	if (strncmp("STv3 PCSX", header, 9)) return -1;
+	if (strncmp("STv3 PSXjin", header, 9)) return -1;
 
 	return 0;
 }
@@ -683,7 +683,7 @@ int LoadStateEmbed(char *file) {
 
 	gzread(f, header, 32);
 
-	if (strncmp("STv3 PCSX", header, 9)) { fclose(f); return -1; }
+	if (strncmp("STv3 PSXjin", header, 9)) { fclose(f); return -1; }
 
 	gzseek(f, 128*96*3, SEEK_CUR);
 

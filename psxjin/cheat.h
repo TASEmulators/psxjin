@@ -44,14 +44,14 @@ extern struct SCheatData Cheat;
         a.cchTextMax=e; \
         ListView_GetItem(GetDlgItem(hwndDlg, b), &a);
 
-BOOL PCSXLoadCheatFile (const char *filename);
-void PCSXDisableCheat (uint32 which1);
-void PCSXEnableCheat (uint32 which1);
-void PCSXDeleteCheat (uint32 which1);
-BOOL PCSXSaveCheatFile (const char *filename);
-void PCSXApplyCheats();
-void PCSXRemoveCheats();
-void PCSXAddCheat(BOOL enable, BOOL save_current_value, uint32 address, uint8 byte);
+BOOL PSXjinLoadCheatFile (const char *filename);
+void PSXjinDisableCheat (uint32 which1);
+void PSXjinEnableCheat (uint32 which1);
+void PSXjinDeleteCheat (uint32 which1);
+BOOL PSXjinSaveCheatFile (const char *filename);
+void PSXjinApplyCheats();
+void PSXjinRemoveCheats();
+void PSXjinAddCheat(BOOL enable, BOOL save_current_value, uint32 address, uint8 byte);
 void ScanAddress(const char* str, uint32 *value);
 BOOL CHT_SaveCheatFileEmbed(const char *filename);
 BOOL CHT_LoadCheatFileEmbed(const char *filename);

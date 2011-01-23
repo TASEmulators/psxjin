@@ -7,7 +7,7 @@
 // global variables
 struct SCheatData Cheat;
 
-void PCSXRemoveCheat (uint32 which1)
+void PSXjinRemoveCheat (uint32 which1)
 {
 //	if (Cheat.c [which1].saved) {
 //		uint32 address = Cheat.c[which1].address;
@@ -15,11 +15,11 @@ void PCSXRemoveCheat (uint32 which1)
 //	}
 }
 
-void PCSXDeleteCheat (uint32 which1)
+void PSXjinDeleteCheat (uint32 which1)
 {
 	if (which1 < Cheat.num_cheats) {
 		if (Cheat.c[which1].enabled)
-			PCSXRemoveCheat (which1);
+			PSXjinRemoveCheat (which1);
 		
 		memmove (&Cheat.c[which1], &Cheat.c[which1 + 1],
 		         sizeof (Cheat.c [0]) * (Cheat.num_cheats - which1 - 1));
@@ -27,7 +27,7 @@ void PCSXDeleteCheat (uint32 which1)
 	}
 }
 
-void PCSXAddCheat (BOOL enable, BOOL save_current_value, 
+void PSXjinAddCheat (BOOL enable, BOOL save_current_value, 
                   uint32 address, uint8 byte)
 {
 	if (Cheat.num_cheats < sizeof (Cheat.c) / sizeof (Cheat.c[0])) {
@@ -42,15 +42,15 @@ void PCSXAddCheat (BOOL enable, BOOL save_current_value,
 	}
 }
 
-void PCSXDisableCheat (uint32 which1)
+void PSXjinDisableCheat (uint32 which1)
 {
 	if (which1 < Cheat.num_cheats && Cheat.c[which1].enabled) {
-		PCSXRemoveCheat(which1);
+		PSXjinRemoveCheat(which1);
 		Cheat.c[which1].enabled = FALSE;
 	}
 }
 
-void PCSXApplyCheat(uint32 which1)
+void PSXjinApplyCheat(uint32 which1)
 {
 	uint32 address = Cheat.c[which1].address;
 
@@ -61,35 +61,35 @@ void PCSXApplyCheat(uint32 which1)
 	Cheat.c [which1].saved = TRUE;
 }
 
-void PCSXEnableCheat (uint32 which1)
+void PSXjinEnableCheat (uint32 which1)
 {
 	if (which1 < Cheat.num_cheats && !Cheat.c[which1].enabled) {
 		Cheat.c[which1].enabled = TRUE;
-		PCSXApplyCheat(which1);
+		PSXjinApplyCheat(which1);
 	}
 }
 
-void PCSXApplyCheats()
+void PSXjinApplyCheats()
 {
 	uint32 i;
 	if (!cheatsEnabled)
 		return;
 	for (i = 0; i < Cheat.num_cheats; i++)
 		if (Cheat.c[i].enabled)
-			PCSXApplyCheat(i);
+			PSXjinApplyCheat(i);
 }
 
-void PCSXRemoveCheats()
+void PSXjinRemoveCheats()
 {
 	uint32 i;
 	if (!cheatsEnabled)
 		return;
 	for (i = 0; i < Cheat.num_cheats; i++)
 	if (Cheat.c[i].enabled)
-		PCSXRemoveCheat(i);
+		PSXjinRemoveCheat(i);
 }
 
-BOOL PCSXLoadCheatFile (const char *filename)
+BOOL PSXjinLoadCheatFile (const char *filename)
 {
 	FILE *fs = fopen (filename, "rb");
 	uint8 data [28];
@@ -113,7 +113,7 @@ BOOL PCSXLoadCheatFile (const char *filename)
 	return (TRUE);
 }
 
-BOOL PCSXSaveCheatFile (const char *filename)
+BOOL PSXjinSaveCheatFile (const char *filename)
 {
 	FILE *fs = fopen (filename, "wb");
 	uint8 data [28];
@@ -251,6 +251,6 @@ BOOL CHT_LoadCheatFileEmbed(const char *filename)
 void CHT_ClearCheatFileEmbed() {
 	uint32 i;
 	for (i = 0; i < Cheat.num_cheats; i++)
-		PCSXDeleteCheat(i);
+		PSXjinDeleteCheat(i);
 	Cheat.num_cheats=0;
 }

@@ -67,7 +67,7 @@ void           makeNormalSnapshotPNG(void);
 void           makeNormalSnapshotBMP(void);
 void           makeVramSnapshot(void);
 void           makeFullVramSnapshot(void);
-void           (*fpPCSX_LuaGui)(void *s, int width, int height, int bpp, int pitch);
+void           (*fpPSXjin_LuaGui)(void *s, int width, int height, int bpp, int pitch);
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -11,7 +11,7 @@ extern AppData gApp;
 
 static void LoadCheatFile(char nameo[2048])
 {
-	const char filter[]="PCSX cheat list(*.cht)\0*.cht\0";
+	const char filter[]="PSXjin cheat list(*.cht)\0*.cht\0";
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
@@ -30,7 +30,7 @@ static void LoadCheatFile(char nameo[2048])
 
 static void SaveCheatFile(char nameo[2048])
 {
-	const char filter[]="PCSX cheat list(*.cht)\0*.cht\0";
+	const char filter[]="PSXjin cheat list(*.cht)\0*.cht\0";
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
@@ -555,7 +555,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					ListView_DeleteItem(GetDlgItem(hwndDlg, IDC_CHEAT_LIST), 0);
 				}
 
-				PCSXLoadCheatFile(nameo);
+				PSXjinLoadCheatFile(nameo);
 				ct.index=(int*)malloc(sizeof(int)*Cheat.num_cheats);
 				ct.state=(DWORD*)malloc(sizeof(DWORD)*Cheat.num_cheats);
 
@@ -602,9 +602,9 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				}
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
-					GPUdisplayText(_("*PCSX*: Cheats Enabled"));
+					GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
 				}
-				PCSXApplyCheats();
+				PSXjinApplyCheats();
 				break;
 			}
 
@@ -640,7 +640,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 										LV_ITEM lvi;
 										
 										if(Cheat.c[l].enabled)
-											PCSXDisableCheat(l);
+											PSXjinDisableCheat(l);
 										
 										ZeroMemory(&lvi, sizeof(LV_ITEM));
 										lvi.iItem= k;
@@ -678,7 +678,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 										Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),ct.index[l]);
 										
 										if(Cheat.c[l].enabled)
-											PCSXEnableCheat(l);
+											PSXjinEnableCheat(l);
 									}
 								}
 							}
@@ -715,7 +715,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 							
 							enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),k);
 							
-							PCSXAddCheat(enabled,1,address,byte);
+							PSXjinAddCheat(enabled,1,address,byte);
 							
 							ZeroMemory(&lvi, sizeof(LV_ITEM));
 							lvi.iItem= k;
@@ -734,11 +734,11 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					{
 						if(ct.state[l]==Deleted)
 						{
-							PCSXDeleteCheat(l);
+							PSXjinDeleteCheat(l);
 						}
 					}
 				}
-				PCSXSaveCheatFile(nameo);
+				PSXjinSaveCheatFile(nameo);
 				break;
 			}
 
@@ -768,7 +768,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 									LV_ITEM lvi;
 
 									if(Cheat.c[l].enabled)
-										PCSXDisableCheat(l);
+										PSXjinDisableCheat(l);
 									
 									ZeroMemory(&lvi, sizeof(LV_ITEM));
 									lvi.iItem= k;
@@ -806,7 +806,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 									Cheat.c[l].enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),ct.index[l]);
 									
 									if(Cheat.c[l].enabled)
-										PCSXEnableCheat(l);
+										PSXjinEnableCheat(l);
 								}
 							}
 						}
@@ -843,7 +843,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 						
 						enabled=ListView_GetCheckState(GetDlgItem(hwndDlg, IDC_CHEAT_LIST),k);
 						
-						PCSXAddCheat(enabled,1,address,byte);
+						PSXjinAddCheat(enabled,1,address,byte);
 						
 						ZeroMemory(&lvi, sizeof(LV_ITEM));
 						lvi.iItem= k;
@@ -862,15 +862,15 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				{
 					if(ct.state[l]==Deleted)
 					{
-						PCSXDeleteCheat(l);
+						PSXjinDeleteCheat(l);
 					}
 				}
 
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
-					GPUdisplayText(_("*PCSX*: Cheats Enabled"));
+					GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
 				}
-				PCSXApplyCheats();
+				PSXjinApplyCheats();
 			}
 
 			case IDCANCEL:

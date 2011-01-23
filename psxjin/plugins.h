@@ -132,7 +132,7 @@ void CALLBACK  GPUshowInput(void);
 void CALLBACK  GPUshowALL(void);
 long CALLBACK  GPUstartAvi(char* filename);
 long CALLBACK  GPUstopAvi(void);
-long CALLBACK  GPUsendFpLuaGui(void (*fpPCSX_LuaGui)(void *,int,int,int,int));
+long CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
 ////plugin stuff From Shadow
 //// *** walking in the valley of your darking soul i realize that i was alone

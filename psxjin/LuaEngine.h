@@ -18,28 +18,28 @@ enum LuaCallID
 };
 void CallRegisteredLuaFunctions(int calltype);
 
-//void PCSX_LuaWrite(uint32 addr);
-void PCSX_LuaFrameBoundary();
-int PCSX_LoadLuaCode(const char *filename);
-void PCSX_ReloadLuaCode();
-void PCSX_LuaStop();
-int PCSX_LuaRunning();
+//void PSXjin_LuaWrite(uint32 addr);
+void PSXjin_LuaFrameBoundary();
+int PSXjin_LoadLuaCode(const char *filename);
+void PSXjin_ReloadLuaCode();
+void PSXjin_LuaStop();
+int PSXjin_LuaRunning();
 
-int PCSX_LuaUsingJoypad(int);
-uint32 PCSX_LuaReadJoypad(int);
-int PCSX_LuaUsingAnalogJoy(int);
-LuaAnalogJoy* PCSX_LuaReadAnalogJoy(int);
-int PCSX_LuaSpeed();
-//int PCSX_LuaFrameskip();
-int PCSX_LuaRerecordCountSkip();
+int PSXjin_LuaUsingJoypad(int);
+uint32 PSXjin_LuaReadJoypad(int);
+int PSXjin_LuaUsingAnalogJoy(int);
+LuaAnalogJoy* PSXjin_LuaReadAnalogJoy(int);
+int PSXjin_LuaSpeed();
+//int PSXjin_LuaFrameskip();
+int PSXjin_LuaRerecordCountSkip();
 
-void PCSX_LuaGui(void *s, int width, int height, int bpp, int pitch);
+void PSXjin_LuaGui(void *s, int width, int height, int bpp, int pitch);
 
-void PCSX_LuaWriteInform();
+void PSXjin_LuaWriteInform();
 
-void PCSX_LuaClearGui();
-void PCSX_LuaEnableGui(uint8 enabled);
+void PSXjin_LuaClearGui();
+void PSXjin_LuaEnableGui(uint8 enabled);
 
-char* PCSX_GetLuaScriptName();
+char* PSXjin_GetLuaScriptName();
 
 #endif
