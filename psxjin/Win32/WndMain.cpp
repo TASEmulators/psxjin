@@ -751,14 +751,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 		}
-		case WM_INITMENU:						
-			RecentCDs.SetGUI_hWnd(gApp.hWnd);
-			RecentCDs.SetID(RECENTCD_START);
-			RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-			//RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
-			RecentCDs.MakeRecentMenu(gApp.hInstance);
-			break;
- 
+
 		case WM_ENTERMENULOOP:
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -806,9 +799,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				RecentCDs.ClearRecentItems();
 			}
 			switch (LOWORD(wParam)) {
-				case ID_RECENT_CLEAR:
-					RecentCDs.ClearRecentItems();
-					return TRUE;
 				case ID_RECENT_AUTO:
 					if (RecentCDs.autoload)
 						RecentCDs.autoload = false;
@@ -1924,9 +1914,9 @@ void CreateMainWindow(int nCmdShow) {
 	RecentCDs.SetGUI_hWnd(gApp.hWnd);
 	RecentCDs.SetID(RECENTCD_START);
 	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
-	
+	RecentCDs.SetType("CD");
 	RecentCDs.MakeRecentMenu(gApp.hInstance);
-	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
 	DragAcceptFiles(hWnd, 1);
 
 	ShowWindow(hWnd, nCmdShow);
@@ -1971,7 +1961,7 @@ void SaveIni()
 		WritePrivateProfileString("Watches", str, &rw_recent_files[i][0], Config.Conf_File);	
 	}
 
-	RecentCDs.SaveRecentItemsToIni(Config.Conf_File, "General", "CD");
+	RecentCDs.SaveRecentItemsToIni(Config.Conf_File, "General");
 }
 
 void LoadIni()
@@ -1996,7 +1986,7 @@ void LoadIni()
 		sprintf(str, "Recent Watch %d", i+1);
 		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
-	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General", "CD");
+	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
 }
 
 int SysInit() {
