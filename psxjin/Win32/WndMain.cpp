@@ -801,10 +801,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			else if (wParam == RecentCDs.GetAutoloadID())
 			{
-				if (RecentCDs.autoload)
-					RecentCDs.autoload = false;
-				else
-					RecentCDs.autoload = true;
+				RecentCDs.autoload ^= 1;
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
