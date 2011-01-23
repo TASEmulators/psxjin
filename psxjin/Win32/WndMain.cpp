@@ -75,7 +75,8 @@ int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
 int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
 int MainWindow_height = 240;
-const int MENUSIZE = 48;
+int MainWindow_menubar = 48;
+//const int MENUSIZE = 48;
 // Recent Menus
 RecentMenu RecentCDs;
 
@@ -114,7 +115,20 @@ int cheatsEnabled=0;
 int CancelQuit=0;
 int UseGui = 1;
 
+
 #define MAXFILENAME 256
+
+int GetMenuSize()
+{
+	POINT Point={0,0};
+	RECT Rect = {0,0};
+	ClientToScreen(gApp.hWnd,&Point);
+	GetWindowRect(gApp.hWnd,&Rect);
+	printf("%d %d %d\n",Point.y, Rect.top, Point.y-Rect.top);
+	MainWindow_menubar = Point.y-Rect.top;
+	return MainWindow_menubar;
+}
+
 
 void strcatz(char *dst, char *src) {
 	int len = strlen(dst) + 1;
@@ -637,7 +651,8 @@ void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRigh
 void UpdateWindowSizeFromConfig()
 {
 	MainWindow_width = GetPrivateProfileInt("GPU", "iResX", 320, Config.Conf_File);
-	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Config.Conf_File)+MENUSIZE;
+	MainWindow_menubar = GetPrivateProfileInt("GPU", "menubar", 48, Config.Conf_File);
+	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Config.Conf_File)+MainWindow_menubar;
 }
 
 void WriteWindowSizeToConfig()
@@ -645,8 +660,10 @@ void WriteWindowSizeToConfig()
 	char Str_Tmp[1024];
 	sprintf(Str_Tmp, "%d", MainWindow_width);
 	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Config.Conf_File);
-	sprintf(Str_Tmp, "%d", MainWindow_height-MENUSIZE);
+	sprintf(Str_Tmp, "%d", MainWindow_height-GetMenuSize());
 	WritePrivateProfileString("GPU", "iResY", Str_Tmp, Config.Conf_File);
+	sprintf(Str_Tmp, "%d", MainWindow_menubar);
+	WritePrivateProfileString("GPU", "menubar", Str_Tmp, Config.Conf_File);
 }
 
 void ResetGame()
@@ -873,26 +890,26 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 				case ID_EMULATOR_1X:
 					MainWindow_width = 320;
-					MainWindow_height = 240+MENUSIZE;
+					MainWindow_height = 240+GetMenuSize();
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 
 				case ID_EMULATOR_2X:
 					MainWindow_width = 640;
-					MainWindow_height = 480+MENUSIZE;
+					MainWindow_height = 480+GetMenuSize();
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 				case ID_EMULATOR_3X:
 					MainWindow_width = 960;
-					MainWindow_height = 720+MENUSIZE;
+					MainWindow_height = 720+GetMenuSize();
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 				case ID_EMULATOR_4X:
 					MainWindow_width = 1280;
-					MainWindow_height = 960+MENUSIZE;
+					MainWindow_height = 960+GetMenuSize();
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;

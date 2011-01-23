@@ -1277,6 +1277,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\gpu\res\gpu.bmp"
+			>
+		</File>
+		<File
 			RelativePath="..\PSEmu_Plugin_Defs.h"
 			>
 		</File>
