@@ -10,7 +10,8 @@ class RecentMenu
 {
 public:
 	static const unsigned int MAX_RECENT_ITEMS = 8;		//Max number of items that can be in the recent menu (this class will use MAX + 2 resource numbers, keep that in mind when reserving!)
-	
+	bool autoload;				//For auto-loading the most recent item
+
 	RecentMenu(int baseID, HWND GUI_hWnd, HINSTANCE instance, int menuItem); //Constructor - Needs a base ID to start building the menu item list
 	RecentMenu();
 
@@ -42,7 +43,7 @@ private:
 	int ClearID;				//Menu item for the clear list (will be one baseID + MAX
 	int menuItem;				//Which menu item to build the recent submenu off	
 	HWND GhWnd;					//Handle to the Windows GUI
-
+	
 	std::vector<std::string> RecentItems;	 //The list of recent filenames
 	HMENU recentmenu;						 //Handle to the recent ROMs submenu
 
