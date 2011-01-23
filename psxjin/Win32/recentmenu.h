@@ -22,6 +22,7 @@ public:
 	void SetID(int base);			 //Set the base & clear ID by giving the starting base ID for the menu items
 	void MakeRecentMenu(HINSTANCE instance);	//Creates the submenu using the HINSTANCE of the main app
 	int GetClearID();				 //Returns the menu item ID for the Clear menu item
+	int GetAutoloadID();			 //ID for the auto-load menu item
 
 	void UpdateRecentItems(std::string filename);	
 	void UpdateRecentItems(const char* filename);	//Overload

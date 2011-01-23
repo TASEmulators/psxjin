@@ -771,7 +771,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
-			CheckMenuItem(gApp.hMenu,ID_RECENT_AUTO,MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu,RecentCDs.GetAutoloadID(),MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
@@ -794,9 +794,18 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				RunCD(gApp.hWnd);
 				return TRUE;
 			}
-			if (wParam == RecentCDs.GetClearID())
+			else if (wParam == RecentCDs.GetClearID())
 			{
 				RecentCDs.ClearRecentItems();
+				return TRUE;
+			}
+			else if (wParam == RecentCDs.GetAutoloadID())
+			{
+				if (RecentCDs.autoload)
+					RecentCDs.autoload = false;
+				else
+					RecentCDs.autoload = true;
+				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
 				case ID_RECENT_AUTO:
