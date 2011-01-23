@@ -18,6 +18,7 @@ RecentMenu::RecentMenu()
 	GhWnd = 0;
 	ClearID = BaseID + MAX_RECENT_ITEMS;
 	recentmenu = 0;
+	rtype = "";
 }
 
 //**************************************************************
@@ -95,7 +96,7 @@ void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string sect
 			RecentItems.push_back(tempstr);
 	}
 
-	autoload = GetPrivateProfileInt(section.c_str(), "Autoload", 0, iniFilename.c_str());	//TODO: Don't just call it autoload, add type parameter to it
+	autoload = GetPrivateProfileInt(section.c_str(), autoloadstr.c_str(), 0, iniFilename.c_str());	//TODO: Don't just call it autoload, add type parameter to it
 	UpdateRecentItemsMenu();
 }
 
@@ -118,7 +119,8 @@ void RecentMenu::SaveRecentItemsToIni(std::string iniFilename, std::string secti
 	
 	char STR[8];
 	sprintf(STR, "%d", autoload);
-	WritePrivateProfileString(section.c_str(), "Autoload", STR, iniFilename.c_str());	//TODO: Don't just call it autoload, add type parameter to it
+	
+	WritePrivateProfileString(section.c_str(), autoloadstr.c_str(), STR, iniFilename.c_str());	//TODO: Don't just call it autoload, add type parameter to it
 
 }
 
@@ -139,6 +141,7 @@ std::string RecentMenu::GetRecentItem(unsigned int listNum)
 void RecentMenu::SetType(std::string type)
 {
 	rtype = type;
+	autoloadstr = "Autoload" + type;
 }
 
 std::string RecentMenu::GetType()
