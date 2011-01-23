@@ -46,6 +46,7 @@ private:
 	int menuItem;				//Which menu item to build the recent submenu off	
 	HWND GhWnd;					//Handle to the Windows GUI
 	std::string rtype;			//Type of recent files, will be used when saving to ini files
+	std::string autoloadstr;	//Name of autoload parameter saved to ini "Autoload" + rtype
 
 	std::vector<std::string> RecentItems;	 //The list of recent filenames
 	HMENU recentmenu;						 //Handle to the recent ROMs submenu
