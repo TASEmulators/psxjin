@@ -128,7 +128,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 int tempDest; //this is for the compiler to not throw in a million of warnings
-char * pConfigFile= ".\\psxjin.ini";
+char pConfigFile[MAX_PATH*2] = ".\\psxjin.ini";
 
 #ifndef _FPSE
 
