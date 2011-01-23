@@ -118,7 +118,7 @@ long CALLBACK ZN_GPUinit()
 
 // --------------------------------------------------- //
 
-extern char * pConfigFile;
+//extern char * pConfigFile;
 
 long CALLBACK ZN_GPUopen(void * vcfg)
 {
@@ -129,7 +129,7 @@ long CALLBACK ZN_GPUopen(void * vcfg)
 	if (cfg->Version!=1) return -1;
 
 #ifdef _WINDOWS
-	pConfigFile=(char *)cfg->CfgFile;                     // only used in this open, so we can store this temp pointer here without danger... don't access it later, though!
+	//pConfigFile=(char *)cfg->CfgFile;                     // only used in this open, so we can store this temp pointer here without danger... don't access it later, though!
 	lret=GPUopen((HWND)cfg->hWnd);
 #else
 	lret=GPUopen(&cfg->hWnd,cfg->GameName,cfg->CfgFile);
