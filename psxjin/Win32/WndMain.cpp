@@ -805,7 +805,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return true;
 				case ID_FILE_CLOSE_CD:
 					strcpy(IsoFile, "");
-					iCallW32Gui = 1;
+//					iCallW32Gui = 1;
 					break;
 
 				case ID_FILE_SCREENSHOT:
@@ -911,11 +911,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_CONFIGURATION_MEMPOKE:
 						CreateMemPoke();
 					return TRUE;
-/*
-				case ID_CONFIGURATION_MEMSEARCH:
-						CreateMemSearch();
-					return TRUE;
-*/
+
 				case ID_CONFIGURATION_CHEATS:
 						PCSXRemoveCheats();
 						CreateCheatEditor();
