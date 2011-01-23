@@ -34,8 +34,6 @@
 #define IDD_PROMPT                      140
 #define IDR_RWACCELERATOR               141
 #define IDD_LUA                         142
-#define IDR_MENU2                       143
-#define RECENT_ROMS                     143
 #define IDC_ISOFILE                     1000
 #define IDC_EDIT2                       1001
 #define IDC_SELECTISO                   1001
@@ -372,6 +370,8 @@
 #define IDC_IS_TEXT                     1324
 #define IDC_USE_BINARY                  1324
 #define IDC_C_WATCH_SEPARATE            1999
+#define ID_RECENT_CLEAR                 39900
+#define ID_RECENT_AUTO                  39901
 #define ID_EMULATOR_DISPFRAMECOUNTER    39995
 #define ID_EMULATOR_1X                  39996
 #define ID_EMULATOR_2X                  39997
@@ -416,7 +416,6 @@
 #define ID_FILE_RECORD_MOVIE            40044
 #define ID_RECENT_NONE                  40044
 #define ID_FILE_REPLAY_MOVIE            40045
-#define ID_RECENT_CLEAR                 40045
 #define ID_FILE_STOP_MOVIE              40046
 #define ID_START_CAPTURE                40047
 #define ID_END_CAPTURE                  40048
@@ -509,7 +508,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        144
-#define _APS_NEXT_COMMAND_VALUE         40046
+#define _APS_NEXT_COMMAND_VALUE         40047
 #define _APS_NEXT_CONTROL_VALUE         1325
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

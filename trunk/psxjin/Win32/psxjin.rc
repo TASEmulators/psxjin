@@ -377,9 +377,9 @@ RECENTROMS MENU
 BEGIN
     POPUP "Recent"
     BEGIN
-        MENUITEM "None",                        ID_RECENT_NONE
         MENUITEM SEPARATOR
         MENUITEM "Clear",                       ID_RECENT_CLEAR
+        MENUITEM "Auto-load",                   ID_RECENT_AUTO
     END
 END
 
