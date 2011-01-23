@@ -124,8 +124,7 @@ int GetMenuSize()
 	RECT Rect = {0,0};
 	ClientToScreen(gApp.hWnd,&Point);
 	GetWindowRect(gApp.hWnd,&Rect);
-	printf("%d %d %d\n",Point.y, Rect.top, Point.y-Rect.top);
-	MainWindow_menubar = Point.y-Rect.top;
+	MainWindow_menubar = Point.y-Rect.top+1;
 	return MainWindow_menubar;
 }
 
