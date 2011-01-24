@@ -371,6 +371,7 @@
 #define IDC_USE_BINARY                  1324
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_RECENT_CLEAR                 39900
+#define ID_FILE_RECENT_MOVIE			39993
 #define ID_EMULATOR_DISPALL             39994
 #define ID_EMULATOR_DISPFRAMECOUNTER    39995
 #define ID_EMULATOR_1X                  39996
