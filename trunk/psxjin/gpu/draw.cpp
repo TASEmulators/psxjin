@@ -5188,13 +5188,13 @@ unsigned long ulInitDisplay(void)
 
 	if (iWindowMode)                                      // win mode?
 	{
-/*
+
 		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style		//TODO: why any of this?
 		dwGPUStyle=dw;
 		dw&=~WS_THICKFRAME;
 		dw|=WS_BORDER|WS_CAPTION;
 		SetWindowLong(hWGPU, GWL_STYLE, dw);
-*/	//adelikat: We want to just keep the window style the same as it was, thanks
+
 		ShowWindow(hWGPU,SW_SHOWNORMAL);
 
 		if (iUseScanLines)
