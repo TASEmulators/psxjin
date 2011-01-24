@@ -134,7 +134,6 @@ typedef struct {
 	long HLE;
 	long PsxOut;
 	long RCntFix;
-	long UseNet;
 	long VSyncWA;
 	long PauseAfterPlayback;
 	char Conf_File[256];

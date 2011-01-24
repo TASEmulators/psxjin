@@ -117,7 +117,7 @@ void sioWrite8(unsigned char value) {
 		case 1: SIO_INT();
 			if ((value&0x40) == 0x40) {
 				padst = 2; parp = 1;
-				if (!Config.UseNet) {
+				
 					switch (CtrlReg&0x2002) {
 						case 0x0002:
 							buf[parp] = PAD1_poll(value);
@@ -126,9 +126,7 @@ void sioWrite8(unsigned char value) {
 							buf[parp] = PAD2_poll(value);
 							break;
 					}
-				}/* else {
-//					SysPrintf("%x: %x, %x, %x, %x\n", CtrlReg&0x2002, buf[2], buf[3], buf[4], buf[5]);
-				}*/
+				
 
 				if (!(buf[parp] & 0x0f)) {
 					bufcount = 2 + 32;
@@ -155,12 +153,11 @@ void sioWrite8(unsigned char value) {
 				SIO_INT();
 				return;
 			}*/
-			if (!Config.UseNet) {
+			
 				switch (CtrlReg&0x2002) {
 					case 0x0002: buf[parp] = PAD1_poll(value); break;
 					case 0x2002: buf[parp] = PAD2_poll(value); break;
-				}
-			}
+				}		
 
 			if (parp == bufcount) { padst = 0; return; }
 			SIO_INT();
@@ -244,35 +241,12 @@ void sioWrite8(unsigned char value) {
 	switch (value) {
 		case 0x01: // start pad
 			StatReg |= RX_RDY;		// Transfer is Ready
-
-			if (!Config.UseNet) {
+			
 				switch (CtrlReg&0x2002) {
 					case 0x0002: buf[0] = PAD1_startPoll(1); break;
 					case 0x2002: buf[0] = PAD2_startPoll(2); break;
-				}
-			} else {
-				if ((CtrlReg & 0x2002) == 0x0002) {
-					int i, j;
-
-					PAD1_startPoll(1);
-					buf[0] = 0;
-					buf[1] = PAD1_poll(0x42);
-					if (!(buf[1] & 0x0f)) {
-						bufcount = 32;
-					} else {
-						bufcount = (buf[1] & 0x0f) * 2;
-					}
-					buf[2] = PAD1_poll(0);
-					i = 3;
-					j = bufcount;
-					while (j--) {
-						buf[i++] = PAD1_poll(0);
-					}
-					bufcount+= 3;
-				} else {
-					memcpy(buf, buf+128, 32);
-				}
-			}
+				}			
+			
 
 			bufcount = 2;
 			parp = 0;
