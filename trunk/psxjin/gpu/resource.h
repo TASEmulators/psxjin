@@ -133,6 +133,7 @@
 #define IDC_DEBUGMODE                   2082
 #define IDC_SSSPSXLIMIT                 2083
 #define IDC_KKAPTURE                    2084
+#define IDD_RECORDING					2085
 
 // Next default values for new objects
 //
