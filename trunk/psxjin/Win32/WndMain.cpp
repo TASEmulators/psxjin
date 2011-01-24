@@ -793,6 +793,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					RecentLua.UpdateRecentItems(fileDropped);
 					PSXjin_LoadLuaCode(fileDropped.c_str());
 				}
+				else if (IsFileExtension(fileDropped, ".001") || IsFileExtension(fileDropped, ".002") || IsFileExtension(fileDropped, ".003") || 
+					IsFileExtension(fileDropped, ".004") || IsFileExtension(fileDropped, ".005") || IsFileExtension(fileDropped, ".006") ||
+					IsFileExtension(fileDropped, ".007") || IsFileExtension(fileDropped, ".008") || IsFileExtension(fileDropped, ".009") ||
+					IsFileExtension(fileDropped, ".010"))
+				{
+					strcpy(Str_Tmp, fileDropped.c_str());
+					LoadState(Str_Tmp);
+				}
 			}
 		}
 
