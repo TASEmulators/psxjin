@@ -377,3 +377,5 @@ extern int           iTileCheat;
 #endif
 
 
+
+void SetWindowSize(int dX, int dY);

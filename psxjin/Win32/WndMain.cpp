@@ -661,6 +661,16 @@ void UpdateWindowSizeFromConfig()
 	MainWindow_height = GetPrivateProfileInt("GPU", "iResY", 240, Config.Conf_File)+MainWindow_menubar;
 }
 
+void SetWindowSize(int dX, int dY)
+{
+	MainWindow_width = dX;
+	MainWindow_height = dY+MainWindow_menubar;
+	MoveWindow(gApp.hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
+}
+
+
+
+
 void WriteWindowSizeToConfig()
 {
 	char Str_Tmp[1024];

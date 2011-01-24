@@ -100,7 +100,6 @@
 #include "stdafx.h"
 
 #define _IN_DRAW
-
 #include "externals.h"
 #include "gpu.h"
 #include "draw.h"
@@ -3929,9 +3928,9 @@ void NoStretchedBlit(void)
 	static int iOldDX=0;
 	static int iOldDY=0;
 
-	int iDX,iDY;
-	int iX=iResX-PreviousPSXDisplay.DisplayMode.x;
-	int iY=iResY-PreviousPSXDisplay.DisplayMode.y;
+	//int iDX,iDY;
+	int iDX=iResX-PreviousPSXDisplay.DisplayMode.x;
+	int iDY=iResY-PreviousPSXDisplay.DisplayMode.y;
 
 	/*
 	float fXS,fYS,fS;
@@ -3940,28 +3939,8 @@ void NoStretchedBlit(void)
 	if(fXS<fYS) fS=fXS; else fS=fYS;
 	*/
 
-	if (iX<0)
-	{
-		iX=0;
-		iDX=iResX;
-	}
-	else
-	{
-		iX=iX/2;
-		iDX=PreviousPSXDisplay.DisplayMode.x;
-	}
-
-	if (iY<0)
-	{
-		iY=0;
-		iDY=iResY;
-	}
-	else
-	{
-		iY=iY/2;
-		iDY=PreviousPSXDisplay.DisplayMode.y;
-	}
-
+	
+	
 	if (iOldDX!=iDX || iOldDY!=iDY)
 	{
 		DDBLTFX     ddbltfx;
@@ -3969,7 +3948,8 @@ void NoStretchedBlit(void)
 		ddbltfx.dwFillColor = 0x00000000;
 		IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
 		iOldDX=iDX;
-		iOldDY=iDY;
+		iOldDY=iDY;		
+		SetWindowSize(PreviousPSXDisplay.DisplayMode.x,PreviousPSXDisplay.DisplayMode.y);	
 	}
 
 	if (iWindowMode)
@@ -3977,18 +3957,16 @@ void NoStretchedBlit(void)
 		RECT ScreenRect,ViewportRect;
 		POINT Point={0,0};
 		ClientToScreen(DX.hWnd,&Point);
-		Point.x+=iX;
-		Point.y+=iY;
-
+	
 		ScreenRect.left     = Point.x;
 		ScreenRect.top      = Point.y;
-		ScreenRect.right    = iDX+Point.x;
-		ScreenRect.bottom   = iDY+Point.y;
+		ScreenRect.right    = PreviousPSXDisplay.DisplayMode.x+Point.x;
+		ScreenRect.bottom   = PreviousPSXDisplay.DisplayMode.y+Point.y;
 
 		ViewportRect.left   = 0;
 		ViewportRect.top    = 0;
-		ViewportRect.right  = iDX;
-		ViewportRect.bottom = iDY;
+		ViewportRect.right  = PreviousPSXDisplay.DisplayMode.x;
+		ViewportRect.bottom = PreviousPSXDisplay.DisplayMode.y;
 
 		WaitVBlank();
 		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
@@ -3996,7 +3974,7 @@ void NoStretchedBlit(void)
 	}
 	else
 	{
-		RECT ScreenRect,ViewportRect;
+		/*RECT ScreenRect,ViewportRect;
 
 		ScreenRect.left     = iX;
 		ScreenRect.top      = iY;
@@ -4010,7 +3988,7 @@ void NoStretchedBlit(void)
 
 		WaitVBlank();
 		IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSRender,&ViewportRect,
-		                       DDBLT_WAIT,NULL);
+		                       DDBLT_WAIT,NULL);*/
 	}
 	if (DX.DDSScreenPic) DisplayPic();
 }
