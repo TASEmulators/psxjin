@@ -1,4 +1,4 @@
- Pcsx - Pc Psx Emulator
+ PSXjin - Pc Psx Emulator
  ----------------------
 
 Contents
@@ -15,17 +15,17 @@ Contents
 1) General
    -------
 
-Pcsx is a PSX emulator. What that really means? It means that it emulates the
+PSXjin is a PSX emulator. What that really means? It means that it emulates the
 way that a PSX works and tries to translate PSX machine language to PC language.
 That is very hard to be done and we can't speak for 100% success in any time.
 The hardware would always be better than the software so if you wanna play games
-then better get a real PSX. Pcsx is capable to run most of the games, but a few
+then better get a real PSX. PSXjin is capable to run most of the games, but a few
 others still don't. We are working on it ;). The members of the team are very 
-advanced coders and they will continue the work on the Pcsx as far as they have 
+advanced coders and they will continue the work on the PSXjin as far as they have 
 enough time to work on it. Real life comes first and sometimes it is much more 
 demanding.
 
- The team of Pcsx
+ The team of PSXjin
 
 --------------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@ Cpu Options:
 Internal HLE Bios:
 -----------------
  If you select this instead of a regular bios (ie. "scph1001.bin")
- Pcsx will emulate the bios (this might not work in all cases but it is
+ PSXjin will emulate the bios (this might not work in all cases but it is
  quite advanced), you can try it and see which one works better, notice
  that the HLE bios might be faster than a regular one and may make some
  games work better.
@@ -164,20 +164,20 @@ Kazzuya   :for the great work on psemu,and for the XA decoder :)
 Calb      :for nice chats and coding hits ;)  We love you calb ;)
 Twin      :for the bot to #pcsx on efnet, for coding hints and and :)
 Lewpy     :Man this plugin is quite fast! 
-Psychojak :For beta testing Pcsx and donating a great amount of games to Shadow ;)
-JNS       :For adding PEC support to Pcsx
+Psychojak :For beta testing PSXjin and donating a great amount of games to Shadow ;)
+JNS       :For adding PEC support to PSXjin
 Antiloop  :Great coder :)
 Segu      :He knows what for :)
 Null      :He also knows :)
 Bobbi
-cdburnout :For putting Pcsx news to their site and for hosting..
+cdburnout :For putting PSXjin news to their site and for hosting..
 D[j]      :For hosting us ;)
 Now3d     :For nice chats,info and blabla :)
 Ricardo Diaz:Linux version may never have been released without his help
 Nuno felicio:Beta testing, suggestions and a portugues readme
 Shunt     :Coding hints and nice chats :)
-Taka      :Many fixes to Pcsx
-jang2k    :Lots of fixes to Pcsx :)
+Taka      :Many fixes to PSXjin
+jang2k    :Lots of fixes to PSXjin :)
 
 and last but not least:
 -----------------------

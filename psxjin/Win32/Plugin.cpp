@@ -1,5 +1,5 @@
-/*  Pcsx - Pc Psx Emulator
- *  Copyright (C) 1999-2003  Pcsx Team
+/*  PSXjin - Pc Psx Emulator
+ *  Copyright (C) 1999-2003  PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -711,7 +711,7 @@ bool OpenPlugins(HWND hWnd) {
 	if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancels the open file dialog
 	if (ret < 0) {/* SysMessage (_("Error Opening CDR Plugin"));*/ return false; }
 
-	SetCurrentDirectory(PcsxDir);
+	SetCurrentDirectory(PSXjinDir);
 	
 	ret = GPUopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
@@ -722,7 +722,7 @@ bool OpenPlugins(HWND hWnd) {
 	ret = PAD2_open(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); return false; }
 
-	SetCurrentDirectory(PcsxDir);
+	SetCurrentDirectory(PSXjinDir);
 //	ShowCursor(FALSE);
 	GPUsendFpLuaGui(PSXjin_LuaGui);
 	return true;

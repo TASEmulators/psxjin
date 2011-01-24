@@ -1,4 +1,4 @@
-To do for Pcsx:
+To do for PSXjin:
  * Add reg caching code for the recompiler.
  * Continue Bios emulation. (linuzappz)
  * Fix CdRom code. (linuzappz)

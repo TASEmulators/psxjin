@@ -84,7 +84,7 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	char szFramesString[32];
 	char szLengthString[32];
 	char szUndoCountString[32];
-	char szPcsxVersion[32];
+	char szPSXjinVersion[32];
 	char szStartFrom[128];
 	char szUsedCdrom[10];
 	char szExtras[128];
@@ -161,14 +161,14 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	sprintf(szFramesString, "%lu", dataMovie.totalFrames);
 	sprintf(szLengthString, "%02d:%02d:%02d", nHours, nMinutes % 60, nSeconds % 60);
 	sprintf(szUndoCountString, "%lu", dataMovie.rerecordCount);
-	sprintf(szPcsxVersion,"%3.3lu",dataMovie.emuVersion);
-	sprintf(szPcsxVersion,"PSXJIN v%c.%c.%c",szPcsxVersion[0],szPcsxVersion[1],szPcsxVersion[2]);
+	sprintf(szPSXjinVersion,"%3.3lu",dataMovie.emuVersion);
+	sprintf(szPSXjinVersion,"PSXJIN v%c.%c.%c",szPSXjinVersion[0],szPSXjinVersion[1],szPSXjinVersion[2]);
 
 	//write strings to dialog
 	SetDlgItemTextA(hDlg, IDC_LENGTH, szLengthString);
 	SetDlgItemTextA(hDlg, IDC_FRAMES, szFramesString);
 	SetDlgItemTextA(hDlg, IDC_UNDO, szUndoCountString);
-	SetDlgItemTextA(hDlg, IDC_EMUVERSION, szPcsxVersion);
+	SetDlgItemTextA(hDlg, IDC_EMUVERSION, szPSXjinVersion);
 	SetDlgItemTextA(hDlg, IDC_METADATA, dataMovie.authorInfo);
 
 	//start from?

@@ -1,5 +1,5 @@
-/*  Pcsx - Pc Psx Emulator
- *  Copyright (C) 1999-2003  Pcsx Team
+/*  PSXjin - Pc Psx Emulator
+ *  Copyright (C) 1999-2003  PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ extern int NeedReset;
 extern int ConfPlug;
 extern int CancelQuit;
 extern int Running;
-extern char PcsxDir[256];
+extern char PSXjinDir[256];
 
 LRESULT WINAPI MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -1,5 +1,5 @@
-/*  Pcsx - Pc Psx Emulator
- *  Copyright (C) 1999-2003  Pcsx Team
+/*  PSXjin - Pc Psx Emulator
+ *  Copyright (C) 1999-2003  PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ HANDLE hConsole;
 long LoadCdBios;
 int Running;
 int Continue=0;
-char PcsxDir[256];
+char PSXjinDir[256];
 bool AVIisCapturing = false;
 
 //TODO: remove me and use the gpu ones!
@@ -287,9 +287,9 @@ int main(int argc, char **argv) {
 
 	Running=0;
 
-	GetCurrentDirectory(256, PcsxDir);
+	GetCurrentDirectory(256, PSXjinDir);
 
-	memset(&Config, 0, sizeof(PcsxConfig));
+	memset(&Config, 0, sizeof(psxjinconfig));
 	strcpy(Config.Net, "Disabled");
 	sprintf(Config.PluginsDir, "%splugins\\", szCurrentPath);
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);

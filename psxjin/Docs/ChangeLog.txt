@@ -30,7 +30,7 @@ ChageLog:
  * Fixed a buf within the recompiler, it now counts better 
    the ops by block (linuzappz)
 
- * Pcsx now compiles without a recompiler ;) (linuzappz)
+ * PSXjin now compiles without a recompiler ;) (linuzappz)
 
  * Added code for NULL pointers with PSXM (linuzappz)
 
@@ -38,7 +38,7 @@ ChageLog:
 
  * Implemented SWL/SWR in iR3000A.c (linuzappz)
 
- * Pcsx is now compilable on mingw, thanks to yokota (linuzappz)
+ * PSXjin is now compilable on mingw, thanks to yokota (linuzappz)
 
  * Fixed small bug on SLTIU, PsxInterpreter.c (linuzappz)
 
@@ -138,7 +138,7 @@ ChageLog:
  * CVGS Mcds now are detected by file size, also fixes to SaveMcd,
    and added support for .gme mcds, Sio.c, thanks to jang2k (linuzappz)
 
- * Fixed Pcsx title for some win32, small fix in Gte.c, and added
+ * Fixed PSXjin title for some win32, small fix in Gte.c, and added
    icons for win32 mcd dlg (still unanimated), WndMain.c, 
    thanks to jang2k (linuzappz)
 
