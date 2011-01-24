@@ -27,7 +27,6 @@ extern "C" {
 #include "Win32/resource.h"
 #endif
 #include "LuaEngine.h"
-#include "recentmenu.h"
 
 #ifndef TRUE
 #define TRUE 1
@@ -3268,7 +3267,7 @@ void PSXjin_LuaFrameBoundary() {
  * Returns true on success, false on failure.
  */
 
-extern RecentMenu RecentLua;
+
 int PSXjin_LoadLuaCode(const char *filename) {
 	lua_State *thread;
 	int result;
@@ -3283,7 +3282,6 @@ int PSXjin_LoadLuaCode(const char *filename) {
 		luaScriptName = strdup(filename);
 	}
 
-	//RecentLua.UpdateRecentItems(filename);
 	// Set current directory from filename (for dofile)
 	strcpy(dir, filename);
 	slash = strrchr(dir, '/');

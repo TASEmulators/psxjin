@@ -5,6 +5,9 @@
 #endif
 
 #include "resource.h"
+#include "recentmenu.h"
+
+extern RecentMenu RecentLua;
 
 HWND LuaConsoleHWnd = NULL;
 HFONT hFont = NULL;
@@ -236,6 +239,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 			{
 				char filename[MAX_PATH];
 				GetDlgItemText(hDlg, IDC_EDIT_LUAPATH, filename, MAX_PATH);
+				RecentLua.UpdateRecentItems(filename);
 				PSXjin_LoadLuaCode(filename);
 			}	break;
 
