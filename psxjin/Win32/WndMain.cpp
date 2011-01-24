@@ -2022,8 +2022,6 @@ void LoadIni()
 		sprintf(str, "Recent Watch %d", i+1);
 		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
-	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
-	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
 }
 
 int SysInit() {
