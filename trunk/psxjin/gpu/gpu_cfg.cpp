@@ -747,7 +747,7 @@ BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void OnRecording(HWND hW)
 {
-	DialogBox(hInst,MAKEINTRESOURCE(IDD_GPURECORDING),
+	DialogBox(hInst,MAKEINTRESOURCE(IDD_RECORDING),
 	          hW,(DLGPROC)RecordingDlgProc);
 
 }
