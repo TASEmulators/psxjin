@@ -35,7 +35,7 @@ int RecentMenu::GetAutoloadID()
 void RecentMenu::SetID(int base)
 {
 	BaseID = base;
-	//ClearID = ClearID = BaseID + MAX_RECENT_ITEMS;
+	ClearID = BaseID + MAX_RECENT_ITEMS;
 }
 
 void RecentMenu::SetGUI_hWnd(HWND GUI_hWnd)
@@ -229,7 +229,6 @@ void RecentMenu::UpdateRecentItemsMenu()
 	moo.fMask = MIIM_SUBMENU | MIIM_STATE;
 
 	GetMenuItemInfo(GetSubMenu(GetMenu(GhWnd), 0), menuItem, FALSE, &moo);
-//	moo.hSubMenu = GetSubMenu(recentmenu, 0);
 	moo.hSubMenu = recentmenu;
 	moo.fState = MFS_ENABLED;
 	SetMenuItemInfo(GetSubMenu(GetMenu(GhWnd), 0), menuItem, FALSE, &moo);
