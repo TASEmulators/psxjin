@@ -1908,6 +1908,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Online Tutorial"), ID_HELP_TUTORIAL);
 }
 
+void gpu_ReadConfig(void);
+
 void CreateMainWindow(int nCmdShow) {
 	WNDCLASS wc;
 	HWND hWnd;
@@ -1927,7 +1929,7 @@ void CreateMainWindow(int nCmdShow) {
 	wc.cbWndExtra = 0;
 
 	RegisterClass(&wc);
-
+	gpu_ReadConfig();
 	UpdateWindowSizeFromConfig();
 
 	hWnd = CreateWindow("PSXjin Main",
