@@ -40,17 +40,17 @@ FILE *emuLog;
 int Log = 0;
 
 char *LabelAuthors = { N_(
-	"PSXjin a open source rerecording psx emulator using PSXjin core\n\n"
+	"PSXjin a open source rerecording PlayStation emulator\n based on a the PCSX core\n\n"
 	"http://code.google.com/p/psxjin/\n"
 	"http://tasvideos.org/\n"
 };
 
 char *LabelGreets = { N_(
-	"original PSXjin written by:\n"
-	"main coder: linuzappz\n"
-	"co-coders: shadow\n"
-	"ex-coders: Nocomp, Pete Bernett, nik3d\n"
-	"Webmaster: AkumaX"))
+	"PSXjin was written by:\n"
+	"PCSX coders: linuzappz, shadow\n"
+	"main TAS coders: zeromus, adelikat"
+	"extra coders: DarkKobold\n"
+	"Tester: arukAdo"))
 };
 
 

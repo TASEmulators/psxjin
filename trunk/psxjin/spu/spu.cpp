@@ -1,6 +1,6 @@
 //spu.cpp
 //original (C) 2002 by Pete Bernert
-//nearly entirely rewritten for pcsxrr by zeromus
+//nearly entirely rewritten for PSXjin by zeromus
 //original changelog is at end of file, for reference
 
 //This program is free software; you can redistribute it and/or modify
