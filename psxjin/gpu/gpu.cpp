@@ -428,7 +428,6 @@ void DoTextSnapShot(int iNum)
 void CALLBACK GPUmakeSnapshot(void)
 {
 	makeNormalSnapshotPNG();
-	GPUdisplayText("Your mom!!!!");
 }
 
 void makeNormalSnapshotPNG(void)                    // snapshot of current screen
