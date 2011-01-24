@@ -321,7 +321,27 @@ int main(int argc, char **argv) {
 	CreateMainWindow(SW_SHOW);
 
 	PSXjinInitCheatData();
-		
+
+	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
+	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
+	char Str[MAX_PATH];
+	
+	//adelikat
+	//Set IsoFile, then load movie, then Run Iso, seems messy but it is the easiest way to deal with how these functions are implemented
+
+	if (runcd == 1 || runcd == 2)
+		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
+	else if (RecentCDs.autoload)
+		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
+
+	if (loadMovie)
+		WIN32_StartMovieReplay(szMovieToLoad);
+	else if (RecentMovies.autoload)
+	{
+		strcpy(Str, RecentMovies.GetRecentItem(0).c_str());
+		WIN32_StartMovieReplay(Str);
+	}
+
 	//process some command line options
 	if (runcd == 1 || runcd == 2)
 	{
@@ -334,15 +354,7 @@ int main(int argc, char **argv) {
 		RunCD(gApp.hWnd);
 	}
 	
-	//TODO: figure out a way for this block to run when a game is opened!  Currently RunCD bypasses all this and goes to the main message loop
-	char Str[MAX_PATH];
-	if (loadMovie)
-		WIN32_StartMovieReplay(szMovieToLoad);
-	else if (RecentMovies.autoload)
-	{
-		strcpy(Str, RecentMovies.GetRecentItem(0).c_str());
-		WIN32_StartMovieReplay(Str);
-	}
+
 
 	if (AutoRWLoad)
 		RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
