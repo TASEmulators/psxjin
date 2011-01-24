@@ -51,6 +51,7 @@
 
 const int RECENTCD_START = 65000;
 const int RECENTMOVIE_START = 65020;
+const int RECENTLUA_START = 65040;
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -84,6 +85,7 @@ int MainWindow_menubar = 48;
 // Recent Menus
 RecentMenu RecentCDs;
 RecentMenu RecentMovies;
+RecentMenu RecentLua;
 
 extern bool OpenPlugins(HWND hWnd);
 
@@ -252,7 +254,7 @@ int main(int argc, char **argv) {
 	char runcd=0;
 	char loadMovie=0;
 	int i;
-
+	bool luaLoaded = false;
 	printf ("PSXjin\n");
 
 	argv = CommandLineToArgvA(GetCommandLine(), &argc);
@@ -274,6 +276,7 @@ int main(int argc, char **argv) {
 			sprintf(Movie.wavFilename,"%s",argv[++i]);
 		}
 		else if (!strcmp(argv[i], "-lua")) {
+			luaLoaded = true;
 			PSXjin_LoadLuaCode(argv[++i]);
 		}
 		else if (!strcmp(argv[i], "-stopcapture"))
@@ -324,8 +327,14 @@ int main(int argc, char **argv) {
 
 	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
 	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
+	RecentLua.GetRecentItemsFromIni(Config.Conf_File, "General");
+
 	char Str[MAX_PATH];
 	
+
+	if (!luaLoaded && RecentLua.autoload) //If lua wasn't loaded from command line (commandline should override autoload parameters)
+			PSXjin_LoadLuaCode(RecentLua.GetRecentItem(0).c_str());
+
 	//adelikat
 	//Set IsoFile, then load movie, then Run Iso, seems messy but it is the easiest way to deal with how these functions are implemented
 
@@ -781,6 +790,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 				else if (IsFileExtension(fileDropped, ".lua"))
 				{
+					RecentLua.UpdateRecentItems(fileDropped);
 					PSXjin_LoadLuaCode(fileDropped.c_str());
 				}
 			}
@@ -805,8 +815,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
-			CheckMenuItem(gApp.hMenu,RecentCDs.GetAutoloadID(),MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
-			CheckMenuItem(gApp.hMenu,RecentMovies.GetAutoloadID(),MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu,RecentCDs.GetAutoloadID(),MF_BYCOMMAND		| (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu,RecentMovies.GetAutoloadID(),MF_BYCOMMAND  | (RecentMovies.autoload ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu,RecentLua.GetAutoloadID(),MF_BYCOMMAND		| (RecentLua.autoload ? MF_CHECKED:MF_UNCHECKED));
+
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
@@ -855,6 +867,22 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			else if (wParam == RecentMovies.GetAutoloadID())
 			{
 				RecentMovies.autoload ^= 1;
+				return TRUE;
+			}
+			//Recent Lua
+			if(wParam >= RECENTLUA_START && wParam <= RECENTLUA_START + RecentLua.MAX_RECENT_ITEMS - 1)
+			{
+				PSXjin_LoadLuaCode(RecentLua.GetRecentItem(wParam - RECENTLUA_START).c_str());
+				return TRUE;
+			}
+			else if (wParam == RecentLua.GetClearID())
+			{
+				RecentLua.ClearRecentItems();
+				return TRUE;
+			}
+			else if (wParam == RecentLua.GetAutoloadID())
+			{
+				RecentLua.autoload ^= 1;
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
@@ -1876,6 +1904,7 @@ void CreateMainMenu() {
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
+	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
 	ADDSUBMENUS(0, 1, _("&Movie"));
 
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
@@ -1982,6 +2011,13 @@ void CreateMainWindow(int nCmdShow) {
 	RecentMovies.MakeRecentMenu(gApp.hInstance);
 	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
 	
+	RecentLua.SetGUI_hWnd(gApp.hWnd);
+	RecentLua.SetID(RECENTLUA_START);
+	RecentLua.SetMenuID(ID_FILE_RECENT_LUA);
+	RecentLua.SetType("Lua");
+	RecentLua.MakeRecentMenu(gApp.hInstance);
+	RecentLua.GetRecentItemsFromIni(Config.Conf_File, "General");
+
 	DragAcceptFiles(hWnd, 1);
 
 	ShowWindow(hWnd, nCmdShow);
@@ -2028,6 +2064,7 @@ void SaveIni()
 
 	RecentCDs.SaveRecentItemsToIni(Config.Conf_File, "General");
 	RecentMovies.SaveRecentItemsToIni(Config.Conf_File, "General");
+	RecentLua.SaveRecentItemsToIni(Config.Conf_File, "General");
 }
 
 void LoadIni()
