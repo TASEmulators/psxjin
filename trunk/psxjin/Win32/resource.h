@@ -70,7 +70,7 @@
 #define IDC_CDDA                        1013
 #define IDC_RECORDMODE                  1013
 #define IDC_CLOSE                       1014
-#define IDC_PSXjin_ABOUT_TEXT             1014
+#define IDC_PSXjin_ABOUT_TEXT           1014
 #define IDC_PSXOUT                      1014
 #define IDC_DISSTEREO                   1014
 #define IDC_ASM_SCROLL                  1015
@@ -111,9 +111,9 @@
 #define IDC_LIST2                       1028
 #define IDC_CONNECTSTR                  1028
 #define IDC_ASMCHECK15                  1029
-#define IDC_PSXjin_ABOUT_AUTHORS          1029
+#define IDC_PSXjin_ABOUT_AUTHORS        1029
 #define IDC_ASMCHECK16                  1030
-#define IDC_PSXjin_ABOUT_GREETS           1030
+#define IDC_PSXjin_ABOUT_GREETS         1030
 #define IDC_ASMCHECK17                  1031
 #define IDC_SELPSX                      1031
 #define IDC_ASMCHECK18                  1032
@@ -371,8 +371,7 @@
 #define IDC_USE_BINARY                  1324
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_RECENT_CLEAR                 39900
-#define ID_RECENT_AUTO                  39901
-#define ID_EMULATOR_DISPALL			    39994
+#define ID_EMULATOR_DISPALL             39994
 #define ID_EMULATOR_DISPFRAMECOUNTER    39995
 #define ID_EMULATOR_1X                  39996
 #define ID_EMULATOR_2X                  39997

@@ -373,14 +373,6 @@ BEGIN
     END
 END
 
-RECENTROMS MENU 
-BEGIN
-    POPUP "Recent"
-    BEGIN
-        MENUITEM SEPARATOR
-    END
-END
-
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
