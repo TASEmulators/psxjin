@@ -334,9 +334,15 @@ int main(int argc, char **argv) {
 		RunCD(gApp.hWnd);
 	}
 	
-
+	//TODO: figure out a way for this block to run when a game is opened!  Currently RunCD bypasses all this and goes to the main message loop
+	char Str[MAX_PATH];
 	if (loadMovie)
 		WIN32_StartMovieReplay(szMovieToLoad);
+	else if (RecentMovies.autoload)
+	{
+		strcpy(Str, RecentMovies.GetRecentItem(0).c_str());
+		WIN32_StartMovieReplay(Str);
+	}
 
 	if (AutoRWLoad)
 		RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
