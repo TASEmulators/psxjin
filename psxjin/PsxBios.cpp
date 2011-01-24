@@ -2083,8 +2083,7 @@ void biosInterrupt() {
 //	if (psxHu32(0x1070) & 0x1) { // Vsync
 		if (pad_buf) {
 			u32 *buf = (u32*)pad_buf;
-
-			if (!Config.UseNet) {
+			
 				PAD1_startPoll(1);
 				if (PAD1_poll(0x42) == 0x23) {
 					PAD1_poll(0);
@@ -2111,29 +2110,17 @@ void biosInterrupt() {
 					PAD2_poll(0);
 					*buf|= PAD2_poll(0) << 24;
 					*buf|= PAD2_poll(0) << 16;
-				}
-			} else {
-				u16 data;
-
-				PAD1_startPoll(1);
-				PAD1_poll(0x42);
-				PAD1_poll(0);
-				data = PAD1_poll(0) << 8;
-				data|= PAD1_poll(0);
-			}
+				}			
 
 		}
-		if (Config.UseNet && pad_buf1 && pad_buf2) {
-			psxBios_PADpoll(1);
-		} else {
+		
 			if (pad_buf1) {
 				psxBios_PADpoll(1);
 			}
 
 			if (pad_buf2) {
 				psxBios_PADpoll(2);
-			}
-		}
+			}		
 
 	if (psxHu32(0x1070) & 0x1) { // Vsync
 		if (RcEV[3][1].status == EvStACTIVE) {
