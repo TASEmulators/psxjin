@@ -241,16 +241,14 @@ void RecentMenu::UpdateRecentItemsMenu()
 	{
 		DeleteMenu(recentmenu, BaseID + x, MF_BYCOMMAND);	
 	}
-	DeleteMenu(recentmenu, ClearID, MF_BYCOMMAND);
+	DeleteMenu(recentmenu, ClearID,   MF_BYCOMMAND);
 	DeleteMenu(recentmenu, ClearID+1, MF_BYCOMMAND);
+	DeleteMenu(recentmenu, ClearID+2, MF_BYCOMMAND);
 
 	if(RecentItems.size() == 0)
 	{
-		EnableMenuItem(recentmenu, ClearID, MF_GRAYED);
-
 		moo.cbSize = sizeof(moo);
 		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_TYPE;
-
 		moo.cch = 5;
 		moo.fType = 0;
 		moo.wID = ClearID+1;
@@ -266,6 +264,7 @@ void RecentMenu::UpdateRecentItemsMenu()
 		InsertMenuItem(recentmenu, 0, TRUE, &moo);
 
 		moo.fType = MFT_SEPARATOR;
+		moo.wID = ClearID+2;
 		InsertMenuItem(recentmenu, 0, TRUE, &moo);
 
 		moo.fType = 0;
@@ -286,13 +285,13 @@ void RecentMenu::UpdateRecentItemsMenu()
 	moo.dwTypeData = "Auto-load";
 	moo.fState = MF_ENABLED;
 	InsertMenuItem(recentmenu, 0, TRUE, &moo);
-	
+
 	moo.wID = ClearID;
 	moo.dwTypeData = "Clear";
-	moo.fState = MF_ENABLED;
 	InsertMenuItem(recentmenu, 0, TRUE, &moo);
 
 	moo.fType = MFT_SEPARATOR;
+	moo.wID = ClearID+2;
 	InsertMenuItem(recentmenu, 0, TRUE, &moo);
 
 	EnableMenuItem(recentmenu, ClearID, MF_ENABLED);
