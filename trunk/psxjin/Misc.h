@@ -1,5 +1,5 @@
-/*  Pcsx - Pc Psx Emulator
- *  Copyright (C) 1999-2003  Pcsx Team
+/*  PSXjin - Pc Psx Emulator
+ *  Copyright (C) 1999-2003  PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,8 +57,8 @@ int CheckState(char *file);
 int SaveStateEmbed(char *file);
 int LoadStateEmbed(char *file);
 
-int SendPcsxInfo();
-int RecvPcsxInfo();
+int SendPSXjinInfo();
+int RecvPSXjinInfo();
 
 extern char *LabelAuthors;
 extern char *LabelGreets;

@@ -1,5 +1,5 @@
-/*  Pcsx - Pc Psx Emulator
- *  Copyright (C) 1999-2003  Pcsx Team
+/*  PSXjin - Pc Psx Emulator
+ *  Copyright (C) 1999-2003  PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -137,9 +137,9 @@ typedef struct {
 	long VSyncWA;
 	long PauseAfterPlayback;
 	char Conf_File[256];
-} PcsxConfig;
+} psxjinconfig;
 
-extern PcsxConfig Config;
+extern psxjinconfig Config;
 
 extern long LoadCdBios;
 extern int StatesC;

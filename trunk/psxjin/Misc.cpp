@@ -1,5 +1,5 @@
-/*  Pcsx - Pc Psx Emulator
- *  Copyright (C) 1999-2003  Pcsx Team
+/*  PSXjin - Pc Psx Emulator
+ *  Copyright (C) 1999-2003  PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ int CDRisoFreeze(gzFile f, int Mode);
 // global variables
 char CdromId[10];
 char CdromLabel[33];
-PcsxConfig Config;
+psxjinconfig Config;
 FILE *emuLog;
 
 int Log = 0;
@@ -424,10 +424,10 @@ int Load(char *ExePath) {
 			if (psxRegs.GPR.n.sp == 0) psxRegs.GPR.n.sp = 0x801fff00;
 	        break;
     	case CPE_EXE:
-    		SysMessage(_("Pcsx found that you wanna use a CPE file. CPE files not supported"));
+    		SysMessage(_("PSXjin found that you wanna use a CPE file. CPE files not supported"));
 			break;
     	case COFF_EXE:
-    		SysMessage(_("Pcsx found that you wanna use a COFF file. COFF files not supported"));
+    		SysMessage(_("PSXjin found that you wanna use a COFF file. COFF files not supported"));
 			break;
     	case INVALID_EXE:
     		SysMessage(_("This file is not a psx file"));
@@ -442,7 +442,7 @@ int Load(char *ExePath) {
 #define gzread(x,y,z) fread(y,1,z,x)
 #define gzseek(x,y,z) fseek(x,y,z);
 
-const char PcsxHeader[32] = "STv3 PSXjin v" PCSX_VERSION;
+const char PSXjinHeader[32] = "STv3 PSXjin v" PCSX_VERSION;
 
 int SaveState(char *file) {
 	FILE* f;
@@ -453,7 +453,7 @@ int SaveState(char *file) {
 	f = fopen(file, "wb");
 	if (f == NULL) return -1;
 
-	gzwrite(f, (void*)PcsxHeader, 32);
+	gzwrite(f, (void*)PSXjinHeader, 32);
 
 	pMem = (unsigned char *) malloc(128*96*3);
 	if (pMem == NULL) return -1;
@@ -608,7 +608,7 @@ int SaveStateEmbed(char *file) {
 	f = fopen(file, "ab");
 	if (f == NULL) return -1;
 
-	gzwrite(f, (void*)PcsxHeader, 32);
+	gzwrite(f, (void*)PSXjinHeader, 32);
 
 	pMem = (unsigned char *) malloc(128*96*3);
 	if (pMem == NULL) return -1;
