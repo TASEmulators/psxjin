@@ -50,6 +50,7 @@
 #include "plugins.h"
 
 const int RECENTCD_START = 65000;
+const int RECENTMOVIE_START = 65020;
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -71,14 +72,18 @@ bool AVIisCapturing = false;
 int dispInput = 0;
 int dispFrameCounter = 0;
 int dispAllText = 0;
+//
+
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
 int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
 int MainWindow_height = 240;
 int MainWindow_menubar = 48;
 //const int MENUSIZE = 48;
+
 // Recent Menus
 RecentMenu RecentCDs;
+RecentMenu RecentMovies;
 
 extern bool OpenPlugins(HWND hWnd);
 
@@ -699,6 +704,7 @@ bool IsFileExtension(std::string filename, std::string ext)
 }
 
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	char Str_Tmp[1024];
 	switch (msg) {
 		case WM_DROPFILES:
 		{
@@ -772,6 +778,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
 			CheckMenuItem(gApp.hMenu,RecentCDs.GetAutoloadID(),MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu,RecentMovies.GetAutoloadID(),MF_BYCOMMAND   | (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
@@ -788,6 +795,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		case WM_COMMAND:
+			//Recent CDs
 			if(wParam >= RECENTCD_START && wParam <= RECENTCD_START + RecentCDs.MAX_RECENT_ITEMS - 1)
 			{
 				strcpy(IsoFile, RecentCDs.GetRecentItem(wParam - RECENTCD_START).c_str());
@@ -802,6 +810,23 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			else if (wParam == RecentCDs.GetAutoloadID())
 			{
 				RecentCDs.autoload ^= 1;
+				return TRUE;
+			}
+			//Recent Movies
+			if(wParam >= RECENTMOVIE_START && wParam <= RECENTMOVIE_START + RecentMovies.MAX_RECENT_ITEMS - 1)
+			{
+				strcpy(Str_Tmp, RecentMovies.GetRecentItem(wParam - RECENTMOVIE_START).c_str());
+				WIN32_StartMovieReplay(Str_Tmp);
+				return TRUE;
+			}
+			else if (wParam == RecentMovies.GetClearID())
+			{
+				RecentMovies.ClearRecentItems();
+				return TRUE;
+			}
+			else if (wParam == RecentMovies.GetAutoloadID())
+			{
+				RecentMovies.autoload ^= 1;
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
@@ -1828,6 +1853,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
+	ADDMENUITEM(1, _("Recent"), ID_FILE_RECENT_MOVIE);
 	ADDSEPARATOR(0);
 
 	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
@@ -1911,12 +1937,21 @@ void CreateMainWindow(int nCmdShow) {
 
 	CreateMainMenu();
 	SetMenu(gApp.hWnd, gApp.hMenu);
+	
 	RecentCDs.SetGUI_hWnd(gApp.hWnd);
 	RecentCDs.SetID(RECENTCD_START);
 	RecentCDs.SetMenuID(ID_FILE_RECENT_CD);
 	RecentCDs.SetType("CD");
 	RecentCDs.MakeRecentMenu(gApp.hInstance);
 	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
+	
+	RecentMovies.SetGUI_hWnd(gApp.hWnd);
+	RecentMovies.SetID(RECENTMOVIE_START);
+	RecentMovies.SetMenuID(ID_FILE_RECENT_MOVIE);
+	RecentMovies.SetType("Movie");
+	RecentMovies.MakeRecentMenu(gApp.hInstance);
+	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
+	
 	DragAcceptFiles(hWnd, 1);
 
 	ShowWindow(hWnd, nCmdShow);
@@ -1962,6 +1997,7 @@ void SaveIni()
 	}
 
 	RecentCDs.SaveRecentItemsToIni(Config.Conf_File, "General");
+	RecentMovies.SaveRecentItemsToIni(Config.Conf_File, "General");
 }
 
 void LoadIni()
@@ -1987,6 +2023,7 @@ void LoadIni()
 		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
 	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
+	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
 }
 
 int SysInit() {
@@ -2137,6 +2174,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 				return;
 			}
 			Running = 1;
+			RecentMovies.UpdateRecentItems(Movie.movieFilename);
 			MOV_StartMovie(MOVIEMODE_PLAY);
 			psxCpu->Execute();
 		}

@@ -24,6 +24,7 @@ HWND hMethod;
 int stop;
 
 extern RecentMenu RecentCDs;
+extern RecentMenu RecentMovies;
 
 void SysMessage(char *fmt, ...);
 //	va_list list;

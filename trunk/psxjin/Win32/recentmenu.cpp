@@ -284,7 +284,7 @@ void RecentMenu::UpdateRecentItemsMenu()
 	moo.cch = 5;
 	moo.fType = 0;
 	moo.wID = ClearID+1;
-	moo.dwTypeData = "Auto-laod";
+	moo.dwTypeData = "Auto-load";
 	moo.fState = MF_ENABLED;
 	InsertMenuItem(recentmenu, 0, TRUE, &moo);
 	
