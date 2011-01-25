@@ -278,6 +278,7 @@ int main(int argc, char **argv) {
 		}
 		else if (!strcmp(argv[i], "-lua")) {
 			luaLoaded = true;
+			RecentLua.UpdateRecentItems(argv[++i]);
 			PSXjin_LoadLuaCode(argv[++i]);
 		}
 		else if (!strcmp(argv[i], "-stopcapture"))
@@ -345,7 +346,9 @@ int main(int argc, char **argv) {
 		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
 
 	if (loadMovie)
+	{
 		WIN32_StartMovieReplay(szMovieToLoad);
+	}
 	else if (RecentMovies.autoload)
 	{
 		strcpy(Str, RecentMovies.GetRecentItem(0).c_str());
@@ -356,6 +359,7 @@ int main(int argc, char **argv) {
 	if (runcd == 1 || runcd == 2)
 	{
 		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
+		RecentCDs.UpdateRecentItems(IsoFile);
 		RunCD(gApp.hWnd);
 	}
 	else if (RecentCDs.autoload)
