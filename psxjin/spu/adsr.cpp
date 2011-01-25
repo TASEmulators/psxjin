@@ -78,11 +78,14 @@ void StaticInitADSR(void)                                    // INIT ADSR
 
 ////////////////////////////////////////////////////////////////////////
 
-void StartADSR(SPU_chan * pChannel)              // MIX ADSR
+void StartADSR(SPU_chan * pChannel)
 {
-	pChannel->ADSR.lVolume=1;                            // and init some adsr vars
+	pChannel->ADSR.lVolume=0;
 	pChannel->ADSR.State=0;
 	pChannel->ADSR.EnvelopeVol=0;
+
+	//test case: without this, SOTN will check some ADSR envelopes too early before the attack kicks in and kill the sounds prematurely
+	MixADSR(pChannel); //tick the ADSR once
 }
 
 ////////////////////////////////////////////////////////////////////////
