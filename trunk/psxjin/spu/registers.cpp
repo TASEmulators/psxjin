@@ -488,17 +488,20 @@ u16 SPUreadRegister(u32 reg)
 			case 0x0C: {
 				//get adsr vol
 
-				//this is the old spu logic. until proven otherwise, I don't like it.
-				//if(s_chan[ch].bNew) return 1;                   // we are started, but not processed? return 1
-				//if(s_chan[ch].ADSRX.lVolume &&                  // same here... we haven't decoded one sample yet, so no envelope yet. return 1 as well
-				//   !s_chan[ch].ADSRX.EnvelopeVol)
-				//	return 1;
+				SPU_chan& chan = SPU_core->channels[ch];
+
+				//printf("returning adsr vol %08X while status=%d\n",chan.ADSR.EnvelopeVol,chan.status);
+				
+				//test case: without this, various sound effects in SOTN will not get a chance to retrigger as their voices get stuck
+				//(in other words, the game polls this to see whether to retrigger instead of discovering whether the channel is stopped)
+				if(chan.status == CHANSTATUS_STOPPED)
+					return 0;
 
 				//test case: without this, beyond the beyond flute in isla village (first town) will get cut off
 				//since the game will choose to cut out the flute lead sound to play other instruments.
 				//with this here, the game knows that the sound isnt dead yet.
-
-				return (u16)(((u32)SPU_core->channels[ch].ADSR.EnvelopeVol)>>16);
+				u16 ret = (u16)(((u32)chan.ADSR.EnvelopeVol)>>16);
+				return ret;
 			}
 
 			case 0x0E: {
