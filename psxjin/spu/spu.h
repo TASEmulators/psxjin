@@ -34,6 +34,8 @@
 
 #define NSSIZE 1
 
+extern int iVolume;	//Volume control range: 1-5
+
 void SPUplayBRRchannel(xa_decode_t *xap);
 
 #define CHANSTATUS_STOPPED          0
