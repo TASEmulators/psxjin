@@ -871,6 +871,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(wParam >= RECENTCD_START && wParam <= RECENTCD_START + RecentCDs.MAX_RECENT_ITEMS - 1)
 			{
 				strcpy(IsoFile, RecentCDs.GetRecentItem(wParam - RECENTCD_START).c_str());
+				RecentCDs.UpdateRecentItems(IsoFile);
 				RunCD(gApp.hWnd);
 				return TRUE;
 			}
@@ -888,6 +889,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(wParam >= RECENTMOVIE_START && wParam <= RECENTMOVIE_START + RecentMovies.MAX_RECENT_ITEMS - 1)
 			{
 				strcpy(Str_Tmp, RecentMovies.GetRecentItem(wParam - RECENTMOVIE_START).c_str());
+				RecentMovies.UpdateRecentItems(Str_Tmp);
 				WIN32_StartMovieReplay(Str_Tmp);
 				return TRUE;
 			}
@@ -905,6 +907,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(wParam >= RECENTLUA_START && wParam <= RECENTLUA_START + RecentLua.MAX_RECENT_ITEMS - 1)
 			{
 				PSXjin_LoadLuaCode(RecentLua.GetRecentItem(wParam - RECENTLUA_START).c_str());
+				RecentLua.UpdateRecentItems(RecentLua.GetRecentItem(wParam - RECENTLUA_START));
 				return TRUE;
 			}
 			else if (wParam == RecentLua.GetClearID())
