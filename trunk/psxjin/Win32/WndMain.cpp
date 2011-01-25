@@ -529,14 +529,13 @@ void OnStates_LoadOther() {
     ofn.lpstrFileTitle		= szFileTitle;
     ofn.nMaxFileTitle		= MAXFILENAME;
     ofn.lpstrTitle			= NULL;
-    ofn.lpstrDefExt			= "EXE";
+    ofn.lpstrDefExt			= "";
     ofn.Flags				= OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
 
 	if (GetOpenFileName ((LPOPENFILENAME)&ofn)) {
 		char Text[256];
 		int ret;
 
-		SetMenu(gApp.hWnd, NULL);
 		OpenPlugins(gApp.hWnd);
 		if (NeedReset) {
 			SysReset();
@@ -591,7 +590,6 @@ void OnStates_SaveOther() {
 		char Text[256];
 		int ret;
 
-		SetMenu(gApp.hWnd, NULL);
 		OpenPlugins(gApp.hWnd);
 		SysReset();
 		NeedReset = 0;
@@ -1919,6 +1917,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Stop AVI"), ID_END_CAPTURE);
 	ADDMENUITEM(0, _("Record &AVI"), ID_START_CAPTURE);
 	ADDSEPARATOR(0);
+	ADDMENUITEM(0, _("Loadstate From..."), ID_FILE_STATES_LOAD_OTHER);
 	ADDMENUITEM(0, _("Screenshot"), ID_FILE_SCREENSHOT);
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
