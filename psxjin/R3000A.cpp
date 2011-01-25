@@ -55,7 +55,7 @@ void psxReset() {
 	psxHwReset();
 	psxBiosInit();
 
-	if (!Config.HLE) psxExecuteBios();
+	psxExecuteBios();
 
 #ifdef EMU_LOG
 	EMU_LOG("*BIOS END*\n");

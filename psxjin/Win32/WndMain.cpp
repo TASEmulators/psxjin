@@ -561,6 +561,7 @@ void OnStates_Save5() { States_Save(4); }
 
 void OnStates_SaveOther() {
 	OPENFILENAME ofn;
+
 	char szFileName[MAXFILENAME];
 	char szFileTitle[MAXFILENAME];
 	char szFilter[256];
@@ -583,21 +584,17 @@ void OnStates_SaveOther() {
     ofn.lpstrFileTitle		= szFileTitle;
     ofn.nMaxFileTitle		= MAXFILENAME;
     ofn.lpstrTitle			= NULL;
-    ofn.lpstrDefExt			= "EXE";
+    ofn.lpstrDefExt			= "001";
     ofn.Flags				= OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
 
-	if (GetOpenFileName ((LPOPENFILENAME)&ofn)) {
+	if (GetSaveFileName ((LPOPENFILENAME)&ofn)) {
 		char Text[256];
 		int ret;
 
-		OpenPlugins(gApp.hWnd);
-		SysReset();
-		NeedReset = 0;
-
 		ret = SaveState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*PSXjin*: Loaded State %s"), szFileName);
-		else sprintf(Text, _("*PSXjin*: Error Loading State %s"), szFileName);
+			 sprintf(Text, _("*PSXjin*: Saved State %s"), szFileName);
+		else sprintf(Text, _("*PSXjin*: Error Saving State %s"), szFileName);
 		GPUdisplayText(Text);
 
 		Running = 1;
@@ -1918,6 +1915,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Record &AVI"), ID_START_CAPTURE);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Loadstate From..."), ID_FILE_STATES_LOAD_OTHER);
+	ADDMENUITEM(0, _("Savestate As..."), ID_FILE_STATES_SAVE_OTHER);
 	ADDMENUITEM(0, _("Screenshot"), ID_FILE_SCREENSHOT);
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
