@@ -828,6 +828,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			CheckMenuItem(gApp.hMenu,RecentMovies.GetAutoloadID(),MF_BYCOMMAND  | (RecentMovies.autoload ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu,RecentLua.GetAutoloadID(),MF_BYCOMMAND		| (RecentLua.autoload ? MF_CHECKED:MF_UNCHECKED));
 
+			CheckMenuItem(gApp.hMenu, ID_EMULATOR_MUTE, MF_BYCOMMAND | ((iVolume == 5) ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
@@ -967,7 +968,12 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_EMULATOR_RESET:
 					ResetGame();
 					return TRUE;
-
+				case ID_EMULATOR_MUTE:
+					if (iVolume == 5) 
+						iVolume = 0;
+					else 
+						iVolume = 5;
+					return TRUE;
 				case ID_CONFIGURATION_GRAPHICS:
 					GPUconfigure();
 					UpdateWindowSizeFromConfig();
@@ -1936,7 +1942,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("2x"), ID_EMULATOR_2X);
 	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("Re&set"), ID_EMULATOR_RESET);
+	ADDMENUITEM(0, _("Mute Sound"), ID_EMULATOR_MUTE);
+	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);
 
 	ADDSUBMENU(0, _("&Configuration"));
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
