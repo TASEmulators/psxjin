@@ -44,9 +44,8 @@
 #include "ramwatch.h"
 #include "CWindow.h"
 #include "memView.h"
-#include "../spu/spu.h"
+#include "../spu/spu.h"	//For iVolume
 #include "recentmenu.h"
-
 #include "plugins.h"
 
 const int RECENTCD_START = 65000;
@@ -55,6 +54,8 @@ const int RECENTLUA_START = 65040;
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+extern void ReadConfig();	//SPU save/load
+extern void WriteConfig();
 
 //Prototypes
 void RunCD(HWND hWnd);
@@ -1985,6 +1986,7 @@ void CreateMainWindow(int nCmdShow) {
 
 	RegisterClass(&wc);
 	gpu_ReadConfig();
+	ReadConfig();
 	UpdateWindowSizeFromConfig();
 
 	hWnd = CreateWindow("PSXjin Main",
@@ -2073,6 +2075,8 @@ void SaveIni()
 	RecentCDs.SaveRecentItemsToIni(Config.Conf_File, "General");
 	RecentMovies.SaveRecentItemsToIni(Config.Conf_File, "General");
 	RecentLua.SaveRecentItemsToIni(Config.Conf_File, "General");
+	
+	WriteConfig();	//Save SPU Settings
 }
 
 void LoadIni()
@@ -2097,6 +2101,8 @@ void LoadIni()
 		sprintf(str, "Recent Watch %d", i+1);
 		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
+
+	ReadConfig();	//Load SPU settings
 }
 
 int SysInit() {
