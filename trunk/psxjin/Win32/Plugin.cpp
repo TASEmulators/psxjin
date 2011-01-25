@@ -33,6 +33,7 @@
 #include "maphkeys.h"
 #include "ram_search.h"
 #include "ramwatch.h"
+#include "../spu/spu.h"
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -591,17 +592,27 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_DISABLED1].key
-	&& modifiers == EmuCommandTable[EMUCMD_DISABLED1].keymod)
+	if(key == EmuCommandTable[EMUCMD_VOLUMEUP].key
+	&& modifiers == EmuCommandTable[EMUCMD_VOLUMEUP].keymod)
 	{
-		//TODO
+		if (iVolume < 5)
+			iVolume++;
+		else if (iVolume > 5)
+			iVolume = 5;		//Meh, just in case
+		sprintf(Text, "Sound volume: %d", 5 - iVolume);
+		GPUdisplayText(_(Text));
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_DISABLED2].key
-	&& modifiers == EmuCommandTable[EMUCMD_DISABLED2].keymod)
+	if(key == EmuCommandTable[EMUCMD_VOLUMEDOWN].key
+	&& modifiers == EmuCommandTable[EMUCMD_VOLUMEDOWN].keymod)
 	{
-		//TODO
+		if (iVolume > 0)
+			iVolume--;
+		if (iVolume < 0)
+			iVolume = 0;		//Meh, just in case
+		sprintf(Text, "Sound volume: %d", 5 - iVolume);
+		GPUdisplayText(_(Text));
 		return;
 	}
 

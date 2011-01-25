@@ -43,7 +43,6 @@
 #include "movie.h"
 #include "registers.h"
 
-
 SPU_struct *SPU_core, *SPU_user;
 
 //global spu values

@@ -86,8 +86,8 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'L',             VK_CONTROL,  "New Lua Script Window", },
 	{ 0,               0,           "Stop Lua Script", },
 	{ 'L',             VK_SHIFT,    "Reload Lua Script", },
-	{ 0,               0,           "Disabled 1", },
-	{ 0,               0,           "Disabled 2", },
+	{ 0,               0,           "Volume Up", },
+	{ 0,               0,           "Volume Down", },
 	{ 0,               0,           "Disabled 3", },
 	{ 0,               0,           "SPU IRQ Enable/Disable", }			//dirty fix, this key is missing from maphkeys.h, putting it on botom of the list prevent keys to be offset and seem to remove it from hotkeys map list
 };
