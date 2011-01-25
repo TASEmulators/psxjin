@@ -815,7 +815,30 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));  
 			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT0,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT1,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT2,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT3,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT4,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT5,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT6,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT7,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT8,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT9,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_OTHER,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT0,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT1,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT2,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT3,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT4,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT5,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT6,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT7,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT8,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT9,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_OTHER,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
 			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -950,18 +973,27 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					GPUmakeSnapshot();
 					return TRUE;
 
-				case ID_FILE_STATES_LOAD_SLOT1: States_Load(0); return TRUE;
-				case ID_FILE_STATES_LOAD_SLOT2: States_Load(1); return TRUE;
-				case ID_FILE_STATES_LOAD_SLOT3: States_Load(2); return TRUE;
-				case ID_FILE_STATES_LOAD_SLOT4: States_Load(3); return TRUE;
-				case ID_FILE_STATES_LOAD_SLOT5: States_Load(4); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT0: States_Load(0); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT1: States_Load(1); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT2: States_Load(2); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT3: States_Load(3); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT4: States_Load(4); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT5: States_Load(5); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT6: States_Load(6); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT7: States_Load(7); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT8: States_Load(8); return TRUE;
+				case ID_FILE_STATES_LOAD_SLOT9: States_Load(9); return TRUE;
 				case ID_FILE_STATES_LOAD_OTHER: OnStates_LoadOther(); return TRUE;
 
-				case ID_FILE_STATES_SAVE_SLOT1: States_Save(0); return TRUE;
-				case ID_FILE_STATES_SAVE_SLOT2: States_Save(1); return TRUE;
-				case ID_FILE_STATES_SAVE_SLOT3: States_Save(2); return TRUE;
-				case ID_FILE_STATES_SAVE_SLOT4: States_Save(3); return TRUE;
-				case ID_FILE_STATES_SAVE_SLOT5: States_Save(4); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT1: States_Save(1); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT2: States_Save(2); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT3: States_Save(3); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT4: States_Save(4); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT5: States_Save(5); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT6: States_Save(6); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT7: States_Save(7); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT8: States_Save(8); return TRUE;
+				case ID_FILE_STATES_SAVE_SLOT9: States_Save(9); return TRUE;
 				case ID_FILE_STATES_SAVE_OTHER: OnStates_SaveOther(); return TRUE;
 
 				case ID_EMULATOR_RESET:
@@ -1914,9 +1946,37 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Stop AVI"), ID_END_CAPTURE);
 	ADDMENUITEM(0, _("Record &AVI"), ID_START_CAPTURE);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("Loadstate From..."), ID_FILE_STATES_LOAD_OTHER);
-	ADDMENUITEM(0, _("Savestate As..."), ID_FILE_STATES_SAVE_OTHER);
+	
 	ADDMENUITEM(0, _("Screenshot"), ID_FILE_SCREENSHOT);
+
+	ADDSUBMENUS(0, 3, _("Loadstate"));
+	ADDMENUITEM(3, _("Loadstate From..."), ID_FILE_STATES_LOAD_OTHER);
+	ADDSEPARATOR(3);
+	ADDMENUITEM(3, _("Loadstate Slot 9"), ID_FILE_STATES_LOAD_SLOT9);
+	ADDMENUITEM(3, _("Loadstate Slot 8"), ID_FILE_STATES_LOAD_SLOT8);
+	ADDMENUITEM(3, _("Loadstate Slot 7"), ID_FILE_STATES_LOAD_SLOT7);
+	ADDMENUITEM(3, _("Loadstate Slot 6"), ID_FILE_STATES_LOAD_SLOT6);
+	ADDMENUITEM(3, _("Loadstate Slot 5"), ID_FILE_STATES_LOAD_SLOT5);
+	ADDMENUITEM(3, _("Loadstate Slot 4"), ID_FILE_STATES_LOAD_SLOT4);
+	ADDMENUITEM(3, _("Loadstate Slot 3"), ID_FILE_STATES_LOAD_SLOT3);
+	ADDMENUITEM(3, _("Loadstate Slot 2"), ID_FILE_STATES_LOAD_SLOT2);
+	ADDMENUITEM(3, _("Loadstate Slot 1"), ID_FILE_STATES_LOAD_SLOT1);
+	ADDMENUITEM(3, _("Loadstate Slot 0"), ID_FILE_STATES_LOAD_SLOT0);
+
+	ADDSUBMENUS(0, 4, _("Savestate"));
+	ADDMENUITEM(4, _("Savestate As..."), ID_FILE_STATES_SAVE_OTHER);
+	ADDSEPARATOR(4);
+	ADDMENUITEM(4, _("Savestate Slot 9"), ID_FILE_STATES_SAVE_SLOT9);
+	ADDMENUITEM(4, _("Savestate Slot 8"), ID_FILE_STATES_SAVE_SLOT8);
+	ADDMENUITEM(4, _("Savestate Slot 7"), ID_FILE_STATES_SAVE_SLOT7);
+	ADDMENUITEM(4, _("Savestate Slot 6"), ID_FILE_STATES_SAVE_SLOT6);
+	ADDMENUITEM(4, _("Savestate Slot 5"), ID_FILE_STATES_SAVE_SLOT5);
+	ADDMENUITEM(4, _("Savestate Slot 4"), ID_FILE_STATES_SAVE_SLOT4);
+	ADDMENUITEM(4, _("Savestate Slot 3"), ID_FILE_STATES_SAVE_SLOT3);
+	ADDMENUITEM(4, _("Savestate Slot 2"), ID_FILE_STATES_SAVE_SLOT2);
+	ADDMENUITEM(4, _("Savestate Slot 1"), ID_FILE_STATES_SAVE_SLOT1);
+	ADDMENUITEM(4, _("Savestate Slot 0"), ID_FILE_STATES_SAVE_SLOT0);
+	
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
