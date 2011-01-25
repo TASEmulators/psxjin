@@ -1076,7 +1076,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_HELP_TUTORIAL:
-					ShellExecute(NULL, "open", "http://code.google.com/p/PSXjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "http://code.google.com/p/psxjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
 					break;
 
 				case ID_HELP_HELP:
@@ -1957,7 +1957,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("RAM &Search"), ID_RAM_SEARCH);
 
 	ADDSUBMENU(0, _("&Help"));
-	ADDMENUITEM(0, _("&About..."), ID_HELP_ABOUT);
+	ADDMENUITEM(0, _("&About"), ID_HELP_ABOUT);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Help File"), ID_HELP_HELP);
 	ADDMENUITEM(0, _("&Online Tutorial"), ID_HELP_TUTORIAL);
