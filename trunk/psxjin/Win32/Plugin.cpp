@@ -382,8 +382,8 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_DISABLED4].key
-	&& modifiers == EmuCommandTable[EMUCMD_DISABLED4].keymod)
+	if(key == EmuCommandTable[EMUCMD_DISABLED].key
+	&& modifiers == EmuCommandTable[EMUCMD_DISABLED].keymod)
 	{
 		//TODO
 		return;

@@ -73,7 +73,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'W',             VK_CONTROL,  "RAM Watch", },
 	{ 0,               0,           "Configure Graphics", },
 	{ 0,               0,           "Configure Sound", },
-	{ 0,               0,           "Disabled 4", },
+	{ 0,               0,           "Disabled", },
 	{ 0,               0,           "Configure Controllers", },
 	{ 0,               0,           "Configure Options", },
 	{ 'C',             VK_SHIFT,    "Cheats Enable/Disable", },
