@@ -13,7 +13,6 @@
 #include <time.h>
 #include <string.h>
 #include <zlib.h>
-#include <bzlib.h>
 
 #include <string>
 
@@ -171,7 +170,9 @@ long CDRreadTrack(unsigned char *time) {
 		uncompress(cdbuffer, &size, Zbuf, p);
 		
 		pbuffer = cdbuffer + 12;
-	} else { // .bz
+	}
+	/*
+	else { // .bz
 		unsigned long pos, p, rp;
 		unsigned long size;
 		unsigned char Zbuf[CD_FRAMESIZE_RAW * 10 * 2];
@@ -201,7 +202,7 @@ long CDRreadTrack(unsigned char *time) {
 
 		pbuffer = cdbuffer + rp * CD_FRAMESIZE_RAW + 12;
 	}
-
+*/
 	return 0;
 }
 
