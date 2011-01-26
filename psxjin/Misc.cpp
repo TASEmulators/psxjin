@@ -48,7 +48,7 @@ char *LabelAuthors = { N_(
 char *LabelGreets = { N_(
 	"PSXjin was written by:\n"
 	"PCSX coders: linuzappz, shadow\n"
-	"main TAS coders: zeromus, adelikat"
+	"main TAS coders: zeromus, adelikat\n"
 	"extra coders: DarkKobold\n"
 	"Tester: arukAdo"))
 };
