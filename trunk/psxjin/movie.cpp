@@ -678,7 +678,7 @@ void MOV_WriteControl() {
 		if (MovieControl.VSyncWA)
 			controlFlags = 6;
 		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+3)-Movie.inputBuffer));
-		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\n",controlFlags); 	
+		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\r\n",controlFlags); 	
 	}
 	else
 	{
