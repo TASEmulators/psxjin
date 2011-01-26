@@ -152,7 +152,7 @@ bool xa_queue::unfreeze(EMUFILE* fp)
 
 void xa_queue::feed(xa_decode_t *xap)
 {
-	//printf("xa feeding xa nsamp=%d chans=%d freq=%d\n",xap->nsamples,xap->stereo*2,xap->freq);
+	//printf("xa feeding xa nsamp=%d chans=%d freq=%d with size=%d\n",xap->nsamples,xap->stereo*2,xap->freq,size());
 
 	enqueue(xap);
 }

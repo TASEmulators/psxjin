@@ -95,7 +95,7 @@ void psxRcntInit() {
 	//if (SPUasync != NULL) {
 		cnts = 5;
 
-		psxCounters[4].rate = 768 * 64;
+		psxCounters[4].rate = 768 * 1;
 		psxCounters[4].target = 1;
 		psxCounters[4].mode = 0x58;
 	//}

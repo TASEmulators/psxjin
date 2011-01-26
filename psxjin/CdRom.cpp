@@ -984,17 +984,33 @@ unsigned char cdrRead3(void) {
 }
 
 void cdrWrite3(unsigned char rt) {
-#ifdef CDRLOG
-	CDRLOG("CD3 write: %x\n", rt);
-#endif
-    if (rt == 0x07 && cdr.Ctrl & 0x1) {
+//#ifdef CDRLOG
+	//printf("CD3 write: %x\n", rt);
+//#endif
+
+    if (rt == 0x07 && (cdr.Ctrl & 0x1)) {
 		cdr.Stat = 0;
 
 		if (cdr.Irq == 0xff) { cdr.Irq = 0; return; }
         if (cdr.Irq) CDRINT(cdr.eCycle);
-        if (cdr.Reading && !cdr.ResultReady) 
-            CDREAD_INT((cdr.Mode & 0x80) ? (cdReadTime / 2) : cdReadTime);
+		
 
+		//zero's code
+		//rationale: I don't understand what rt == 0x07 && (cdr.Ctrl & 0x1) means but it looks like it is polling for completion.
+        //the old code makes no sense. why schedule an interrupt later if the result is not ready?
+        //trigger an interrupt NOW if it IS.
+		//well, this breaks things unless it is restricted to my XA test case in SoTN, so....
+		if ((cdr.Muted == 1) && (cdr.Mode & 0x40)) {
+			if (cdr.Reading && cdr.ResultReady) 
+			{
+				CDREAD_INT(0);
+			}
+		}
+		else 
+		//old code
+			if (cdr.Reading && !cdr.ResultReady) 
+            CDREAD_INT((cdr.Mode & 0x80) ? (cdReadTime / 2) : cdReadTime);
+		
 		return;
 	}
 	if (rt == 0x80 && !(cdr.Ctrl & 0x1) && cdr.Readed == 0) {
