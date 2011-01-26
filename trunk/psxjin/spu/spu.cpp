@@ -149,7 +149,7 @@ void SPU_chan::keyon()
 	
 	blockAddress = (rawStartAddr<<3);
 	
-	//printf("[%02d] Keyon at %08X with smpinc %f\n",ch,blockAddress,smpinc);
+	//if(spu->isCore) printf("[%02d] Keyon at %08X with smpinc %f\n",ch,blockAddress,smpinc);
 
 	//init interpolation state with zeros
 	block[24] = block[25] = block[26] = block[27] = 0;
@@ -534,16 +534,20 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 			else
 				samp = chan->decodeBRR(spu);
 
-
-			s32 adsrLevel = MixADSR(chan);
-			//printf("[%02d] adsr: %d\n",i,adsrLevel);
-
-			//channel may have ended at any time
+			//channel may have ended at any time (from the BRR decode or from a previous envelope calculation
 			if (chan->status == CHANSTATUS_STOPPED) {
 				fmod = 0;
 				continue;
 			}
 
+			//since we tick the envelope when we keyon, we need to retrieve that value here.
+			s32 adsrLevel = chan->ADSR.lVolume;
+
+			//and now immediately afterwards tick it again
+			MixADSR(chan);
+
+
+	
 			checklog[i] = true;
 
 			samp = samp * adsrLevel/1023;
@@ -833,7 +837,6 @@ void REVERBInfo::load(EMUFILE* fp) {
 
 //this is called from the cdrom system with a buffer of decoded xa audio
 //we are supposed to grab it and then play it. 
-//FeedXA takes care of stashing it for us
 void SPUplayADPCMchannel(xa_decode_t *xap)
 {
 	if (!iUseXA)    return;                               // no XA? bye
@@ -842,7 +845,16 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 
 	Lock lock;
 	SPU_core->xaqueue.feed(xap);
-	if(SPU_user) SPU_user->xaqueue.feed(xap);
+	
+	switch(iSoundMode)
+	{
+	case SOUND_MODE_ASYNCH:
+	case SOUND_MODE_DUAL:
+		SPU_user->xaqueue.feed(xap);
+		break;
+	case SOUND_MODE_SYNCH:
+		break;
+	}
 }
 
 //this func will be called first by the main emu
