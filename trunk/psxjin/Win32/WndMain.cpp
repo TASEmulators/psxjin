@@ -359,7 +359,6 @@ int main(int argc, char **argv) {
 	if (runcd == 1 || runcd == 2)
 	{
 		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
-		RecentCDs.UpdateRecentItems(IsoFile);
 		RunCD(gApp.hWnd);
 	}
 	else if (RecentCDs.autoload)
@@ -663,6 +662,7 @@ void RunCD(HWND hWnd)
 			}
 			if (Movie.mode == MOVIEMODE_INACTIVE)
 				Movie.currentFrame = 0;
+			RecentCDs.UpdateRecentItems(IsoFile);
 			Running = 1;
 			psxCpu->Execute();
 		}
