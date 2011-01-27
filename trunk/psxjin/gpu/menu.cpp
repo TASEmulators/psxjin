@@ -340,7 +340,7 @@ void BuildDispMenu(int iInc)
 	cCurrentInput[33] = currentInput&0x1000000?' ':'2'; //l2
 	cCurrentInput[34] = currentInput&0x2000000?' ':'R'; //r2
 	cCurrentInput[35] = currentInput&0x2000000?' ':'2'; //r2
-    strcpy(szInputBuf,cCurrentInput);
+    memcpy(szInputBuf,cCurrentInput,36);
 	if (dwCoreFlags&1)  szMenuBuf[23]  = 'A';
 	if (dwCoreFlags&2)  szMenuBuf[23]  = 'M';
 	if (dwCoreFlags&0xff00)                               //A/M/G/D
