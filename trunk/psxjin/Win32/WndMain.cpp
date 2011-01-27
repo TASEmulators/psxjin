@@ -2361,6 +2361,7 @@ void WIN32_StartMovieRecord()
 				return;
 			}
 			Running = 1;
+			RecentMovies.UpdateRecentItems(Movie.movieFilename);
 			MOV_StartMovie(MOVIEMODE_RECORD);
 			psxCpu->Execute();
 		}
