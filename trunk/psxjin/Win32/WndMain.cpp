@@ -334,7 +334,7 @@ int main(int argc, char **argv) {
 	char Str[MAX_PATH];
 	
 
-	if (!luaLoaded && RecentLua.autoload) //If lua wasn't loaded from command line (commandline should override autoload parameters)
+	if (!luaLoaded && RecentLua.GetAutoLoad()) //If lua wasn't loaded from command line (commandline should override autoload parameters)
 			PSXjin_LoadLuaCode(RecentLua.GetRecentItem(0).c_str());
 
 	//adelikat
@@ -342,14 +342,14 @@ int main(int argc, char **argv) {
 
 	if (runcd == 1 || runcd == 2)
 		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
-	else if (RecentCDs.autoload)
+	else if (RecentCDs.GetAutoLoad())
 		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
 
 	if (loadMovie)
 	{
 		WIN32_StartMovieReplay(szMovieToLoad);
 	}
-	else if (RecentMovies.autoload)
+	else if (RecentMovies.GetAutoLoad())
 	{
 		strcpy(Str, RecentMovies.GetRecentItem(0).c_str());
 		WIN32_StartMovieReplay(Str);
@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
 		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
 		RunCD(gApp.hWnd);
 	}
-	else if (RecentCDs.autoload)
+	else if (RecentCDs.GetAutoLoad())
 	{
 		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
 		RunCD(gApp.hWnd);
@@ -846,10 +846,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
-			CheckMenuItem(gApp.hMenu,RecentCDs.GetAutoloadID(),MF_BYCOMMAND		| (RecentCDs.autoload ? MF_CHECKED:MF_UNCHECKED));
-			CheckMenuItem(gApp.hMenu,RecentMovies.GetAutoloadID(),MF_BYCOMMAND  | (RecentMovies.autoload ? MF_CHECKED:MF_UNCHECKED));
-			CheckMenuItem(gApp.hMenu,RecentLua.GetAutoloadID(),MF_BYCOMMAND		| (RecentLua.autoload ? MF_CHECKED:MF_UNCHECKED));
-
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_MUTE, MF_BYCOMMAND | ((iVolume == 5) ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
@@ -882,7 +878,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			else if (wParam == RecentCDs.GetAutoloadID())
 			{
-				RecentCDs.autoload ^= 1;
+				RecentCDs.FlipAutoLoad();
 				return TRUE;
 			}
 			//Recent Movies
@@ -900,7 +896,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			else if (wParam == RecentMovies.GetAutoloadID())
 			{
-				RecentMovies.autoload ^= 1;
+				RecentMovies.FlipAutoLoad();
 				return TRUE;
 			}
 			//Recent Lua
@@ -917,7 +913,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			else if (wParam == RecentLua.GetAutoloadID())
 			{
-				RecentLua.autoload ^= 1;
+				RecentLua.FlipAutoLoad();
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
