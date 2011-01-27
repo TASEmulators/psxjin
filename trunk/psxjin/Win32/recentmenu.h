@@ -26,8 +26,7 @@ public:
 	void UpdateRecentItems(std::string filename);	
 	void UpdateRecentItems(const char* filename);	//Overload
 
-	void RemoveRecentItem(std::string filename);
-	void RemoveRecentItem(const char* filename);
+	void HandleRemove(std::string filename, bool ask);	//Removes from recent list and updates menu, asks the user first, if specified
 
 	void GetRecentItemsFromIni(std::string iniFilename, std::string section);	//Retrieves items from an Ini file and populates the recent Menu
 	void SaveRecentItemsToIni (std::string iniFilename, std::string section);	//Saves items to the Ini file
