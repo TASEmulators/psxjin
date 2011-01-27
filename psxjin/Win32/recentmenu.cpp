@@ -67,18 +67,6 @@ void RecentMenu::UpdateRecentItems(std::string filename) //Overloaded function
 
 //**************************************************************
 
-void RecentMenu::RemoveRecentItem(std::string filename)
-{
-	RemoveRecent(filename);
-}
-
-void RecentMenu::RemoveRecentItem(const char* filename)
-{
-	RemoveRecent(filename);
-}
-
-//**************************************************************
-
 void RecentMenu::GetRecentItemsFromIni(std::string iniFilename, std::string section)
 {
 	//This function retrieves the recent items stored in the .ini file
@@ -165,10 +153,23 @@ void RecentMenu::FlipAutoLoad()
 	CheckMenuItem(recentmenu,ClearID+1,MF_BYCOMMAND   | (autoload ? MF_CHECKED:MF_UNCHECKED));
 }
 
+//Removes from recent list and updates menu, asks the user first, if specified
+void RecentMenu::HandleRemove(std::string filename, bool ask)
+{
+	if (ask)
+	{
+		int result = MessageBox(GhWnd,"Remove from list?", "Failure Opening Recent File", MB_YESNO);
+		if (result == IDYES)
+			RemoveRecent(filename);
+	}
+	else
+		RemoveRecent(filename);
+}
 
 //*******************************************************************
 //Private functions
 //*******************************************************************
+
 void RecentMenu::RemoveRecent(std::string filename)
 {
 	//Called By RemoveRecentItem to do the actual work for the overloaded functions
