@@ -252,6 +252,7 @@ int main(int argc, char **argv) {
 		timeBeginPeriod (wmTimerRes);
 	}
 
+	char runexe=0;
 	char runcd=0;
 	char loadMovie=0;
 	int i;
@@ -262,7 +263,9 @@ int main(int argc, char **argv) {
 	int runcdarg=-2;
 	if( argc > 1 )
 	for( i=1; i < argc; i++ ) {
-		if (!strcmp(argv[i], "-runcd"))
+		if(!strcmp(argv[i], "-runexe"))
+		{ runexe = 1; runcdarg = i; }
+		else if (!strcmp(argv[i], "-runcd"))
 		{ runcd = 1; runcdarg = i; }
 		else if (!strcmp(argv[i], "-play")) {
 			loadMovie = 1;
@@ -340,10 +343,13 @@ int main(int argc, char **argv) {
 	//adelikat
 	//Set IsoFile, then load movie, then Run Iso, seems messy but it is the easiest way to deal with how these functions are implemented
 
-	if (runcd == 1 || runcd == 2)
-		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
-	else if (RecentCDs.GetAutoLoad())
-		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
+	if(!runexe)
+	{
+		if (runcd == 1 || runcd == 2)
+			strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
+		else if (RecentCDs.GetAutoLoad())
+			strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
+	}
 
 	if (loadMovie)
 	{
@@ -366,8 +372,16 @@ int main(int argc, char **argv) {
 		strcpy(IsoFile, RecentCDs.GetRecentItem(0).c_str());
 		RunCD(gApp.hWnd);
 	}
-	
 
+	if(runexe)
+	{
+		OpenPlugins(gApp.hWnd);
+		SysReset();
+		NeedReset = 0;
+		Load((char*)CDR_iso_fileToOpen.c_str());
+		Running = 1;
+		psxCpu->Execute();
+	}
 
 	if (AutoRWLoad)
 		RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
