@@ -27,7 +27,7 @@ int SetBytesPerFrame( MovieType Movie)
 {
 	if (Movie.isText)
 	{
-	Movie.bytesPerFrame = 3;
+	Movie.bytesPerFrame = 4;
 	switch (Movie.padType1) {
 		case PSE_PAD_TYPE_STANDARD:
 			Movie.bytesPerFrame += STANDARD_PAD_SIZE;
@@ -417,6 +417,7 @@ void MOV_StartMovie(int mode)
 {
 	Movie.mode = mode;
 	Movie.currentFrame = 0;
+	Movie.MaxRecFrames = 0;
 	Movie.lagCounter = 0;
 	Movie.currentCdrom = 1;
 	cdOpenCase = 0;
@@ -754,7 +755,7 @@ void MOV_ReadControl() {
 	if (Movie.isText)
 	{
 		int contFlg = atoi((char*)Movie.inputBufferPtr);
-		Movie.inputBufferPtr += 3;
+		Movie.inputBufferPtr += 4;
 		char controlFlags = (1 << contFlg);
 		controlFlags >>= 1;
 		MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
@@ -774,7 +775,7 @@ void MOV_ReadControl() {
 		MovieControl.RCntFix = controlFlags&MOVIE_CONTROL_RCNTFIX;
 		MovieControl.VSyncWA = controlFlags&MOVIE_CONTROL_VSYNCWA;
 	}
-		
+	
 }
 
 void MOV_WriteControl() {
@@ -794,7 +795,7 @@ void MOV_WriteControl() {
 		if (MovieControl.VSyncWA)
 			controlFlags = 6;
 		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+3)-Movie.inputBuffer));
-		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\r\n",controlFlags); 	
+		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\n\r",controlFlags); 	
 	}
 	else
 	{
@@ -870,7 +871,7 @@ int MovieFreeze(gzFile f, int Mode) {
 
 	//saving state
 	if (Mode == 1)
-		bufSize = Movie.bytesPerFrame * (Movie.currentFrame+1);
+		bufSize = Movie.bytesPerFrame * (Movie.MaxRecFrames+1);
 
 	//saving/loading state
 	gzfreezel(&Movie.currentFrame);

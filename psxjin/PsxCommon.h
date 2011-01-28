@@ -170,6 +170,7 @@ struct MovieType {
 	unsigned char padType2;              //joypad2 type
 	unsigned long totalFrames;           //total movie frames
 	unsigned long currentFrame;          //current frame in movie
+	unsigned long MaxRecFrames;			 //Maximum frame hit for recording
 	unsigned long lagCounter;            //current lag count
 	unsigned char mode;                  //movie is | 1: recording | 2: playing | 0: not active
 	unsigned char readOnly;              //movie is | 1: read-only | 0: read+write
@@ -209,6 +210,9 @@ struct MovieType {
 	char AviDrive[256];
 	char AviDirectory[256];
 	char AviFnameShort[256];
+	int MultiTrack;
+	int RecordPlayer;
+	
 };
 
 struct MovieControlType {

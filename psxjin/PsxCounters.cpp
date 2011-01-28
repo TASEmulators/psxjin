@@ -161,6 +161,7 @@ if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
 }
 
 Movie.currentFrame++;
+if (Movie.currentFrame > Movie.MaxRecFrames) Movie.MaxRecFrames = Movie.currentFrame;
 
 // update OSD information
 GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);

@@ -27,6 +27,7 @@
 #include "../movie.h"
 #include "../cheat.h"
 #include "../R3000A.h"
+#include "movie.h"
 
 #include "Win32.h"
 #include "resource.h"
@@ -676,6 +677,50 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_STOPAVI].keymod)
 	{
 		WIN32_StopAviRecord();
+		return;
+	}
+	
+	if(key == EmuCommandTable[EMUCMD_MTRACK].key
+	&& modifiers == EmuCommandTable[EMUCMD_MTRACK].keymod)
+	{
+		if (!IsMovieLoaded())
+		{
+			Movie.MultiTrack = !Movie.MultiTrack;
+			if (Movie.MultiTrack)
+			{
+				Movie.RecordPlayer = 3;
+				GPUdisplayText("*PSXjin*: MultiTrack Enabled");
+			}
+			else
+				GPUdisplayText("*PSXjin*: MultiTrack Disabled");
+		}
+		else GPUdisplayText("*PSXjin*: Movie must be loaded to enable multitrack");
+		return;
+	}
+	if(key == EmuCommandTable[EMUCMD_INCPLAYER].key
+	&& modifiers == EmuCommandTable[EMUCMD_INCPLAYER].keymod)
+	{
+		Movie.RecordPlayer += 1;
+		Movie.RecordPlayer = (Movie.RecordPlayer > 4)? (1):(Movie.RecordPlayer);
+		return;
+	}
+	if(key == EmuCommandTable[EMUCMD_DECPLAYER].key
+	&& modifiers == EmuCommandTable[EMUCMD_DECPLAYER].keymod)
+	{
+		Movie.RecordPlayer -= 1;
+		Movie.RecordPlayer = (Movie.RecordPlayer == 0)? (4):(Movie.RecordPlayer);
+		return;
+	}
+	if(key == EmuCommandTable[EMUCMD_SELECTALL].key
+	&& modifiers == EmuCommandTable[EMUCMD_SELECTALL].keymod)
+	{
+		Movie.RecordPlayer = 4;		
+		return;
+	}
+	if(key == EmuCommandTable[EMUCMD_SELECTNONE].key
+	&& modifiers == EmuCommandTable[EMUCMD_SELECTNONE].keymod)
+	{
+		Movie.RecordPlayer = 3;		
 		return;
 	}
 }

@@ -89,7 +89,15 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,               0,           "Volume Up", },
 	{ 0,               0,           "Volume Down", },
 	{ 0,               0,           "Disabled 3", },
-	{ 0,               0,           "SPU IRQ Enable/Disable", }			//dirty fix, this key is missing from maphkeys.h, putting it on botom of the list prevent keys to be offset and seem to remove it from hotkeys map list
+	{ 0,			   0,			"Toggle MultiTrack",},
+	{ 0,			   0,			"MTrack: Increment Player",},
+	{ 0,			   0,			"MTrack: Decrement Player",},
+	{ 0,			   0,			"MTrack: Select All",},
+	{ 0,			   0,			"MTrack: Select None",},
+	{ 0,               0,           "SPU IRQ Enable/Disable", },			//dirty fix, this key is missing from maphkeys.h, putting it on botom of the list prevent keys to be offset and seem to remove it from hotkeys map list
+
+	
+
 };
 
 static HWND hMHkeysList = NULL;

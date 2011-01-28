@@ -105,6 +105,7 @@
 #include "draw.h"
 #include "prim.h"
 #include "menu.h"
+#include "PsxCommon.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 // misc globals
@@ -4573,6 +4574,10 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 		if (ulKeybits&KEY_SHOWINPUT)
 		{
 			DisplayInput();
+			if (Movie.MultiTrack)
+			{
+				DisplayRecording(Movie.RecordPlayer);
+			}
 		}
 	}
 
