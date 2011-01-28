@@ -31,6 +31,7 @@ void DisplayText(void);
 void DisplayFrames(void);
 void DisplayLag(void);
 void DisplayInput(void);
+void DisplayRecording(int RecNum);
 void DisplayMovMode(void);
 void CloseMenu(void);
 void InitMenu(void);

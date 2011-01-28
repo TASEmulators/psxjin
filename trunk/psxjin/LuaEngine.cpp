@@ -3441,7 +3441,8 @@ int PSXjin_LuaRunning() {
 int PSXjin_LuaUsingJoypad(int which) {
 	if (!PSXjin_LuaRunning())
 		return 0;
-	return lua_joypads_used & (1 << which);
+	return (lua_joypads_used & (1 << which));	
+	
 }
 
 

@@ -453,13 +453,42 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 		padd.leftJoyY = luaAnalogJoy->yleft;
 		padd.rightJoyX = luaAnalogJoy->xright;
 		padd.rightJoyY = luaAnalogJoy->yright;
-	}
+	}  
+
 
 /* movie stuff start */
 
 if (iJoysToPoll == 2) { // only poll once each frame
 	if (Movie.mode == MOVIEMODE_RECORD)
-		MOV_WriteJoy(&padd,Movie.padType1);
+	{
+		if (Movie.MultiTrack) 
+		{
+			if ((Movie.RecordPlayer == 1) || (Movie.RecordPlayer == 4)) 
+			{
+				MOV_WriteJoy(&padd,Movie.padType1);
+			}
+			else 
+			{
+				if (Movie.currentFrame >= Movie.MaxRecFrames)
+				{
+					padd.buttonStatus = 0xffff;
+					padd.leftJoyX = 128;
+					padd.leftJoyY = 128;
+					padd.rightJoyX = 128;
+					padd.rightJoyY = 128;
+					MOV_WriteJoy(&padd,Movie.padType1);
+				} 
+				else
+				{
+					MOV_ReadJoy(&padd,Movie.padType1);
+				}
+			}
+		}
+		else
+		{
+			MOV_WriteJoy(&padd,Movie.padType1);
+		}
+	}
 	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
 		MOV_ReadJoy(&padd,Movie.padType1);
 	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
@@ -523,9 +552,14 @@ int LoadPAD1plugin(char *PAD1dll) {
 
 unsigned char CALLBACK PAD2__startPoll(int pad) {
 	PadDataS padd;
-
-	PAD2_readPort2(&padd);
-
+	if (Movie.MultiTrack && ((Movie.RecordPlayer == 2) || (Movie.RecordPlayer == 4)))
+	{
+		PAD1_readPort1(&padd);
+	}
+	else
+	{
+		PAD2_readPort2(&padd);
+	}
 	if(PSXjin_LuaUsingJoypad(1)) padd.buttonStatus = PSXjin_LuaReadJoypad(1)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(1);
 	if (luaAnalogJoy != NULL) {
@@ -539,7 +573,35 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 
 if (iJoysToPoll == 1) { // only poll once each frame
 	if (Movie.mode == MOVIEMODE_RECORD)
-		MOV_WriteJoy(&padd,Movie.padType2);
+	{
+		if (Movie.MultiTrack) 
+		{
+			if ((Movie.RecordPlayer == 2) || (Movie.RecordPlayer == 4)) 
+			{
+				MOV_WriteJoy(&padd,Movie.padType2);
+			}
+			else 
+			{
+				if (Movie.currentFrame >= Movie.MaxRecFrames)
+				{
+					padd.buttonStatus = 0xffff;
+					padd.leftJoyX = 128;
+					padd.leftJoyY = 128;
+					padd.rightJoyX = 128;
+					padd.rightJoyY = 128;
+					MOV_WriteJoy(&padd,Movie.padType2);
+				} 
+				else
+				{
+					MOV_ReadJoy(&padd,Movie.padType2);
+				}
+			}
+		}
+		else
+		{
+			MOV_WriteJoy(&padd,Movie.padType2);
+		}
+	}
 	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
 		MOV_ReadJoy(&padd,Movie.padType2);
 	memcpy(&Movie.lastPad2,&padd,sizeof(padd));
