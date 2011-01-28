@@ -136,7 +136,8 @@ typedef struct {
 	long RCntFix;
 	long VSyncWA;
 	long PauseAfterPlayback;
-	char Conf_File[256];
+	char Conf_File[256];	
+	long SplitAVI;
 } psxjinconfig;
 
 extern psxjinconfig Config;
@@ -204,7 +205,10 @@ struct MovieType {
 	uint8* inputBuffer;                  //full movie input buffer
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
-	
+	int AviCount;						 //Number of AVIs created
+	char AviDrive[256];
+	char AviDirectory[256];
+	char AviFnameShort[256];
 };
 
 struct MovieControlType {
