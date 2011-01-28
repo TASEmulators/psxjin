@@ -741,6 +741,7 @@ bool IsFileExtension(std::string filename, std::string ext)
 }
 
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	char File[256];
 	char Str_Tmp[1024];
 	switch (msg) {
 		case WM_DROPFILES:
@@ -917,6 +918,17 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
+				case ID_FILE_RUN_EXE:
+					if (!Open_File_Proc(File)) return TRUE;
+					SetMenu(hWnd, NULL);
+					OpenPlugins(hWnd);
+					SysReset();
+					NeedReset = 0;
+					Load(File);
+					Running = 1;
+					psxCpu->Execute();
+					return TRUE;
+
 				case ID_FILE_EXIT:
 					ExitPSXjin();
 					return TRUE;
@@ -1987,7 +1999,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
 	ADDMENUITEM(1, _("Recent"), ID_FILE_RECENT_MOVIE);
 	ADDSEPARATOR(0);
-
+	ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
 	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
