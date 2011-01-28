@@ -2414,8 +2414,16 @@ void WIN32_StartAviRecord()
 	fszFilename[0] = '\0';
 	fszExt[0] = '\0';
 	_splitpath(nameo, fszDrive, fszDirectory, fszFilename, fszExt);
-
-	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
+	strcpy(Movie.AviDrive,fszDrive);
+	strcpy(Movie.AviDirectory,fszDirectory);
+	strcpy(Movie.AviFnameShort,fszFilename);
+	if (Config.SplitAVI) 
+	{
+		Movie.AviCount = 0;
+		sprintf(Movie.aviFilename, "%s%s%s-%dx%d_%03d.avi",fszDrive,fszDirectory,fszFilename,MainWindow_width,MainWindow_height,Movie.AviCount);
+	} else {
+			sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
+	}	 
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
 	OpenPlugins(gApp.hWnd);
 	GPUstartAvi(Movie.aviFilename);
@@ -2423,6 +2431,17 @@ void WIN32_StartAviRecord()
 	if (NeedReset) { SysReset(); NeedReset = 0; }
 	Running = 1;
 	psxCpu->Execute();
+}
+
+void WIN32_SplitAvi()
+{
+	if (Movie.capture)
+	{
+		GPUstopAvi();
+		Movie.AviCount++;
+		sprintf(Movie.aviFilename, "%s%s%s-%dx%d_%03d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviFnameShort,MainWindow_width,MainWindow_height,Movie.AviCount);
+		GPUstartAvi(Movie.aviFilename);	
+	}
 }
 
 void WIN32_StopAviRecord()

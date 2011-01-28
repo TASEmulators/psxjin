@@ -39,8 +39,10 @@
 #include "externals.h"
 #include "gpu_record.h"
 #include "gpu.h"
+#include "PsxCommon.h"
 
 BOOL			RECORD_RECORDING = FALSE;
+BOOL			RUN_ONCE = FALSE;
 BITMAPINFOHEADER	RECORD_BI = {40,0,0,1,16,0,0,2048,2048,0,0};
 unsigned char		RECORD_BUFFER[1600*1200*3];
 unsigned long		RECORD_INDEX;
@@ -95,10 +97,16 @@ BOOL RECORD_Start(char filename[256])
 			break;
 		}
 	}
-	else
+	else if (RECORD_RECORDING_MODE==1)
 	{
 		RECORD_BI.biWidth	= RECORD_RECORDING_WIDTH;
 		RECORD_BI.biHeight	= RECORD_RECORDING_HEIGHT;
+	}
+	else
+	{
+		Config.SplitAVI = true;
+		RECORD_BI.biWidth = iResX;
+		RECORD_BI.biHeight = iResY;
 	}
 	if (RECORD_COMPRESSION_MODE==0)
 	{

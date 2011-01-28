@@ -379,3 +379,4 @@ extern int           iTileCheat;
 
 
 void SetWindowSize(int dX, int dY);
+void WIN32_SplitAvi(void);

@@ -125,7 +125,7 @@
 // CONFIG FILE helpers.... used in (non-fpse) Linux and ZN Windows
 /////////////////////////////////////////////////////////////////////////////
 
-static int tempDest; //this is for the compiler to not throw in a million of warnings
+static int tempDest; //this is for the co,mpiler to not throw in a million of warnings
 char pConfigFile[MAX_PATH*2] = ".\\psxjin.ini";
 
 #ifndef _FPSE
@@ -650,6 +650,7 @@ BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		HWND hWC;
 		CheckDlgButton(hW,IDC_REC_MODE1,RECORD_RECORDING_MODE==0);
 		CheckDlgButton(hW,IDC_REC_MODE2,RECORD_RECORDING_MODE==1);
+		CheckDlgButton(hW,IDC_REC_MODE3,RECORD_RECORDING_MODE==2);
 		hWC = GetDlgItem(hW,IDC_VIDEO_SIZE);
 		tempDest = ComboBox_ResetContent(hWC);
 		tempDest = ComboBox_AddString(hWC,"Full");
@@ -726,8 +727,18 @@ BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case IDOK:
 		{
 			HWND hWC;
-			if (IsDlgButtonChecked(hW,IDC_REC_MODE1))	RECORD_RECORDING_MODE = 0;
-			else										RECORD_RECORDING_MODE = 1;
+			if (IsDlgButtonChecked(hW,IDC_REC_MODE1))	
+			{
+				RECORD_RECORDING_MODE = 0;
+			}
+			else if	(IsDlgButtonChecked(hW,IDC_REC_MODE2))	
+			{
+				RECORD_RECORDING_MODE = 1;
+			}
+			else
+			{
+				RECORD_RECORDING_MODE = 2;
+			}
 			hWC = GetDlgItem(hW,IDC_VIDEO_SIZE);
 			RECORD_VIDEO_SIZE = ComboBox_GetCurSel(hWC);
 			RECORD_RECORDING_WIDTH = GetDlgItemInt(hW,IDC_REC_WIDTH,NULL,FALSE);

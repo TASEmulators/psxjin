@@ -129,16 +129,16 @@
 #define IDC_COMPRESSION2                2078
 #define IDC_RECCFG                      2079
 #define IDC_VSYNC                       2080
+#define IDC_REC_MODE3                   2080
 #define IDC_TRANSPARENT                 2081
 #define IDC_DEBUGMODE                   2082
 #define IDC_SSSPSXLIMIT                 2083
 #define IDC_KKAPTURE                    2084
-#define IDD_RECORDING					2085
-#define IDD_KEYS						2086
-
+#define IDD_RECORDING                   2085
+#define IDD_KEYS                        2086
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143

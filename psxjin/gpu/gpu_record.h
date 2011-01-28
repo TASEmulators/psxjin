@@ -35,6 +35,7 @@
 #include <vfw.h>
 
 extern BOOL				RECORD_RECORDING;
+extern BOOL				RUN_ONCE;
 extern BITMAPINFOHEADER	RECORD_BI;
 extern unsigned char	RECORD_BUFFER[1600*1200*3];
 extern unsigned long	RECORD_INDEX;

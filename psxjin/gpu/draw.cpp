@@ -3943,6 +3943,7 @@ void NoStretchedBlit(void)
 	
 	if (iOldDX!=iDX || iOldDY!=iDY)
 	{
+		WIN32_SplitAvi();
 		DDBLTFX     ddbltfx;
 		ddbltfx.dwSize = sizeof(ddbltfx);
 		ddbltfx.dwFillColor = 0x00000000;

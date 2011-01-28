@@ -3387,7 +3387,11 @@ void CALLBACK GPUstartAvi(char* filename)
 	if (!RECORD_RECORDING)
 	{
 		HWND hWP=GetActiveWindow();
-		OnRecording(hWP);
+		if (!RUN_ONCE)
+		{
+			OnRecording(hWP);
+			RUN_ONCE = true;
+		}
 		RECORD_RECORDING=TRUE;
 		RECORD_Start(filename);
 		BuildDispMenu(0);
