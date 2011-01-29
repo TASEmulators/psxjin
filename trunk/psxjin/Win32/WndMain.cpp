@@ -674,8 +674,10 @@ void RunCD(HWND hWnd)
 				SysMessage(_("Could not load Cdrom"));
 				return;
 			}
-			if (Movie.mode == MOVIEMODE_INACTIVE)
-				Movie.currentFrame = 0;
+			
+			Movie.currentFrame = 0;
+			WIN32_StopAviRecord();
+			MOV_StopMovie();
 			RecentCDs.UpdateRecentItems(IsoFile);
 			Running = 1;
 			psxCpu->Execute();
