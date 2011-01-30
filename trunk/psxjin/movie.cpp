@@ -509,7 +509,7 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 				pad->buttonStatus <<= 1;
 				pad->buttonStatus |= ((Movie.inputBufferPtr[i]==(uint8)'.')?0:1);
 			}	
-			pad->buttonStatus <<= 2;
+			pad->buttonStatus <<= 2;			
 			Movie.inputBufferPtr += STANDARD_PAD_SIZE;
 		break;
 	}
@@ -694,7 +694,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+ANALOG_PAD_SIZE)-Movie.inputBuffer));
 			for(int i=0;i<16;i++)
 			{			
-			int bitmask = (1<<(16-i));
+			int bitmask = (1<<(15-i));
 			if((pad->buttonStatus^0xffff) & bitmask)
 				Movie.inputBufferPtr[i] = (uint8)pad_mnemonics[i];
 			else //otherwise write an unset bit
@@ -708,7 +708,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+STANDARD_PAD_SIZE)-Movie.inputBuffer));
 			for(int i=0;i<14;i++)
 			{			
-			int bitmask = (1<<(13-i+2));
+			int bitmask = (1<<((13-i)+2));
 			if((pad->buttonStatus^0xffff) & bitmask)
 				Movie.inputBufferPtr[i] = (uint8)pad_mnemonics[i];
 			else //otherwise write an unset bit
@@ -794,8 +794,8 @@ void MOV_WriteControl() {
 			controlFlags = 5;
 		if (MovieControl.VSyncWA)
 			controlFlags = 6;
-		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+3)-Movie.inputBuffer));
-		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\n\r",controlFlags); 	
+		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+4)-Movie.inputBuffer));
+		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\r\n",controlFlags); 	
 	}
 	else
 	{
@@ -871,7 +871,7 @@ int MovieFreeze(gzFile f, int Mode) {
 
 	//saving state
 	if (Mode == 1)
-		bufSize = Movie.bytesPerFrame * (Movie.MaxRecFrames+1);
+		bufSize = Movie.bytesPerFrame * (Movie.currentFrame+1);
 
 	//saving/loading state
 	gzfreezel(&Movie.currentFrame);
@@ -906,7 +906,7 @@ int MovieFreeze(gzFile f, int Mode) {
 		if (Movie.mode == MOVIEMODE_RECORD && !PSXjin_LuaRerecordCountSkip())
 			Movie.rerecordCount++;
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
-		
+
 		//update information GPU OSD after loading a savestate
 		GPUsetlagcounter(Movie.lagCounter);
 		GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
@@ -914,6 +914,6 @@ int MovieFreeze(gzFile f, int Mode) {
 		buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
 		GPUinputdisplay(buttonToSend);
 	}
-
+	printf("%d MODE			%d Movie.inputBufferPtr\n", Mode, Movie.inputBufferPtr);
 	return 0;
 }
