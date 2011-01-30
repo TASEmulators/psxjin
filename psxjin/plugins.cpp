@@ -131,7 +131,7 @@ END_EXTERN_C
 
 static const char *err;
 static int errval;
-
+PadDataS PaddInput;
 void ConfigurePlugins();
 
 void CALLBACK GPU__readDataMem(unsigned long *pMem, int iSize) {
@@ -443,9 +443,9 @@ unsigned char _PADpoll(unsigned char value) {
 
 unsigned char CALLBACK PAD1__startPoll(int pad) {
 	PadDataS padd;
-
+	
 	PAD1_readPort1(&padd);
-
+	memcpy(&PaddInput,&padd,sizeof(padd));
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
 	if (luaAnalogJoy != NULL) {
@@ -554,7 +554,8 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	PadDataS padd;
 	if (Movie.MultiTrack && ((Movie.RecordPlayer == 2) || (Movie.RecordPlayer == 4)))
 	{
-		PAD1_readPort1(&padd);
+		PAD2_readPort2(&padd);
+		memcpy(&padd,&PaddInput,sizeof(padd));
 	}
 	else
 	{
