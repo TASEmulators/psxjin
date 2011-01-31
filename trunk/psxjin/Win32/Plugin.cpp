@@ -46,6 +46,43 @@ int ShowPic=0;
 char Text[255];
 int ret;
 
+
+void CDOpenClose()
+{
+	if (Movie.mode == MOVIEMODE_RECORD)
+	{
+		MovieControl.cdCase ^= 1;
+		if (cdOpenCase < 0) {
+			if (MovieControl.cdCase)
+				GPUdisplayText("*PSXjin*: CD Case Will Close On Next Frame");
+			else
+				GPUdisplayText("*PSXjin*: CD Case Won't Close On Next Frame");
+		}
+		else {
+			if (MovieControl.cdCase)
+				GPUdisplayText("*PSXjin*: CD Case Will Open On Next Frame");
+			else
+				GPUdisplayText("*PSXjin*: CD Case Won't Open On Next Frame");
+		}
+	}
+	else 
+	{
+		cdOpenCase ^= -1;
+		if (cdOpenCase < 0) {
+			GPUdisplayText(_("*PSXjin*: CD Case Opened"));
+		}
+		else {
+			GPUdisplayText(_("*PSXjin*: CD Case Closed"));
+			CDRclose();
+			CDRopen(IsoFile);
+			CheckCdrom();
+			if (LoadCdrom() == -1)
+				SysMessage(_("Could not load Cdrom"));
+		}
+	}
+		return;
+}
+
 void gpuShowPic() {
 	gzFile f;
 
@@ -634,36 +671,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CDCASE].key
 	&& modifiers == EmuCommandTable[EMUCMD_CDCASE].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
-			MovieControl.cdCase ^= 1;
-			if (cdOpenCase < 0) {
-				if (MovieControl.cdCase)
-					GPUdisplayText("*PSXjin*: CD Case Will Close On Next Frame");
-				else
-					GPUdisplayText("*PSXjin*: CD Case Won't Close On Next Frame");
-			}
-			else {
-				if (MovieControl.cdCase)
-					GPUdisplayText("*PSXjin*: CD Case Will Open On Next Frame");
-				else
-					GPUdisplayText("*PSXjin*: CD Case Won't Open On Next Frame");
-			}
-		}
-		else {
-			cdOpenCase ^= -1;
-			if (cdOpenCase < 0) {
-				GPUdisplayText(_("*PSXjin*: CD Case Opened"));
-			}
-			else {
-				GPUdisplayText(_("*PSXjin*: CD Case Closed"));
-				CDRclose();
-				CDRopen(IsoFile);
-				CheckCdrom();
-				if (LoadCdrom() == -1)
-					SysMessage(_("Could not load Cdrom"));
-			}
-		}
-		return;
+		CDOpenClose();
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STARTAVI].key

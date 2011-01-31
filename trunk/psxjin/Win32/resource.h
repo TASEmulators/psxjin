@@ -374,6 +374,7 @@
 #define IDC_PORT2_MTAP                  1326
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_RECENT_CLEAR                 39900
+#define ID_EMULATOR_CDCLOSE				39980
 #define ID_FILE_STATES_SAVE_SLOT9       39981
 #define ID_FILE_STATES_SAVE_SLOT8       39982
 #define ID_FILE_STATES_SAVE_SLOT7       39983
