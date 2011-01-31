@@ -2,8 +2,8 @@
 #define __MOVIE_H__
 
 #define STANDARD_PAD_SIZE 15
-#define ANALOG_PAD_SIZE 12
-#define MOUSE_PAD_SIZE 33
+#define ANALOG_PAD_SIZE 33
+#define MOUSE_PAD_SIZE 12
 
 extern int iPause;
 extern int iDoPauseAtVSync;

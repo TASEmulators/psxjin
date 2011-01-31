@@ -688,7 +688,7 @@ void PADhandleKey(int key) {
 			Movie.MultiTrack = !Movie.MultiTrack;
 			if (Movie.MultiTrack)
 			{
-				Movie.RecordPlayer = 3;
+				Movie.RecordPlayer = Movie.NumPlayers+1;
 				GPUdisplayText("*PSXjin*: MultiTrack Enabled");
 			}
 			else
@@ -701,26 +701,26 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_INCPLAYER].keymod)
 	{
 		Movie.RecordPlayer += 1;
-		Movie.RecordPlayer = (Movie.RecordPlayer > 4)? (1):(Movie.RecordPlayer);
+		Movie.RecordPlayer = (Movie.RecordPlayer > Movie.NumPlayers+2)? (1):(Movie.RecordPlayer);
 		return;
 	}
 	if(key == EmuCommandTable[EMUCMD_DECPLAYER].key
 	&& modifiers == EmuCommandTable[EMUCMD_DECPLAYER].keymod)
 	{
 		Movie.RecordPlayer -= 1;
-		Movie.RecordPlayer = (Movie.RecordPlayer == 0)? (4):(Movie.RecordPlayer);
+		Movie.RecordPlayer = (Movie.RecordPlayer == 0)? (Movie.NumPlayers+2):(Movie.RecordPlayer);
 		return;
 	}
 	if(key == EmuCommandTable[EMUCMD_SELECTALL].key
 	&& modifiers == EmuCommandTable[EMUCMD_SELECTALL].keymod)
 	{
-		Movie.RecordPlayer = 4;		
+		Movie.RecordPlayer = Movie.NumPlayers+2;		
 		return;
 	}
 	if(key == EmuCommandTable[EMUCMD_SELECTNONE].key
 	&& modifiers == EmuCommandTable[EMUCMD_SELECTNONE].keymod)
 	{
-		Movie.RecordPlayer = 3;		
+		Movie.RecordPlayer = Movie.NumPlayers+1;		
 		return;
 	}
 }

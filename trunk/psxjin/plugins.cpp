@@ -370,7 +370,9 @@ static unsigned char buf[256];
 unsigned char stdpar[10] = { 0x00, 0x41, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 unsigned char mousepar[8] = { 0x00, 0x12, 0x5a, 0xff, 0xff, 0xff, 0xff };
 unsigned char analogpar[9] = { 0x00, 0xff, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-
+unsigned char mtappar[34] = { 0x00, 0x80, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+							  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+							  0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 static int bufcount, bufc;
 
 PadDataS padd1, padd2;
@@ -384,7 +386,6 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 			mousepar[4] = pad->buttonStatus >> 8;
 			mousepar[5] = pad->moveX;
 			mousepar[6] = pad->moveY;
-
 			memcpy(buf, mousepar, 7);
 			bufcount = 6;
 			break;
@@ -436,6 +437,61 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 	return buf[bufc++];
 }
 
+unsigned char _xPADstartPoll(PadDataS *padd) {
+	bufc = 0;
+	PadDataS pad[4];
+	memcpy(&pad,padd,sizeof(pad));	
+	int psize = 8;
+	for (int i = 0; i < 4; i++)
+	{
+		mtappar[3+psize*i+1] = 0x5A;
+		switch (pad->controllerType) {
+			case PSE_PAD_TYPE_MOUSE:
+				mtappar[3+psize*i] = 0x12;
+				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad[i].moveX;
+				mtappar[3+psize*i+5] = pad[i].moveY;								
+				break;
+			case PSE_PAD_TYPE_NEGCON: // npc101/npc104(slph00001/slph00069)
+				mtappar[3+psize*i] = 0x23;
+				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad->rightJoyX;
+				mtappar[3+psize*i+5] = pad->rightJoyY;
+				mtappar[3+psize*i+6] = pad->leftJoyX;
+				mtappar[3+psize*i+7] = pad->leftJoyY;	
+				break;
+			case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+				mtappar[3+psize*i] = 0x73;
+				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad->rightJoyX;
+				mtappar[3+psize*i+5] = pad->rightJoyY;
+				mtappar[3+psize*i+6] = pad->leftJoyX;
+				mtappar[3+psize*i+7] = pad->leftJoyY;	
+				break;
+			case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+				mtappar[3+psize*i] = 0x53;
+				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad->rightJoyX;
+				mtappar[3+psize*i+5] = pad->rightJoyY;
+				mtappar[3+psize*i+6] = pad->leftJoyX;
+				mtappar[3+psize*i+7] = pad->leftJoyY;				
+				break;
+			case PSE_PAD_TYPE_STANDARD:
+			default:
+				mtappar[3+psize*i] = 0x41;
+				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;				
+		}
+	}
+	memcpy(buf, mtappar, 34);
+	bufcount = 34;
+	return buf[bufc++];
+}
+
 unsigned char _PADpoll(unsigned char value) {
 	if (bufc > bufcount) return 0;
 	return buf[bufc++];
@@ -443,7 +499,13 @@ unsigned char _PADpoll(unsigned char value) {
 
 unsigned char CALLBACK PAD1__startPoll(int pad) {
 	PadDataS padd;
-	
+	PadDataS Mpadds[4];
+	PadDataS epadd; //empty pad;
+	epadd.buttonStatus = 0xffff;
+	epadd.leftJoyX = 128;
+	epadd.leftJoyY = 128;
+	epadd.rightJoyX = 128;
+	epadd.rightJoyY = 128;
 	PAD1_readPort1(&padd);
 	memcpy(&PaddInput,&padd,sizeof(padd));
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
@@ -457,53 +519,85 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 
 
 /* movie stuff start */
-
-if (iJoysToPoll == 2) { // only poll once each frame
-	if (Movie.mode == MOVIEMODE_RECORD)
-	{
-		if (Movie.MultiTrack) 
-		{
-			if ((Movie.RecordPlayer == 1) || (Movie.RecordPlayer == 4)) 
+	if (!Movie.Port1_Mtap) {
+		if (iJoysToPoll == 2) { // only poll once each frame
+			if (Movie.mode == MOVIEMODE_RECORD)
 			{
-				MOV_WriteJoy(&padd,Movie.padType1);
-			}
-			else 
-			{
-				if (Movie.currentFrame >= Movie.MaxRecFrames)
+				if (Movie.MultiTrack) 
 				{
-					padd.buttonStatus = 0xffff;
-					padd.leftJoyX = 128;
-					padd.leftJoyY = 128;
-					padd.rightJoyX = 128;
-					padd.rightJoyY = 128;
-					MOV_WriteJoy(&padd,Movie.padType1);
-				} 
+					if ((Movie.RecordPlayer == 1) || (Movie.RecordPlayer == 4)) 
+					{
+						MOV_WriteJoy(&padd,Movie.padType1);
+					}
+					else 
+					{
+						if (Movie.currentFrame >= Movie.MaxRecFrames)
+						{						
+							MOV_WriteJoy(&epadd,Movie.padType1);
+						} 
+						else
+						{
+							MOV_ReadJoy(&padd,Movie.padType1);
+						}
+					}
+				}
 				else
 				{
-					MOV_ReadJoy(&padd,Movie.padType1);
+					MOV_WriteJoy(&padd,Movie.padType1);
 				}
 			}
+			else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
+			{
+				MOV_ReadJoy(&padd,Movie.padType1);
+			}
+			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			iJoysToPoll--;
+			return _PADstartPoll(&padd);
 		}
 		else
 		{
-			MOV_WriteJoy(&padd,Movie.padType1);
+			memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
+			return _PADstartPoll(&padd);
+		}
+	} else {
+		if (iJoysToPoll == 2) { // only poll once each frame		
+			for (int Player = 0; Player < 4; Player++)		
+			{		
+				if (Movie.mode == MOVIEMODE_RECORD) {
+					if ((Movie.RecordPlayer == Player+1) || (Movie.RecordPlayer == Movie.NumPlayers+2)) 
+					{
+						MOV_WriteJoy(&padd,Movie.padType1);
+						memcpy(&Mpadds[Player],&padd,sizeof(padd));
+					}
+					else 
+					{
+						if (Movie.currentFrame >= Movie.MaxRecFrames)
+						{							
+							MOV_WriteJoy(&epadd,Movie.padType1);
+						} 
+						else
+						{
+							MOV_ReadJoy(&Mpadds[Player],Movie.padType1);
+						}
+					}				
+				} else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames) {
+					MOV_ReadJoy(&Mpadds[Player],Movie.padType1);
+				}
+				memcpy(&Movie.lastPads1,&Mpadds[Player],sizeof(Mpadds));
+				memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			}
+			iJoysToPoll--;
+			return _xPADstartPoll(&Mpadds[0]);
+		}
+		else
+		{
+			memcpy(&Mpadds,&Movie.lastPads1,sizeof(Mpadds));
+			memcpy(&Movie.lastPad2,&padd,sizeof(padd));
+			return _xPADstartPoll(&Mpadds[0]);
 		}
 	}
-	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
-	{
-		MOV_ReadJoy(&padd,Movie.padType1);
-	}
-	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
-	iJoysToPoll--;
 }
-else
-{
-	memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
-}
-/* movie stuff end */
 
-	return _PADstartPoll(&padd);
-}
 
 unsigned char CALLBACK PAD1__poll(unsigned char value) {
 	return _PADpoll(value);
@@ -555,7 +649,8 @@ int LoadPAD1plugin(char *PAD1dll) {
 
 unsigned char CALLBACK PAD2__startPoll(int pad) {
 	PadDataS padd;
-	if (Movie.MultiTrack && ((Movie.RecordPlayer == 2) || (Movie.RecordPlayer == 4)))
+	PadDataS Mpadds[4];
+	if (Movie.MultiTrack && ((Movie.RecordPlayer >= Movie.P2_Start) || (Movie.RecordPlayer == Movie.NumPlayers+2)))
 	{
 		PAD2_readPort2(&padd);
 		memcpy(&padd,&PaddInput,sizeof(padd));
@@ -574,49 +669,90 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	}
 
 /* movie stuff start */
-
-if (iJoysToPoll == 1) { // only poll once each frame
-	if (Movie.mode == MOVIEMODE_RECORD)
-	{
-		if (Movie.MultiTrack) 
+if (!Movie.Port2_Mtap) {
+	if (iJoysToPoll == 1) { // only poll once each frame
+		if (Movie.mode == MOVIEMODE_RECORD)
 		{
-			if ((Movie.RecordPlayer == 2) || (Movie.RecordPlayer == 4)) 
+			if (Movie.MultiTrack) 
+			{
+				if ((Movie.RecordPlayer == Movie.P2_Start) || (Movie.RecordPlayer == Movie.NumPlayers+2)) 
+				{
+					MOV_WriteJoy(&padd,Movie.padType2);
+				}
+				else 
+				{
+					if (Movie.currentFrame >= Movie.MaxRecFrames)
+					{
+						padd.buttonStatus = 0xffff;
+						padd.leftJoyX = 128;
+						padd.leftJoyY = 128;
+						padd.rightJoyX = 128;
+						padd.rightJoyY = 128;
+						MOV_WriteJoy(&padd,Movie.padType2);
+					} 
+					else
+					{
+						MOV_ReadJoy(&padd,Movie.padType2);
+					}
+				}
+			}
+			else
 			{
 				MOV_WriteJoy(&padd,Movie.padType2);
 			}
-			else 
-			{
-				if (Movie.currentFrame >= Movie.MaxRecFrames)
-				{
-					padd.buttonStatus = 0xffff;
-					padd.leftJoyX = 128;
-					padd.leftJoyY = 128;
-					padd.rightJoyX = 128;
-					padd.rightJoyY = 128;
-					MOV_WriteJoy(&padd,Movie.padType2);
-				} 
-				else
-				{
-					MOV_ReadJoy(&padd,Movie.padType2);
+		}
+		else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
+			MOV_ReadJoy(&padd,Movie.padType2);
+		memcpy(&Movie.lastPad2,&padd,sizeof(padd));
+		iJoysToPoll--;
+		return _PADstartPoll(&padd);
+	}
+	else
+	{
+		memcpy(&padd,&Movie.lastPad2,sizeof(Movie.lastPad2));
+		return _PADstartPoll(&padd);
+	}
+	} else {
+		if (iJoysToPoll == 1) { // only poll once each frame		
+			for (int Player = 0; Player < 4; Player++)		
+			{		
+				if (Movie.mode == MOVIEMODE_RECORD) {
+					if ((Movie.RecordPlayer == Movie.P2_Start+Player) || (Movie.RecordPlayer == Movie.NumPlayers+2)) 
+					{
+						MOV_WriteJoy(&Mpadds[Player],Movie.padType2);
+					}
+					else 
+					{
+						if (Movie.currentFrame >= Movie.MaxRecFrames)
+						{
+							padd.buttonStatus = 0xffff;
+							padd.leftJoyX = 128;
+							padd.leftJoyY = 128;
+							padd.rightJoyX = 128;
+							padd.rightJoyY = 128;
+							MOV_WriteJoy(&Mpadds[Player],Movie.padType2);
+						} 
+						else
+						{
+							MOV_ReadJoy(&Mpadds[Player],Movie.padType2);
+						}
+					}				
+				} else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames) {
+					MOV_ReadJoy(&Mpadds[Player],Movie.padType2);
 				}
+				memcpy(&Movie.lastPads2,&Mpadds[Player],sizeof(Mpadds));
+				memcpy(&Movie.lastPad2,&padd,sizeof(padd));
 			}
+			iJoysToPoll--;
+			return _xPADstartPoll(&Mpadds[0]);
 		}
 		else
 		{
-			MOV_WriteJoy(&padd,Movie.padType2);
+			memcpy(&Mpadds,&Movie.lastPads2,sizeof(Mpadds));
+			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			return _xPADstartPoll(&Mpadds[0]);
 		}
 	}
-	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
-		MOV_ReadJoy(&padd,Movie.padType2);
-	memcpy(&Movie.lastPad2,&padd,sizeof(padd));
-	iJoysToPoll--;
-}
-else
-	memcpy(&padd,&Movie.lastPad2,sizeof(Movie.lastPad2));
-
-/* movie stuff end */
-
-	return _PADstartPoll(&padd);
 }
 
 unsigned char CALLBACK PAD2__poll(unsigned char value) {
