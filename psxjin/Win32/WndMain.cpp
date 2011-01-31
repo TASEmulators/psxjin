@@ -663,7 +663,12 @@ void RunCD(HWND hWnd)
 		if (BIOSExists())
 		{
 			ClosePlugins();
-			if(!OpenPlugins(hWnd)) return;
+			if(!OpenPlugins(hWnd)) 
+			{
+				iCallW32Gui =  1;
+				CDRclose();
+				return;
+			}
 			
 			SysReset();
 			NeedReset = 0;
@@ -672,6 +677,7 @@ void RunCD(HWND hWnd)
 				ClosePlugins();
 				RestoreWindow();
 				SysMessage(_("Could not load Cdrom"));
+				IsoFile[0] = 0;
 				return;
 			}
 			
