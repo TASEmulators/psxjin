@@ -79,44 +79,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,18,0,0
- PRODUCTVERSION 1,18,0,0
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x4L
- FILETYPE 0x2L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "FileDescription", "P.E.Op.S. gpu soft plugin"
-            VALUE "FileVersion", "1, 18, 0, 0"
-            VALUE "InternalName", "P.E.Op.S. soft gpu"
-            VALUE "LegalCopyright", "GPL"
-            VALUE "OriginalFilename", "gpuPeopsSoft.DLL"
-            VALUE "ProductName", "gpuPeopsSoft"
-            VALUE "ProductVersion", "1, 18, 0, 0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog
 //
 
