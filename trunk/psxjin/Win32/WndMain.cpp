@@ -941,6 +941,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				return TRUE;
 			}
 			switch (LOWORD(wParam)) {
+/*
 				case ID_FILE_RUN_EXE:
 					if (!Open_File_Proc(File)) return TRUE;
 					SetMenu(hWnd, NULL);
@@ -951,7 +952,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					Running = 1;
 					psxCpu->Execute();
 					return TRUE;
-
+*/
 				case ID_FILE_EXIT:
 					ExitPSXjin();
 					return TRUE;
@@ -1038,6 +1039,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						iVolume = 0;
 					else 
 						iVolume = 5;
+					return TRUE;
+				case ID_EMULATOR_CDCLOSE:
+					CDOpenClose();
 					return TRUE;
 				case ID_CONFIGURATION_GRAPHICS:
 					GPUconfigure();
@@ -2022,7 +2026,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
 	ADDMENUITEM(1, _("Recent"), ID_FILE_RECENT_MOVIE);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE);
+	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE); //adelikat: For running SDK made games, disabling in favor of a commandline argument instead
 	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
