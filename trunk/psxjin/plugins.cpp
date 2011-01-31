@@ -490,13 +490,16 @@ if (iJoysToPoll == 2) { // only poll once each frame
 		}
 	}
 	else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
+	{
 		MOV_ReadJoy(&padd,Movie.padType1);
+	}
 	memcpy(&Movie.lastPad1,&padd,sizeof(padd));
 	iJoysToPoll--;
 }
 else
+{
 	memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
-
+}
 /* movie stuff end */
 
 	return _PADstartPoll(&padd);

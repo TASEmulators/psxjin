@@ -673,6 +673,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
 	if (Movie.isText)
 	{
+		char temp[1024];		
 		const char mouse_mnemonics[] = "LR";
 		const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
 	switch (type) {
@@ -687,7 +688,9 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 				Movie.inputBufferPtr[i] = '.';
 			}		
 			Movie.inputBufferPtr += 2;
-			Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, " %03d %03d|", pad->moveX, pad->moveY);
+			int size = sprintf(temp, " %03d %03d|", pad->moveX, pad->moveY);
+			memcpy(Movie.inputBufferPtr,temp,size);
+			Movie.inputBufferPtr += size;
 			break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
 		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
@@ -701,7 +704,9 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}				
 			Movie.inputBufferPtr += 16;
-			Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, " %03d %03d %03d %03d|", pad->leftJoyX, pad->leftJoyY, pad->rightJoyX, pad->rightJoyY);
+			int size = sprintf(temp, " %03d %03d %03d %03d|", pad->leftJoyX, pad->leftJoyY, pad->rightJoyX, pad->rightJoyY);
+			memcpy(Movie.inputBufferPtr,temp,size);
+			Movie.inputBufferPtr += size;
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
@@ -778,9 +783,10 @@ void MOV_ReadControl() {
 	
 }
 
-void MOV_WriteControl() {
+void MOV_WriteControl() {	
 	if (Movie.isText)
 	{
+		char temp[10];
 		int controlFlags = 0;
 		if (MovieControl.reset)
 			controlFlags = 1;
@@ -795,7 +801,10 @@ void MOV_WriteControl() {
 		if (MovieControl.VSyncWA)
 			controlFlags = 6;
 		ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+4)-Movie.inputBuffer));
-		Movie.inputBufferPtr += sprintf((char*)Movie.inputBufferPtr, "%d|\r\n",controlFlags); 	
+		sprintf(temp, "%d|\r\n",controlFlags); 	
+		memcpy(Movie.inputBufferPtr,temp,4);
+		Movie.inputBufferPtr +=  4;
+
 	}
 	else
 	{
