@@ -180,19 +180,50 @@ if (Movie.mode == MOVIEMODE_PLAY) {
 
 // write/read joypad information for this frame
 if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
-	if (Movie.mode == MOVIEMODE_RECORD) {		
-		MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);
-		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);		
+	if (!Movie.Port1_Mtap)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {		
+			MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);		
+		}
+			else if (Movie.mode == MOVIEMODE_PLAY) {
+				MOV_ReadJoy(&paddtemp,Movie.padType1);		
+		}
+	} else {
+		for (int i = 0; i < 4; i++)
+		{
+			if (Movie.mode == MOVIEMODE_RECORD) {		
+				MOV_WriteJoy(&Movie.lastPads1[i],Movie.padType1);		
+			}
+			else if (Movie.mode == MOVIEMODE_PLAY) {
+					MOV_ReadJoy(&paddtemp,Movie.padType1);		
+			}	
+		}
 	}
-	else if (Movie.mode == MOVIEMODE_PLAY) {
-		MOV_ReadJoy(&paddtemp,Movie.padType1);
-		MOV_ReadJoy(&paddtemp,Movie.padType2);
+	if (!Movie.Port2_Mtap)
+	{
+		if (Movie.mode == MOVIEMODE_RECORD) {		
+			MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);		
+		}
+			else if (Movie.mode == MOVIEMODE_PLAY) {
+				MOV_ReadJoy(&paddtemp,Movie.padType2);		
+		}
+	} else {
+		for (int i = 0; i < 4; i++)
+		{
+			if (Movie.mode == MOVIEMODE_RECORD) {		
+				MOV_WriteJoy(&Movie.lastPads2[i],Movie.padType2);		
+			}
+			else if (Movie.mode == MOVIEMODE_PLAY) {
+					MOV_ReadJoy(&paddtemp,Movie.padType2);		
+			}	
+		}
 	}
 	Movie.lagCounter++;
 	GPUsetlagcounter(Movie.lagCounter);
 }
 else if (iJoysToPoll == 1) { //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
-	if (Movie.mode == MOVIEMODE_RECORD)
+	printf("CATASTROPHIC FAILURE: CONTACT DARKKOBOLD");
+	if (Movie.mode == MOVIEMODE_RECORD)		
 		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
 	else if (Movie.mode == MOVIEMODE_PLAY)
 		MOV_ReadJoy(&paddtemp,Movie.padType2);

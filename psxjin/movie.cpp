@@ -25,61 +25,104 @@ static const char szFileHeader[] = "PJM "; //movie file identifier
 
 int SetBytesPerFrame( MovieType Movie)
 {
-	if (Movie.isText)
-	{
-	Movie.bytesPerFrame = 4;
-	switch (Movie.padType1) {
-		case PSE_PAD_TYPE_STANDARD:
-			Movie.bytesPerFrame += STANDARD_PAD_SIZE;
-			break;
-		case PSE_PAD_TYPE_MOUSE:
-			Movie.bytesPerFrame += MOUSE_PAD_SIZE;
-			break;
-		case PSE_PAD_TYPE_ANALOGPAD:
-		case PSE_PAD_TYPE_ANALOGJOY:
-			Movie.bytesPerFrame += ANALOG_PAD_SIZE;
-			break;
+	int loopcount;
+	if (Movie.isText) {
+		Movie.bytesPerFrame = 4;	
+		if (Movie.Port1_Mtap) 
+		{
+			loopcount = 4;
+		}
+		else
+		{
+			loopcount = 1;
+		}
+		for (int i = 0; i < loopcount; i++)
+		{
+			switch (Movie.padType1) {
+				case PSE_PAD_TYPE_STANDARD:
+					Movie.bytesPerFrame += STANDARD_PAD_SIZE;
+					break;
+				case PSE_PAD_TYPE_MOUSE:
+					Movie.bytesPerFrame += MOUSE_PAD_SIZE;
+					break;
+				case PSE_PAD_TYPE_ANALOGPAD:
+				case PSE_PAD_TYPE_ANALOGJOY:
+					Movie.bytesPerFrame += ANALOG_PAD_SIZE;
+					break;
+			}
+		}
+		if (Movie.Port2_Mtap) 
+		{
+			loopcount = 4;
+		}
+		else
+		{
+			loopcount = 1;
+		}
+		for (int i = 0; i < loopcount; i++)
+		{
+			switch (Movie.padType2) {
+				case PSE_PAD_TYPE_STANDARD:
+					Movie.bytesPerFrame += STANDARD_PAD_SIZE;
+					break;
+				case PSE_PAD_TYPE_MOUSE:
+					Movie.bytesPerFrame += MOUSE_PAD_SIZE;
+					break;
+				case PSE_PAD_TYPE_ANALOGPAD:
+				case PSE_PAD_TYPE_ANALOGJOY:
+					Movie.bytesPerFrame += ANALOG_PAD_SIZE;
+					break;
+			}
+		}
 	}
-	switch (Movie.padType2) {
-		case PSE_PAD_TYPE_STANDARD:
-			Movie.bytesPerFrame += STANDARD_PAD_SIZE;
-			break;
-		case PSE_PAD_TYPE_MOUSE:
-			Movie.bytesPerFrame += MOUSE_PAD_SIZE;
-			break;
-		case PSE_PAD_TYPE_ANALOGPAD:
-		case PSE_PAD_TYPE_ANALOGJOY:
-			Movie.bytesPerFrame += ANALOG_PAD_SIZE;
-			break;
-	}
-	}
-	else
-	{
+	else {
 		Movie.bytesPerFrame = 1;
-		switch (Movie.padType1) {
-		case PSE_PAD_TYPE_STANDARD:
-			Movie.bytesPerFrame += 2;
-			break;
-		case PSE_PAD_TYPE_MOUSE:
-			Movie.bytesPerFrame += 4;
-			break;
-		case PSE_PAD_TYPE_ANALOGPAD:
-		case PSE_PAD_TYPE_ANALOGJOY:
-			Movie.bytesPerFrame += 6;
-			break;
-	}
-	switch (Movie.padType2) {
-		case PSE_PAD_TYPE_STANDARD:
-			Movie.bytesPerFrame += 2;
-			break;
-		case PSE_PAD_TYPE_MOUSE:
-			Movie.bytesPerFrame += 4;
-			break;
-		case PSE_PAD_TYPE_ANALOGPAD:
-		case PSE_PAD_TYPE_ANALOGJOY:
-			Movie.bytesPerFrame += 6;
-			break;
-	}
+		if (Movie.Port1_Mtap) 
+		{
+			loopcount = 4;
+		}
+		else
+		{
+			loopcount = 1;
+		}
+		for (int i = 0; i < loopcount; i++)
+		{
+			switch (Movie.padType1) {
+			case PSE_PAD_TYPE_STANDARD:
+				Movie.bytesPerFrame += 2;
+				break;
+			case PSE_PAD_TYPE_MOUSE:
+				Movie.bytesPerFrame += 4;
+				break;
+			case PSE_PAD_TYPE_ANALOGPAD:
+			case PSE_PAD_TYPE_ANALOGJOY:
+				Movie.bytesPerFrame += 6;
+				break;
+			}
+		}
+		if (Movie.Port1_Mtap) 
+		{
+			loopcount = 4;
+		}
+		else	
+		{	
+			loopcount = 1;
+		}
+		for (int i = 0; i < loopcount; i++)
+		{
+			switch (Movie.padType2) {
+				case PSE_PAD_TYPE_STANDARD:
+					Movie.bytesPerFrame += 2;
+					break;
+				case PSE_PAD_TYPE_MOUSE:
+					Movie.bytesPerFrame += 4;
+					break;
+				case PSE_PAD_TYPE_ANALOGPAD:
+				case PSE_PAD_TYPE_ANALOGJOY:
+					Movie.bytesPerFrame += 6;
+					break;
+			}
+		}
 	}
 	return Movie.bytesPerFrame;
 }
@@ -88,7 +131,7 @@ int SetBytesPerFrame( MovieType Movie)
 
 static void ReserveInputBufferSpace(uint32 spaceNeeded)
 {
-	if (spaceNeeded > Movie.inputBufferSize || Movie.inputBufferSize == 0) {
+	if (spaceNeeded > Movie.inputBufferSize) {
 		uint32 ptrOffset = Movie.inputBufferPtr - Movie.inputBuffer;
 		uint32 allocChunks = spaceNeeded / BUFFER_GROWTH_SIZE;
 		Movie.inputBufferSize = BUFFER_GROWTH_SIZE * (allocChunks+1);
@@ -103,8 +146,7 @@ static void ReserveInputBufferSpace(uint32 spaceNeeded)
 -----------------------------------------------------------------------------*/
 
 int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
-	char readHeader[4];
-	int empty;
+	char readHeader[4];	
 	FILE* fd;
 	int nMetaLen;
 	int i;
@@ -128,7 +170,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	}
 	fread(&tempMovie->emuVersion, 1, 4, fd);  //emulator version number
 
-	fread(&tempMovie->movieFlags, 1, 1, fd);  //read flags
+	fread(&tempMovie->movieFlags, 1, 2, fd);  //read flags
 	{
 		tempMovie->saveStateIncluded = tempMovie->movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
 		tempMovie->memoryCardIncluded = tempMovie->movieFlags&MOVIE_FLAG_MEMORY_CARDS;
@@ -136,8 +178,22 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->irqHacksIncluded = tempMovie->movieFlags&MOVIE_FLAG_IRQ_HACKS;
 		tempMovie->palTiming = tempMovie->movieFlags&MOVIE_FLAG_PAL_TIMING;
 		tempMovie->isText = tempMovie->movieFlags&MOVIE_FLAG_IS_TEXT;
+		tempMovie->Port1_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P1_MTAP;
+		tempMovie->Port2_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P2_MTAP;
 	}
-	fread(&empty, 1, 1, fd);  //reserved for more flags
+	int NumPlayers= 2;
+	tempMovie->P2_Start = 2;
+	if (tempMovie->Port1_Mtap)
+	{
+		NumPlayers += 3;
+		tempMovie->P2_Start += 3;
+	}
+	if (tempMovie->Port1_Mtap)
+	{
+		NumPlayers += 3;
+		tempMovie->P2_Start += 3;
+	}
+	//fread(&empty, 1, 1, fd);  //reserved for more flags
 
 	fread(&tempMovie->padType1, 1, 1, fd);
 	fread(&tempMovie->padType2, 1, 1, fd);
@@ -239,12 +295,16 @@ static void WriteMovieHeader()
 		Movie.movieFlags |= MOVIE_FLAG_PAL_TIMING;
 	if (Movie.isText)
 		Movie.movieFlags |= MOVIE_FLAG_IS_TEXT;
+	if (Movie.Port1_Mtap)	
+		Movie.movieFlags |= MOVIE_FLAG_P1_MTAP;
+	if (Movie.Port2_Mtap)
+		Movie.movieFlags |= MOVIE_FLAG_P2_MTAP;
 
+	
 	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
 	fwrite(&movieVersion, 1, 4, fpMovie);          //movie version
 	fwrite(&emuVersion, 1, 4, fpMovie);            //emu version
-	fwrite(&Movie.movieFlags, 1, 1, fpMovie);      //flags
-	fwrite(&empty, 1, 1, fpMovie);                 //reserved for more flags
+	fwrite(&Movie.movieFlags, 1, 2, fpMovie);      //flags	
 	fwrite(&Movie.padType1, 1, 1, fpMovie);        //padType1
 	fwrite(&Movie.padType2, 1, 1, fpMovie);        //padType2
 	fwrite(&empty, 1, 4, fpMovie);                 //total frames

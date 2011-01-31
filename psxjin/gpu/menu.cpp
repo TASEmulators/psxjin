@@ -254,12 +254,13 @@ void DisplayInput(void)
 	#endif
 }
 
-void DisplayRecording(int RecNum)
+void DisplayRecording(int RecNum, int MaxPlayer)
 {
 	#ifdef _WINDOWS
 	HDC hdc;
 	HFONT hFO;
-
+	char *text;
+	text = new char[10];
 	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
 	hFO=(HFONT)SelectObject(hdc,hGFont);
 
@@ -267,23 +268,18 @@ void DisplayRecording(int RecNum)
 	if (bTransparent)
 		SetBkMode(hdc,TRANSPARENT);
 	else SetBkColor(hdc,RGB(0,0,0));
-	switch(RecNum)
-	{
-		case 1:
-		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,"Player 1\0",8,NULL);
-		break;
-		case 2: 
-		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,"Player 2\0",8,NULL);
-		break;
-		case 3:
-		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,"None\0",4,NULL);
-		break;
-		case 4:
-		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,"All\0",3,NULL);
-		break;
+	if (RecNum <= MaxPlayer)
+	{	
+		sprintf(text,"Player %d\0",RecNum);
+		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,text,8,NULL);
 	}
+	else if (RecNum == MaxPlayer+1)
+		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,"None\0",4,NULL);
+	else
+		ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-24,0,NULL,"All\0",3,NULL);			
 	SelectObject(hdc,hFO);
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	delete text;
 	#endif
 }
 

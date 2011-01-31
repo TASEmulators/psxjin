@@ -4576,7 +4576,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 			DisplayInput();
 			if (Movie.MultiTrack)
 			{
-				DisplayRecording(Movie.RecordPlayer);
+				DisplayRecording(Movie.RecordPlayer, Movie.NumPlayers);
 			}
 		}
 	}

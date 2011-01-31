@@ -164,8 +164,10 @@ struct MovieType {
 	int isText;							 //set if Movie type is Text, other wise it is binary
 	PadDataS lastPad1;                   //last joypad1 buttons polled
 	PadDataS lastPad2;                   //last joypad2 buttons polled
+	PadDataS lastPads1[4];
+	PadDataS lastPads2[4];
 	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
-	char movieFlags;                     //movie flags byte used in header
+	int16 movieFlags;                     //movie flags byte used in header
 	unsigned char padType1;              //joypad1 type
 	unsigned char padType2;              //joypad2 type
 	unsigned long totalFrames;           //total movie frames
@@ -207,12 +209,15 @@ struct MovieType {
 	uint32 inputBufferSize;              //movie input buffer size
 	uint8* inputBufferPtr;               //pointer to the full movie input buffer
 	int AviCount;						 //Number of AVIs created
-	char AviDrive[256];
-	char AviDirectory[256];
-	char AviFnameShort[256];
-	int MultiTrack;
-	int RecordPlayer;
-	
+	char AviDrive[256];					 //Drive where avi will be stored - for splitting
+	char AviDirectory[256];				 //Directory where avi will be stored - for splitting
+	char AviFnameShort[256];			 //Filename where avi will be stored - for splitting
+	int MultiTrack;						//Enable Disable Multitrack
+	int RecordPlayer;					//Which Player are we currently Recording?
+	int Port1_Mtap;						//Is player 1 a Multitap?
+	int Port2_Mtap;						//Is player 2 a Multitap?
+	int NumPlayers;						//Number of players in the movie
+	int P2_Start;						//Where does pad2 start? 		
 };
 
 struct MovieControlType {
@@ -232,6 +237,8 @@ struct MovieControlType {
 #define MOVIE_FLAG_CHEAT_LIST     (1<<4)
 #define MOVIE_FLAG_IRQ_HACKS      (1<<5)
 #define MOVIE_FLAG_IS_TEXT		  (1<<6)
+#define MOVIE_FLAG_P1_MTAP		  (1<<7)
+#define MOVIE_FLAG_P2_MTAP		  (1<<8)
 
 #define MOVIE_CONTROL_RESET       (1<<1)
 #define MOVIE_CONTROL_CDCASE      (1<<2)
