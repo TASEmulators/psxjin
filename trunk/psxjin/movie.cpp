@@ -181,19 +181,21 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->Port1_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P1_MTAP;
 		tempMovie->Port2_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P2_MTAP;
 	}
-	int NumPlayers= 2;
+	tempMovie->NumPlayers= 2;
 	tempMovie->P2_Start = 2;
 	if (tempMovie->Port1_Mtap)
 	{
-		NumPlayers += 3;
+		tempMovie->MultiTrack = 1;
+		tempMovie->NumPlayers += 3;
 		tempMovie->P2_Start += 3;
+		tempMovie->RecordPlayer = tempMovie->NumPlayers + 2;
 	}
-	if (tempMovie->Port1_Mtap)
+	if (tempMovie->Port2_Mtap)
 	{
-		NumPlayers += 3;
-		tempMovie->P2_Start += 3;
-	}
-	//fread(&empty, 1, 1, fd);  //reserved for more flags
+		tempMovie->MultiTrack = 1;
+		tempMovie->RecordPlayer = tempMovie->NumPlayers + 2;
+		tempMovie->NumPlayers += 3;		
+	}	
 
 	fread(&tempMovie->padType1, 1, 1, fd);
 	fread(&tempMovie->padType2, 1, 1, fd);
