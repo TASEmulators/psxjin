@@ -88,7 +88,7 @@ int SetBytesPerFrame( MovieType Movie)
 
 static void ReserveInputBufferSpace(uint32 spaceNeeded)
 {
-	if (spaceNeeded > Movie.inputBufferSize) {
+	if (spaceNeeded > Movie.inputBufferSize || Movie.inputBufferSize == 0) {
 		uint32 ptrOffset = Movie.inputBufferPtr - Movie.inputBuffer;
 		uint32 allocChunks = spaceNeeded / BUFFER_GROWTH_SIZE;
 		Movie.inputBufferSize = BUFFER_GROWTH_SIZE * (allocChunks+1);
