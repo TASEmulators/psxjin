@@ -455,36 +455,36 @@ unsigned char _xPADstartPoll(PadDataS *padd) {
 				break;
 			case PSE_PAD_TYPE_NEGCON: // npc101/npc104(slph00001/slph00069)
 				mtappar[3+psize*i] = 0x23;
-				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
-				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;
-				mtappar[3+psize*i+4] = pad->rightJoyX;
-				mtappar[3+psize*i+5] = pad->rightJoyY;
-				mtappar[3+psize*i+6] = pad->leftJoyX;
-				mtappar[3+psize*i+7] = pad->leftJoyY;	
+				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad[i].rightJoyX;
+				mtappar[3+psize*i+5] = pad[i].rightJoyY;
+				mtappar[3+psize*i+6] = pad[i].leftJoyX;
+				mtappar[3+psize*i+7] = pad[i].leftJoyY;		
 				break;
 			case PSE_PAD_TYPE_ANALOGPAD: // scph1150
 				mtappar[3+psize*i] = 0x73;
-				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
-				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;
-				mtappar[3+psize*i+4] = pad->rightJoyX;
-				mtappar[3+psize*i+5] = pad->rightJoyY;
-				mtappar[3+psize*i+6] = pad->leftJoyX;
-				mtappar[3+psize*i+7] = pad->leftJoyY;	
+				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad[i].rightJoyX;
+				mtappar[3+psize*i+5] = pad[i].rightJoyY;
+				mtappar[3+psize*i+6] = pad[i].leftJoyX;
+				mtappar[3+psize*i+7] = pad[i].leftJoyY;			
 				break;
 			case PSE_PAD_TYPE_ANALOGJOY: // scph1110
 				mtappar[3+psize*i] = 0x53;
-				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
-				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;
-				mtappar[3+psize*i+4] = pad->rightJoyX;
-				mtappar[3+psize*i+5] = pad->rightJoyY;
-				mtappar[3+psize*i+6] = pad->leftJoyX;
-				mtappar[3+psize*i+7] = pad->leftJoyY;				
+				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
+				mtappar[3+psize*i+4] = pad[i].rightJoyX;
+				mtappar[3+psize*i+5] = pad[i].rightJoyY;
+				mtappar[3+psize*i+6] = pad[i].leftJoyX;
+				mtappar[3+psize*i+7] = pad[i].leftJoyY;				
 				break;
 			case PSE_PAD_TYPE_STANDARD:
 			default:
 				mtappar[3+psize*i] = 0x41;
-				mtappar[3+psize*i+2] = pad->buttonStatus & 0xff;
-				mtappar[3+psize*i+3] = pad->buttonStatus >> 8;				
+				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
+				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;				
 		}
 	}
 	memcpy(buf, mtappar, 34);
@@ -574,6 +574,7 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 						if (Movie.currentFrame >= Movie.MaxRecFrames)
 						{							
 							MOV_WriteJoy(&epadd,Movie.padType1);
+							memcpy(&Mpadds[Player],&epadd,sizeof(padd));
 						} 
 						else
 						{
@@ -583,16 +584,16 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 				} else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames) {
 					MOV_ReadJoy(&Mpadds[Player],Movie.padType1);
 				}
-				memcpy(&Movie.lastPads1,&Mpadds[Player],sizeof(Mpadds));
-				memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+				memcpy(&Movie.lastPads1[Player],&Mpadds[Player],sizeof(padd));				
 			}
+			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
 			iJoysToPoll--;
 			return _xPADstartPoll(&Mpadds[0]);
 		}
 		else
 		{
 			memcpy(&Mpadds,&Movie.lastPads1,sizeof(Mpadds));
-			memcpy(&Movie.lastPad2,&padd,sizeof(padd));
+			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
 			return _xPADstartPoll(&Mpadds[0]);
 		}
 	}
