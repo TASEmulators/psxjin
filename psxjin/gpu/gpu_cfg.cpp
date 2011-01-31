@@ -193,7 +193,7 @@ char pConfigFile[MAX_PATH*2] = ".\\psxjin.ini";
 /////////////////////////////////////////////////////////////////////////////
 // globals
 
-char szKeyDefaults[11]={VK_DELETE,VK_INSERT,VK_HOME,VK_END,VK_PRIOR,VK_NEXT,VK_MULTIPLY,VK_SUBTRACT,VK_ADD,VK_F12,0x00};
+char szKeyDefaults[11]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 char szDevName[128];
 
 ////////////////////////////////////////////////////////////////////////
