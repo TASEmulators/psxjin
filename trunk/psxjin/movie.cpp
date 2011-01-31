@@ -961,6 +961,8 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Config.VSyncWA);
 	gzfreezel(&Movie.lastPad1);
 	gzfreezel(&Movie.lastPad2);
+	gzfreezel(&Movie.lastPads1);
+	gzfreezel(&Movie.lastPads2);
 	gzfreezel(&Movie.currentCdrom);
 	gzfreezel(&Movie.CdromCount);
 	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
