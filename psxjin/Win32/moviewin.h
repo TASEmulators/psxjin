@@ -1,6 +1,7 @@
 #ifndef __W32_MOVIE_H__
 #define __W32_MOVIE_H__
 
+void CDOpenClose();
 int MOV_W32_StartRecordDialog();
 int MOV_W32_StartReplayDialog();
 int MOV_W32_CdChangeDialog();

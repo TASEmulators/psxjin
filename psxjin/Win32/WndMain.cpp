@@ -862,6 +862,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT8,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_SLOT9,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_OTHER,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_CDCLOSE,		MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
 			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -2037,6 +2038,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Mute Sound"), ID_EMULATOR_MUTE);
+	ADDMENUITEM(0, _("&CD Case Open/Close"), ID_EMULATOR_CDCLOSE);
 	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);
 
 	ADDSUBMENU(0, _("&Configuration"));
@@ -2544,3 +2546,4 @@ void CreateMemPoke()
 	else // already open so just reactivate the window
 		SetActiveWindow(memPokeHWND);
 }
+
