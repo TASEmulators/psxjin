@@ -673,7 +673,8 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 {
 	if (Movie.isText)
 	{
-		char temp[1024];		
+		char temp[1024];	
+		int size;
 		const char mouse_mnemonics[] = "LR";
 		const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
 	switch (type) {
@@ -688,7 +689,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 				Movie.inputBufferPtr[i] = '.';
 			}		
 			Movie.inputBufferPtr += 2;
-			int size = sprintf(temp, " %03d %03d|", pad->moveX, pad->moveY);
+			size = sprintf(temp, " %03d %03d|", pad->moveX, pad->moveY);
 			memcpy(Movie.inputBufferPtr,temp,size);
 			Movie.inputBufferPtr += size;
 			break;
@@ -704,7 +705,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}				
 			Movie.inputBufferPtr += 16;
-			int size = sprintf(temp, " %03d %03d %03d %03d|", pad->leftJoyX, pad->leftJoyY, pad->rightJoyX, pad->rightJoyY);
+			size = sprintf(temp, " %03d %03d %03d %03d|", pad->leftJoyX, pad->leftJoyY, pad->rightJoyX, pad->rightJoyY);
 			memcpy(Movie.inputBufferPtr,temp,size);
 			Movie.inputBufferPtr += size;
 			break;
