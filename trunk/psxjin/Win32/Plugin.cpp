@@ -46,14 +46,25 @@ int ShowPic=0;
 char Text[255];
 int ret;
 
+void PlayMovieFromBeginning()
+{
+	if (Movie.mode != MOVIEMODE_INACTIVE) {
+		MOV_StopMovie();
+		WIN32_StartMovieReplay(Movie.movieFilename);
+	}
+	else
+		GPUdisplayText("*PSXjin*: error: No Movie To Play");
+	return;
+}
+
 void ReadonlyToggle()
 {
 	Movie.readOnly^=1;
-		if (Movie.readOnly)
-			GPUdisplayText("*PSXjin*: Read-Only mode");
-		else
-			GPUdisplayText("*PSXjin*: Read+Write mode");
-		return;
+	if (Movie.readOnly)
+		GPUdisplayText("*PSXjin*: Read-Only mode");
+	else
+		GPUdisplayText("*PSXjin*: Read+Write mode");
+	return;
 }
 
 void CDOpenClose()
@@ -469,13 +480,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].key
 	&& modifiers == EmuCommandTable[EMUCMD_PLAYFROMBEGINNING].keymod)
 	{
-		if (Movie.mode != MOVIEMODE_INACTIVE) {
-			MOV_StopMovie();
-			WIN32_StartMovieReplay(Movie.movieFilename);
-		}
-		else
-			GPUdisplayText("*PSXjin*: error: No Movie To Play");
-		return;
+		PlayMovieFromBeginning();
 	}
 
 	if(key == EmuCommandTable[EMUCMD_STOPMOVIE].key
