@@ -413,9 +413,12 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"Standard");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"Dual Analog");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"Mouse");
+		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_INSERTSTRING, -1, (LPARAM)"None");
+
 		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_INSERTSTRING, -1, (LPARAM)"Standard");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_INSERTSTRING, -1, (LPARAM)"Dual Analog");
 		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_INSERTSTRING, -1, (LPARAM)"Mouse");
+		SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_INSERTSTRING, -1, (LPARAM)"None");
 		
 		SendDlgItemMessage(hDlg, IDC_REPLAYRESET, CB_SETCURSEL, 0, 0);
 		SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_SETCURSEL, 0, 0);
@@ -466,8 +469,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 						Movie.Port1_Mtap = 1;
 						Movie.NumPlayers +=3;
 						Movie.P2_Start += 3;
-						Movie.MultiTrack =1;
-						Movie.RecordPlayer = Movie.NumPlayers+1;
+						Movie.MultiTrack =1;						
 					}
 					else
 						Movie.Port1_Mtap = 0;
@@ -476,7 +478,6 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 						Movie.Port2_Mtap = 1;
 						Movie.NumPlayers +=3;
 						Movie.MultiTrack =1;
-						Movie.RecordPlayer = Movie.NumPlayers+1;
 					}
 					else
 						Movie.Port2_Mtap = 0;
@@ -510,6 +511,11 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 					//save "joypad type" option lists
 					lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE1, CB_GETCURSEL, 0, 0);
 					switch (lIndex) {
+						case 3:											
+							Movie.padType1 = PSE_PAD_TYPE_NONE;
+							Movie.NumPlayers--;
+							Movie.P2_Start = 1;
+							break;
 						case 2:
 							Movie.padType1=PSE_PAD_TYPE_MOUSE;
 							break;
@@ -519,20 +525,25 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 						case 0:
 						default:
 							Movie.padType1=PSE_PAD_TYPE_STANDARD;
+							break;
 					}
 					lIndex = SendDlgItemMessage(hDlg, IDC_PADTYPE2, CB_GETCURSEL, 0, 0);
 					switch (lIndex) {
+						case 3:
+								Movie.NumPlayers--;														
+								Movie.padType2 = PSE_PAD_TYPE_NONE;
+								break;
 						case 2:
 							Movie.padType2=PSE_PAD_TYPE_MOUSE;
 							break;
 						case 1:
 							Movie.padType2=PSE_PAD_TYPE_ANALOGPAD;
-							break;
+							break;						
 						case 0:
 						default:
 							Movie.padType2=PSE_PAD_TYPE_STANDARD;
-					}
-
+					}					
+					Movie.RecordPlayer = Movie.NumPlayers+1;
 					EndDialog(hDlg, 1);
 					return TRUE;
 				}

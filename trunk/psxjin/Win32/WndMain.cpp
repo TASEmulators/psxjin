@@ -763,7 +763,7 @@ bool IsFileExtension(std::string filename, std::string ext)
 }
 
 LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	char File[256];
+//	char File[256];
 	char Str_Tmp[1024];
 	switch (msg) {
 		case WM_DROPFILES:

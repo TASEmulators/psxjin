@@ -202,6 +202,8 @@ typedef struct
 #define PSE_PAD_TYPE_GUNCON			6
 // ANALOG CONTROLLER SCPH-1150
 #define PSE_PAD_TYPE_ANALOGPAD		7
+// NO CONTROLLER
+
 
 
 // sucess, everything configured, and went OK.

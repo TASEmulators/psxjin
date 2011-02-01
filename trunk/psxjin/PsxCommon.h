@@ -162,8 +162,6 @@ typedef struct
 
 struct MovieType {	
 	int isText;							 //set if Movie type is Text, other wise it is binary
-	PadDataS lastPad1;                   //last joypad1 buttons polled
-	PadDataS lastPad2;                   //last joypad2 buttons polled
 	PadDataS lastPads1[4];
 	PadDataS lastPads2[4];
 	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
@@ -230,7 +228,7 @@ struct MovieControlType {
 };
 
 #define MOVIE_VERSION 2
-
+#define PSE_PAD_TYPE_NONE 8 
 #define MOVIE_FLAG_FROM_SAVESTATE (1<<1)
 #define MOVIE_FLAG_PAL_TIMING     (1<<2)
 #define MOVIE_FLAG_MEMORY_CARDS   (1<<3)

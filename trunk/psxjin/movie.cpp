@@ -49,6 +49,9 @@ int SetBytesPerFrame( MovieType Movie)
 				case PSE_PAD_TYPE_ANALOGJOY:
 					Movie.bytesPerFrame += ANALOG_PAD_SIZE;
 					break;
+				case PSE_PAD_TYPE_NONE:
+					Movie.bytesPerFrame += 1;
+					break;
 			}
 		}
 		if (Movie.Port2_Mtap) 
@@ -71,6 +74,9 @@ int SetBytesPerFrame( MovieType Movie)
 				case PSE_PAD_TYPE_ANALOGPAD:
 				case PSE_PAD_TYPE_ANALOGJOY:
 					Movie.bytesPerFrame += ANALOG_PAD_SIZE;
+					break;
+				case PSE_PAD_TYPE_NONE:
+					Movie.bytesPerFrame += 1;
 					break;
 			}
 		}
@@ -98,9 +104,12 @@ int SetBytesPerFrame( MovieType Movie)
 			case PSE_PAD_TYPE_ANALOGJOY:
 				Movie.bytesPerFrame += 6;
 				break;
+			case PSE_PAD_TYPE_NONE:
+				Movie.bytesPerFrame += 0;
+				break;
 			}
 		}
-		if (Movie.Port1_Mtap) 
+		if (Movie.Port2_Mtap) 
 		{
 			loopcount = 4;
 		}
@@ -120,6 +129,9 @@ int SetBytesPerFrame( MovieType Movie)
 				case PSE_PAD_TYPE_ANALOGPAD:
 				case PSE_PAD_TYPE_ANALOGJOY:
 					Movie.bytesPerFrame += 6;
+					break;
+				case PSE_PAD_TYPE_NONE:
+					Movie.bytesPerFrame += 0;
 					break;
 			}
 		}
@@ -422,13 +434,23 @@ static int StartRecord()
 {
 	fpMovie = fopen(Movie.movieFilename,"w+b");
 	Movie.bytesPerFrame = SetBytesPerFrame(Movie);
-
+	PadDataS epadd; //empty pad;
+	epadd.buttonStatus = 0xffff;
+	epadd.leftJoyX = 128;
+	epadd.leftJoyY = 128;
+	epadd.rightJoyX = 128;
+	epadd.rightJoyY = 128;
+	for (int i = 0; i < 4; i++)
+	{
+		memcpy(&Movie.lastPads1[i], &epadd, sizeof(epadd));
+		memcpy(&Movie.lastPads2[i], &epadd, sizeof(epadd));
+	}
 	Movie.rerecordCount = 0;
 	Movie.readOnly = 0;
 	Movie.CdromCount = 1;
 	sprintf(Movie.CdromIds, "%9.9s", CdromId);
-
 	WriteMovieHeader();
+	printf("1. Controllers are %d %d", Movie.padType1, Movie.padType2);
 	Movie.inputBufferPtr = Movie.inputBuffer;
 
 	return 1;
@@ -564,6 +586,9 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 			pad->rightJoyY = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
 			break;	
+		case PSE_PAD_TYPE_NONE:	
+			Movie.inputBufferPtr++;
+			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
 			for(int i=0;i<14;i++)
@@ -599,6 +624,8 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 			pad->leftJoyY = JoyRead8();
 			pad->rightJoyX = JoyRead8();
 			pad->rightJoyY = JoyRead8();
+			break;
+		case PSE_PAD_TYPE_NONE:	
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
@@ -771,6 +798,11 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			memcpy(Movie.inputBufferPtr,temp,size);
 			Movie.inputBufferPtr += size;
 			break;
+		case PSE_PAD_TYPE_NONE:
+			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+1)-Movie.inputBuffer));
+			Movie.inputBufferPtr[0] = (uint8)'|';
+			Movie.inputBufferPtr++;
+			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+STANDARD_PAD_SIZE)-Movie.inputBuffer));
@@ -810,6 +842,8 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			JoyWrite8(pad->leftJoyY);
 			JoyWrite8(pad->rightJoyX);
 			JoyWrite8(pad->rightJoyY);
+			break;
+		case PSE_PAD_TYPE_NONE:
 			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
@@ -959,8 +993,6 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Config.Sio);
 	gzfreezel(&Config.RCntFix);
 	gzfreezel(&Config.VSyncWA);
-	gzfreezel(&Movie.lastPad1);
-	gzfreezel(&Movie.lastPad2);
 	gzfreezel(&Movie.lastPads1);
 	gzfreezel(&Movie.lastPads2);
 	gzfreezel(&Movie.currentCdrom);
@@ -984,10 +1016,9 @@ int MovieFreeze(gzFile f, int Mode) {
 		//update information GPU OSD after loading a savestate
 		GPUsetlagcounter(Movie.lagCounter);
 		GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
-		buttonToSend = Movie.lastPad1.buttonStatus;
-		buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
+		buttonToSend = Movie.lastPads1[0].buttonStatus;
+		buttonToSend = (buttonToSend ^ (Movie.lastPads2[0].buttonStatus << 16));
 		GPUinputdisplay(buttonToSend);
 	}
-	printf("%d MODE			%d Movie.inputBufferPtr\n", Mode, Movie.inputBufferPtr);
 	return 0;
 }
