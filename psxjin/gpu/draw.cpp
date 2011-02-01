@@ -3943,8 +3943,7 @@ void NoStretchedBlit(void)
 	
 	
 	if (iOldDX!=iDX || iOldDY!=iDY)
-	{
-		WIN32_SplitAvi();
+	{		
 		DDBLTFX     ddbltfx;
 		ddbltfx.dwSize = sizeof(ddbltfx);
 		ddbltfx.dwFillColor = 0x00000000;
@@ -3952,6 +3951,7 @@ void NoStretchedBlit(void)
 		iOldDX=iDX;
 		iOldDY=iDY;		
 		SetWindowSize(PreviousPSXDisplay.DisplayMode.x,PreviousPSXDisplay.DisplayMode.y);	
+		WIN32_SplitAvi();
 	}
 
 	if (iWindowMode)

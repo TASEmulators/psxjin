@@ -2466,6 +2466,8 @@ void WIN32_StartAviRecord()
 	}	 
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
 	OpenPlugins(gApp.hWnd);
+	Config.CurWinX = MainWindow_width;
+	Config.CurWinY = MainWindow_height-MainWindow_menubar;
 	GPUstartAvi(Movie.aviFilename);
 	SPUstartWav(Movie.wavFilename);
 	if (NeedReset) { SysReset(); NeedReset = 0; }
@@ -2480,6 +2482,8 @@ void WIN32_SplitAvi()
 		GPUstopAvi();
 		Movie.AviCount++;
 		sprintf(Movie.aviFilename, "%s%s%s-%dx%d_%03d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviFnameShort,MainWindow_width,MainWindow_height,Movie.AviCount);
+		Config.CurWinX = MainWindow_width;
+		Config.CurWinY = MainWindow_height-MainWindow_menubar;
 		GPUstartAvi(Movie.aviFilename);	
 	}
 }

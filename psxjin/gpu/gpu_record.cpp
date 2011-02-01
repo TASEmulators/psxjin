@@ -105,8 +105,8 @@ BOOL RECORD_Start(char filename[256])
 	else
 	{
 		Config.SplitAVI = true;
-		RECORD_BI.biWidth = iResX;
-		RECORD_BI.biHeight = iResY;
+		RECORD_BI.biWidth = Config.CurWinX;
+		RECORD_BI.biHeight = Config.CurWinY;
 	}
 	if (RECORD_COMPRESSION_MODE==0)
 	{
