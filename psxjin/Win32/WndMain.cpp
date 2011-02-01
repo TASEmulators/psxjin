@@ -2194,7 +2194,7 @@ void LoadIni()
 	ramw_y = GetPrivateProfileInt("RamWatch", "ramw_y", 0, Config.Conf_File);
 	MainWindow_wndx = GetPrivateProfileInt("General", "main_x", 0, Config.Conf_File);
 	MainWindow_wndy = GetPrivateProfileInt("General", "main_y", 0, Config.Conf_File);
-	dispAllText = GetPrivateProfileInt("General", "AllDisplay", 0, Config.Conf_File);
+	dispAllText = GetPrivateProfileInt("General", "AllDisplay", 1, Config.Conf_File);
 	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Config.Conf_File);
 	dispInput = GetPrivateProfileInt("General", "InputDisplay", 0, Config.Conf_File);
 	
