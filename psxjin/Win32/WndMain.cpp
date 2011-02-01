@@ -2580,8 +2580,56 @@ void UpdateMenuHotkeys()
 	//Update all menu items that can be called from a hotkey to include the current hotkey assignment
 	std::string combo, combined;
 	
-	combo =  GetComboName(EmuCommandTable[EMUCMD_OPENCD].keymod);
+	//File-------------------------------------------------------
+	combo = GetComboName(EmuCommandTable[EMUCMD_OPENCD].keymod);
 	combo.append(RealKeyName(EmuCommandTable[EMUCMD_OPENCD].key));
 	combined = "Open &CD\t" + combo;
 	ChangeMenuItemText(ID_FILE_RUN_CD, combined);
+
+	combo = GetComboName(EmuCommandTable[EMUCMD_SCREENSHOT].keymod);
+	combo.append(RealKeyName(EmuCommandTable[EMUCMD_SCREENSHOT].key));
+	combined = "Screenshot\t" + combo;
+	ChangeMenuItemText(ID_FILE_SCREENSHOT, combined);
+
+	//TODO:
+	//Loadstate & Savestate hotkeys
+	//Start playback
+	//Start record
+	//Start Avi
+	//Stop Avi
+	//New Lua script window
+
+	combo = GetComboName(EmuCommandTable[EMUCMD_STOPMOVIE].keymod);
+	combo.append(RealKeyName(EmuCommandTable[EMUCMD_STOPMOVIE].key));
+	combined = "S&top Movie\t" + combo;
+	ChangeMenuItemText(ID_FILE_STOP_MOVIE, combined);
+
+	//Emulator---------------------------------------------------
+	combo = GetComboName(EmuCommandTable[EMUCMD_RESET].keymod);
+	combo.append(RealKeyName(EmuCommandTable[EMUCMD_RESET].key));
+	combined = "&Reset\t" + combo;
+	ChangeMenuItemText(ID_EMULATOR_RESET, combined);
+
+	combo = GetComboName(EmuCommandTable[EMUCMD_FRAMECOUNTER].keymod);
+	combo.append(RealKeyName(EmuCommandTable[EMUCMD_FRAMECOUNTER].key));
+	combined = "Display Frame counter\t" + combo;
+	ChangeMenuItemText(ID_EMULATOR_DISPFRAMECOUNTER, combined);
+
+	combo = GetComboName(EmuCommandTable[EMUCMD_INPUTDISPLAY].keymod);
+	combo.append(RealKeyName(EmuCommandTable[EMUCMD_INPUTDISPLAY].key));
+	combined = "Display Input\t" + combo;
+	ChangeMenuItemText(ID_EMULATOR_DISPINPUT, combined);
+
+	//Configuration----------------------------------------------
+	//Configure Graphics
+	//Configure Sound
+	//Controllers
+	//Memcards
+	//Options
+
+	//Tools------------------------------------------------------
+	//Ram Search
+	//Ram Watch
+	//Ram Poke
+	//Cheat editor
 }
