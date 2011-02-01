@@ -1021,6 +1021,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STATES_LOAD_SLOT9: States_Load(9); return TRUE;
 				case ID_FILE_STATES_LOAD_OTHER: OnStates_LoadOther(); return TRUE;
 
+				case ID_FILE_STATES_SAVE_SLOT0: States_Save(0); return TRUE;
 				case ID_FILE_STATES_SAVE_SLOT1: States_Save(1); return TRUE;
 				case ID_FILE_STATES_SAVE_SLOT2: States_Save(2); return TRUE;
 				case ID_FILE_STATES_SAVE_SLOT3: States_Save(3); return TRUE;
