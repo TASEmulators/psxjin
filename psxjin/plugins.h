@@ -38,6 +38,7 @@ typedef void* HWND;
 
 #include "iso/cdriso.h"
 
+void ReadonlyToggle();
 int  LoadPlugins();
 void ReleasePlugins();
 int  OpenPlugins();

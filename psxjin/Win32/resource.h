@@ -393,6 +393,7 @@
 #define ID_FILE_STATES_SAVE_SLOT8       39818
 #define ID_FILE_STATES_SAVE_SLOT9       39819
 #define ID_FILE_STATES_SAVE_SLOT0       39820
+#define ID_FILE_READONLY				39988
 #define ID_RECENT_CLEAR                 39989
 #define ID_EMULATOR_CDCLOSE				39990
 #define ID_EMULATOR_MUTE                39991

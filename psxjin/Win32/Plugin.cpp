@@ -46,6 +46,15 @@ int ShowPic=0;
 char Text[255];
 int ret;
 
+void ReadonlyToggle()
+{
+	Movie.readOnly^=1;
+		if (Movie.readOnly)
+			GPUdisplayText("*PSXjin*: Read-Only mode");
+		else
+			GPUdisplayText("*PSXjin*: Read+Write mode");
+		return;
+}
 
 void CDOpenClose()
 {
@@ -280,12 +289,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RWTOGGLE].key
 	&& modifiers == EmuCommandTable[EMUCMD_RWTOGGLE].keymod)
 	{
-		Movie.readOnly^=1;
-		if (Movie.readOnly)
-			GPUdisplayText("*PSXjin*: Read-Only mode");
-		else
-			GPUdisplayText("*PSXjin*: Read+Write mode");
-		return;
+		ReadonlyToggle();
 	}
 
 	if(key == EmuCommandTable[EMUCMD_LAGCOUNTERRESET].key
