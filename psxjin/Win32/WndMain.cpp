@@ -2566,15 +2566,24 @@ void ChangeMenuItemText(int menuitem, std::string text)
 extern char* RealKeyName(int c);
 void MakeMenuName(int i, std::string menuname, int menuid)
 {
-	menuname.append("\t");
-	if(EmuCommandTable[i].keymod == VK_CONTROL)
-		menuname.append("Ctrl + ");
-	else if(EmuCommandTable[i].keymod == VK_MENU)
-		menuname.append("Alt + ");
-	else if(EmuCommandTable[i].keymod == VK_SHIFT)
-		menuname.append("Shift + ");
+	int mod = EmuCommandTable[i].keymod;
+	int key = EmuCommandTable[i].key;
 
-	menuname.append(RealKeyName(EmuCommandTable[i].key));
+	if (key)
+		menuname.append("\t");
+
+	if (mod)
+	{
+		if(mod == VK_CONTROL)
+			menuname.append("Ctrl + ");
+		else if(mod == VK_MENU)
+			menuname.append("Alt + ");
+		else if(mod == VK_SHIFT)
+			menuname.append("Shift + ");
+	}
+	
+	if (key)
+		menuname.append(RealKeyName(key));
 
 	ChangeMenuItemText(menuid, menuname);
 }
