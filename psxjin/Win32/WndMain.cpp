@@ -1136,11 +1136,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						CreateCheatEditor();
 						PSXjinApplyCheats();
 					return TRUE;
-
+/*
 				case ID_CONFIGURATION_NETPLAY:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_NETPLAY), hWnd, (DLGPROC)ConfigureNetPlayDlgProc);
 					return TRUE;
-
+*/
 				case ID_CONFIGURATION_MEMORYCARDMANAGER:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), hWnd, (DLGPROC)ConfigureMcdsDlgProc);
 					return TRUE;
@@ -2628,17 +2628,17 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_RESET, "&Reset", ID_EMULATOR_RESET);
 	MakeMenuName(EMUCMD_FRAMECOUNTER, "Display Frame counter", ID_EMULATOR_DISPFRAMECOUNTER);
 	MakeMenuName(EMUCMD_INPUTDISPLAY, "Display Input", ID_EMULATOR_DISPINPUT);
-
+	
 	//Configuration----------------------------------------------
-	//Configure Graphics
-	//Configure Sound
-	//Controllers
-	//Memcards
-	//Options
+	MakeMenuName(EMUCMD_CONFGPU, "&Graphics", ID_CONFIGURATION_GRAPHICS);
+	MakeMenuName(EMUCMD_CONFSPU, "&Sound", ID_CONFIGURATION_SOUND);
+	MakeMenuName(EMUCMD_CONFPAD, "&Controllers", ID_CONFIGURATION_CONTROLLERS);
+	MakeMenuName(EMUCMD_MEMORYCARDS, "&Memory Cards", ID_CONFIGURATION_MEMORYCARDMANAGER);
+	MakeMenuName(EMUCMD_CONFCPU, "&Options", ID_CONFIGURATION_CPU);
 
 	//Tools------------------------------------------------------
-	//Ram Search
-	//Ram Watch
-	//Ram Poke
-	//Cheat editor
+	MakeMenuName(EMUCMD_RAMSEARCH, "RAM &Search", ID_RAM_SEARCH);
+	MakeMenuName(EMUCMD_RAMWATCH, "RAM &Watch", ID_RAM_WATCH);
+	MakeMenuName(EMUCMD_RAMPOKE, "RAM &Poke", ID_CONFIGURATION_MEMPOKE);
+	MakeMenuName(EMUCMD_CHEATTOGLE, "&Cheat Editor", ID_CONFIGURATION_CHEATS);
 }
