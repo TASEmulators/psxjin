@@ -367,6 +367,7 @@ void *hPAD1Driver;
 void *hPAD2Driver;
 
 static unsigned char buf[256];
+unsigned char nonepar[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 unsigned char stdpar[10] = { 0x00, 0x41, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 unsigned char mousepar[8] = { 0x00, 0x12, 0x5a, 0xff, 0xff, 0xff, 0xff };
 unsigned char analogpar[9] = { 0x00, 0xff, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
@@ -378,8 +379,7 @@ static int bufcount, bufc;
 PadDataS padd1, padd2;
 
 unsigned char _PADstartPoll(PadDataS *pad) {
-	bufc = 0;
-
+	bufc = 0;		
 	switch (pad->controllerType) {
 		case PSE_PAD_TYPE_MOUSE:
 			mousepar[3] = pad->buttonStatus & 0xff;
@@ -425,22 +425,25 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 			memcpy(buf, analogpar, 9);
 			bufcount = 8;
 			break;
+		case PSE_PAD_TYPE_NONE:
+			memcpy(buf,nonepar,2);
+			bufcount = 1;			
+			break;
 		case PSE_PAD_TYPE_STANDARD:
 		default:
 			stdpar[3] = pad->buttonStatus & 0xff;
 			stdpar[4] = pad->buttonStatus >> 8;
-
 			memcpy(buf, stdpar, 5);
 			bufcount = 4;
+			break;
 	}
-
 	return buf[bufc++];
 }
 
 unsigned char _xPADstartPoll(PadDataS *padd) {
 	bufc = 0;
 	PadDataS pad[4];
-	memcpy(&pad,padd,sizeof(pad));	
+	memcpy(&pad,padd,sizeof(pad));		
 	int psize = 8;
 	for (int i = 0; i < 4; i++)
 	{
@@ -498,15 +501,20 @@ unsigned char _PADpoll(unsigned char value) {
 }
 
 unsigned char CALLBACK PAD1__startPoll(int pad) {
-	PadDataS padd;
-	PadDataS Mpadds[4];
-	PadDataS epadd; //empty pad;
+	PadDataS padd; //Pad that is read in
+	PadDataS Mpadds[4]; //Place to store all 4 pads data
+	
+
+	PadDataS epadd; //Set up an empty pad to fill the buffer
 	epadd.buttonStatus = 0xffff;
 	epadd.leftJoyX = 128;
 	epadd.leftJoyY = 128;
 	epadd.rightJoyX = 128;
 	epadd.rightJoyY = 128;
+	epadd.controllerType = Movie.padType1;
+
 	PAD1_readPort1(&padd);
+	padd.controllerType = Movie.padType1;
 	memcpy(&PaddInput,&padd,sizeof(padd));
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
@@ -518,7 +526,7 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	}  
 
 
-/* movie stuff start */
+/* movie stuff start */	
 	if (!Movie.Port1_Mtap) {
 		if (iJoysToPoll == 2) { // only poll once each frame
 			if (Movie.mode == MOVIEMODE_RECORD)
@@ -550,13 +558,13 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 			{
 				MOV_ReadJoy(&padd,Movie.padType1);
 			}
-			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			memcpy(&Movie.lastPads1[0],&padd,sizeof(padd));
 			iJoysToPoll--;
 			return _PADstartPoll(&padd);
 		}
 		else
 		{
-			memcpy(&padd,&Movie.lastPad1,sizeof(Movie.lastPad1));
+			memcpy(&padd,&Movie.lastPads1[0],sizeof(padd));
 			return _PADstartPoll(&padd);
 		}
 	} else {
@@ -585,15 +593,13 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 					MOV_ReadJoy(&Mpadds[Player],Movie.padType1);
 				}
 				memcpy(&Movie.lastPads1[Player],&Mpadds[Player],sizeof(padd));				
-			}
-			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			}			
 			iJoysToPoll--;
 			return _xPADstartPoll(&Mpadds[0]);
 		}
 		else
 		{
-			memcpy(&Mpadds,&Movie.lastPads1,sizeof(Mpadds));
-			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			memcpy(&Mpadds,&Movie.lastPads1,sizeof(Mpadds));			
 			return _xPADstartPoll(&Mpadds[0]);
 		}
 	}
@@ -651,6 +657,13 @@ int LoadPAD1plugin(char *PAD1dll) {
 unsigned char CALLBACK PAD2__startPoll(int pad) {
 	PadDataS padd;
 	PadDataS Mpadds[4];
+	PadDataS epadd; //empty pad;
+	epadd.buttonStatus = 0xffff;
+	epadd.leftJoyX = 128;
+	epadd.leftJoyY = 128;
+	epadd.rightJoyX = 128;
+	epadd.rightJoyY = 128;
+	epadd.controllerType = Movie.padType2;
 	if (Movie.MultiTrack && ((Movie.RecordPlayer >= Movie.P2_Start) || (Movie.RecordPlayer == Movie.NumPlayers+2)))
 	{
 		PAD2_readPort2(&padd);
@@ -660,6 +673,7 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	{
 		PAD2_readPort2(&padd);
 	}
+	padd.controllerType = Movie.padType2; //Force Controller to match movie file. 
 	if(PSXjin_LuaUsingJoypad(1)) padd.buttonStatus = PSXjin_LuaReadJoypad(1)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(1);
 	if (luaAnalogJoy != NULL) {
@@ -683,13 +697,8 @@ if (!Movie.Port2_Mtap) {
 				else 
 				{
 					if (Movie.currentFrame >= Movie.MaxRecFrames)
-					{
-						padd.buttonStatus = 0xffff;
-						padd.leftJoyX = 128;
-						padd.leftJoyY = 128;
-						padd.rightJoyX = 128;
-						padd.rightJoyY = 128;
-						MOV_WriteJoy(&padd,Movie.padType2);
+					{					
+						MOV_WriteJoy(&epadd,Movie.padType2);
 					} 
 					else
 					{
@@ -704,13 +713,13 @@ if (!Movie.Port2_Mtap) {
 		}
 		else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
 			MOV_ReadJoy(&padd,Movie.padType2);
-		memcpy(&Movie.lastPad2,&padd,sizeof(padd));
+		memcpy(&Movie.lastPads2[0],&padd,sizeof(padd));
 		iJoysToPoll--;
 		return _PADstartPoll(&padd);
 	}
 	else
 	{
-		memcpy(&padd,&Movie.lastPad2,sizeof(Movie.lastPad2));
+		memcpy(&padd,&Movie.lastPads2[0],sizeof(padd));
 		return _PADstartPoll(&padd);
 	}
 	} else {
@@ -721,19 +730,15 @@ if (!Movie.Port2_Mtap) {
 					if ((Movie.RecordPlayer == Movie.P2_Start+Player) || (Movie.RecordPlayer == Movie.NumPlayers+2)) 
 					{
 						MOV_WriteJoy(&Mpadds[Player],Movie.padType2);
+						memcpy(&Mpadds[Player],&padd,sizeof(padd));
 					}
 					else 
 					{
 						if (Movie.currentFrame >= Movie.MaxRecFrames)
-						{
-							padd.buttonStatus = 0xffff;
-							padd.leftJoyX = 128;
-							padd.leftJoyY = 128;
-							padd.rightJoyX = 128;
-							padd.rightJoyY = 128;
-							MOV_WriteJoy(&Mpadds[Player],Movie.padType2);
-						} 
-						else
+						{							
+							MOV_WriteJoy(&epadd,Movie.padType2);
+							memcpy(&Mpadds[Player],&epadd,sizeof(epadd));
+						} 						else
 						{
 							MOV_ReadJoy(&Mpadds[Player],Movie.padType2);
 						}
@@ -741,16 +746,14 @@ if (!Movie.Port2_Mtap) {
 				} else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames) {
 					MOV_ReadJoy(&Mpadds[Player],Movie.padType2);
 				}
-				memcpy(&Movie.lastPads2,&Mpadds[Player],sizeof(Mpadds));
-				memcpy(&Movie.lastPad2,&padd,sizeof(padd));
+				memcpy(&Movie.lastPads2[Player],&Mpadds[Player],sizeof(Mpadds));				
 			}
 			iJoysToPoll--;
 			return _xPADstartPoll(&Mpadds[0]);
 		}
 		else
 		{
-			memcpy(&Mpadds,&Movie.lastPads2,sizeof(Mpadds));
-			memcpy(&Movie.lastPad1,&padd,sizeof(padd));
+			memcpy(&Mpadds,&Movie.lastPads2,sizeof(Mpadds));			
 			return _xPADstartPoll(&Mpadds[0]);
 		}
 	}

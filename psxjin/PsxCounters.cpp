@@ -183,7 +183,7 @@ if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
 	if (!Movie.Port1_Mtap)
 	{
 		if (Movie.mode == MOVIEMODE_RECORD) {		
-			MOV_WriteJoy(&Movie.lastPad1,Movie.padType1);		
+			MOV_WriteJoy(&Movie.lastPads1[0],Movie.padType1);		
 		}
 			else if (Movie.mode == MOVIEMODE_PLAY) {
 				MOV_ReadJoy(&paddtemp,Movie.padType1);		
@@ -202,7 +202,7 @@ if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
 	if (!Movie.Port2_Mtap)
 	{
 		if (Movie.mode == MOVIEMODE_RECORD) {		
-			MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);		
+			MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);		
 		}
 			else if (Movie.mode == MOVIEMODE_PLAY) {
 				MOV_ReadJoy(&paddtemp,Movie.padType2);		
@@ -224,7 +224,7 @@ if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
 else if (iJoysToPoll == 1) { //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
 	printf("CATASTROPHIC FAILURE: CONTACT DARKKOBOLD");
 	if (Movie.mode == MOVIEMODE_RECORD)		
-		MOV_WriteJoy(&Movie.lastPad2,Movie.padType2);
+		MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);
 	else if (Movie.mode == MOVIEMODE_PLAY)
 		MOV_ReadJoy(&paddtemp,Movie.padType2);
 }
@@ -243,8 +243,8 @@ if ((Movie.mode == MOVIEMODE_RECORD) && (Movie.currentFrame%1800 == 0))
 	MOV_WriteMovieFile();
 
 buttonToSend = 0;
-buttonToSend = Movie.lastPad1.buttonStatus;
-buttonToSend = (buttonToSend ^ (Movie.lastPad2.buttonStatus << 16));
+buttonToSend = Movie.lastPads1[0].buttonStatus;
+buttonToSend = (buttonToSend ^ (Movie.lastPads2[0].buttonStatus << 16));
 GPUinputdisplay(buttonToSend);
 
 modeFlags = 0;
