@@ -2648,6 +2648,7 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_CONFSPU, "&Sound", ID_CONFIGURATION_SOUND);
 	MakeMenuName(EMUCMD_CONFPAD, "&Controllers", ID_CONFIGURATION_CONTROLLERS);
 	MakeMenuName(EMUCMD_MEMORYCARDS, "&Memory Cards", ID_CONFIGURATION_MEMORYCARDMANAGER);
+	MakeMenuName(EMUCMD_HOTKEYS, "Map &Hotkeys",ID_CONFIGURATION_MAPHOTKEYS);
 	MakeMenuName(EMUCMD_CONFCPU, "&Options", ID_CONFIGURATION_CPU);
 
 	//Tools------------------------------------------------------

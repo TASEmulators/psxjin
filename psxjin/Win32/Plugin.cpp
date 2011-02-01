@@ -435,10 +435,10 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_DISABLED].key
-	&& modifiers == EmuCommandTable[EMUCMD_DISABLED].keymod)
+	if(key == EmuCommandTable[EMUCMD_HOTKEYS].key
+	&& modifiers == EmuCommandTable[EMUCMD_HOTKEYS].keymod)
 	{
-		//TODO
+		MHkeysCreate();
 		return;
 	}
 
