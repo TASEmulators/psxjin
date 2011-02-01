@@ -2563,35 +2563,30 @@ void ChangeMenuItemText(int menuitem, std::string text)
 	SetMenuItemInfo(gApp.hMenu, menuitem, FALSE, &moo);
 }
 
-const char* GetComboName(int i)
+extern char* RealKeyName(int c);
+void MakeMenuName(int i, std::string menuname, int menuid)
 {
-	if(i == VK_CONTROL)
-		return "Ctrl + ";
-	else if(i == VK_MENU)
-		return "Alt + ";
-	else if(i == VK_SHIFT)
-		return "Shift + ";
-	else
-		return "";
+	menuname.append("\t");
+	if(EmuCommandTable[i].keymod == VK_CONTROL)
+		menuname.append("Ctrl + ");
+	else if(EmuCommandTable[i].keymod == VK_MENU)
+		menuname.append("Alt + ");
+	else if(EmuCommandTable[i].keymod == VK_SHIFT)
+		menuname.append("Shift + ");
+
+	menuname.append(RealKeyName(EmuCommandTable[i].key));
+
+	ChangeMenuItemText(menuid, menuname);
 }
 
-extern char* RealKeyName(int c);
 void UpdateMenuHotkeys()
 {
 	//Update all menu items that can be called from a hotkey to include the current hotkey assignment
-	std::string combo, combined;
 	
 	//File-------------------------------------------------------
-	combo = GetComboName(EmuCommandTable[EMUCMD_OPENCD].keymod);
-	combo.append(RealKeyName(EmuCommandTable[EMUCMD_OPENCD].key));
-	combined = "Open &CD\t" + combo;
-	ChangeMenuItemText(ID_FILE_RUN_CD, combined);
-
-	combo = GetComboName(EmuCommandTable[EMUCMD_SCREENSHOT].keymod);
-	combo.append(RealKeyName(EmuCommandTable[EMUCMD_SCREENSHOT].key));
-	combined = "Screenshot\t" + combo;
-	ChangeMenuItemText(ID_FILE_SCREENSHOT, combined);
-
+	MakeMenuName(EMUCMD_OPENCD, "Open &CD", ID_FILE_RUN_CD);
+	MakeMenuName(EMUCMD_SCREENSHOT, "Screenshot", ID_FILE_SCREENSHOT);
+	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
 	//TODO:
 	//Loadstate & Savestate hotkeys
 	//Start playback
@@ -2600,26 +2595,10 @@ void UpdateMenuHotkeys()
 	//Stop Avi
 	//New Lua script window
 
-	combo = GetComboName(EmuCommandTable[EMUCMD_STOPMOVIE].keymod);
-	combo.append(RealKeyName(EmuCommandTable[EMUCMD_STOPMOVIE].key));
-	combined = "S&top Movie\t" + combo;
-	ChangeMenuItemText(ID_FILE_STOP_MOVIE, combined);
-
 	//Emulator---------------------------------------------------
-	combo = GetComboName(EmuCommandTable[EMUCMD_RESET].keymod);
-	combo.append(RealKeyName(EmuCommandTable[EMUCMD_RESET].key));
-	combined = "&Reset\t" + combo;
-	ChangeMenuItemText(ID_EMULATOR_RESET, combined);
-
-	combo = GetComboName(EmuCommandTable[EMUCMD_FRAMECOUNTER].keymod);
-	combo.append(RealKeyName(EmuCommandTable[EMUCMD_FRAMECOUNTER].key));
-	combined = "Display Frame counter\t" + combo;
-	ChangeMenuItemText(ID_EMULATOR_DISPFRAMECOUNTER, combined);
-
-	combo = GetComboName(EmuCommandTable[EMUCMD_INPUTDISPLAY].keymod);
-	combo.append(RealKeyName(EmuCommandTable[EMUCMD_INPUTDISPLAY].key));
-	combined = "Display Input\t" + combo;
-	ChangeMenuItemText(ID_EMULATOR_DISPINPUT, combined);
+	MakeMenuName(EMUCMD_RESET, "&Reset", ID_EMULATOR_RESET);
+	MakeMenuName(EMUCMD_FRAMECOUNTER, "Display Frame counter", ID_EMULATOR_DISPFRAMECOUNTER);
+	MakeMenuName(EMUCMD_INPUTDISPLAY, "Display Input", ID_EMULATOR_DISPINPUT);
 
 	//Configuration----------------------------------------------
 	//Configure Graphics
