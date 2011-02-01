@@ -835,6 +835,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			
 			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));  
@@ -970,6 +972,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_STOP_MOVIE:
 					MOV_StopMovie();
 					return TRUE;
+
+				case ID_FILE_PLAYBEGINNING:
+					PlayMovieFromBeginning();
+					return TRUE;
+
 				case ID_FILE_READONLY:
 					ReadonlyToggle();
 					return TRUE;
@@ -2027,6 +2034,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
 	ADDSUBMENUS(0, 1, _("&Movie"));
 	ADDMENUITEM(1, _("Read-only"), ID_FILE_READONLY);
+	ADDMENUITEM(1, _("Play from &Beginning"), ID_FILE_PLAYBEGINNING);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
@@ -2601,6 +2609,7 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_SCREENSHOT, "Screenshot", ID_FILE_SCREENSHOT);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
+	MakeMenuName(EMUCMD_PLAYFROMBEGINNING, "Play from &Beginning", ID_FILE_PLAYBEGINNING);
 	MakeMenuName(EMUCMD_RWTOGGLE, "Read-only", ID_FILE_READONLY);
 	MakeMenuName(EMUCMD_LOADSTATE10, "Loadstate Slot 0", ID_FILE_STATES_LOAD_SLOT0);
 	MakeMenuName(EMUCMD_LOADSTATE1, "Loadstate Slot 1", ID_FILE_STATES_LOAD_SLOT1);
