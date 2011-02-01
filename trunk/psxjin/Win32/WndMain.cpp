@@ -1992,6 +1992,7 @@ void CreateMainMenu() {
 	ADDSUBMENUS(0, 3, _("Loadstate"));
 	ADDMENUITEM(3, _("Loadstate From..."), ID_FILE_STATES_LOAD_OTHER);
 	ADDSEPARATOR(3);
+	ADDMENUITEM(3, _("Loadstate Slot 0"), ID_FILE_STATES_LOAD_SLOT0);
 	ADDMENUITEM(3, _("Loadstate Slot 9"), ID_FILE_STATES_LOAD_SLOT9);
 	ADDMENUITEM(3, _("Loadstate Slot 8"), ID_FILE_STATES_LOAD_SLOT8);
 	ADDMENUITEM(3, _("Loadstate Slot 7"), ID_FILE_STATES_LOAD_SLOT7);
@@ -2001,11 +2002,11 @@ void CreateMainMenu() {
 	ADDMENUITEM(3, _("Loadstate Slot 3"), ID_FILE_STATES_LOAD_SLOT3);
 	ADDMENUITEM(3, _("Loadstate Slot 2"), ID_FILE_STATES_LOAD_SLOT2);
 	ADDMENUITEM(3, _("Loadstate Slot 1"), ID_FILE_STATES_LOAD_SLOT1);
-	ADDMENUITEM(3, _("Loadstate Slot 0"), ID_FILE_STATES_LOAD_SLOT0);
-
+	
 	ADDSUBMENUS(0, 4, _("Savestate"));
 	ADDMENUITEM(4, _("Savestate As..."), ID_FILE_STATES_SAVE_OTHER);
 	ADDSEPARATOR(4);
+	ADDMENUITEM(4, _("Savestate Slot 0"), ID_FILE_STATES_SAVE_SLOT0);
 	ADDMENUITEM(4, _("Savestate Slot 9"), ID_FILE_STATES_SAVE_SLOT9);
 	ADDMENUITEM(4, _("Savestate Slot 8"), ID_FILE_STATES_SAVE_SLOT8);
 	ADDMENUITEM(4, _("Savestate Slot 7"), ID_FILE_STATES_SAVE_SLOT7);
@@ -2015,8 +2016,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(4, _("Savestate Slot 3"), ID_FILE_STATES_SAVE_SLOT3);
 	ADDMENUITEM(4, _("Savestate Slot 2"), ID_FILE_STATES_SAVE_SLOT2);
 	ADDMENUITEM(4, _("Savestate Slot 1"), ID_FILE_STATES_SAVE_SLOT1);
-	ADDMENUITEM(4, _("Savestate Slot 0"), ID_FILE_STATES_SAVE_SLOT0);
-	
+
 	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
@@ -2587,6 +2587,28 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_OPENCD, "Open &CD", ID_FILE_RUN_CD);
 	MakeMenuName(EMUCMD_SCREENSHOT, "Screenshot", ID_FILE_SCREENSHOT);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
+	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
+	MakeMenuName(EMUCMD_LOADSTATE10, "Loadstate Slot 0", ID_FILE_STATES_LOAD_SLOT0);
+	MakeMenuName(EMUCMD_LOADSTATE1, "Loadstate Slot 1", ID_FILE_STATES_LOAD_SLOT1);
+	MakeMenuName(EMUCMD_LOADSTATE2, "Loadstate Slot 2", ID_FILE_STATES_LOAD_SLOT2);
+	MakeMenuName(EMUCMD_LOADSTATE3, "Loadstate Slot 3", ID_FILE_STATES_LOAD_SLOT3);
+	MakeMenuName(EMUCMD_LOADSTATE4, "Loadstate Slot 4", ID_FILE_STATES_LOAD_SLOT4);
+	MakeMenuName(EMUCMD_LOADSTATE5, "Loadstate Slot 5", ID_FILE_STATES_LOAD_SLOT5);
+	MakeMenuName(EMUCMD_LOADSTATE6, "Loadstate Slot 6", ID_FILE_STATES_LOAD_SLOT6);
+	MakeMenuName(EMUCMD_LOADSTATE7, "Loadstate Slot 7", ID_FILE_STATES_LOAD_SLOT7);
+	MakeMenuName(EMUCMD_LOADSTATE8, "Loadstate Slot 8", ID_FILE_STATES_LOAD_SLOT8);
+	MakeMenuName(EMUCMD_LOADSTATE9, "Loadstate Slot 9", ID_FILE_STATES_LOAD_SLOT9);
+	MakeMenuName(EMUCMD_SAVESTATE10, "Savestate Slot 0", ID_FILE_STATES_SAVE_SLOT0);
+	MakeMenuName(EMUCMD_SAVESTATE1, "Savestate Slot 1", ID_FILE_STATES_SAVE_SLOT1);
+	MakeMenuName(EMUCMD_SAVESTATE2, "Savestate Slot 2", ID_FILE_STATES_SAVE_SLOT2);
+	MakeMenuName(EMUCMD_SAVESTATE3, "Savestate Slot 3", ID_FILE_STATES_SAVE_SLOT3);
+	MakeMenuName(EMUCMD_SAVESTATE4, "Savestate Slot 4", ID_FILE_STATES_SAVE_SLOT4);
+	MakeMenuName(EMUCMD_SAVESTATE5, "Savestate Slot 5", ID_FILE_STATES_SAVE_SLOT5);
+	MakeMenuName(EMUCMD_SAVESTATE6, "Savestate Slot 6", ID_FILE_STATES_SAVE_SLOT6);
+	MakeMenuName(EMUCMD_SAVESTATE7, "Savestate Slot 7", ID_FILE_STATES_SAVE_SLOT7);
+	MakeMenuName(EMUCMD_SAVESTATE8, "Savestate Slot 8", ID_FILE_STATES_SAVE_SLOT8);
+	MakeMenuName(EMUCMD_SAVESTATE9, "Savestate Slot 9", ID_FILE_STATES_SAVE_SLOT9);
+
 	//TODO:
 	//Loadstate & Savestate hotkeys
 	//Start playback
