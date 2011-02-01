@@ -60,7 +60,7 @@ extern void WriteConfig();
 //Prototypes
 void RunCD(HWND hWnd);
 void SaveIni();
-
+void UpdateMenuHotkeys();
 // global variables
 AppData gApp;
 HANDLE hConsole;
@@ -828,6 +828,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		case WM_ENTERMENULOOP:
+			UpdateMenuHotkeys();
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
@@ -2199,8 +2200,8 @@ void LoadIni()
 	dispInput = GetPrivateProfileInt("General", "InputDisplay", 0, Config.Conf_File);
 	
 
-	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
-	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows like to save -32000 and other odd things
+	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things
+	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things
 
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
 	{
@@ -2550,3 +2551,37 @@ void CreateMemPoke()
 		SetActiveWindow(memPokeHWND);
 }
 
+void ChangeMenuItemText(int menuitem, std::string text)
+{
+	MENUITEMINFO moo;
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.cch = NULL;
+	GetMenuItemInfo(gApp.hMenu, menuitem, FALSE, &moo);
+	moo.dwTypeData = (LPSTR)text.c_str();
+	SetMenuItemInfo(gApp.hMenu, menuitem, FALSE, &moo);
+}
+
+const char* GetComboName(int i)
+{
+	if(i == VK_CONTROL)
+		return "Ctrl + ";
+	else if(i == VK_MENU)
+		return "Alt + ";
+	else if(i == VK_SHIFT)
+		return "Shift + ";
+	else
+		return "";
+}
+
+extern char* RealKeyName(int c);
+void UpdateMenuHotkeys()
+{
+	//Update all menu items that can be called from a hotkey to include the current hotkey assignment
+	std::string combo, combined;
+	
+	combo =  GetComboName(EmuCommandTable[EMUCMD_OPENCD].keymod);
+	combo.append(RealKeyName(EmuCommandTable[EMUCMD_OPENCD].key));
+	combined = "Open &CD\t" + combo;
+	ChangeMenuItemText(ID_FILE_RUN_CD, combined);
+}

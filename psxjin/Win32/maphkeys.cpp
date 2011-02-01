@@ -107,7 +107,7 @@ static int bLastValDefined = 0;
 static HHOOK hook;
 static int receivingKmap;
 
-static char* RealKeyName(int c)
+char* RealKeyName(int c)
 {
 	static char out[256];
 
