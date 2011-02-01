@@ -2457,13 +2457,8 @@ void WIN32_StartAviRecord()
 	strcpy(Movie.AviDrive,fszDrive);
 	strcpy(Movie.AviDirectory,fszDirectory);
 	strcpy(Movie.AviFnameShort,fszFilename);
-	if (Config.SplitAVI) 
-	{
-		Movie.AviCount = 0;
-		sprintf(Movie.aviFilename, "%s%s%s-%dx%d_%03d.avi",fszDrive,fszDirectory,fszFilename,MainWindow_width,MainWindow_height,Movie.AviCount);
-	} else {
-			sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);
-	}	 
+	Movie.AviCount = 0;
+	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);		 
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
 	OpenPlugins(gApp.hWnd);
 	Config.CurWinX = MainWindow_width;
@@ -2481,7 +2476,7 @@ void WIN32_SplitAvi()
 	{
 		GPUstopAvi();
 		Movie.AviCount++;
-		sprintf(Movie.aviFilename, "%s%s%s-%dx%d_%03d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviFnameShort,MainWindow_width,MainWindow_height,Movie.AviCount);
+		sprintf(Movie.aviFilename, "%s%s%03d_%s-%dx%d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort,MainWindow_width,MainWindow_height-MainWindow_menubar);
 		Config.CurWinX = MainWindow_width;
 		Config.CurWinY = MainWindow_height-MainWindow_menubar;
 		GPUstartAvi(Movie.aviFilename);	

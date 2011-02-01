@@ -3401,11 +3401,11 @@ void CALLBACK GPUstartAvi(char* filename)
 void CALLBACK GPUstopAvi()
 {
 	if (RECORD_RECORDING)
-	{
+	{		
 		RECORD_RECORDING=FALSE;
 		RECORD_Stop();
 		BuildDispMenu(0);
-	}
+	}	
 }
 
 void CALLBACK GPUsendFpLuaGui(void (*fpPSXjin_LuaGuiTemp)(void *s, int width, int height, int bpp, int pitch))

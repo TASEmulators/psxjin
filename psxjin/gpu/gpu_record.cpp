@@ -105,6 +105,7 @@ BOOL RECORD_Start(char filename[256])
 	else
 	{
 		Config.SplitAVI = true;
+		sprintf(&filename[0],"%s%s%03d_%s-%dx%d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort,Config.CurWinX, Config.CurWinY);
 		RECORD_BI.biWidth = Config.CurWinX;
 		RECORD_BI.biHeight = Config.CurWinY;
 	}
