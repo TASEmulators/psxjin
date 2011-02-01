@@ -138,6 +138,8 @@ typedef struct {
 	long PauseAfterPlayback;
 	char Conf_File[256];	
 	long SplitAVI;
+	int CurWinX;
+	int CurWinY;
 } psxjinconfig;
 
 extern psxjinconfig Config;
@@ -215,7 +217,8 @@ struct MovieType {
 	int Port1_Mtap;						//Is player 1 a Multitap?
 	int Port2_Mtap;						//Is player 2 a Multitap?
 	int NumPlayers;						//Number of players in the movie
-	int P2_Start;						//Where does pad2 start? 		
+	int P2_Start;						//Where does pad2 start? 
+
 };
 
 struct MovieControlType {
