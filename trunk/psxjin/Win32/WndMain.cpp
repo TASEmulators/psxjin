@@ -871,6 +871,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
+			CheckMenuItem(gApp.hMenu, ID_FILE_READONLY, MF_BYCOMMAND | (Movie.readOnly ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_MUTE, MF_BYCOMMAND | ((iVolume == 5) ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
@@ -968,6 +969,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_STOP_MOVIE:
 					MOV_StopMovie();
+					return TRUE;
+				case ID_FILE_READONLY:
+					ReadonlyToggle();
 					return TRUE;
 
 				case ID_LUA_OPEN:
@@ -2022,7 +2026,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
 	ADDSUBMENUS(0, 1, _("&Movie"));
-
+	ADDMENUITEM(1, _("Read-only"), ID_FILE_READONLY);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
 	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
 	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
@@ -2597,6 +2601,7 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_SCREENSHOT, "Screenshot", ID_FILE_SCREENSHOT);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
+	MakeMenuName(EMUCMD_RWTOGGLE, "Read-only", ID_FILE_READONLY);
 	MakeMenuName(EMUCMD_LOADSTATE10, "Loadstate Slot 0", ID_FILE_STATES_LOAD_SLOT0);
 	MakeMenuName(EMUCMD_LOADSTATE1, "Loadstate Slot 1", ID_FILE_STATES_LOAD_SLOT1);
 	MakeMenuName(EMUCMD_LOADSTATE2, "Loadstate Slot 2", ID_FILE_STATES_LOAD_SLOT2);
