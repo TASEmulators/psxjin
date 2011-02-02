@@ -836,7 +836,8 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
-			
+			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CONTROLLERS,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+
 			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));  
