@@ -584,7 +584,7 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 			pad->rightJoyX = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
 			pad->rightJoyY = atoi((char*)Movie.inputBufferPtr);
-			Movie.inputBufferPtr += 4;		
+			Movie.inputBufferPtr += 5;		
 			break;	
 		case PSE_PAD_TYPE_NONE:	
 			Movie.inputBufferPtr++;

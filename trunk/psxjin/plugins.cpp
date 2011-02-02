@@ -510,11 +510,11 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	epadd.leftJoyX = 128;
 	epadd.leftJoyY = 128;
 	epadd.rightJoyX = 128;
-	epadd.rightJoyY = 128;
+	epadd.rightJoyY = 128;	
 	epadd.controllerType = Movie.padType1;
-
-	PAD1_readPort1(&padd);
-	padd.controllerType = Movie.padType1;
+	PAD1_readPort1(&padd);	
+	if (Movie.mode != 0)	
+		padd.controllerType = Movie.padType1;
 	memcpy(&PaddInput,&padd,sizeof(padd));
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
@@ -673,7 +673,8 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	{
 		PAD2_readPort2(&padd);
 	}
-	padd.controllerType = Movie.padType2; //Force Controller to match movie file. 
+	if (Movie.mode != 0)	
+		padd.controllerType = Movie.padType2; //Force Controller to match movie file. 
 	if(PSXjin_LuaUsingJoypad(1)) padd.buttonStatus = PSXjin_LuaReadJoypad(1)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(1);
 	if (luaAnalogJoy != NULL) {
