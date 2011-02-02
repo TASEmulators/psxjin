@@ -2632,8 +2632,8 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_SAVESTATE8, "Savestate Slot 8", ID_FILE_STATES_SAVE_SLOT8);
 	MakeMenuName(EMUCMD_SAVESTATE9, "Savestate Slot 9", ID_FILE_STATES_SAVE_SLOT9);
 
-	MakeMenuName(EMUCMD_STARTPLAYBACK, "Start &Playback...", ID_FILE_RECORD_MOVIE);
-	MakeMenuName(EMUCMD_STARTRECORDING, "Start &Recording...", ID_FILE_REPLAY_MOVIE);
+	MakeMenuName(EMUCMD_STARTPLAYBACK, "Start &Playback...", ID_FILE_REPLAY_MOVIE);
+	MakeMenuName(EMUCMD_STARTRECORDING, "Start &Recording...", ID_FILE_RECORD_MOVIE);
 	MakeMenuName(EMUCMD_STARTAVI, "Record &AVI", ID_START_CAPTURE);
 	MakeMenuName(EMUCMD_STOPAVI, "Stop AVI", ID_END_CAPTURE);
 	MakeMenuName(EMUCMD_LUA_OPEN, "&New Lua Script Window...", ID_LUA_OPEN);
