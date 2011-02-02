@@ -1120,7 +1120,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					}
 					else
 						SetForegroundWindow(RamSearchHWnd);
-					return TRUE;
+					return TRUE;				
 
 				case ID_RAM_WATCH:
 					if(!RamWatchHWnd)
@@ -1158,8 +1158,11 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_CONFIGURATION_CPU:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CPUCONF), hWnd, (DLGPROC)ConfigureCpuDlgProc);
-					return TRUE;
+					return TRUE;				
 
+				case ID_EMULATOR_ANALOG: 
+					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_ANALOG_CONTROL), NULL, (DLGPROC)AnalogControlProc);	
+					return TRUE;
 				case ID_CONFIGURATION:
 					ConfigurePlugins(hWnd);
 					return TRUE;
@@ -1837,6 +1840,33 @@ BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return FALSE;
 }
 
+BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	char guifuckingsucks[1024];
+	switch(uMsg) {
+		case WM_INITDIALOG:
+			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_LEFTX), 0, 255, true);
+			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_LEFTY), 0, 255, true);
+			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_RIGHTX), 0, 255, true);
+			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_RIGHTY), 0, 255, true);		
+			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTX),128,true);
+			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTY),128,true);
+			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTX),128,true);
+			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTY),128,true);
+		case WM_PAINT: 
+			{
+				sprintf(guifuckingsucks,"Left: X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTY)));
+				Static_SetText(GetDlgItem(hW,IDC_PAD_LEFT_TEXT2),guifuckingsucks);
+				sprintf(guifuckingsucks,"Right: X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTY)));
+				Static_SetText(GetDlgItem(hW,IDC_PAD_RIGHT_TEXT),guifuckingsucks);
+			}
+						 
+			
+	}
+	return FALSE;
+}
+
+
 void Open_Mcd_Proc(HWND hW, int mcd) {
 	OPENFILENAME ofn;
 	char szFileName[MAXFILENAME];
@@ -2054,7 +2084,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("3x"), ID_EMULATOR_3X);
 	ADDMENUITEM(0, _("2x"), ID_EMULATOR_2X);
 	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
-	ADDSEPARATOR(0);
+	ADDSEPARATOR(0);	
+	ADDMENUITEM(0, _("Open Analog Control"), ID_EMULATOR_ANALOG);
 	ADDMENUITEM(0, _("Mute Sound"), ID_EMULATOR_MUTE);
 	ADDMENUITEM(0, _("&CD Case Open/Close"), ID_EMULATOR_CDCLOSE);
 	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);

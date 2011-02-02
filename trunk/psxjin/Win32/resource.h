@@ -34,6 +34,7 @@
 #define IDD_PROMPT                      140
 #define IDR_RWACCELERATOR               141
 #define IDD_LUA                         142
+#define IDD_ANALOG_CONTROL              144
 #define IDC_ISOFILE                     1000
 #define IDC_EDIT2                       1001
 #define IDC_SELECTISO                   1001
@@ -372,6 +373,14 @@
 #define IDC_PORT1_MTAP                  1325
 #define IDC_PORT1_MTAP2                 1326
 #define IDC_PORT2_MTAP                  1326
+#define IDC_PAD_RIGHTX                  1326
+#define IDC_PAD_LEFTX                   1327
+#define IDC_PAD_RIGHTY                  1328
+#define IDC_PAD_LEFTY                   1329
+#define IDC_PAD_LEFT_TEXT               1330
+#define IDC_PAD_RIGHT_TEXT              1330
+#define IDC_PAD_LEFT_TEXT2              1331
+#define IDC_CHECK1                      1332
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_FILE_STATES_LOAD_SLOT1       39801
 #define ID_FILE_STATES_LOAD_SLOT2       39802
@@ -393,10 +402,11 @@
 #define ID_FILE_STATES_SAVE_SLOT8       39818
 #define ID_FILE_STATES_SAVE_SLOT9       39819
 #define ID_FILE_STATES_SAVE_SLOT0       39820
-#define ID_FILE_PLAYBEGINNING			39987
-#define ID_FILE_READONLY				39988
+#define ID_EMULATOR_ANALOG              39986
+#define ID_FILE_PLAYBEGINNING           39987
+#define ID_FILE_READONLY                39988
 #define ID_RECENT_CLEAR                 39989
-#define ID_EMULATOR_CDCLOSE				39990
+#define ID_EMULATOR_CDCLOSE             39990
 #define ID_EMULATOR_MUTE                39991
 #define ID_FILE_RECENT_LUA              39992
 #define ID_FILE_RECENT_MOVIE            39993
@@ -526,9 +536,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        144
+#define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         40047
-#define _APS_NEXT_CONTROL_VALUE         1326
+#define _APS_NEXT_CONTROL_VALUE         1333
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
