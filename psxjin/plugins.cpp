@@ -380,7 +380,7 @@ PadDataS padd1, padd2;
 
 unsigned char _PADstartPoll(PadDataS *pad) {
 	bufc = 0;		
-	printf("Pad Type a. %d b. %d\n", pad->controllerType, Movie.padType1);
+	//printf("Analog Values  %03d %03d %03d %03d\n", pad->rightJoyX, pad->rightJoyY, pad->leftJoyX, pad->leftJoyY);
 	switch (pad->controllerType) {
 		case PSE_PAD_TYPE_MOUSE:
 			mousepar[3] = pad->buttonStatus & 0xff;
