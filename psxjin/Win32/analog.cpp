@@ -34,7 +34,10 @@ void UpdatePositionText(HWND hWnd)
 	if (Config.WriteAnalog)		
 	{
 		Config.WriteAnalog = false;
-		//SendDlgItemMessage(hWnd,IDC_PAD_RIGHTX,TBM_SETPOS,0,0) ??? WTF? 
+		SendDlgItemMessage(hWnd,IDC_PAD_LEFTX,TBM_SETPOS,true,Config.PadLeftX);
+		SendDlgItemMessage(hWnd,IDC_PAD_LEFTY,TBM_SETPOS,true,Config.PadLeftY);
+		SendDlgItemMessage(hWnd,IDC_PAD_RIGHTX,TBM_SETPOS,true,Config.PadRightX);
+		SendDlgItemMessage(hWnd,IDC_PAD_RIGHTY,TBM_SETPOS,true,Config.PadRightY);
 	}
 	sprintf(Temp_Str,"X=%03d Y=%03d",SendDlgItemMessage(hWnd,IDC_PAD_LEFTX,TBM_GETPOS,0,0),SendDlgItemMessage(hWnd,IDC_PAD_LEFTY,TBM_GETPOS,0,0));
 	SetDlgItemText(hWnd, IDC_LeftBox, Temp_Str);
@@ -89,11 +92,14 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 				r.left -= width2;
 			}
 			}
-			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_LEFTX), 0, 255, true);
-			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_LEFTY), 0, 255, true);
-			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_RIGHTX), 0, 255, true);
-			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_RIGHTY), 0, 255, true);		
-			SendDlgItemMessage(hW,IDC_PAD_LEFTX,TBM_SETPOS,50,0);
+			SendDlgItemMessage(hW,IDC_PAD_LEFTX,TBM_SETRANGE,true,MAKELONG(0, 255));		
+			SendDlgItemMessage(hW,IDC_PAD_LEFTY,TBM_SETRANGE,true,MAKELONG(0, 255));		
+			SendDlgItemMessage(hW,IDC_PAD_RIGHTX,TBM_SETRANGE,true,MAKELONG(0, 255));		
+			SendDlgItemMessage(hW,IDC_PAD_RIGHTY,TBM_SETRANGE,true,MAKELONG(0, 255));		
+			SendDlgItemMessage(hW,IDC_PAD_LEFTX,TBM_SETPOS,true,128);
+			SendDlgItemMessage(hW,IDC_PAD_LEFTY,TBM_SETPOS,true,128);
+			SendDlgItemMessage(hW,IDC_PAD_RIGHTX,TBM_SETPOS,true,128);
+			SendDlgItemMessage(hW,IDC_PAD_RIGHTY,TBM_SETPOS,true,128);
 			Config.enable_extern_analog = true;
 		case WM_VSCROLL:
 		case WM_HSCROLL:

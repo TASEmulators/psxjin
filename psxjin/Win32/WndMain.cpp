@@ -448,6 +448,8 @@ void UpdateToolWindows()
 {
 	Update_RAM_Search();	//Update_RAM_Watch() is also called; hotkey.cpp - HK_StateLoadSlot & State_Load also call these functions
 	RefreshAllToolWindows();
+	if (Config.WriteAnalog && AnalogControlHWnd)
+		UpdatePositionText(AnalogControlHWnd);
 }
 
 int Slots[5] = { -1, -1, -1, -1, -1 };
