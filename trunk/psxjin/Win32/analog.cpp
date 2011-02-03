@@ -24,7 +24,7 @@
 #include "resource.h"
 #include "PSXCommon.h"
 
-bool enable = true;
+
 char Temp_Str[1024];
 
 //TODO: Enable Analog conrol should be check/unchecked in INITDIALOG based on some WndMain bool
@@ -54,22 +54,46 @@ void UpdateControls(HWND hWnd)
 
 BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	RECT r;
+	RECT r2;
+	int dx1, dy1, dx2, dy2;
 	switch(uMsg)
 	{
 		case WM_DESTROY:
 		case WM_CLOSE:
 		case WM_QUIT:
+			Config.enable_extern_analog = false;
 			DestroyWindow(hW);
 			break;
-		case WM_INITDIALOG:
+		case WM_INITDIALOG:				
+			{
+			GetWindowRect(gApp.hWnd, &r);
+			dx1 = (r.right - r.left) / 2;
+			dy1 = (r.bottom - r.top) / 2;
+
+			GetWindowRect(hW, &r2);
+			dx2 = (r2.right - r2.left) / 2;
+			dy2 = (r2.bottom - r2.top) / 2;
+
+			// push it away from the main window if we can
+			const int width = (r.right-r.left); 
+			const int width2 = (r2.right-r2.left); 
+			if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
+			{
+				r.right += width;
+				r.left += width;
+			}
+			else if((int)r.left - (int)width2 > 0)
+			{
+				r.right -= width2;
+				r.left -= width2;
+			}
+			}
 			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_LEFTX), 0, 255, true);
 			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_LEFTY), 0, 255, true);
 			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_RIGHTX), 0, 255, true);
 			ScrollBar_SetRange(GetDlgItem(hW,IDC_PAD_RIGHTY), 0, 255, true);		
-			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTX),128,true);
-			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTY),128,true);
-			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTX),128,true);
-			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTY),128,true);			
+			SendDlgItemMessage(hW,IDC_PAD_LEFTX,TBM_SETPOS,50,0);
 			Config.enable_extern_analog = true;
 		case WM_VSCROLL:
 		case WM_HSCROLL:
@@ -97,6 +121,7 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			switch(LOWORD(wParam))
 			{
 				case IDOK:
+				Config.enable_extern_analog = false;
 				DestroyWindow(hW);
 				break;
 			}		

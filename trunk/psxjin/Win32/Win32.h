@@ -58,7 +58,6 @@ extern char PSXjinDir[256];
 LRESULT WINAPI MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK ConfigureNetPlayDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 void ConfigurePlugins(HWND hWnd);
