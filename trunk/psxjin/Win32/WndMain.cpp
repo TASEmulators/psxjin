@@ -312,7 +312,8 @@ int main(int argc, char **argv) {
 	sprintf(Config.MemCardsDir, "%smemcards\\", szCurrentPath);
 	sprintf(Config.Conf_File, "%s\\psxjin.ini", szCurrentPath);
 	LoadConfig();	//Attempt to load ini, or set default settings
-
+	Config.enable_extern_analog = false;
+	Config.WriteAnalog = false;
 	strcpy (pConfigFile, Config.Conf_File);
 
 	//If directories don't already exist, create them

@@ -140,6 +140,12 @@ typedef struct {
 	long SplitAVI;
 	int CurWinX;
 	int CurWinY;
+	bool WriteAnalog;
+	bool enable_extern_analog;
+	int PadLeftX;
+	int PadLeftY;
+	int PadRightX;
+	int PadRightY;
 } psxjinconfig;
 
 extern psxjinconfig Config;

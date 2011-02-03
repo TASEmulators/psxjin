@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string>
 #include "resource.h"
+#include "PSXCommon.h"
 
 bool enable = true;
 char Temp_Str[1024];
@@ -30,7 +31,11 @@ char Temp_Str[1024];
 
 void UpdatePositionText(HWND hWnd)
 {
-	
+	if (Config.WriteAnalog)		
+	{
+		Config.WriteAnalog = false;
+		//SendDlgItemMessage(hWnd,IDC_PAD_RIGHTX,TBM_SETPOS,0,0) ??? WTF? 
+	}
 	sprintf(Temp_Str,"X=%03d Y=%03d",SendDlgItemMessage(hWnd,IDC_PAD_LEFTX,TBM_GETPOS,0,0),SendDlgItemMessage(hWnd,IDC_PAD_LEFTY,TBM_GETPOS,0,0));
 	SetDlgItemText(hWnd, IDC_LeftBox, Temp_Str);
 	sprintf(Temp_Str,"X=%03d Y=%03d",SendDlgItemMessage(hWnd,IDC_PAD_RIGHTX,TBM_GETPOS,0,0),SendDlgItemMessage(hWnd,IDC_PAD_RIGHTY,TBM_GETPOS,0,0));
@@ -39,12 +44,12 @@ void UpdatePositionText(HWND hWnd)
 
 void UpdateControls(HWND hWnd)
 {
-	EnableWindow(GetDlgItem(hWnd,IDC_PAD_LEFTY) ,(enable ? MF_ENABLED:MF_GRAYED) );
-	EnableWindow(GetDlgItem(hWnd,IDC_PAD_LEFTX) ,(enable ? MF_ENABLED:MF_GRAYED) );
-	EnableWindow(GetDlgItem(hWnd,IDC_PAD_RIGHTX),(enable ? MF_ENABLED:MF_GRAYED) );
-	EnableWindow(GetDlgItem(hWnd,IDC_PAD_RIGHTY),(enable ? MF_ENABLED:MF_GRAYED) );
-	EnableWindow(GetDlgItem(hWnd,IDC_LEFTGROUP) ,(enable ? MF_ENABLED:MF_GRAYED) );
-	EnableWindow(GetDlgItem(hWnd,IDC_RIGHTGROUP),(enable ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_LEFTY) ,(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_LEFTX) ,(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_RIGHTX),(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_RIGHTY),(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_LEFTGROUP) ,(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_RIGHTGROUP),(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
 }
 
 BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -64,11 +69,16 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTX),128,true);
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTY),128,true);
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTX),128,true);
-			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTY),128,true);
-			
-		case WM_PAINT: 	
+			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTY),128,true);			
+			Config.enable_extern_analog = true;
 		case WM_VSCROLL:
 		case WM_HSCROLL:
+			Config.WriteAnalog = false; 
+			Config.PadLeftX = SendDlgItemMessage(hW,IDC_PAD_LEFTX,TBM_GETPOS,0,0);
+			Config.PadLeftY = SendDlgItemMessage(hW,IDC_PAD_LEFTY,TBM_GETPOS,0,0);
+			Config.PadRightY = SendDlgItemMessage(hW,IDC_PAD_RIGHTY,TBM_GETPOS,0,0);
+			Config.PadRightX = SendDlgItemMessage(hW,IDC_PAD_RIGHTX,TBM_GETPOS,0,0);
+		case WM_PAINT: 	
 			UpdatePositionText(hW);
 			break;
 		case WM_COMMAND:
@@ -78,7 +88,7 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 					switch(LOWORD(wParam))
 					{
 					case IDC_ENABLEANALOG:
-						enable = !enable;
+						Config.enable_extern_analog = !Config.enable_extern_analog;
 						UpdateControls(hW);
 						break;
 					}

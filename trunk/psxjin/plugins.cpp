@@ -517,6 +517,13 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	if (Movie.mode != 0)	
 		padd.controllerType = Movie.padType1;
 	memcpy(&PaddInput,&padd,sizeof(padd));
+	if (Config.enable_extern_analog)
+	{
+		padd.leftJoyX = 255  * Config.PadLeftX /100;
+		padd.leftJoyY = 255 * Config.PadLeftY / 100;
+		padd.rightJoyX = 255 * Config.PadRightX / 100;
+		padd.rightJoyY = 255 * Config.PadRightY / 100;
+	}
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
 	if (luaAnalogJoy != NULL) {
@@ -558,6 +565,11 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 			else if (Movie.mode == MOVIEMODE_PLAY && Movie.currentFrame < Movie.totalFrames)
 			{
 				MOV_ReadJoy(&padd,Movie.padType1);
+				Config.WriteAnalog = true;
+				Config.PadLeftX = (100 * padd.leftJoyX ) / 255;
+				Config.PadLeftY = (100 * padd.leftJoyY) / 255;
+				Config.PadRightX = (100 * padd.rightJoyX) / 255;
+				Config.PadRightY =(100 * padd.rightJoyY) / 255;
 			}
 			memcpy(&Movie.lastPads1[0],&padd,sizeof(padd));
 			iJoysToPoll--;
@@ -740,7 +752,8 @@ if (!Movie.Port2_Mtap) {
 						{							
 							MOV_WriteJoy(&epadd,Movie.padType2);
 							memcpy(&Mpadds[Player],&epadd,sizeof(epadd));
-						} 						else
+						} 						
+						else
 						{
 							MOV_ReadJoy(&Mpadds[Player],Movie.padType2);
 						}
