@@ -1273,6 +1273,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\analog.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\analog.h"
+			>
+		</File>
+		<File
 			RelativePath="Cdrom02.ico"
 			>
 		</File>
