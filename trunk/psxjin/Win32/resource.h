@@ -70,10 +70,12 @@
 #define IDC_EDIT1                       1013
 #define IDC_CDDA                        1013
 #define IDC_RECORDMODE                  1013
+#define IDC_LeftBox                     1013
 #define IDC_CLOSE                       1014
 #define IDC_PSXjin_ABOUT_TEXT           1014
 #define IDC_PSXOUT                      1014
 #define IDC_DISSTEREO                   1014
+#define IDC_RightBox                    1014
 #define IDC_ASM_SCROLL                  1015
 #define IDC_CPU                         1015
 #define IDC_IRQDECODE                   1015
@@ -381,6 +383,9 @@
 #define IDC_PAD_RIGHT_TEXT              1330
 #define IDC_PAD_LEFT_TEXT2              1331
 #define IDC_CHECK1                      1332
+#define IDC_ENABLEANALOG                1332
+#define IDC_LEFTGROUP                   1333
+#define IDC_RIGHTGROUP                  1334
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_FILE_STATES_LOAD_SLOT1       39801
 #define ID_FILE_STATES_LOAD_SLOT2       39802
@@ -538,7 +543,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         40047
-#define _APS_NEXT_CONTROL_VALUE         1333
+#define _APS_NEXT_CONTROL_VALUE         1335
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
