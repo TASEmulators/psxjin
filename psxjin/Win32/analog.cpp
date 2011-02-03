@@ -23,6 +23,20 @@
 #include <string>
 #include "resource.h"
 
+bool enable = true;
+
+//TODO: Enable Analog conrol should be check/unchecked in INITDIALOG based on some WndMain bool
+
+void UpdateControls(HWND hWnd)
+{
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_LEFTY) ,(enable ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_LEFTX) ,(enable ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_RIGHTX),(enable ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_PAD_RIGHTY),(enable ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_LEFTGROUP) ,(enable ? MF_ENABLED:MF_GRAYED) );
+	EnableWindow(GetDlgItem(hWnd,IDC_RIGHTGROUP),(enable ? MF_ENABLED:MF_GRAYED) );
+}
+
 BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char guifuckingsucks[1024];
@@ -42,15 +56,28 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_LEFTY),128,true);
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTX),128,true);
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTY),128,true);
+			
 		case WM_PAINT: 
 		{
-			sprintf(guifuckingsucks,"Left: X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTY)));
-			Static_SetText(GetDlgItem(hW,IDC_PAD_LEFT_TEXT2),guifuckingsucks);
-			sprintf(guifuckingsucks,"Right: X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTY)));
-			Static_SetText(GetDlgItem(hW,IDC_PAD_RIGHT_TEXT),guifuckingsucks);
+			sprintf(guifuckingsucks,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTY)));
+			SetDlgItemText(hW, IDC_LeftBox, guifuckingsucks);
+			sprintf(guifuckingsucks,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTY)));
+			SetDlgItemText(hW, IDC_RightBox, guifuckingsucks);
 		}
 		break;
 		case WM_COMMAND:
+			switch(HIWORD(wParam))
+			{
+				case BN_CLICKED:
+					switch(LOWORD(wParam))
+					{
+					case IDC_ENABLEANALOG:
+						enable = !enable;
+						UpdateControls(hW);
+						break;
+					}
+				break;
+			}
 			switch(LOWORD(wParam))
 			{
 				case IDOK:
