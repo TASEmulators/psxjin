@@ -30,9 +30,10 @@ char Temp_Str[1024];
 
 void UpdatePositionText(HWND hWnd)
 {
-	sprintf(Temp_Str,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_LEFTX)),ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_LEFTY)));
+	
+	sprintf(Temp_Str,"X=%03d Y=%03d",SendDlgItemMessage(hWnd,IDC_PAD_LEFTX,TBM_GETPOS,0,0),SendDlgItemMessage(hWnd,IDC_PAD_LEFTY,TBM_GETPOS,0,0));
 	SetDlgItemText(hWnd, IDC_LeftBox, Temp_Str);
-	sprintf(Temp_Str,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_RIGHTX)),ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_RIGHTY)));
+	sprintf(Temp_Str,"X=%03d Y=%03d",SendDlgItemMessage(hWnd,IDC_PAD_RIGHTX,TBM_GETPOS,0,0),SendDlgItemMessage(hWnd,IDC_PAD_RIGHTY,TBM_GETPOS,0,0));
 	SetDlgItemText(hWnd, IDC_RightBox, Temp_Str);
 }
 
@@ -65,21 +66,11 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTX),128,true);
 			ScrollBar_SetPos(GetDlgItem(hW,IDC_PAD_RIGHTY),128,true);
 			
-		case WM_PAINT: 
-		{
-			UpdatePositionText(hW);
-		}
-		break;
-		
+		case WM_PAINT: 	
 		case WM_VSCROLL:
-		{
-			//if (LOWORD(wParam) == SB_ENDSCROLL)
-			//	return true;
-			case IDC_PAD_LEFTY:
-			case IDC_PAD_RIGHTY:
-				UpdatePositionText(hW);
-				break;
-		}
+		case WM_HSCROLL:
+			UpdatePositionText(hW);
+			break;
 		case WM_COMMAND:
 			switch(HIWORD(wParam))
 			{
