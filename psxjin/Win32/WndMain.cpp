@@ -304,7 +304,6 @@ int main(int argc, char **argv) {
 	GetCurrentDirectory(256, PSXjinDir);
 
 	memset(&Config, 0, sizeof(psxjinconfig));
-	strcpy(Config.Net, "Disabled");
 	sprintf(Config.PluginsDir, "%splugins\\", szCurrentPath);
 	sprintf(Config.BiosDir, "%sbios\\", szCurrentPath);
 	sprintf(Config.SstatesDir, "%ssstates\\", szCurrentPath);

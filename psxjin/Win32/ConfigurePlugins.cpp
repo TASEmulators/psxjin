@@ -41,7 +41,6 @@ void SaveConfig()
 	WritePrivateProfileString("Plugins", "Pad2", Config.Pad2 , Conf_File);
 	WritePrivateProfileString("Plugins", "MCD1", Config.Mcd1 , Conf_File);
 	WritePrivateProfileString("Plugins", "MCD2", Config.Mcd2 , Conf_File);
-	//WritePrivateProfileString("Plugins", "Net", Config.Net , Conf_File);	//adelikat: Netplay was disabled so let's not save it
 	wsprintf(Str_Tmp, "%d", Config.Xa);
 	WritePrivateProfileString("Plugins", "Xa", Str_Tmp, Conf_File);
 	wsprintf(Str_Tmp, "%d", Config.Sio);
@@ -96,7 +95,6 @@ void LoadConfig()
 	Config.PsxType = GetPrivateProfileInt("Plugins", "PsxType", 0, Conf_File);
 	Config.QKeys = GetPrivateProfileInt("Plugins", "QKeys", 0, Conf_File);
 	Config.Cdda = GetPrivateProfileInt("Plugins", "Cdda", 0, Conf_File);
-	//Config.Cpu = GetPrivateProfileInt("Plugins", "CPU", 0, Conf_File);
 	Config.PauseAfterPlayback = GetPrivateProfileInt("Plugins", "PauseAfterPlayback", 0, Conf_File);
 	Config.PsxOut = GetPrivateProfileInt("Plugins", "PsxOut", 0, Conf_File);
 	Config.RCntFix = GetPrivateProfileInt("Plugins", "RCntFix", 0, Conf_File);
@@ -320,17 +318,14 @@ void OnOK(HWND hW) {
 	SysCloseLibrary(drv);
 
 void ConfigureGPU(HWND hW) {
-	//ConfPlugin(GPUconfigure, IDC_LISTGPU, "GPUconfigure");
 	GPUconfigure();
 }
 
 void ConfigureSPU(HWND hW) {
-	//ConfPlugin(SPUconfigure, IDC_LISTSPU, "SPUconfigure");
 	SPUconfigure();
 }
 
 void ConfigureCDR(HWND hW) {
-	//ConfPlugin(CDRconfigure, IDC_LISTCDR, "CDRconfigure");
 	CDRconfigure();
 }
 
@@ -341,20 +336,6 @@ void ConfigurePAD1(HWND hW) {
 void ConfigurePAD2(HWND hW) {
 	ConfPlugin(PADconfigure, IDC_LISTPAD2, "PADconfigure");
 }
-
-
-//void AboutGPU(HWND hW) {
-//	ConfPlugin(GPUabout, IDC_LISTGPU, "GPUabout");
-//}
-
-//void AboutSPU(HWND hW) {
-//	ConfPlugin(SPUabout, IDC_LISTSPU, "SPUabout");
-//}
-
-//void AboutCDR(HWND hW) {
-//	ConfPlugin(CDRabout, IDC_LISTCDR, "CDRabout");
-//}
-
 
 void AboutPAD1(HWND hW) {
 	ConfPlugin(PADabout, IDC_LISTPAD1, "PADabout");
@@ -384,18 +365,6 @@ void AboutPAD2(HWND hW) {
 		else SysMessage(_("This plugin reports that should not work correctly")); \
 	} \
 	SysCloseLibrary(drv);
-
-//void TestGPU(HWND hW) {
-//	TestPlugin(GPUtest, IDC_LISTGPU, "GPUtest");
-//}
-
-//void TestSPU(HWND hW) {
-//	TestPlugin(SPUtest, IDC_LISTSPU, "SPUtest");
-//}
-
-//void TestCDR(HWND hW) {
-//	TestPlugin(CDRtest, IDC_LISTCDR, "CDRtest");
-//}
 
 void TestPAD1(HWND hW) {
 	TestPlugin(PADtest, IDC_LISTPAD1, "PADtest");
@@ -470,16 +439,8 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 					return TRUE;
        			case IDC_CONFIGPAD1: ConfigurePAD1(hW); return TRUE;
        			case IDC_CONFIGPAD2: ConfigurePAD2(hW); return TRUE;
-
-				//case IDC_TESTGPU:    TestGPU(hW);   return TRUE;
-				//case IDC_TESTSPU:    TestSPU(hW);   return TRUE;
-				//case IDC_TESTCDR:    TestCDR(hW);   return TRUE;
 				case IDC_TESTPAD1:   TestPAD1(hW);  return TRUE;
 				case IDC_TESTPAD2:   TestPAD2(hW);  return TRUE;
-
-				//case IDC_ABOUTGPU:   AboutGPU(hW);  return TRUE;
-				//case IDC_ABOUTSPU:   AboutSPU(hW);  return TRUE;
-                //case IDC_ABOUTCDR:   AboutCDR(hW);  return TRUE;
     	        case IDC_ABOUTPAD1:  AboutPAD1(hW); return TRUE;
     		    case IDC_ABOUTPAD2:  AboutPAD2(hW); return TRUE;
 
@@ -504,103 +465,3 @@ void ConfigurePlugins(HWND hWnd) {
               hWnd,  
               (DLGPROC)ConfigurePluginsDlgProc);
 }
-
-// NetPlay Config Dialog
-
-BOOL OnConfigureNetPlayDialog(HWND hW) {
-	WIN32_FIND_DATA FindData;
-	HANDLE Find;
-	HANDLE Lib;
-	PSEgetLibType    PSE_GetLibType;
-	PSEgetLibName    PSE_GetLibName;
-	PSEgetLibVersion PSE_GetLibVersion;
-	HWND hWC_NET=GetDlgItem(hW,IDC_LISTNET);
-	char tmpStr[256];
-	char *lp;
-	int i;
-
-	strcpy(tmpStr, Config.PluginsDir);
-	strcat(tmpStr, "*.dll");
-	Find = FindFirstFile(tmpStr, &FindData);
-
-	lp = (char *)malloc(strlen("Disabled")+8);
-	sprintf(lp, "Disabled");
-	i = ComboBox_AddString(hWC_NET, "Disabled");
-	tempDest = ComboBox_SetItemData(hWC_NET, i, lp);
-	tempDest = ComboBox_SetCurSel(hWC_NET,  0);
-
-	do {
-		if (Find==INVALID_HANDLE_VALUE) break;
-		sprintf(tmpStr,"%s%s", Config.PluginsDir, FindData.cFileName);
-		Lib = LoadLibrary(tmpStr);
-		if (Lib!=NULL) {
-			PSE_GetLibType = (PSEgetLibType) GetProcAddress((HMODULE)Lib,"PSEgetLibType");
-			PSE_GetLibName = (PSEgetLibName) GetProcAddress((HMODULE)Lib,"PSEgetLibName");
-			PSE_GetLibVersion = (PSEgetLibVersion) GetProcAddress((HMODULE)Lib,"PSEgetLibVersion");
-
-			if (PSE_GetLibType != NULL && PSE_GetLibName != NULL && PSE_GetLibVersion != NULL) {
-				unsigned long version = PSE_GetLibVersion();
-				long type;
-
-				sprintf(tmpStr, "%s %d.%d", PSE_GetLibName(), (int)(version>>8)&0xff, (int)version&0xff);
-				type = PSE_GetLibType();
-				if (type & PSE_LT_NET  && ((version >> 16) == 2)) {
-					ComboAddPlugin(hWC_NET, Config.Net);
-				}
-			}
-		}
-	} while (FindNextFile(Find,&FindData));
-
-	if (Find!=INVALID_HANDLE_VALUE) FindClose(Find);
-
-	return TRUE;
-}
-
-BOOL CALLBACK ConfigureNetPlayDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	int i,iCnt;HWND hWC;char * lp;
-
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			SetWindowText(hW, _("NetPlay Configuration"));
-
-			Button_SetText(GetDlgItem(hW, IDOK), _("OK"));
-			Button_SetText(GetDlgItem(hW, IDCANCEL), _("Cancel"));
-			Static_SetText(GetDlgItem(hW, IDC_NETPLAY), _("NetPlay"));
-			Button_SetText(GetDlgItem(hW, IDC_CONFIGNET), _("Configure..."));
-			Button_SetText(GetDlgItem(hW, IDC_TESTNET), _("Test..."));
-			Button_SetText(GetDlgItem(hW, IDC_ABOUTNET), _("About..."));
-			Static_SetText(GetDlgItem(hW, IDC_NETPLAYNOTE), _("Note: The NetPlay Plugin Directory should be the same as the other Plugins."));
-
-			OnConfigureNetPlayDialog(hW);
-			return TRUE;
-
-		case WM_COMMAND: {
-     		switch (LOWORD(wParam)) {
-				case IDCANCEL: 
-					CleanCombo(IDC_LISTNET);
-					EndDialog(hW,FALSE); 
-					return TRUE;
-
-				case IDOK:
-					strcpy(Config.Net, GetSelDLL(hW, IDC_LISTNET));
-
-					SaveConfig();
-
-					CleanUpCombos(hW);
-
-					NeedReset = 1;
-					ReleasePlugins();
-					LoadPlugins();
-
-					CleanCombo(IDC_LISTNET);
-
-					EndDialog(hW,TRUE);
-
-					return TRUE;
-			}
-		}
-	}
-
-	return FALSE;
-}
-
