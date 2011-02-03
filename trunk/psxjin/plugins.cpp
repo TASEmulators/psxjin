@@ -519,10 +519,18 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	memcpy(&PaddInput,&padd,sizeof(padd));
 	if (Config.enable_extern_analog)
 	{
-		padd.leftJoyX = 255  * Config.PadLeftX /100;
-		padd.leftJoyY = 255 * Config.PadLeftY / 100;
-		padd.rightJoyX = 255 * Config.PadRightX / 100;
-		padd.rightJoyY = 255 * Config.PadRightY / 100;
+		padd.leftJoyX = Config.PadLeftX;
+		padd.leftJoyY = Config.PadLeftY;
+		padd.rightJoyX = Config.PadRightX;
+		padd.rightJoyY = Config.PadRightY;
+	}
+	else
+	{
+		Config.WriteAnalog = true;
+		Config.PadLeftX = (padd.leftJoyX);
+		Config.PadLeftY = (padd.leftJoyY);
+		Config.PadRightX = (padd.rightJoyX);
+		Config.PadRightY =(padd.rightJoyY);
 	}
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
@@ -566,10 +574,10 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 			{
 				MOV_ReadJoy(&padd,Movie.padType1);
 				Config.WriteAnalog = true;
-				Config.PadLeftX = (100 * padd.leftJoyX ) / 255;
-				Config.PadLeftY = (100 * padd.leftJoyY) / 255;
-				Config.PadRightX = (100 * padd.rightJoyX) / 255;
-				Config.PadRightY =(100 * padd.rightJoyY) / 255;
+				Config.PadLeftX = (padd.leftJoyX);
+				Config.PadLeftY = (padd.leftJoyY);
+				Config.PadRightX = (padd.rightJoyX);
+				Config.PadRightY =(padd.rightJoyY);
 			}
 			memcpy(&Movie.lastPads1[0],&padd,sizeof(padd));
 			iJoysToPoll--;
