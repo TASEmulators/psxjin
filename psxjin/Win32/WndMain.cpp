@@ -47,6 +47,7 @@
 #include "../spu/spu.h"	//For iVolume
 #include "recentmenu.h"
 #include "plugins.h"
+#include "analog.h"
 
 const int RECENTCD_START = 65000;
 const int RECENTMOVIE_START = 65020;
@@ -1162,8 +1163,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CPUCONF), hWnd, (DLGPROC)ConfigureCpuDlgProc);
 					return TRUE;				
 
-				case ID_EMULATOR_ANALOG: 
-					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_ANALOG_CONTROL), NULL, (DLGPROC)AnalogControlProc);	
+				case ID_EMULATOR_ANALOG:
+					if (!AnalogControlHWnd)
+						AnalogControlHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_ANALOG_CONTROL), NULL, (DLGPROC)AnalogControlProc);	
 					return TRUE;
 				case ID_CONFIGURATION:
 					ConfigurePlugins(hWnd);
