@@ -24,8 +24,17 @@
 #include "resource.h"
 
 bool enable = true;
+char Temp_Str[1024];
 
 //TODO: Enable Analog conrol should be check/unchecked in INITDIALOG based on some WndMain bool
+
+void UpdatePositionText(HWND hWnd)
+{
+	sprintf(Temp_Str,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_LEFTX)),ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_LEFTY)));
+	SetDlgItemText(hWnd, IDC_LeftBox, Temp_Str);
+	sprintf(Temp_Str,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_RIGHTX)),ScrollBar_GetPos(GetDlgItem(hWnd,IDC_PAD_RIGHTY)));
+	SetDlgItemText(hWnd, IDC_RightBox, Temp_Str);
+}
 
 void UpdateControls(HWND hWnd)
 {
@@ -39,7 +48,6 @@ void UpdateControls(HWND hWnd)
 
 BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char guifuckingsucks[1024];
 	switch(uMsg)
 	{
 		case WM_DESTROY:
@@ -59,12 +67,19 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			
 		case WM_PAINT: 
 		{
-			sprintf(guifuckingsucks,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_LEFTY)));
-			SetDlgItemText(hW, IDC_LeftBox, guifuckingsucks);
-			sprintf(guifuckingsucks,"X=%03d Y=%03d",ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTX)),ScrollBar_GetPos(GetDlgItem(hW,IDC_PAD_RIGHTY)));
-			SetDlgItemText(hW, IDC_RightBox, guifuckingsucks);
+			UpdatePositionText(hW);
 		}
 		break;
+		
+		case WM_VSCROLL:
+		{
+			//if (LOWORD(wParam) == SB_ENDSCROLL)
+			//	return true;
+			case IDC_PAD_LEFTY:
+			case IDC_PAD_RIGHTY:
+				UpdatePositionText(hW);
+				break;
+		}
 		case WM_COMMAND:
 			switch(HIWORD(wParam))
 			{
