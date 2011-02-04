@@ -96,6 +96,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,			   0,			"MTrack: Select None",},
 	{ 0,			   0,			"Auto-hold",},
 	{ 0,			   0,			"Auto-hold clear",},
+	{ 0,			   0,			"Auto-fire",},
 	{ 0,               0,           "SPU IRQ Enable/Disable", },			//dirty fix, this key is missing from maphkeys.h, putting it on botom of the list prevent keys to be offset and seem to remove it from hotkeys map list
 
 	
