@@ -2383,6 +2383,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 			return;
 		}
 		GetMovieFilenameMini(Movie.movieFilename);
+		Movie.readOnly = 1;
 	}
 	else
 		nRet = MOV_W32_StartReplayDialog();
