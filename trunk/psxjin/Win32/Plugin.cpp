@@ -835,7 +835,7 @@ bool OpenPlugins(HWND hWnd) {
 	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); return false; }
 
 	SetCurrentDirectory(PSXjinDir);
-	ShowCursor(FALSE);
+	//ShowCursor(FALSE);
 	GPUsendFpLuaGui(PSXjin_LuaGui);
 	return true;
 }
