@@ -181,6 +181,8 @@ char *GetSavestateFilename(int newState) {
 }
 
 void PADhandleKey(int key) {
+	char tempstr[1024];
+	const int Frates[] = {1, 4, 9, 15, 22, 30, 60, 75, 90, 120, 240, 480, 9999};
 	int i;
 	int modifiers = 0;
 	if(GetAsyncKeyState(VK_CONTROL))
@@ -322,6 +324,7 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDNORMAL].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_NORMAL);
+		GPUdisplayText("Speed at 100%");
 		return;
 	}
 
@@ -349,8 +352,10 @@ void PADhandleKey(int key) {
 
 	if(key == EmuCommandTable[EMUCMD_SPEEDDEC].key
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDDEC].keymod)
-	{
+	{		
 		SetEmulationSpeed(EMUSPEED_SLOWER);
+		sprintf(tempstr,"Speed set at %d%%",(100 * Frates[iSpeedMode-1])/60);
+		GPUdisplayText(tempstr);
 		return;
 	}
 
@@ -358,6 +363,8 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_SPEEDINC].keymod)
 	{
 		SetEmulationSpeed(EMUSPEED_FASTER);
+		sprintf(tempstr,"Speed set at %d%%",(100 * Frates[iSpeedMode-1])/60);
+		GPUdisplayText(tempstr);
 		return;
 	}
 
