@@ -757,12 +757,7 @@ void PADhandleKey(int key) {
 		Config.GetAutoHold = true;
 		return;
 	}
-	/*if(key == EmuCommandTable[EMUCMD_AUTOFIRE].key
-	&& modifiers == EmuCommandTable[EMUCMD_AUTOFIRE].keymod)
-	{
-		Config.GetAutoFire = true;
-		return;
-	}*/
+
 	if(key == EmuCommandTable[EMUCMD_AUTOHOLDCLEAR].key
 	&& modifiers == EmuCommandTable[EMUCMD_AUTOHOLDCLEAR].keymod)
 	{
@@ -775,7 +770,12 @@ void PADhandleKey(int key) {
 		return;
 	}
 	
-
+	if(key == EmuCommandTable[EMUCMD_AUTOFIRE].key
+	&& modifiers == EmuCommandTable[EMUCMD_AUTOFIRE].keymod)
+	{
+		Config.GetAutoFire = true;
+		return;
+	}
 }
 
 char charsTable[4] = { '|', '/', '-', '\\' };
