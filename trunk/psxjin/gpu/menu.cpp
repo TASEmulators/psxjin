@@ -65,6 +65,7 @@
 #include "draw.h"
 #include "menu.h"
 #include "gpu.h"
+#include "PSXCommon.h"
 
 unsigned long dwCoreFlags=0;
 char cCurrentFrame[14];
@@ -235,12 +236,12 @@ void DisplayMovMode(void)
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
 }
-void DisplayInput(void)
+void DisplayInput(short P1, short P2)
 {
-	#ifdef _WINDOWS
+	#ifdef _WINDOWS	
+	const unsigned short Order[] = {0x80, 0x10, 0x20, 0x40, 0x8, 0x1, 0x8000, 0x4000, 0x2000, 0x1000, 0x400, 0x400, 0x800, 0x800, 0x100, 0x100, 0x200, 0x200};	
 	HDC hdc;
-	HFONT hFO;
-
+	HFONT hFO;	
 	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
 	hFO=(HFONT)SelectObject(hdc,hGFont);
 
@@ -248,7 +249,49 @@ void DisplayInput(void)
 	if (bTransparent)
 		SetBkMode(hdc,TRANSPARENT);
 	else SetBkColor(hdc,RGB(0,0,0));
+	ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szInputBuf,36,NULL);	
+	for (int i = 0; i < 18; i++)
+	{
+		if (P1&Order[i])
+		{NULL;} else szInputBuf[i] = ' ';
+	}
+	for (int i = 0; i < 18; i++)
+	{
+		if (P2&Order[i])
+		{} else szInputBuf[i+18] = ' ';
+	}
+	SetTextColor(hdc,RGB(0,255,255));
+	SetBkMode(hdc,TRANSPARENT);
 	ExtTextOut(hdc,2,PSXDisplay.DisplayMode.y-12,0,NULL,szInputBuf,36,NULL);
+	SelectObject(hdc,hFO);
+	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
+	#endif
+}
+void DisplayAnalog(PadDataS padd1, PadDataS padd2)
+{
+	#ifdef _WINDOWS
+	HDC hdc;
+	HFONT hFO;
+	char tempstr[128];
+	IDirectDrawSurface_GetDC(DX.DDSRender,&hdc);
+	hFO=(HFONT)SelectObject(hdc,hGFont);
+
+	SetTextColor(hdc,RGB(0,255,0));
+	if (bTransparent)
+		SetBkMode(hdc,TRANSPARENT);
+	else SetBkColor(hdc,RGB(0,0,0));
+	int n = 1;
+	if (padd2.controllerType !=4)
+	{
+		sprintf(tempstr,"%03d %03d %03d %03d",padd2.leftJoyX, padd2.leftJoyY, padd2.rightJoyX, padd2.rightJoyY);
+		ExtTextOut(hdc,PSXDisplay.DisplayMode.x-90,PSXDisplay.DisplayMode.y-12,0,NULL,tempstr,lstrlen(tempstr),NULL);
+		n++;
+	}	
+	if (padd1.controllerType !=4)
+	{
+		sprintf(tempstr,"%03d %03d %03d %03d",padd1.leftJoyX, padd1.leftJoyY, padd1.rightJoyX, padd1.rightJoyY);
+		ExtTextOut(hdc,PSXDisplay.DisplayMode.x-90,PSXDisplay.DisplayMode.y-(n*12),0,NULL,tempstr,lstrlen(tempstr),NULL);
+	}	
 	SelectObject(hdc,hFO);
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 	#endif
@@ -332,7 +375,7 @@ void BuildDispMenu(int iInc)
 			j++;
 		}
 	}
-
+	
 	cCurrentInput[0] = currentInput&0x80?' ':'<';
 	cCurrentInput[1] = currentInput&0x10?' ':'^';
 	cCurrentInput[2] = currentInput&0x20?' ':'>';

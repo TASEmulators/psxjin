@@ -4573,7 +4573,8 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 		}
 		if (ulKeybits&KEY_SHOWINPUT)
 		{
-			DisplayInput();
+			DisplayInput(Config.Pad1AutoHold | Config.Pad1AutoFire, Config.Pad2AutoFire | Config.Pad2AutoHold);
+			DisplayAnalog(Movie.lastPads1[0],Movie.lastPads2[0]);
 			if (Movie.MultiTrack)
 			{
 				DisplayRecording(Movie.RecordPlayer, Movie.NumPlayers);
