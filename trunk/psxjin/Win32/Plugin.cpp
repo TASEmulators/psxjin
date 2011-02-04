@@ -743,6 +743,20 @@ void PADhandleKey(int key) {
 		Movie.RecordPlayer = Movie.NumPlayers+1;		
 		return;
 	}
+
+	if(key == EmuCommandTable[EMUCMD_AUTOHOLD].key
+	&& modifiers == EmuCommandTable[EMUCMD_AUTOHOLD].keymod)
+	{
+		
+		return;
+	}
+	if(key == EmuCommandTable[EMUCMD_AUTOHOLDCLEAR].key
+	&& modifiers == EmuCommandTable[EMUCMD_AUTOHOLDCLEAR].keymod)
+	{
+				
+		return;
+	}
+
 }
 
 char charsTable[4] = { '|', '/', '-', '\\' };
