@@ -26,7 +26,7 @@ static void MakeOfn(char* pszFilter)
 	ofn.lpstrFilter = pszFilter;
 	ofn.lpstrFile = szChoice;
 	ofn.nMaxFile = sizeof(szChoice) / sizeof(char);
-	ofn.lpstrInitialDir = ".\\movies";
+	ofn.lpstrInitialDir = Config.MovieDir;
 	ofn.Flags = OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
 	ofn.lpstrDefExt = "pjm";
 
@@ -383,12 +383,12 @@ std::string MakeMovieName()
 
 	return str;
 }
-
+char defaultFilename[1024];
 static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	int nRet;
 	LONG lIndex;
-	char defaultFilename[1024];
+	
 	if (Msg == WM_INITDIALOG) {
 		// come up with a unique name
 		char szPath[256];
@@ -439,7 +439,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 			switch (wID) {
 				case IDC_BROWSE:
 				{
-					sprintf(szChoice, "%.8s", defaultFilename);
+					sprintf(szChoice, "%.64s", defaultFilename);
 					MakeOfn(szFilter);
 					ofn.lpstrTitle = "Record Input to File";
 					ofn.Flags |= OFN_OVERWRITEPROMPT;
