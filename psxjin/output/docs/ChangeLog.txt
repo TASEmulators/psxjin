@@ -1,8 +1,16 @@
 Changes from PCSX-rr v0.1.3
-
-New SPU core
-Overhaul of GUI design including the fact the menu is no longer separate from the game window
-Various new features & teaks
-More stable movie recording
-Audio capturing
-Numerous bug fixes & small changes
+----------------------------
+-New SPU core integrated, designed by zeromus
+-Overhaul of GUI design including the fact the menu is no longer separate from the game window
+	**This means menus can be accessed without leaving the game!**
+-GPU Plugin is integrated
+-More stable movie recording!
+-Audio capturing!
+-Window is resizeable, creating separate AVI files for encoders.
+-Multi-track recording is built-in
+-Recent Rom, Movie, and Lua script menus
+-Quick switching Zoom features (1x, 2x, 3x, 4x)
+-MultiTap Controllers are available in movie recording
+-Analog Control Window
+-Text or Binary Format movies
+-Numerous bug fixes & small changes
