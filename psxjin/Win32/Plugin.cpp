@@ -747,15 +747,27 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_AUTOHOLD].key
 	&& modifiers == EmuCommandTable[EMUCMD_AUTOHOLD].keymod)
 	{
-		
+		Config.GetAutoHold = true;
 		return;
 	}
+	/*if(key == EmuCommandTable[EMUCMD_AUTOFIRE].key
+	&& modifiers == EmuCommandTable[EMUCMD_AUTOFIRE].keymod)
+	{
+		Config.GetAutoFire = true;
+		return;
+	}*/
 	if(key == EmuCommandTable[EMUCMD_AUTOHOLDCLEAR].key
 	&& modifiers == EmuCommandTable[EMUCMD_AUTOHOLDCLEAR].keymod)
 	{
-				
+		Config.Pad1AutoHold = 0;
+		Config.Pad2AutoHold = 0;
+		Config.EnableAutoHold = false;
+		Config.EnableAutoFire = false;
+		Config.Pad1AutoFire = 0;
+		Config.Pad2AutoFire = 0;
 		return;
 	}
+	
 
 }
 

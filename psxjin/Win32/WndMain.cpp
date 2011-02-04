@@ -1196,6 +1196,28 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		case WM_KEYUP: {
 			int modifier = 0;int key;
+			if (Config.GetAutoHold)
+			{				
+				PadDataS padd; 
+				PAD1_readPort1(&padd);
+				Config.Pad1AutoHold |= (padd.buttonStatus ^ 0xffff);				
+				PAD2_readPort2(&padd);
+				Config.Pad2AutoHold |= (padd.buttonStatus ^ 0xffff);
+				if ((Config.Pad1AutoHold > 0) || (Config.Pad2AutoHold > 0))				
+					Config.EnableAutoHold = true;				
+				Config.GetAutoHold = false;					
+			}
+			if (Config.GetAutoFire)
+			{
+				PadDataS padd; 
+				PAD1_readPort1(&padd);
+				Config.Pad1AutoFire |= (padd.buttonStatus ^ 0xffff);
+				PAD2_readPort2(&padd);
+				Config.Pad2AutoFire |= (padd.buttonStatus ^ 0xffff);			
+				if ((Config.Pad1AutoFire > 0) || (Config.Pad2AutoFire > 0))
+					Config.EnableAutoFire = true;				
+				Config.GetAutoFire = false;				
+			}			
 			key = wParam;
 			if(GetAsyncKeyState(VK_MENU))
 				modifier = VK_MENU;
