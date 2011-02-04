@@ -532,6 +532,22 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 		Config.PadRightX = (padd.rightJoyX);
 		Config.PadRightY =(padd.rightJoyY);
 	}
+	if (Config.EnableAutoFire) 
+	{
+		Config.AutoFireFrame = !Config.AutoFireFrame; //Flip framef
+		if (Config.AutoFireFrame) 
+		{			
+			padd.buttonStatus &= (Config.Pad1AutoFire ^ 0xffff); //Force pad on  and value with zero, force to zero. 
+		}
+		else
+		{
+			padd.buttonStatus |= (Config.Pad1AutoFire); //Force pad off, or value with one;
+		}
+	}
+	if (Config.EnableAutoHold)
+	{		
+		padd.buttonStatus &= (Config.Pad1AutoHold ^ 0xffff); //Force pad on  and value with zero, force to zero. 			
+	}
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
 	if (luaAnalogJoy != NULL) {
@@ -693,6 +709,22 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	else
 	{
 		PAD2_readPort2(&padd);
+	}
+	if (Config.EnableAutoFire) 
+	{
+		Config.AutoFireFrame = !Config.AutoFireFrame; //Flip framef
+		if (Config.AutoFireFrame) 
+		{			
+			padd.buttonStatus &= (Config.Pad2AutoFire ^ 0xffff); //Force pad on  and value with zero, force to zero. 
+		}
+		else
+		{
+			padd.buttonStatus |= (Config.Pad2AutoFire); //Force pad off, or value with one;
+		}
+	}
+	if (Config.EnableAutoHold)
+	{		
+		padd.buttonStatus &= (Config.Pad2AutoHold ^ 0xffff); //Force pad on  and value with zero, force to zero. 			
 	}
 	if (Movie.mode != 0)	
 		padd.controllerType = Movie.padType2; //Force Controller to match movie file. 

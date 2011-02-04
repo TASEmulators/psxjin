@@ -146,6 +146,15 @@ typedef struct {
 	int PadLeftY;
 	int PadRightX;
 	int PadRightY;
+	bool EnableAutoHold;
+	bool EnableAutoFire;
+	bool GetAutoHold;
+	bool GetAutoFire;
+	bool AutoFireFrame;
+	unsigned short Pad1AutoHold;
+	unsigned short Pad2AutoHold;
+	unsigned short Pad1AutoFire;
+	unsigned short Pad2AutoFire;
 } psxjinconfig;
 
 extern psxjinconfig Config;
