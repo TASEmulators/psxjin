@@ -88,7 +88,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 'L',             VK_SHIFT,    "Reload Lua Script", },
 	{ 0,               0,           "Volume Up", },
 	{ 0,               0,           "Volume Down", },
-	{ 0,               0,           "Disabled 3", },
+	{ 0,               0,           "Analog Control", },
 	{ 0,			   0,			"Toggle MultiTrack",},
 	{ 0,			   0,			"MTrack: Increment Player",},
 	{ 0,			   0,			"MTrack: Decrement Player",},

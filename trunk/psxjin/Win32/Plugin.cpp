@@ -35,6 +35,7 @@
 #include "ram_search.h"
 #include "ramwatch.h"
 #include "../spu/spu.h"
+#include "analog.h"
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -673,11 +674,10 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_DISABLED3].key
-	&& modifiers == EmuCommandTable[EMUCMD_DISABLED3].keymod)
+	if(key == EmuCommandTable[EMUCMD_ANALOG].key
+	&& modifiers == EmuCommandTable[EMUCMD_ANALOG].keymod)
 	{
-		//TODO
-		return;
+		OpenAnalogControl();
 	}
 
 	if(key == EmuCommandTable[EMUCMD_RESET].key

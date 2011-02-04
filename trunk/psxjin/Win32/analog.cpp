@@ -24,7 +24,7 @@
 #include "resource.h"
 #include "PSXCommon.h"
 
-
+HWND AnalogControlHWnd = NULL;
 char Temp_Str[1024];
 
 //TODO: Enable Analog conrol should be check/unchecked in INITDIALOG based on some WndMain bool
@@ -55,6 +55,13 @@ void UpdateControls(HWND hWnd)
 	EnableWindow(GetDlgItem(hWnd,IDC_RIGHTGROUP),(Config.enable_extern_analog ? MF_ENABLED:MF_GRAYED) );
 }
 
+void CloseAnalogCongrol(HWND hWnd)
+{
+	Config.enable_extern_analog = false;
+	DestroyWindow(hWnd);
+	AnalogControlHWnd = NULL;
+}
+
 BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT r;
@@ -65,8 +72,7 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 		case WM_DESTROY:
 		case WM_CLOSE:
 		case WM_QUIT:
-			Config.enable_extern_analog = false;
-			DestroyWindow(hW);
+			CloseAnalogCongrol(hW);
 			break;
 		case WM_INITDIALOG:				
 			{
@@ -127,10 +133,17 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			switch(LOWORD(wParam))
 			{
 				case IDOK:
-				Config.enable_extern_analog = false;
-				DestroyWindow(hW);
-				break;
+					CloseAnalogCongrol(hW);
+					break;
 			}		
 	}
 	return false;
+}
+
+void OpenAnalogControl()
+{
+	if (!AnalogControlHWnd)
+		AnalogControlHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_ANALOG_CONTROL), NULL, (DLGPROC)AnalogControlProc);
+	else
+		SetForegroundWindow(AnalogControlHWnd);
 }
