@@ -1199,9 +1199,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			{				
 				PadDataS padd; 
 				PAD1_readPort1(&padd);
-				Config.Pad1AutoHold |= (padd.buttonStatus ^ 0xffff);				
+				Config.Pad1AutoHold ^= (padd.buttonStatus ^ 0xffff);				
 				PAD2_readPort2(&padd);
-				Config.Pad2AutoHold |= (padd.buttonStatus ^ 0xffff);
+				Config.Pad2AutoHold ^= (padd.buttonStatus ^ 0xffff);
 				if ((Config.Pad1AutoHold > 0) || (Config.Pad2AutoHold > 0))				
 					Config.EnableAutoHold = true;				
 				Config.GetAutoHold = false;					
@@ -1210,9 +1210,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			{
 				PadDataS padd; 
 				PAD1_readPort1(&padd);
-				Config.Pad1AutoFire |= (padd.buttonStatus ^ 0xffff);
+				Config.Pad1AutoFire ^= (padd.buttonStatus ^ 0xffff);
 				PAD2_readPort2(&padd);
-				Config.Pad2AutoFire |= (padd.buttonStatus ^ 0xffff);			
+				Config.Pad2AutoFire ^= (padd.buttonStatus ^ 0xffff);			
 				if ((Config.Pad1AutoFire > 0) || (Config.Pad2AutoFire > 0))
 					Config.EnableAutoFire = true;				
 				Config.GetAutoFire = false;				
