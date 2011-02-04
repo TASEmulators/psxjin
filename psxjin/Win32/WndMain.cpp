@@ -1165,8 +1165,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;				
 
 				case ID_EMULATOR_ANALOG:
-					if (!AnalogControlHWnd)
-						AnalogControlHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_ANALOG_CONTROL), NULL, (DLGPROC)AnalogControlProc);	
+					OpenAnalogControl();
 					return TRUE;
 				case ID_CONFIGURATION:
 					ConfigurePlugins(hWnd);
