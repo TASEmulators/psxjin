@@ -330,14 +330,13 @@ static void WriteMovieHeader()
 	fwrite(&empty, 1, 4, fpMovie);                 //cdIds offset
 	fwrite(&empty, 1, 4, fpMovie);                 //input offset
 
-	authLen = strlen(Movie.authorInfo);
 	if (authLen > 0) {
 		fwrite(&authLen, 1, 4, fpMovie);             //author info size
 		authbuf = (unsigned char*)malloc(authLen);
 		for(i=0; i<authLen; ++i) {
 			authbuf[i + 0] = Movie.authorInfo[i] & 0xff;
 		}
-		fwrite(authbuf, 1, authLen, fpMovie);        //author info
+		fwrite(authbuf, 1, authLen, fpMovie);        //author info		printf(authbuf);
 		free(authbuf);
 	}
 
@@ -1068,11 +1067,15 @@ int MovieFreeze(gzFile f, int Mode) {
 void ChangeAuthor(const char* author)
 {
 	strncpy(Movie.authorInfo, author, 512);
+	printf(author);
+	printf(Movie.authorInfo);
 	WriteMovieHeader();
 	MOV_WriteMovieFile();
 }
 
 void ChangeRerecordCount(int rerecords)
 {
-
+	Movie.rerecordCount = rerecords;	
+	WriteMovieHeader();
+	MOV_WriteMovieFile();
 }
