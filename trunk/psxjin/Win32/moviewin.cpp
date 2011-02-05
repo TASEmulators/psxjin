@@ -585,3 +585,109 @@ int MOV_W32_CdChangeDialog()
 {
 	return DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CDCHANGE), gApp.hWnd, CdChangeDialogProc);
 }
+
+LRESULT CALLBACK PromptAuthorProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	char Str_Tmp[512];
+	RECT r;
+	RECT r2;
+	int dx1, dy1, dx2, dy2;
+
+	switch(uMsg)
+	{
+		case WM_INITDIALOG:
+			GetWindowRect(gApp.hWnd, &r);
+			dx1 = (r.right - r.left) / 2;
+			dy1 = (r.bottom - r.top) / 2;
+
+			GetWindowRect(hDlg, &r2);
+			dx2 = (r2.right - r2.left) / 2;
+			dy2 = (r2.bottom - r2.top) / 2;
+
+			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+			SetWindowText(hDlg, "Change author");		
+			strcpy(Str_Tmp,"Enter an author name for this movie.");
+			SendDlgItemMessage(hDlg,IDC_PROMPT_TEXT,WM_SETTEXT,0,(LPARAM)Str_Tmp);
+			SendDlgItemMessage(hDlg,IDC_PROMPT_EDIT, WM_SETTEXT,0, (LPARAM) Movie.authorInfo);
+			return true;
+			break;
+
+		case WM_COMMAND:
+			switch(LOWORD(wParam))
+			{
+				case IDOK:
+				{
+					GetDlgItemText(hDlg,IDC_PROMPT_EDIT,Str_Tmp,512);
+					EndDialog(hDlg, true);
+					return true;
+					break;
+				}
+				case IDCANCEL:
+					EndDialog(hDlg, false);
+					return false;
+					break;
+			}
+			break;
+
+		case WM_CLOSE:
+			EndDialog(hDlg, false);
+			return false;
+			break;
+	}
+
+	return false;
+}
+
+LRESULT CALLBACK PromptRerecordProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	char Str_Tmp[512];
+	RECT r;
+	RECT r2;
+	int dx1, dy1, dx2, dy2;
+
+	switch(uMsg)
+	{
+		case WM_INITDIALOG:
+			GetWindowRect(gApp.hWnd, &r);
+			dx1 = (r.right - r.left) / 2;
+			dy1 = (r.bottom - r.top) / 2;
+
+			GetWindowRect(hDlg, &r2);
+			dx2 = (r2.right - r2.left) / 2;
+			dy2 = (r2.bottom - r2.top) / 2;
+
+			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+			SetWindowText(hDlg, "Change Rerecord Count");		
+			strcpy(Str_Tmp,"Enter the rerecord count for this movie.");
+			SendDlgItemMessage(hDlg,IDC_PROMPT_TEXT,WM_SETTEXT,0,(LPARAM)Str_Tmp);
+			SendDlgItemMessage(hDlg,IDC_PROMPT_EDIT, WM_SETTEXT,0, (LPARAM) Movie.authorInfo);
+			return true;
+			break;
+
+		case WM_COMMAND:
+			switch(LOWORD(wParam))
+			{
+				case IDOK:
+				{
+					GetDlgItemText(hDlg,IDC_PROMPT_EDIT,Str_Tmp,512);
+					ChangeAuthor(Str_Tmp);
+					EndDialog(hDlg, true);
+					return true;
+					break;
+				}
+				case IDCANCEL:
+					EndDialog(hDlg, false);
+					ChangeRerecordCount(0);
+					return false;
+					break;
+			}
+			break;
+
+		case WM_CLOSE:
+			EndDialog(hDlg, false);
+			return false;
+			break;
+	}
+
+	return false;
+}
