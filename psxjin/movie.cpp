@@ -1064,3 +1064,15 @@ int MovieFreeze(gzFile f, int Mode) {
 	}
 	return 0;
 }
+
+void ChangeAuthor(const char* author)
+{
+	strncpy(Movie.authorInfo, author, 512);
+	WriteMovieHeader();
+	MOV_WriteMovieFile();
+}
+
+void ChangeRerecordCount(int rerecords)
+{
+
+}

@@ -839,6 +839,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_EDITAUTHOR,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_EDITRERECORD,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
+
 			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CONTROLLERS,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
 			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
@@ -983,6 +987,12 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				case ID_FILE_READONLY:
 					ReadonlyToggle();
+					return TRUE;
+				case ID_FILE_EDITAUTHOR:
+					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_PROMPT), hWnd, (DLGPROC)PromptAuthorProc);
+					return TRUE;
+				case ID_FILE_EDITRERECORD:
+					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_PROMPT), hWnd, (DLGPROC)PromptRerecordProc);
 					return TRUE;
 
 				case ID_LUA_OPEN:
@@ -2062,6 +2072,8 @@ void CreateMainMenu() {
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
 	ADDSUBMENUS(0, 1, _("&Movie"));
+	ADDMENUITEM(1, _("Edit Rerecords"), ID_FILE_EDITRERECORD);
+	ADDMENUITEM(1, _("Edit Author"), ID_FILE_EDITAUTHOR);
 	ADDMENUITEM(1, _("Read-only"), ID_FILE_READONLY);
 	ADDMENUITEM(1, _("Play from &Beginning"), ID_FILE_PLAYBEGINNING);
 	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
@@ -2688,3 +2700,4 @@ void UpdateMenuHotkeys()
 	MakeMenuName(EMUCMD_RAMPOKE, "RAM &Poke", ID_CONFIGURATION_MEMPOKE);
 	MakeMenuName(EMUCMD_CHEATTOGLE, "&Cheat Editor", ID_CONFIGURATION_CHEATS);
 }
+
