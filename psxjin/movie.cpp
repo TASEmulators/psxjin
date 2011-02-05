@@ -224,16 +224,14 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	// read metadata
 	fread(&nMetaLen, 1, 4, fd);
 
-	if (nMetaLen >= MOVIE_MAX_METADATA)
-		nMetaLen = MOVIE_MAX_METADATA-1;
-
-//	tempMovie->authorInfo = (char*)malloc((nMetaLen+1)*sizeof(char));
 	for(i=0; i<nMetaLen; ++i) {
-		char c = 0;
-		c |= fgetc(fd) & 0xff;
-		tempMovie->authorInfo[i] = c;
-	}
-	tempMovie->authorInfo[i] = '\0';
+		char c = fgetc(fd);
+		if(i >= MOVIE_MAX_METADATA) continue;//movie had more metadata than we support. how?? discard it.
+ 		tempMovie->authorInfo[i] = c;
+ 	}
+
+	tempMovie->authorInfo[MOVIE_MAX_METADATA-1] = '\0';
+ 
 
 	fseek(fd, tempMovie->cdIdsOffset, SEEK_SET);
 	// read CDs IDs information
@@ -289,11 +287,8 @@ static void WriteMovieHeader()
 {
 	int empty=0;
 	unsigned long emuVersion = PCSXRR_VERSION;
-	unsigned long movieVersion = MOVIE_VERSION;
-	int authLen;
-	const char ENDLN = '\n';
-	unsigned char* authbuf;
-	int i;
+	unsigned long movieVersion = MOVIE_VERSION;	
+	const char ENDLN = '\n';	
 	int cdidsLen;
 
 	Movie.movieFlags=0;
@@ -329,17 +324,12 @@ static void WriteMovieHeader()
 	fwrite(&empty, 1, 4, fpMovie);                 //cheat list offset
 	fwrite(&empty, 1, 4, fpMovie);                 //cdIds offset
 	fwrite(&empty, 1, 4, fpMovie);                 //input offset
-
-	if (authLen > 0) {
-		fwrite(&authLen, 1, 4, fpMovie);             //author info size
-		authbuf = (unsigned char*)malloc(authLen);
-		for(i=0; i<authLen; ++i) {
-			authbuf[i + 0] = Movie.authorInfo[i] & 0xff;
-		}
-		fwrite(authbuf, 1, authLen, fpMovie);        //author info		printf(authbuf);
-		free(authbuf);
-	}
-
+	
+	int authLen = strnlen(Movie.authorInfo,MOVIE_MAX_METADATA)+1;
+	fwrite(&authLen, 1, 4, fpMovie);             //author info size
+	fwrite(Movie.authorInfo, 1, authLen-1, fpMovie);        //author info		printf(authbuf);
+	fputc(0,fpMovie);
+ 
 	Movie.saveStateOffset = ftell(fpMovie);        //get savestate offset
 	if (!Movie.saveStateIncluded)
 		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte savestate
@@ -1068,8 +1058,8 @@ void ChangeAuthor(const char* author)
 {
 	strncpy(Movie.authorInfo, author, 512);
 	printf(author);
-	printf(Movie.authorInfo);
 	WriteMovieHeader();
+	printf(Movie.authorInfo);
 	MOV_WriteMovieFile();
 }
 
