@@ -677,7 +677,6 @@ LRESULT CALLBACK PromptRerecordProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 				}
 				case IDCANCEL:
 					EndDialog(hDlg, false);
-					ChangeRerecordCount(0);
 					return false;
 					break;
 			}
