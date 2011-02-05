@@ -618,6 +618,7 @@ LRESULT CALLBACK PromptAuthorProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case IDOK:
 				{
 					GetDlgItemText(hDlg,IDC_PROMPT_EDIT,Str_Tmp,512);
+					ChangeAuthor(Str_Tmp);
 					EndDialog(hDlg, true);
 					return true;
 					break;
@@ -644,7 +645,7 @@ LRESULT CALLBACK PromptRerecordProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 	RECT r;
 	RECT r2;
 	int dx1, dy1, dx2, dy2;
-
+	sprintf(Str_Tmp,"%d",Movie.rerecordCount);
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
@@ -659,8 +660,7 @@ LRESULT CALLBACK PromptRerecordProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 			SetWindowText(hDlg, "Change Rerecord Count");		
 			strcpy(Str_Tmp,"Enter the rerecord count for this movie.");
-			SendDlgItemMessage(hDlg,IDC_PROMPT_TEXT,WM_SETTEXT,0,(LPARAM)Str_Tmp);
-			SendDlgItemMessage(hDlg,IDC_PROMPT_EDIT, WM_SETTEXT,0, (LPARAM) Movie.authorInfo);
+			SendDlgItemMessage(hDlg,IDC_PROMPT_TEXT,WM_SETTEXT,0,(LPARAM) Str_Tmp);			
 			return true;
 			break;
 
@@ -669,8 +669,8 @@ LRESULT CALLBACK PromptRerecordProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			{
 				case IDOK:
 				{
-					GetDlgItemText(hDlg,IDC_PROMPT_EDIT,Str_Tmp,512);
-					ChangeAuthor(Str_Tmp);
+					GetDlgItemText(hDlg,IDC_PROMPT_EDIT,Str_Tmp,512);	
+					ChangeRerecordCount(atoi(Str_Tmp));
 					EndDialog(hDlg, true);
 					return true;
 					break;
