@@ -16,6 +16,7 @@ extern struct MovieControlType MovieControl;
 
 void MOV_StartMovie(int mode);
 void MOV_StopMovie();
+void MOV_Convert();
 void MOV_WriteJoy(PadDataS *pad,unsigned char type);
 void MOV_ReadJoy(PadDataS *pad,unsigned char type);
 void MOV_WriteControl();

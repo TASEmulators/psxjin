@@ -648,99 +648,81 @@ static void JoyWrite16(uint16 v)
 	Movie.inputBufferPtr += 2;
 }
 
-void MOV_Convert()
-{
-   int OldSize = Movie.inputBufferSize;
-   int OldBPF = Movie.bytesPerFrame;
-
    uint8* NewBuffer; 
    uint8* NewBufferPtr;   
-   uint8* OldBufferPtr = Movie.inputBuffer;   
-   if (Movie.isText)
-   {
-	   Movie.isText = 0;
-	   Movie.bytesPerFrame = SetBytesPerFrame(Movie);
-	   NewBuffer = (uint8*)malloc(Movie.bytesPerFrame*Movie.totalFrames);
-	   Movie.inputBufferSize = Movie.bytesPerFrame*Movie.totalFrames;
-	   for (unsigned int i=0;i < Movie.totalFrames; i++)
-	   {
-		   switch (Movie.padType1) {
-			case PSE_PAD_TYPE_MOUSE: // .. 000 000| to 16byte key setting + 
-				*NewBufferPtr = 0; 
-				*NewBufferPtr = 0;
-				NewBufferPtr++;
-				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:2);
-				OldBufferPtr++;
+   uint8* OldBufferPtr;
+
+void Convert_To_Binary(unsigned char PadType) {
+	 switch (PadType) {
+		case PSE_PAD_TYPE_MOUSE: // .. 000 000| to 16byte key setting + 
+			*NewBufferPtr = 0; 
+			*NewBufferPtr = 0;
+			NewBufferPtr++;
+			*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:2);
+			OldBufferPtr++;
+			*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
+			OldBufferPtr++;				
+			NewBufferPtr++;				
+			*NewBufferPtr = atoi((char*)OldBufferPtr);
+			NewBufferPtr++;
+			OldBufferPtr += 4;
+			*NewBufferPtr = atoi((char*)OldBufferPtr);
+			NewBufferPtr++;
+			OldBufferPtr += 4;
+			
+		break;
+		case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
+		case PSE_PAD_TYPE_ANALOGJOY: // scph1110			
+			*NewBufferPtr = 0;
+			for (int j=0; j < 8; j++)
+			{
+				*NewBufferPtr <<= 1;
 				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-				OldBufferPtr++;				
-				NewBufferPtr++;				
+				OldBufferPtr++;
+			}
+			NewBufferPtr++;
+			*NewBufferPtr = 0;
+			for (int j=0; j < 8; j++)
+			{
+				*NewBufferPtr <<= 1;
+				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
+				OldBufferPtr++;
+			}
+			NewBufferPtr++;
+			for (int j=0; j<4; j++)
+			{
 				*NewBufferPtr = atoi((char*)OldBufferPtr);
 				NewBufferPtr++;
 				OldBufferPtr += 4;
-				*NewBufferPtr = atoi((char*)OldBufferPtr);
-				NewBufferPtr++;
-				OldBufferPtr += 5;
-				
-			break;
-			case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
-			case PSE_PAD_TYPE_ANALOGJOY: // scph1110			
-				*NewBufferPtr = 0;
-				for (int j=0; j < 8; j++)
-				{
-					*NewBufferPtr <<= 1;
-					*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-					OldBufferPtr++;
-				}
-				NewBufferPtr++;
-				*NewBufferPtr = 0;
-				for (int j=0; j < 8; j++)
-				{
-					*NewBufferPtr <<= 1;
-					*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-					OldBufferPtr++;
-				}
-				NewBufferPtr++;
-				for (int j=0; j<4; j++)
-				{
-					*NewBufferPtr = atoi((char*)OldBufferPtr);
-					NewBufferPtr++;
-					OldBufferPtr += 4;
-				}
-			break;
-			case PSE_PAD_TYPE_STANDARD:
-			default:	
-				*NewBufferPtr = 0;
-				for (int j=0; j < 8; j++)
-				{
-					*NewBufferPtr <<= 1;
-					*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-					OldBufferPtr++;
-				}
-				NewBufferPtr++;
-				*NewBufferPtr = 0;
-				for (int j=0; j < 8; j++)
-				{
-					*NewBufferPtr <<= 1;
-					*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-					OldBufferPtr++;
-				}
-				NewBufferPtr++;			
-			break;
-		   }
+			}
+		break;
+		case PSE_PAD_TYPE_STANDARD:
+		default:	
+			*NewBufferPtr = 0;
+			for (int j=0; j < 8; j++)
+			{
+				*NewBufferPtr <<= 1;
+				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
+				OldBufferPtr++;
+			}
+			NewBufferPtr++;
+			*NewBufferPtr = 0;
+			for (int j=0; j < 8; j++)
+			{
+				*NewBufferPtr <<= 1;
+				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
+				OldBufferPtr++;
+			}
+			NewBufferPtr++;			
+		break;
 	   }
-
+	 OldBufferPtr++; //For '|'
    }
-   else
-   {
-	   Movie.isText = 1;
-	    const char mouse_mnemonics[] = "LR";
-	    const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
-	   Movie.bytesPerFrame = SetBytesPerFrame(Movie);
-	   NewBuffer = (uint8*)malloc(Movie.bytesPerFrame*Movie.totalFrames);
-	   Movie.inputBufferSize = Movie.bytesPerFrame*Movie.totalFrames;
-	   for (unsigned int i=0;i < Movie.totalFrames; i++)
-	   {
-			switch (Movie.padType1) {
+
+void Convert_To_Text(unsigned char PadType) {
+	const char mouse_mnemonics[] = "LR";
+	const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
+	switch (PadType) {
 			case PSE_PAD_TYPE_MOUSE:
 			break;
 			case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
@@ -750,6 +732,66 @@ void MOV_Convert()
 			default:	
 			break;
 			}	   
+
+}
+
+
+void MOV_Convert()
+{
+   int OldSize = Movie.inputBufferSize;
+   int OldBPF = Movie.bytesPerFrame;
+   OldBufferPtr = Movie.inputBuffer;   
+   if (Movie.isText)
+   {
+	   Movie.isText = 0;
+	   Movie.bytesPerFrame = SetBytesPerFrame(Movie);
+	   NewBuffer = (uint8*)malloc(Movie.bytesPerFrame*Movie.totalFrames);
+	   Movie.inputBufferSize = Movie.bytesPerFrame*Movie.totalFrames;
+	   for (unsigned int i=0;i < Movie.totalFrames; i++)
+	   {
+		   if (Movie.Port1_Mtap)
+		   {
+			   for (int j = 0; j < 4; j++)
+			   {
+				   Convert_To_Binary(Movie.padType1);
+			   }
+		   } else Convert_To_Binary(Movie.padType1);
+		   if (Movie.Port2_Mtap)
+		   {
+			   for (int j = 0; j < 4; j++)
+			   {
+				   Convert_To_Binary(Movie.padType2);
+			   }
+		   } else Convert_To_Binary(Movie.padType2);
+		   *NewBufferPtr = atoi((char*)OldBufferPtr); // "0|\r\n"
+		   NewBufferPtr++;
+		   OldBufferPtr += 4;
+	   }
+
+
+   }
+   else
+   {
+	   Movie.isText = 1;	    
+	   Movie.bytesPerFrame = SetBytesPerFrame(Movie);
+	   NewBuffer = (uint8*)malloc(Movie.bytesPerFrame*Movie.totalFrames);
+	   Movie.inputBufferSize = Movie.bytesPerFrame*Movie.totalFrames;
+	   for (unsigned int i=0;i < Movie.totalFrames; i++)
+	   {
+		   if (Movie.Port1_Mtap)
+		   {
+			   for (int j = 0; j < 4; j++)
+			   {
+				   Convert_To_Text(Movie.padType1);
+			   }
+		   } else Convert_To_Text(Movie.padType1);
+		   if (Movie.Port2_Mtap)
+		   {
+			   for (int j = 0; j < 4; j++)
+			   {
+				   Convert_To_Text(Movie.padType2);
+			   }
+		   } else Convert_To_Text(Movie.padType2);
 	   }	   
    }
    free(Movie.inputBuffer);
