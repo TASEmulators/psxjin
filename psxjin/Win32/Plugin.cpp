@@ -148,8 +148,8 @@ void WIN32_SaveState(int newState) {
 void WIN32_LoadState(int newState) {
 	int previousMode = Movie.mode;
 	if (Movie.mode == MOVIEMODE_RECORD) {
-		if (Movie.readOnly) {
-			MOV_WriteMovieFile();
+		MOV_WriteMovieFile();
+		if (Movie.readOnly) {		
 			Movie.mode = MOVIEMODE_PLAY;
 		}
 	}
