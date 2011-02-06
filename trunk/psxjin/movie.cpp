@@ -729,6 +729,9 @@ void Convert_To_Binary(unsigned char PadType) {
 	 OldBufferPtr++; //For '|'
    }
 
+
+
+
 void Convert_To_Text(unsigned char PadType) {
 	const char mouse_mnemonics[] = "LR";
 	const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
@@ -758,7 +761,7 @@ void Convert_To_Text(unsigned char PadType) {
 				for(int i=0;i<16;i++)
 				{			
 				int bitmask = (1<<(15-i));
-				if((v^0xffff) & bitmask)
+				if((v) & bitmask)
 					NewBufferPtr[i] = (uint8)pad_mnemonics[i];
 				else //otherwise write an unset bit
 					NewBufferPtr[i] = (uint8)'.';
@@ -774,7 +777,7 @@ void Convert_To_Text(unsigned char PadType) {
 				for(int i=0;i<14;i++)
 				{			
 					int bitmask = (1<<((13-i)+2));
-					if((v^0xffff) & bitmask)
+					if((v) & bitmask)
 						NewBufferPtr[i] = (uint8)pad_mnemonics[i];
 					else //otherwise write an unset bit
 						NewBufferPtr[i] = (uint8)'.';
@@ -829,6 +832,7 @@ void MOV_Convert()
 	   Movie.isText = 1;	    
 	   Movie.bytesPerFrame = SetBytesPerFrame(Movie);
 	   NewBuffer = (uint8*)malloc(Movie.bytesPerFrame*Movie.totalFrames);
+	   NewBufferPtr = NewBuffer;
 	   Movie.inputBufferSize = Movie.bytesPerFrame*Movie.totalFrames;
 	   for (unsigned int i=0;i < Movie.totalFrames; i++)
 	   {
@@ -845,8 +849,7 @@ void MOV_Convert()
 			   {
 				   Convert_To_Text(Movie.padType2);
 			   }
-		   } else Convert_To_Text(Movie.padType2);
-	   }	   
+		   } else Convert_To_Text(Movie.padType2);		 	   
 	   	 Cflag = *OldBufferPtr;
 		 Cflag2 = 0;
 		    while (Cflag > 0) 
@@ -856,8 +859,9 @@ void MOV_Convert()
 			}
 	   sprintf(tempstr,"%d|\r\n",Cflag2);
 	   memcpy(NewBufferPtr,tempstr,4);
-	   NewBufferPtr+= 4;
+	   NewBufferPtr += 4;
 	   OldBufferPtr++;
+	  }
    }
    free(Movie.inputBuffer);
    Movie.inputBuffer = NewBuffer;
