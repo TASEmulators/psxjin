@@ -223,13 +223,12 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 
 	// read metadata
 	fread(&nMetaLen, 1, 4, fd);
-
+	tempMovie->authorInfoOffset = ftell(fd);
 	for(i=0; i<nMetaLen; ++i) {
 		char c = fgetc(fd);
 		if(i >= MOVIE_MAX_METADATA) continue;//movie had more metadata than we support. how?? discard it.
  		tempMovie->authorInfo[i] = c;
  	}
-
 	tempMovie->authorInfo[MOVIE_MAX_METADATA-1] = '\0';
  
 
@@ -283,6 +282,30 @@ void MOV_WriteMovieFile()
 	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames+1), fpMovie);
 }
 
+static void UpdateMovieFlags(void)
+{
+	fseek(fpMovie,12,SEEK_SET);
+	Movie.movieFlags=0;
+	if (Movie.saveStateIncluded)
+		Movie.movieFlags |= MOVIE_FLAG_FROM_SAVESTATE;
+	if (Movie.memoryCardIncluded)
+		Movie.movieFlags |= MOVIE_FLAG_MEMORY_CARDS;
+	if (Movie.cheatListIncluded)
+		Movie.movieFlags |= MOVIE_FLAG_CHEAT_LIST;
+	if (Movie.irqHacksIncluded)
+		Movie.movieFlags |= MOVIE_FLAG_IRQ_HACKS;
+	if (Config.PsxType)
+		Movie.movieFlags |= MOVIE_FLAG_PAL_TIMING;
+	if (Movie.isText)
+		Movie.movieFlags |= MOVIE_FLAG_IS_TEXT;
+	if (Movie.Port1_Mtap)	
+		Movie.movieFlags |= MOVIE_FLAG_P1_MTAP;
+	if (Movie.Port2_Mtap)
+		Movie.movieFlags |= MOVIE_FLAG_P2_MTAP;
+	fwrite(&Movie.movieFlags, 1, 2, fpMovie);      
+}
+
+
 static void WriteMovieHeader()
 {
 	int empty=0;
@@ -325,11 +348,15 @@ static void WriteMovieHeader()
 	fwrite(&empty, 1, 4, fpMovie);                 //cdIds offset
 	fwrite(&empty, 1, 4, fpMovie);                 //input offset
 	
-	int authLen = strnlen(Movie.authorInfo,MOVIE_MAX_METADATA)+1;
-	fwrite(&authLen, 1, 4, fpMovie);             //author info size
-	fwrite(Movie.authorInfo, 1, authLen-1, fpMovie);        //author info		printf(authbuf);
-	fputc(0,fpMovie);
- 
+	int authLen = strnlen(Movie.authorInfo,MOVIE_MAX_METADATA);
+	int temp = 512;
+	fwrite(&temp, 1, 4, fpMovie);             //author info size
+	Movie.authorInfoOffset = ftell(fpMovie);
+	fwrite(Movie.authorInfo, 1, authLen, fpMovie);        //author info		printf(authbuf);
+	for (int i = MOVIE_MAX_METADATA-authLen;i<MOVIE_MAX_METADATA;i++)
+	{
+		fputc(0,fpMovie);
+	}
 	Movie.saveStateOffset = ftell(fpMovie);        //get savestate offset
 	if (!Movie.saveStateIncluded)
 		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte savestate
@@ -404,8 +431,7 @@ static void WriteMovieHeader()
 
 static void TruncateMovie()
 {
-	long truncLen = Movie.inputOffset + Movie.bytesPerFrame*(Movie.totalFrames+1);
-
+	long truncLen = Movie.inputOffset + Movie.bytesPerFrame*(Movie.totalFrames);
 	HANDLE fileHandle = CreateFile(Movie.movieFilename, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0);
 	if (fileHandle != NULL) {
 		SetFilePointer(fileHandle, truncLen, 0, FILE_BEGIN);
@@ -439,7 +465,6 @@ static int StartRecord()
 	Movie.CdromCount = 1;
 	sprintf(Movie.CdromIds, "%9.9s", CdromId);
 	WriteMovieHeader();
-	printf("1. Controllers are %d %d", Movie.padType1, Movie.padType2);
 	Movie.inputBufferPtr = Movie.inputBuffer;
 
 	return 1;
@@ -642,6 +667,8 @@ static void JoyWrite16(uint16 v)
    uint8* OldBufferPtr;
 
 void Convert_To_Binary(unsigned char PadType) {
+	int bitmask;
+	short Fixed = 0;		
 	 switch (PadType) {
 		case PSE_PAD_TYPE_MOUSE: // .. 000 000| to 16byte key setting + 
 			*NewBufferPtr = 0; 
@@ -661,23 +688,20 @@ void Convert_To_Binary(unsigned char PadType) {
 			
 		break;
 		case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110			
-			*NewBufferPtr = 0;
-			for (int j=0; j < 8; j++)
+		case PSE_PAD_TYPE_ANALOGJOY: // scph1110							
+			for (int j=0; j < 14; j++)
 			{
-				*NewBufferPtr <<= 1;
-				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
+				bitmask = (1<<((13-j)+2));				
+				if  (*OldBufferPtr!=(uint8)'.')
+				{
+					Fixed |= bitmask;
+				}
 				OldBufferPtr++;
 			}
-			NewBufferPtr++;
-			*NewBufferPtr = 0;
-			for (int j=0; j < 8; j++)
-			{
-				*NewBufferPtr <<= 1;
-				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-				OldBufferPtr++;
-			}
-			NewBufferPtr++;
+			*NewBufferPtr=Fixed &0xff;
+			NewBufferPtr++;			
+			*NewBufferPtr= Fixed >> 8;
+			NewBufferPtr++;		
 			for (int j=0; j<4; j++)
 			{
 				*NewBufferPtr = atoi((char*)OldBufferPtr);
@@ -686,23 +710,20 @@ void Convert_To_Binary(unsigned char PadType) {
 			}
 		break;
 		case PSE_PAD_TYPE_STANDARD:
-		default:	
-			*NewBufferPtr = 0;
-			for (int j=0; j < 8; j++)
+		default:							
+			for (int j=0; j < 14; j++)
 			{
-				*NewBufferPtr <<= 1;
-				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
+				bitmask = (1<<((13-j)+2));				
+				if  (*OldBufferPtr!=(uint8)'.')
+				{
+					Fixed |= bitmask;
+				}
 				OldBufferPtr++;
 			}
-			NewBufferPtr++;
-			*NewBufferPtr = 0;
-			for (int j=0; j < 8; j++)
-			{
-				*NewBufferPtr <<= 1;
-				*NewBufferPtr |= ((*OldBufferPtr==(uint8)'.')?0:1);
-				OldBufferPtr++;
-			}
+			*NewBufferPtr=Fixed &0xff;
 			NewBufferPtr++;			
+			*NewBufferPtr= Fixed >> 8;
+			NewBufferPtr++;		
 		break;
 	   }
 	 OldBufferPtr++; //For '|'
@@ -711,15 +732,56 @@ void Convert_To_Binary(unsigned char PadType) {
 void Convert_To_Text(unsigned char PadType) {
 	const char mouse_mnemonics[] = "LR";
 	const char pad_mnemonics[] = "#XO^1234LDRUSsLR";
+	uint16 v =(OldBufferPtr[0] | (OldBufferPtr[1]<<8));
+	int size;
+	char temp[32];
+	OldBufferPtr += 2;
 	switch (PadType) {
 			case PSE_PAD_TYPE_MOUSE:
+				for(int i=0;i<2;i++)
+				{			
+				int bitmask = (1<<(15-i));
+				if(v & bitmask)
+					NewBufferPtr[i] = mouse_mnemonics[i];
+				else //otherwise write an unset bit
+					NewBufferPtr[i] = '.';
+				}				
+				NewBufferPtr += 2;
+				size = sprintf(temp, " %03d %03d|", OldBufferPtr[0], OldBufferPtr[1]);
+				OldBufferPtr+=2;
+				memcpy(NewBufferPtr,temp,size);
+				NewBufferPtr += size;
+			break;
 			break;
 			case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
-			case PSE_PAD_TYPE_ANALOGJOY: // scph1110			
+			case PSE_PAD_TYPE_ANALOGJOY: // scph1110	
+				for(int i=0;i<16;i++)
+				{			
+				int bitmask = (1<<(15-i));
+				if((v^0xffff) & bitmask)
+					NewBufferPtr[i] = (uint8)pad_mnemonics[i];
+				else //otherwise write an unset bit
+					NewBufferPtr[i] = (uint8)'.';
+				}				
+				NewBufferPtr += 16;
+				size = sprintf(temp, " %03d %03d %03d %03d|", OldBufferPtr[0], OldBufferPtr[1], OldBufferPtr[2], OldBufferPtr[3]);
+				OldBufferPtr += 4;
+				memcpy(NewBufferPtr,temp,size);
+				NewBufferPtr += size;
 			break;
 			case PSE_PAD_TYPE_STANDARD:
 			default:	
-			break;
+				for(int i=0;i<14;i++)
+				{			
+					int bitmask = (1<<((13-i)+2));
+					if((v^0xffff) & bitmask)
+						NewBufferPtr[i] = (uint8)pad_mnemonics[i];
+					else //otherwise write an unset bit
+						NewBufferPtr[i] = (uint8)'.';
+				}								 
+				NewBufferPtr[14] = (uint8)'|';			
+				NewBufferPtr += 15;
+				break;
 			}	   
 
 }
@@ -729,12 +791,15 @@ void MOV_Convert()
 {
    int OldSize = Movie.inputBufferSize;
    int OldBPF = Movie.bytesPerFrame;
-   OldBufferPtr = Movie.inputBuffer;   
+   OldBufferPtr = Movie.inputBuffer;  
+   int Cflag, Cflag2;
+   char tempstr[10];
    if (Movie.isText)
    {
 	   Movie.isText = 0;
 	   Movie.bytesPerFrame = SetBytesPerFrame(Movie);
 	   NewBuffer = (uint8*)malloc(Movie.bytesPerFrame*Movie.totalFrames);
+	   NewBufferPtr = NewBuffer;
 	   Movie.inputBufferSize = Movie.bytesPerFrame*Movie.totalFrames;
 	   for (unsigned int i=0;i < Movie.totalFrames; i++)
 	   {
@@ -752,12 +817,12 @@ void MOV_Convert()
 				   Convert_To_Binary(Movie.padType2);
 			   }
 		   } else Convert_To_Binary(Movie.padType2);
-		   *NewBufferPtr = atoi((char*)OldBufferPtr); // "0|\r\n"
+		  
+		   Cflag = atoi((char*)OldBufferPtr); // "0|\r\n"
+			*NewBufferPtr =	 (1 << Cflag) >> 1;					
 		   NewBufferPtr++;
 		   OldBufferPtr += 4;
 	   }
-
-
    }
    else
    {
@@ -782,11 +847,24 @@ void MOV_Convert()
 			   }
 		   } else Convert_To_Text(Movie.padType2);
 	   }	   
+	   	 Cflag = *OldBufferPtr;
+		 Cflag2 = 0;
+		    while (Cflag > 0) 
+			{
+				Cflag >>= 1;
+				Cflag2++;
+			}
+	   sprintf(tempstr,"%d|\r\n",Cflag2);
+	   memcpy(NewBufferPtr,tempstr,4);
+	   NewBufferPtr+= 4;
+	   OldBufferPtr++;
    }
    free(Movie.inputBuffer);
    Movie.inputBuffer = NewBuffer;
-   WriteMovieHeader();
+   Movie.inputBufferPtr = NewBufferPtr;
+   UpdateMovieFlags();
    MOV_WriteMovieFile();
+   TruncateMovie();
 }
 
 void MOV_WriteJoy(PadDataS *pad,unsigned char type)
@@ -1051,21 +1129,18 @@ int MovieFreeze(gzFile f, int Mode) {
 		buttonToSend = (buttonToSend ^ (Movie.lastPads2[0].buttonStatus << 16));
 		GPUinputdisplay(buttonToSend);
 	}
-	return 0;
-}
+	return 0;}
 
 void ChangeAuthor(const char* author)
 {
 	strncpy(Movie.authorInfo, author, 512);
 	printf(author);
-	WriteMovieHeader();
-	printf(Movie.authorInfo);
+	fseek(fpMovie,Movie.authorInfoOffset,SEEK_SET); 
+	fwrite(Movie.authorInfo, 1, strnlen(Movie.authorInfo, MOVIE_MAX_METADATA), fpMovie); 
 	MOV_WriteMovieFile();
 }
 
 void ChangeRerecordCount(int rerecords)
 {
-	Movie.rerecordCount = rerecords;	
-	WriteMovieHeader();
-	MOV_WriteMovieFile();
+	Movie.rerecordCount = rerecords;		
 }
