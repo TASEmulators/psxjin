@@ -2075,16 +2075,6 @@ void CreateMainMenu() {
 	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
-	ADDSUBMENUS(0, 1, _("&Movie"));
-	ADDMENUITEM(1, _("Convert Movie"), ID_MOVIE_CONVERT);
-	ADDMENUITEM(1, _("Edit Rerecords"), ID_FILE_EDITRERECORD);
-	ADDMENUITEM(1, _("Edit Author"), ID_FILE_EDITAUTHOR);
-	ADDMENUITEM(1, _("Read-only"), ID_FILE_READONLY);
-	ADDMENUITEM(1, _("Play from &Beginning"), ID_FILE_PLAYBEGINNING);
-	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
-	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
-	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
-	ADDMENUITEM(1, _("Recent"), ID_FILE_RECENT_MOVIE);
 	ADDSEPARATOR(0);
 	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE); //adelikat: For running SDK made games, disabling in favor of a commandline argument instead
 	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
@@ -2106,7 +2096,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&CD Case Open/Close"), ID_EMULATOR_CDCLOSE);
 	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);
 
-	ADDSUBMENU(0, _("&Configuration"));
+	ADDSUBMENU(0, _("&Config"));
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
@@ -2117,6 +2107,17 @@ void CreateMainMenu() {
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("&Plugins && Bios"), ID_CONFIGURATION);
 
+	ADDSUBMENU(0, _("&Movie"));
+	ADDMENUITEM(0, _("Convert Movie"), ID_MOVIE_CONVERT);
+	ADDMENUITEM(0, _("Edit Rerecords"), ID_FILE_EDITRERECORD);
+	ADDMENUITEM(0, _("Edit Author"), ID_FILE_EDITAUTHOR);
+	ADDSEPARATOR(0);
+	ADDMENUITEM(0, _("Read-only"), ID_FILE_READONLY);
+	ADDMENUITEM(0, _("Play from &Beginning"), ID_FILE_PLAYBEGINNING);
+	ADDMENUITEM(0, _("S&top Movie"), ID_FILE_STOP_MOVIE);
+	ADDMENUITEM(0, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
+	ADDMENUITEM(0, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
+	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_MOVIE);
 
 	ADDSUBMENU(0, _("&Tools"));
 	ADDMENUITEM(0, _("&Cheat Editor"), ID_CONFIGURATION_CHEATS);
