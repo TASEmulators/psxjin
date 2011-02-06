@@ -239,7 +239,13 @@ PCHAR*    CommandLineToArgvA( PCHAR CmdLine, int* _argc)
 	return argv;
 }
 
+#ifdef NOCONSOLE
+int CALLBACK WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow) {
+	char** argv;
+	int argc;
+#else
 int main(int argc, char **argv) {
+#endif
 	TIMECAPS tc;
 	DWORD wmTimerRes;
 	if (timeGetDevCaps(&tc, sizeof(TIMECAPS))== TIMERR_NOERROR)
