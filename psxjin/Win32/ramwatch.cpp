@@ -1149,14 +1149,12 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				{
 					AutoRWLoad ^= 1;
 					CheckMenuItem(ramwatchmenu, RAMMENU_FILE_AUTOLOAD, AutoRWLoad ? MF_CHECKED : MF_UNCHECKED);
-					//regSetDwordValue(AUTORWLOAD, AutoRWLoad); TODO
 					break;
 				}
 				case RAMMENU_FILE_SAVEWINDOW:
 				{
 					RWSaveWindowPos ^=1;
 					CheckMenuItem(ramwatchmenu, RAMMENU_FILE_SAVEWINDOW, RWSaveWindowPos ? MF_CHECKED : MF_UNCHECKED);
-					//regSetDwordValue(RWSAVEPOS, RWSaveWindowPos); TODO
 					break;
 				}
 				case IDC_C_ADDCHEAT:
