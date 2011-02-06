@@ -385,7 +385,10 @@ int main(int argc, char **argv) {
 	}
 
 	if (AutoRWLoad)
+	{
+		OpenRWRecentFile(0);
 		RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
+	}
 	
 	RunGui();
 
@@ -689,6 +692,11 @@ void RunCD(HWND hWnd)
 			MOV_StopMovie();
 			RecentCDs.UpdateRecentItems(IsoFile);
 			Running = 1;
+			if (AutoRWLoad)
+			{
+				OpenRWRecentFile(0);
+				RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
+			}
 			psxCpu->Execute();
 		}
 		else
