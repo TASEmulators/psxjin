@@ -48,7 +48,7 @@ struct InitRamWatch
 } initRamWatch;
 
 HWND RamWatchHWnd;
-#define gamefilename "" // TODO
+#define gamefilename IsoFile
 #define hWnd gApp.hWnd
 #define hInst gApp.hInstance
 static char Str_Tmp [1024];
