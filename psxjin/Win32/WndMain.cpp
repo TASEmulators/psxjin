@@ -2419,6 +2419,11 @@ void WIN32_StartMovieReplay(char* szFilename)
 		if (!IsoFile[0] == 0) //adelikat:  Having CfgOpenFile() be value returning is more elegant but this gets the job done
 		{
 			LoadCdBios = 0;
+			if (AutoRWLoad)
+			{
+				OpenRWRecentFile(0);
+				RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
+			}	//adelikat: Need to do this for Movie autoload
 			OpenPlugins(gApp.hWnd);
 			SysReset();
 			NeedReset = 0;
