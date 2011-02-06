@@ -204,6 +204,7 @@ struct MovieType {
 	unsigned long inputOffset;           //input chunk location in file
 	unsigned long memoryCard1Size;       //memcard1 file size
 	unsigned long memoryCard2Size;       //memcard2 file size
+	unsigned long authorInfoOffset;		 //Offset to author info
 	char authorInfo[MOVIE_MAX_METADATA]; //author info
 	unsigned long formatVersion;         //movie file format version number
 	unsigned long emuVersion;            //emulator version used in recording
