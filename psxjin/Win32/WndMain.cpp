@@ -841,15 +841,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_EDITAUTHOR,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_EDITRERECORD,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_MOVIE_CONVERT,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
-
 			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CONTROLLERS,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-
 			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));  
 			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
-			
+	
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT0,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT1,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT2,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
@@ -886,7 +885,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
-			
 			return TRUE;
 		case WM_MOVE:
 		{
@@ -994,7 +992,13 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_FILE_EDITRERECORD:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_PROMPT), hWnd, (DLGPROC)PromptRerecordProc);
 					return TRUE;
-
+				case ID_MOVIE_CONVERT:
+					MOV_Convert();
+					if (Movie.isText)
+						MessageBox(hWnd, "Movie converted to Text", "Convert Movie", MB_OK);
+					else
+						MessageBox(hWnd, "Movie converted to Binary", "Convert Movie", MB_OK);
+					return TRUE;
 				case ID_LUA_OPEN:
 					if(!LuaConsoleHWnd)
 					{
@@ -2072,6 +2076,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
 	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
 	ADDSUBMENUS(0, 1, _("&Movie"));
+	ADDMENUITEM(1, _("Convert Movie"), ID_MOVIE_CONVERT);
 	ADDMENUITEM(1, _("Edit Rerecords"), ID_FILE_EDITRERECORD);
 	ADDMENUITEM(1, _("Edit Author"), ID_FILE_EDITAUTHOR);
 	ADDMENUITEM(1, _("Read-only"), ID_FILE_READONLY);
