@@ -132,6 +132,10 @@ void gpuShowPic() {
 void WIN32_SaveState(int newState) {
 	StatesC=newState-1;
 	if (StatesC == -1) StatesC = 9;
+	if (Movie.mode == MOVIEMODE_RECORD)
+	{
+		MOV_WriteMovieFile();
+	}
 	if (Movie.mode != MOVIEMODE_INACTIVE)
 		sprintf(Text, "%ssstates\\%s.pjm.%3.3d", szCurrentPath, Movie.movieFilenameMini, StatesC+1);
 	else
@@ -147,9 +151,9 @@ void WIN32_SaveState(int newState) {
 
 void WIN32_LoadState(int newState) {
 	int previousMode = Movie.mode;
-	if (Movie.mode == MOVIEMODE_RECORD) {
-		MOV_WriteMovieFile();
+	if (Movie.mode == MOVIEMODE_RECORD) {		
 		if (Movie.readOnly) {		
+			MOV_WriteMovieFile();
 			Movie.mode = MOVIEMODE_PLAY;
 		}
 	}
