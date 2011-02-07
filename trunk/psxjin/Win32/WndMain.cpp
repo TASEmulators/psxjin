@@ -299,6 +299,9 @@ int main(int argc, char **argv) {
 		{
 			CDR_iso_fileToOpen = argv[i];
 		}
+		else if (!strcmp(argv[i], "-startpaused")) {
+			iPause = 1;
+		}
 	}
 
 	GetCurrentPath();
@@ -343,7 +346,6 @@ int main(int argc, char **argv) {
 
 	char Str[MAX_PATH];
 	
-
 	if (!luaLoaded && RecentLua.GetAutoLoad()) //If lua wasn't loaded from command line (commandline should override autoload parameters)
 			PSXjin_LoadLuaCode(RecentLua.GetRecentItem(0).c_str());
 
