@@ -435,7 +435,6 @@
 #define ID_FILE_RUN_EXE                 40004
 #define ID_EMULATOR_PAUSE               40005
 #define ID_EMULATOR_RESET               40006
-#define ID_HELP_HELP                    40007
 #define ID_DEBUG_ENABLE_DEBUGGER        40008
 #define ID_CONFIGURATION_GRAPHICS       40009
 #define ID_CONFIGURATION_SOUND          40010
