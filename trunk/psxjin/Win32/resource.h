@@ -382,10 +382,13 @@
 #define IDC_PAD_LEFT_TEXT               1330
 #define IDC_PAD_RIGHT_TEXT              1330
 #define IDC_PAD_LEFT_TEXT2              1331
+#define IDC_PAD_LEFTY2                  1331
 #define IDC_CHECK1                      1332
 #define IDC_ENABLEANALOG                1332
 #define IDC_LEFTGROUP                   1333
 #define IDC_RIGHTGROUP                  1334
+#define IDC_ANALOGLEFT                  1335
+#define IDC_ANALOGRIGHT                 1336
 #define IDC_C_WATCH_SEPARATE            1999
 #define ID_FILE_STATES_LOAD_SLOT1       39801
 #define ID_FILE_STATES_LOAD_SLOT2       39802
@@ -407,9 +410,9 @@
 #define ID_FILE_STATES_SAVE_SLOT8       39818
 #define ID_FILE_STATES_SAVE_SLOT9       39819
 #define ID_FILE_STATES_SAVE_SLOT0       39820
-#define ID_MOVIE_CONVERT				39983
-#define ID_FILE_EDITRERECORD			39984
-#define ID_FILE_EDITAUTHOR				39985
+#define ID_MOVIE_CONVERT                39983
+#define ID_FILE_EDITRERECORD            39984
+#define ID_FILE_EDITAUTHOR              39985
 #define ID_EMULATOR_ANALOG              39986
 #define ID_FILE_PLAYBEGINNING           39987
 #define ID_FILE_READONLY                39988
@@ -546,7 +549,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         40047
-#define _APS_NEXT_CONTROL_VALUE         1335
+#define _APS_NEXT_CONTROL_VALUE         1338
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
