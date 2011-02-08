@@ -1297,6 +1297,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\psxjin.ico"
+			>
+		</File>
+		<File
 			RelativePath=".\psxjin.rc"
 			>
 		</File>
