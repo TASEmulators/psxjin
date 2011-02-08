@@ -84,7 +84,7 @@ END
 
 IDD_CFGSOFT DIALOGEX 0, 0, 291, 292
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Configure the TAS Soft Graphics Plugin..."
+CAPTION "Graphics Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     PUSHBUTTON      "Select device...",IDC_SELDEV,7,3,60,12
