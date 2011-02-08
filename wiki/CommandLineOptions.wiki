@@ -23,7 +23,7 @@ Starts specified Lua (.lua) script file
 
 "-stopcapture _number_"
 
-Specifies a frame to stop AVI capture? TODO: Confirm this
+Stop WAV/AVI capture at the specified frame
 
 "-read-only"
 
