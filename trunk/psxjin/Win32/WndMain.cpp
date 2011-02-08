@@ -1181,11 +1181,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						CreateCheatEditor();
 						PSXjinApplyCheats();
 					return TRUE;
-/*
-				case ID_CONFIGURATION_NETPLAY:
-					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_NETPLAY), hWnd, (DLGPROC)ConfigureNetPlayDlgProc);
-					return TRUE;
-*/
+
 				case ID_CONFIGURATION_MEMORYCARDMANAGER:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_MCDCONF), hWnd, (DLGPROC)ConfigureMcdsDlgProc);
 					return TRUE;
@@ -1204,10 +1200,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_HELP_TUTORIAL:
 					ShellExecute(NULL, "open", "http://code.google.com/p/psxjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
 					break;
-
-				case ID_HELP_HELP:
-					ShellExecute(NULL, "open", "PSXjin-instructions.txt", NULL, NULL, SW_SHOWNORMAL);
-					return TRUE;
 
 				case ID_HELP_ABOUT:
 					DialogBox(gApp.hInstance, MAKEINTRESOURCE(ABOUT_DIALOG), hWnd, (DLGPROC)AboutDlgProc);
@@ -2144,8 +2136,7 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&Help"));
 	ADDMENUITEM(0, _("&About"), ID_HELP_ABOUT);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&Help File"), ID_HELP_HELP);
-	ADDMENUITEM(0, _("&Online Tutorial"), ID_HELP_TUTORIAL);
+	ADDMENUITEM(0, _("&Online &Help"), ID_HELP_TUTORIAL);
 }
 
 void gpu_ReadConfig(void);
@@ -2153,10 +2144,7 @@ void gpu_ReadConfig(void);
 void CreateMainWindow(int nCmdShow) {
 	WNDCLASS wc;
 	HWND hWnd;
-	HBRUSH hBrush;
-	COLORREF crBkg = RGB(14,90,193);
-	hBrush=CreateSolidBrush(crBkg);
-
+	
 	wc.lpszClassName = "PSXjin Main";
 	wc.lpfnWndProc = MainWndProc;
 	wc.style = 0;
@@ -2290,9 +2278,6 @@ void LoadIni()
 }
 
 int SysInit() {
-	//if (Config.PsxOut) 
-		//OpenConsole();
-
 	if (psxInit() == -1) return -1;
 
 	#ifdef GTE_DUMP
