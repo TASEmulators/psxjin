@@ -1,50 +1,52 @@
-#summary PCSX-rr Lua Scripting Function List
+#summary PSXjin Lua Scripting Function List
 
 See also [http://www.lua.org/manual/5.1/ Lua manual].
 
 *Important: nil is not 0. nil and 0 are two different entities.*
 
-=pcsx=
+=Emu=
 
-===pcsx.speedmode(string mode)===
+(Note: All these functions can be called through psxjin. or emu.)
+
+===emu.speedmode(string mode)===
 
 Changes the speed of emulation depending on mode. If "normal", emulator runs at normal speed. If "nothrottle", emulator runs at max speed without frameskip. If "turbo", emulator drops some frames. If "maximum", screen rendering is disabled.
 
-===pcsx.frameadvance()===
+===emu.frameadvance()===
 
 Pauses script until a frame is emulated. Cannot be called by a coroutine or registered function.
 
-===pcsx.pause()===
+===emu.pause()===
 
 Pauses emulator when the current frame has finished emulating.
 
-===pcsx.unpause()===
+===emu.unpause()===
 
 Unpauses emulator.
 
-===int pcsx.framecount()===
+===int emu.framecount()===
 
 Returns the frame count for the movie, or the number of frames from last reset otherwise.
 
-===int pcsx.lagcount()===
+===int emu.lagcount()===
 
 Returns the lag count.
 
-===boolean pcsx.lagged()===
+===boolean emu.lagged()===
 
 Returns true if the current frame is a lag frame, false otherwise.
 
-===pcsx.registerbefore(function func)===
-===pcsx.registerafter(function func)===
-===pcsx.registerexit(function func)===
+===emu.registerbefore(function func)===
+===emu.registerafter(function func)===
+===emu.registerexit(function func)===
 
 (?)
 
-===pcsx.message(string msg)===
+===emu.message(string msg)===
 
 Displays the message on the screen.
 
-=memory=
+=Memory=
 
 ===int memory.readbyte(int addr)===
 ===int memory.readbytesigned(int addr)===
@@ -151,7 +153,7 @@ Sets the opacity of drawings depending on alpha. 0.0 is invisible, 1.0 is drawn 
 
 ===gui.text(int x, int y, string msg)===
 
-Draws the given text at (x,y). Not to be confused with _pcsx.message(string msg)_.
+Draws the given text at (x,y). Not to be confused with _emu.message(string msg)_.
 
 ===gui.gdoverlay(int x=0, int y=0, string gdimage, float alpha=1.0)===
 
