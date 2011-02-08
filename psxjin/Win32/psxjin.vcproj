@@ -1281,10 +1281,6 @@
 			>
 		</File>
 		<File
-			RelativePath="Cdrom02.ico"
-			>
-		</File>
-		<File
 			RelativePath="..\gpu\res\gpu.bmp"
 			>
 		</File>
