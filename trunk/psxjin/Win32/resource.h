@@ -7,7 +7,7 @@
 #define IDOK2                           3
 #define IDR_MENU1                       101
 #define IDI_APP_ICON                    102
-#define IDD_MCDCONF                     102
+#define IDD_MCDCONF                     100
 #define DEBUG_DIALOG                    103
 #define ABOUT_DIALOG                    104
 #define IDD_CPUCONF                     105
@@ -35,6 +35,7 @@
 #define IDR_RWACCELERATOR               141
 #define IDD_LUA                         142
 #define IDD_ANALOG_CONTROL              144
+#define IDI_ICON1                       145
 #define IDC_ISOFILE                     1000
 #define IDC_EDIT2                       1001
 #define IDC_SELECTISO                   1001
@@ -547,7 +548,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        145
+#define _APS_NEXT_RESOURCE_VALUE        146
 #define _APS_NEXT_COMMAND_VALUE         40047
 #define _APS_NEXT_CONTROL_VALUE         1338
 #define _APS_NEXT_SYMED_VALUE           101
