@@ -5,9 +5,8 @@
 #define IDS_TITLE                       1
 #define W_OK                            2
 #define IDOK2                           3
-#define IDR_MENU1                       101
-#define IDI_APP_ICON                    102
 #define IDD_MCDCONF                     100
+#define IDR_MENU1                       101
 #define DEBUG_DIALOG                    103
 #define ABOUT_DIALOG                    104
 #define IDD_CPUCONF                     105
