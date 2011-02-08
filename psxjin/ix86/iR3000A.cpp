@@ -447,7 +447,7 @@ __inline static void execute() {
 
 	if (!iPause || iFrameAdvance) { // emulate
 		if (iVSyncFlag) {
-			if (iGpuHasUpdated) {
+			if (iGpuHasUpdated || iFrameAdvance || iDoPauseAtVSync) {
 				if (iSaveStateTo) {
 					#ifdef WIN32
 						WIN32_SaveState(iSaveStateTo);
@@ -455,10 +455,10 @@ __inline static void execute() {
 					#endif
 				}
 				if (iFrameAdvance || iDoPauseAtVSync) {
-					iPause = 1;
-					iDoPauseAtVSync = 0;
-					iFrameAdvance = 0;
+					iPause = 1;					
 				}
+				iDoPauseAtVSync = 0;
+				iFrameAdvance = 0;
 				iGpuHasUpdated = 0;
 			}
 			iVSyncFlag = 0;
