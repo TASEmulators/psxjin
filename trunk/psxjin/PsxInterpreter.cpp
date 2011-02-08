@@ -55,24 +55,24 @@ void inline execI()
 	if (!iPause || iFrameAdvance)
 	{
 		if (iVSyncFlag) {
-			if (iGpuHasUpdated) {
+			if (iGpuHasUpdated || iFrameAdvance || iDoPauseAtVSync) {
 				if (iSaveStateTo) {
 					WIN32_SaveState(iSaveStateTo==10?0:iSaveStateTo);
 					//WIN32_SaveState(Movie.currentFrame);
 					iSaveStateTo = 0;
-				}
-				if (iFrameAdvance || iDoPauseAtVSync) {
+				}		
+				if (iFrameAdvance || iDoPauseAtVSync)
+				{
 					iPause = 1;
-					iDoPauseAtVSync = 0;
-					iFrameAdvance = 0;
 				}
+				iDoPauseAtVSync = 0;
+				iFrameAdvance = 0;				
 				iGpuHasUpdated = 0;
 			}
 			iVSyncFlag = 0;
 			PSXjin_LuaFrameBoundary();
 			iJoysToPoll = 2;
 		}
-
 		code = PSXM(psxRegs.pc);
 		psxRegs.code = code == NULL ? 0 : *code;
 		debugI();
