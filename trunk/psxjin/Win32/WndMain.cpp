@@ -1044,6 +1044,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					RunCD(hWnd);
 					return true;
 				case ID_FILE_CLOSE_CD:
+					if (Movie.mode != MOVIEMODE_INACTIVE)
+						MOV_StopMovie();
+					if (Movie.capture)
+						WIN32_StopAviRecord();
 					strcpy(IsoFile, "");
 					iCallW32Gui =  1;
 					CDRclose();
