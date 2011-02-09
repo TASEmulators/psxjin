@@ -527,11 +527,16 @@ void MOV_StartMovie(int mode)
 	Config.VSyncWA = 0;
 	memset(&MovieControl, 0, sizeof(MovieControl));
 	if (Movie.mode == MOVIEMODE_RECORD)
+	{
 		StartRecord();
+		GPUdisplayText("Movie recording started.");
+	}
 	else if (Movie.mode == MOVIEMODE_PLAY)
 	{
 		if (!StartReplay())
 			MOV_StopMovie();
+		else
+			GPUdisplayText("Movie playback started.");
 	}
 }
 
@@ -542,7 +547,10 @@ void MOV_StopMovie()
 		fclose(fpMovie);
 		fpMovie = NULL;
 		TruncateMovie();
+		GPUdisplayText("Movie recording stopped.");
 	}
+	else if (Movie.mode == MOVIEMODE_PLAY)
+		GPUdisplayText("Movie playback stopped.");
 	Movie.mode = MOVIEMODE_INACTIVE;
 	if(fpMovie)
 		fclose(fpMovie);
