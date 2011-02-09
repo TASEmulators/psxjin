@@ -498,6 +498,8 @@ static int StartReplay()
 		toRead = Movie.bytesPerFrame * (Movie.totalFrames+1);
 		ReserveInputBufferSpace(toRead);
 		fread(Movie.inputBufferPtr, 1, toRead, fpMovie);
+		if (Movie.inputBufferPtr == 0)
+			return 0;
 	}
 
 	return 1;
@@ -527,7 +529,10 @@ void MOV_StartMovie(int mode)
 	if (Movie.mode == MOVIEMODE_RECORD)
 		StartRecord();
 	else if (Movie.mode == MOVIEMODE_PLAY)
-		StartReplay();
+	{
+		if (!StartReplay())
+			MOV_StopMovie();
+	}
 }
 
 void MOV_StopMovie()
