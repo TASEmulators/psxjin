@@ -516,7 +516,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CHEATTOGLE].key
 	&& modifiers == EmuCommandTable[EMUCMD_CHEATTOGLE].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
+		if (Movie.mode == MOVIEMODE_RECORD || Movie.mode == MOVIEMODE_PLAY) {
 			if (Movie.cheatListIncluded) {
 				MovieControl.cheats ^= 1;
 				if (!cheatsEnabled) {
@@ -547,7 +547,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_SIOIRQ].key
 	&& modifiers == EmuCommandTable[EMUCMD_SIOIRQ].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
+		if (Movie.mode == MOVIEMODE_RECORD || Movie.mode == MOVIEMODE_PLAY) {
 			MovieControl.sioIrq ^= 1;
 			if (!Config.Sio) {
 				if (MovieControl.sioIrq)
@@ -575,7 +575,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_RCNTFIX].key
 	&& modifiers == EmuCommandTable[EMUCMD_RCNTFIX].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
+		if (Movie.mode == MOVIEMODE_RECORD || Movie.mode == MOVIEMODE_PLAY) {
 			MovieControl.RCntFix ^= 1;
 			if (!Config.RCntFix) {
 				if (MovieControl.RCntFix)
@@ -603,7 +603,7 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_VSYNCWA].key
 	&& modifiers == EmuCommandTable[EMUCMD_VSYNCWA].keymod)
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {
+		if (Movie.mode == MOVIEMODE_RECORD || Movie.mode == MOVIEMODE_PLAY) {
 			MovieControl.VSyncWA ^= 1;
 			if (!Config.VSyncWA) {
 				if (MovieControl.VSyncWA)
