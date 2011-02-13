@@ -296,8 +296,8 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_VSYNCADVANCE].key
-	&& modifiers == EmuCommandTable[EMUCMD_VSYNCADVANCE].keymod)
+	if(key == EmuCommandTable[EMUCMD_DISABLED].key
+	&& modifiers == EmuCommandTable[EMUCMD_DISABLED].keymod)
 	{
 		iFrameAdvance=1;
 		iGpuHasUpdated=1;
