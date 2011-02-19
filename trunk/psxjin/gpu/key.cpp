@@ -104,7 +104,8 @@ LRESULT CALLBACK KeyWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 		break;
 		//--------------------------------------------------//
 	case WM_SYSKEYUP:                                   // alt+enter
-		if (wParam==VK_RETURN) bChangeWinMode=TRUE;
+		//if (wParam==VK_RETURN) bChangeWinMode=TRUE;
+		//this gets triggered accidentally sometimes, and fullscreen sucks anyway
 		break;
 		//--------------------------------------------------//
 	case WM_KEYUP:                                      // key up

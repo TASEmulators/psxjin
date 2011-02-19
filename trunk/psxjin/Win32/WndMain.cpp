@@ -31,6 +31,7 @@
 
 #include "resource.h"
 #include "AboutDlg.h"
+#include "gpu/gpu_record.h"
 
 #include "../version.h"
 #include "PsxCommon.h"
@@ -48,6 +49,7 @@
 #include "recentmenu.h"
 #include "plugins.h"
 #include "analog.h"
+#include "aviout.h"
 
 const int RECENTCD_START = 65000;
 const int RECENTMOVIE_START = 65020;
@@ -443,6 +445,7 @@ void RunGui() {
 	Running = 1;
 }
 
+HWND GetMainWindow() { return gApp.hWnd; }
 void SNDDXSetWindow(HWND hwnd);
 void RestoreWindow() {
 	AccBreak = 1;
@@ -2532,14 +2535,18 @@ void WIN32_StartAviRecord()
 	Movie.AviCount = 0;
 	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);		 
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
-	OpenPlugins(gApp.hWnd);
+	//OpenPlugins(gApp.hWnd);
 	Config.CurWinX = MainWindow_width;
 	Config.CurWinY = MainWindow_height-MainWindow_menubar;
 	GPUstartAvi(Movie.aviFilename);
 	SPUstartWav(Movie.wavFilename);
 	if (NeedReset) { SysReset(); NeedReset = 0; }
-	Running = 1;
-	psxCpu->Execute();
+	extern int            iUseNoStretchBlt;
+	if(iUseNoStretchBlt==1)
+		RECORD_RECORDING_MODE = 2;
+	else RECORD_RECORDING_MODE = 0 ;
+	//Running = 1;
+	//psxCpu->Execute();
 }
 
 void WIN32_SplitAvi()
