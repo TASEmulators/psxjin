@@ -124,6 +124,7 @@
 #include <string.h>
 #include "resource.h"
 #include <png.h>
+#include "win32.h"
 
 #endif
 
@@ -3389,7 +3390,8 @@ void CALLBACK GPUstartAvi(char* filename)
 		HWND hWP=GetActiveWindow();
 		if (!RUN_ONCE)
 		{
-			OnRecording(hWP);
+			extern bool HACK_CODEC_CHOOSE(HWND hW);
+			HACK_CODEC_CHOOSE(GetMainWindow());
 			RUN_ONCE = true;
 		}
 		RECORD_RECORDING=TRUE;

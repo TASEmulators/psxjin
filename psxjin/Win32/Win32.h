@@ -38,6 +38,7 @@
 #include <ctype.h>
 #include <io.h>
 #include <direct.h>
+#include "PsxCommon.h"
 
 #ifndef strcasecmp
 #define strcasecmp _stricmp
@@ -60,7 +61,14 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 BOOL CALLBACK ConfigureCpuDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK ConfigureNetPlayDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+HWND GetMainWindow();
 void ConfigurePlugins(HWND hWnd);
+
+extern int MainWindow_wndx;
+extern int MainWindow_wndy;
+extern int MainWindow_width;
+extern int MainWindow_height;
+extern int MainWindow_menubar;
 
 int  Open_File_Proc(char *file);
 void Open_Mcd_Proc(HWND hW, int MCDID);

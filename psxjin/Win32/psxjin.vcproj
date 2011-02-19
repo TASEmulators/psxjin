@@ -346,7 +346,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="GUI"
+			Name="Win32"
 			>
 			<File
 				RelativePath="AboutDlg.cpp"
