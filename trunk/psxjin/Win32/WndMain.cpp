@@ -49,7 +49,6 @@
 #include "recentmenu.h"
 #include "plugins.h"
 #include "analog.h"
-#include "aviout.h"
 
 const int RECENTCD_START = 65000;
 const int RECENTMOVIE_START = 65020;
