@@ -685,23 +685,26 @@ void RunCD(HWND hWnd)
 				CDRclose();
 				return;
 			}
-			
-			SysReset();
-			NeedReset = 0;
-			CheckCdrom();
-			if (LoadCdrom() == -1) {
-				ClosePlugins();
-				RestoreWindow();
-				SysMessage(_("Could not load Cdrom"));
-				IsoFile[0] = 0;
-				return;
-			}
 			if (!Movie.CDSwap)
 			{
+				SysReset();
+				NeedReset = 0;
+				CheckCdrom();
+				if (LoadCdrom() == -1) {
+					ClosePlugins();
+					RestoreWindow();
+					SysMessage(_("Could not load Cdrom"));
+					IsoFile[0] = 0;
+					return;
+				}			
 				Movie.currentFrame = 0;
 				WIN32_StopAviRecord();
 				MOV_StopMovie();
-			}		
+			}	
+			else
+			{
+				Movie.CDSwap = false;
+			}
 			RecentCDs.UpdateRecentItems(IsoFile);
 			Running = 1;
 			if (AutoRWLoad)
