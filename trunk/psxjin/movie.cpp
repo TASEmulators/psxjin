@@ -1051,6 +1051,7 @@ void MOV_WriteControl() {
 
 void MOV_ProcessControlFlags() {
 	if (MovieControl.cdCase) {
+		Movie.CDSwap = true;
 		cdOpenCase ^= -1;
 		if (cdOpenCase < 0) {
 			Movie.currentCdrom++;
@@ -1069,7 +1070,7 @@ void MOV_ProcessControlFlags() {
 				SysMessage(_("Could not load Cdrom"));
 			sprintf(Movie.CdromIds, "%s%9.9s", Movie.CdromIds,CdromId);
 		}
-	}
+	} //End of Flags
 	if (MovieControl.cheats)
 		cheatsEnabled ^= 1;
 	if (MovieControl.reset) {

@@ -77,7 +77,7 @@ struct EMUCMDTABLE EmuCommandTable[]=
 	{ 0,               0,           "Configure Controllers", },
 	{ 0,               0,           "Configure Options", },
 	{ 'C',             VK_SHIFT,    "Cheats Enable/Disable", },
-	{ 'O',             VK_CONTROL,  "CD Case Open/Close", },
+	{ 'S',             VK_CONTROL,	"CD Swap (Open/Close)", },
 	{ 0,               0,           "SIO IRQ Enable/Disable", },
 	{ 0,               0,           "Parasite Eve 2 Fix E/D", },		//RCntFix
 	{ 0,               0,           "Resident Evil 2/3 Fix E/D", },		//VSYNCWA

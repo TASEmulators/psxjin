@@ -179,6 +179,7 @@ typedef struct
 
 struct MovieType {	
 	int isText;							 //set if Movie type is Text, other wise it is binary
+	bool CDSwap;						//Set if swap is going to occur
 	PadDataS lastPads1[4];
 	PadDataS lastPads2[4];
 	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
