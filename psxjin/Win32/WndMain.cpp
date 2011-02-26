@@ -259,7 +259,7 @@ int main(int argc, char **argv) {
 		wmTimerRes = 5;
 		timeBeginPeriod (wmTimerRes);
 	}
-
+	Movie.CDSwap = false;
 	char runexe=0;
 	char runcd=0;
 	char loadMovie=0;
@@ -696,10 +696,12 @@ void RunCD(HWND hWnd)
 				IsoFile[0] = 0;
 				return;
 			}
-			
-			Movie.currentFrame = 0;
-			WIN32_StopAviRecord();
-			MOV_StopMovie();
+			if (!Movie.CDSwap)
+			{
+				Movie.currentFrame = 0;
+				WIN32_StopAviRecord();
+				MOV_StopMovie();
+			}		
 			RecentCDs.UpdateRecentItems(IsoFile);
 			Running = 1;
 			if (AutoRWLoad)
