@@ -1161,5 +1161,6 @@ void ChangeAuthor(const char* author)
 
 void ChangeRerecordCount(int rerecords)
 {
-	Movie.rerecordCount = rerecords;		
+	Movie.rerecordCount = rerecords;
+	MOV_WriteMovieFile();
 }
