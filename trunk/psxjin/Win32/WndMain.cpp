@@ -2549,7 +2549,7 @@ void WIN32_StartAviRecord()
 	Movie.AviCount = 0;
 	sprintf(Movie.aviFilename, "%s%s%s.avi",fszDrive,fszDirectory,fszFilename);		 
 	sprintf(Movie.wavFilename, "%s%s%s.wav",fszDrive,fszDirectory,fszFilename);
-	//OpenPlugins(gApp.hWnd);
+
 	Config.CurWinX = MainWindow_width;
 	Config.CurWinY = MainWindow_height-MainWindow_menubar;
 	GPUstartAvi(Movie.aviFilename);
@@ -2567,7 +2567,7 @@ void WIN32_SplitAvi()
 {
 	if (Movie.capture)
 	{
-		GPUstopAvi();
+		GPUstopAvi(false);
 		Movie.AviCount++;
 		sprintf(Movie.aviFilename, "%s%s%03d_%s-%dx%d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort,MainWindow_width,MainWindow_height-MainWindow_menubar);
 		Config.CurWinX = MainWindow_width;
@@ -2580,7 +2580,7 @@ void WIN32_StopAviRecord()
 {
 	if (!Movie.capture)
 		return;
-	GPUstopAvi();
+	GPUstopAvi(true);
 	SPUstopWav();
 	Movie.capture = 0;
 	AVIisCapturing = false;
