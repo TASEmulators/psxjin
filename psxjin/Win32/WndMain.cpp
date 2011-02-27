@@ -74,6 +74,7 @@ bool AVIisCapturing = false;
 
 //TODO: remove me and use the gpu ones!
 int dispInput = 0;
+int dispAnalog = 0;
 int dispFrameCounter = 0;
 int dispAllText = 0;
 //
@@ -908,6 +909,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPANALOG, MF_BYCOMMAND | (dispAnalog ? MF_CHECKED:MF_UNCHECKED));
 			return TRUE;
 		case WM_MOVE:
 		{
@@ -1138,6 +1140,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_EMULATOR_DISPINPUT:
 					dispInput ^= 1;
 					GPUshowInput();
+					return TRUE;
+				case ID_EMULATOR_DISPANALOG:
+					dispAnalog ^= 1;
+					GPUshowAnalog();
 					return TRUE;
 				case ID_EMULATOR_DISPFRAMECOUNTER:
 					dispFrameCounter ^= 1;
@@ -2111,6 +2117,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
+	ADDMENUITEM(0, _("Display Analog"), ID_EMULATOR_DISPANALOG);
 	ADDMENUITEM(0, _("Display Input"), ID_EMULATOR_DISPINPUT);
 	ADDMENUITEM(0, _("Display Frame counter"), ID_EMULATOR_DISPFRAMECOUNTER);
 	ADDMENUITEM(0, _("Display All Text"), ID_EMULATOR_DISPALL);
@@ -2246,6 +2253,8 @@ void SaveIni()
 	WritePrivateProfileString("General", "FrameCounter", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", dispInput );
 	WritePrivateProfileString("General", "InputDisplay", Str_Tmp, Config.Conf_File);
+	sprintf(Str_Tmp, "%d", dispAnalog );
+	WritePrivateProfileString("General", "AnalogDisplay", Str_Tmp, Config.Conf_File);
 
 
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
@@ -2273,6 +2282,7 @@ void LoadIni()
 	dispAllText = GetPrivateProfileInt("General", "AllDisplay", 1, Config.Conf_File);
 	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Config.Conf_File);
 	dispInput = GetPrivateProfileInt("General", "InputDisplay", 0, Config.Conf_File);
+	dispAnalog = GetPrivateProfileInt("General", "AnalogDisplay", 0, Config.Conf_File);
 	
 
 	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things

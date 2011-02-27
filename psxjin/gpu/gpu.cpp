@@ -3359,6 +3359,23 @@ void CALLBACK GPUshowInput()
 	}
 }
 
+void CALLBACK GPUshowAnalog()
+{
+	if (ulKeybits&KEY_SHOWANALOG)
+	{
+		DestroyPic();
+		ulKeybits&=~KEY_SHOWANALOG;
+		DoClearScreenBuffer();
+	}
+	else
+	{
+		ulKeybits|=KEY_SHOWANALOG;
+		szDispBuf[0]=0;
+		BuildDispMenu(0);
+	}
+}
+
+
 
 void CALLBACK GPUshowALL()
 {	

@@ -133,6 +133,7 @@ void CALLBACK  GPUsetcurrentmode(char);
 void CALLBACK  GPUsetspeedmode(unsigned long);
 void CALLBACK  GPUshowframecounter(void);
 void CALLBACK  GPUshowInput(void);
+void CALLBACK  GPUshowAnalog(void);
 void CALLBACK  GPUshowALL(void);
 void CALLBACK  GPUstartAvi(char* filename);
 void CALLBACK  GPUstopAvi(void);

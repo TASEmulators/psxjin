@@ -427,6 +427,7 @@
 #define ID_EMULATOR_2X                  39997
 #define ID_EMULATOR_3X                  39998
 #define ID_EMULATOR_4X                  39999
+#define ID_EMULATOR_DISPANALOG			40030
 #define ID_EMULATOR_DISPINPUT           40000
 #define ID_FILE_EXIT                    40001
 #define ID_HELP_ABOUT                   40002
