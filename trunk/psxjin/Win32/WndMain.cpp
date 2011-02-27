@@ -872,7 +872,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));  
 			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
-	
+			
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT0,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT1,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_LOAD_SLOT2,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
@@ -903,7 +903,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-
+			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CHEATS,MF_BYCOMMAND | MF_GRAYED);
 			CheckMenuItem(gApp.hMenu, ID_FILE_READONLY, MF_BYCOMMAND | (Movie.readOnly ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_MUTE, MF_BYCOMMAND | ((iVolume == 5) ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPALL, MF_BYCOMMAND | (dispAllText ? MF_CHECKED:MF_UNCHECKED));
