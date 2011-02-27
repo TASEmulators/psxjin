@@ -1152,10 +1152,10 @@ int MovieFreeze(gzFile f, int Mode) {
 
 void ChangeAuthor(const char* author)
 {
-	strncpy(Movie.authorInfo, author, 512);
+	strncpy(Movie.authorInfo, author, MOVIE_MAX_METADATA);
 	printf(author);
-	fseek(fpMovie,Movie.authorInfoOffset,SEEK_SET); 
-	fwrite(Movie.authorInfo, 1, strnlen(Movie.authorInfo, MOVIE_MAX_METADATA), fpMovie); 
+	fseek(fpMovie,Movie.authorInfoOffset,SEEK_SET);
+	fwrite(Movie.authorInfo, 1, MOVIE_MAX_METADATA, fpMovie); 
 	MOV_WriteMovieFile();
 }
 
