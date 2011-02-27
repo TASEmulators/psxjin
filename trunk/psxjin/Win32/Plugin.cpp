@@ -46,6 +46,7 @@ int iSpeedMode = 7;
 int ShowPic=0;
 char Text[255];
 int ret;
+extern int dispAnalog;
 
 void PlayMovieFromBeginning()
 {
@@ -296,11 +297,11 @@ void PADhandleKey(int key) {
 		return;
 	}
 
-	if(key == EmuCommandTable[EMUCMD_DISABLED].key
-	&& modifiers == EmuCommandTable[EMUCMD_DISABLED].keymod)
+	if(key == EmuCommandTable[EMUCMD_ANALOGTOGGLE].key
+	&& modifiers == EmuCommandTable[EMUCMD_ANALOGTOGGLE].keymod)
 	{
-		iFrameAdvance=1;
-		iGpuHasUpdated=1;
+		dispAnalog ^= 1;
+		GPUshowAnalog();
 		return;
 	}
 
