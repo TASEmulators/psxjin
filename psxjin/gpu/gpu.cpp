@@ -3417,13 +3417,15 @@ void CALLBACK GPUstartAvi(char* filename)
 	}
 }
 
-void CALLBACK GPUstopAvi()
+void CALLBACK GPUstopAvi(bool off)
 {
 	if (RECORD_RECORDING)
 	{		
 		RECORD_RECORDING=FALSE;
 		RECORD_Stop();
 		BuildDispMenu(0);
+		if (off)
+			RUN_ONCE = 0;
 	}	
 }
 
