@@ -979,7 +979,6 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 /*
 				case ID_FILE_RUN_EXE:
 					if (!Open_File_Proc(File)) return TRUE;
-					SetMenu(hWnd, NULL);
 					OpenPlugins(hWnd);
 					SysReset();
 					NeedReset = 0;
@@ -2470,7 +2469,6 @@ void WIN32_StartMovieRecord()
 		{
 			if (Movie.saveStateIncluded)
 			{
-				SetMenu(gApp.hWnd, NULL);
 				OpenPlugins(gApp.hWnd);
 				Running = 1;
 				MOV_StartMovie(MOVIEMODE_RECORD);
