@@ -241,8 +241,8 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		c |= fgetc(fd) & 0xff;
 		tempMovie->CdromIds[i] = c;					
 	}
-	fseek(fd,0,SEEK_END);
-	int totalFrameCheck = (ftell(fd) - tempMovie->inputOffset)/SetBytesPerFrame(*tempMovie) - 1;
+	fseek(fd,0,SEEK_END);	
+	int totalFrameCheck = (ftell(fd) - tempMovie->inputOffset)/SetBytesPerFrame(*tempMovie);
 	if (totalFrameCheck != tempMovie->totalFrames)
 	{
 		printf("%d Frames Listed %d totalFrames actual\n", tempMovie->totalFrames, totalFrameCheck);
@@ -260,7 +260,8 @@ void MOV_WriteMovieFile()
 	fseek(fpMovie, 12, SEEK_SET);
 	fwrite(&Movie.movieFlags, 1, 1, fpMovie);    //flags
 	fseek(fpMovie, 16, SEEK_SET);
-	fwrite(&Movie.currentFrame, 1, 4, fpMovie);  //total frames
+	int tempframe = Movie.currentFrame+1;
+	fwrite(&tempframe, 1, 4, fpMovie);  //total frames
 	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); //rerecord count
 	fseek(fpMovie, Movie.cdIdsOffset, SEEK_SET);
 	fwrite(&Movie.CdromCount, 1, 1, fpMovie);    //total CDs used
@@ -277,9 +278,9 @@ void MOV_WriteMovieFile()
 	fseek(fpMovie, 44, SEEK_SET);
 	Movie.inputOffset = Movie.cdIdsOffset+1+(9*Movie.CdromCount);
 	fwrite(&Movie.inputOffset, 1, 4, fpMovie);   //input offset
-	Movie.totalFrames=Movie.currentFrame; //used when toggling read-only mode
+	Movie.totalFrames=Movie.currentFrame+1; //used when toggling read-only mode
 	fseek(fpMovie, Movie.inputOffset, SEEK_SET);
-	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames+1), fpMovie);
+	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames), fpMovie);
 }
 
 static void UpdateMovieFlags(void)
@@ -495,7 +496,7 @@ static int StartReplay()
 	{
 		fseek(fpMovie, Movie.inputOffset, SEEK_SET);
 		Movie.inputBufferPtr = Movie.inputBuffer;
-		toRead = Movie.bytesPerFrame * (Movie.totalFrames+1);
+		toRead = Movie.bytesPerFrame * (Movie.totalFrames);
 		ReserveInputBufferSpace(toRead);
 		fread(Movie.inputBufferPtr, 1, toRead, fpMovie);
 		if (Movie.inputBufferPtr == 0)
