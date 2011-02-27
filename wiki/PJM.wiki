@@ -5,7 +5,7 @@
 000 4-byte signature: "PJM "
 004 4-byte unsigned long: version number (currently "2")
 008 4-byte unsigned long: version of the emulator used
-00C 1-byte flags:
+00C 2-byte flags:
     bit 0: reserved, set to 0
     bit 1:
           if "0", movie begins from power-on
@@ -22,8 +22,14 @@
     bit 5:
           if "0", movie does not use hacks
           if "1", movie does use hacks such as "SPU/SIO IRQ always enabled"
-    other: reserved, set to 0
-00D 1-byte flags: reserved, set to 0
+    bit 6: 
+          if "0", movie is in Binary format
+          if "1", movie is in text format
+    bit 7:
+          Multitap toggle, player 1
+    bit 8:
+          Multitap toggle, player 2
+
 00E 1-byte unsigned char: controller port 1 type
 00F 1-byte unsigned char: controller port 2 type
 010 4-byte unsigned long: number of frames
@@ -70,10 +76,14 @@ After the CD-ROM IDs, comes the controller data.
 
 === Bytes per Frame ===
 {{{
-04 Mouse
-02 Standard
-06 Analog Joystick
-06 Analog Controller
+In Binary Format:
+  04 Mouse
+  02 Standard
+  06 Analog Joystick/Controller
+In Text Format:
+  12 Mouse
+  15 Standard
+  33 Analog Joystick/Controller
 }}}
 ^(The other controller types are currently not supported by PCSX.)^
 
