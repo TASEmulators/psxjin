@@ -43,6 +43,7 @@
 #define KEY_CHECKTHISOUT  256
 #define KEY_SHOWINPUT	  512
 #define KEY_SHOWFCOUNT	  1024
+#define KEY_SHOWANALOG	  2048
 
 
 #ifndef _FPSE
