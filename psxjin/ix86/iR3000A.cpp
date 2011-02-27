@@ -460,6 +460,8 @@ __inline static void execute() {
 				iDoPauseAtVSync = 0;
 				iFrameAdvance = 0;
 				iGpuHasUpdated = 0;
+				GPUupdateframe();
+				SysUpdate();
 			}
 			iVSyncFlag = 0;
 			PSXjin_LuaFrameBoundary();
