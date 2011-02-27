@@ -2,7 +2,7 @@
  
 == Header ==
 {{{
-000 4-byte signature: "PXM "
+000 4-byte signature: "PJM "
 004 4-byte unsigned long: version number (currently "2")
 008 4-byte unsigned long: version of the emulator used
 00C 1-byte flags:
