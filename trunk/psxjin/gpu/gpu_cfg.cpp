@@ -851,9 +851,6 @@ void OnCfgDef2(HWND hW)
 
 void gpu_ReadConfig(void)
 {
-	HKEY myKey;
-	DWORD type;
-	DWORD size;
 	char Conf_File[256];
 	char Str_Tmp[256];
 	memset(szDevName,0,128);
@@ -906,10 +903,6 @@ void gpu_ReadConfig(void)
 	
 //	RECORD_COMPRESSION1 = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION1", 0, Conf_File);
 	
-	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", 0, (LPSTR)&RECORD_COMPRESSION_STATE1[0], 4096, Conf_File);
-	
-//	RECORD_COMPRESSION2 = GetPrivateProfileInt("GPU", "RECORD_COMPRESSION2", 0, Conf_File);
-
 	GetPrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", 0, (LPSTR)&RECORD_COMPRESSION_STATE2[0], 4096, Conf_File);
 	
 	if (RECORD_RECORDING_WIDTH>1024) RECORD_RECORDING_WIDTH = 1024;
@@ -922,32 +915,9 @@ void gpu_ReadConfig(void)
 	guiDev.Data3 = GetPrivateProfileInt("GPU", "GUID3", 0, Conf_File);
 	GetPrivateProfileString("GPU", "GUID4", 0, (LPSTR)&guiDev.Data4[0], 8, Conf_File);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Put Record compression info in standard Windows psx config (registry), for now
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\PSXJIN\\GPU",0,KEY_ALL_ACCESS,&myKey)==ERROR_SUCCESS)
-	{
-#define GetBINARY(xa,xb) size=sizeof(xb);RegQueryValueEx(myKey,xa,0,&type,(LPBYTE)&xb,&size);
-		GetBINARY("RecordingCompression1",		    RECORD_COMPRESSION1);
-		GetBINARY("RecordingCompression2",		    RECORD_COMPRESSION2);
-		if (RECORD_COMPRESSION1.cbSize != sizeof(RECORD_COMPRESSION1))
-		{
-			memset(&RECORD_COMPRESSION1,0,sizeof(RECORD_COMPRESSION1));
-			RECORD_COMPRESSION1.cbSize = sizeof(RECORD_COMPRESSION1);
-		}
-		RECORD_COMPRESSION1.lpState = RECORD_COMPRESSION_STATE1;
-		if (RECORD_COMPRESSION2.cbSize != sizeof(RECORD_COMPRESSION2))
-		{
-			memset(&RECORD_COMPRESSION2,0,sizeof(RECORD_COMPRESSION2));
-			RECORD_COMPRESSION2.cbSize = sizeof(RECORD_COMPRESSION2);
-		}
-		RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
-
-		RegCloseKey(myKey);
-	}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	memset(&RECORD_COMPRESSION2,0,sizeof(RECORD_COMPRESSION2));
+	RECORD_COMPRESSION2.cbSize = sizeof(RECORD_COMPRESSION2);
+	RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
 
 	if (!iColDepth) iColDepth=32;
 	if (iUseFixes) dwActFixes=dwCfgFixes;
@@ -976,9 +946,6 @@ void gpu_WriteConfig(void)
 {
 	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
 	char Str_Tmp[1024];
-
-	HKEY myKey;
-	DWORD myDisp;
 
 	sprintf(Str_Tmp, "%d", iResX);
 	WritePrivateProfileString("GPU", "iResX", Str_Tmp, Conf_File);
@@ -1030,14 +997,7 @@ void gpu_WriteConfig(void)
 //*****
 //		WritePrivateProfileString("GPU", "guiDev", &guiDev, Conf_File);
 	
-	//Recording options
-	if (RECORD_COMPRESSION1.cbState>sizeof(RECORD_COMPRESSION_STATE1) || RECORD_COMPRESSION1.lpState!=RECORD_COMPRESSION_STATE1)
-	{
-		memset(&RECORD_COMPRESSION1,0,sizeof(RECORD_COMPRESSION1));
-		memset(&RECORD_COMPRESSION_STATE1,0,sizeof(RECORD_COMPRESSION_STATE1));
-		RECORD_COMPRESSION1.cbSize	= sizeof(RECORD_COMPRESSION1);
-		RECORD_COMPRESSION1.lpState = RECORD_COMPRESSION_STATE1;
-	}
+
 	if (RECORD_COMPRESSION2.cbState>sizeof(RECORD_COMPRESSION_STATE2) || RECORD_COMPRESSION2.lpState!=RECORD_COMPRESSION_STATE2)
 	{
 		memset(&RECORD_COMPRESSION2,0,sizeof(RECORD_COMPRESSION2));
@@ -1060,7 +1020,6 @@ void gpu_WriteConfig(void)
 	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_MODE", Str_Tmp, Conf_File);
 
 	WritePrivateProfileString("GPU", "iDebugMode", Str_Tmp, Conf_File);
-	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE1", (LPSTR)RECORD_COMPRESSION_STATE1, Conf_File);
 	WritePrivateProfileString("GPU", "RECORD_COMPRESSION_STATE2", (LPSTR)RECORD_COMPRESSION_STATE2, Conf_File);
 
 	sprintf(Str_Tmp, "%d", guiDev.Data1);
@@ -1071,18 +1030,6 @@ void gpu_WriteConfig(void)
 	WritePrivateProfileString("GPU", "GUID3", Str_Tmp, Conf_File);
 	WritePrivateProfileString("GPU", "GUID4", (LPSTR)guiDev.Data4, Conf_File);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\PSXJIN\\GPU",0,NULL,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&myKey,&myDisp);
-
-	#define SetBINARY(xa,xb) RegSetValueEx(myKey,xa,0,REG_BINARY,(LPBYTE)&xb,sizeof(xb));
-
-	SetBINARY("RecordingCompression1",		RECORD_COMPRESSION1);
-	
-	SetBINARY("RecordingCompression2",		RECORD_COMPRESSION2);
-	
-
-	RegCloseKey(myKey);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -3404,15 +3404,20 @@ void CALLBACK GPUstartAvi(char* filename)
 {
 	if (!RECORD_RECORDING)
 	{
+		bool proceed = true;
 		HWND hWP=GetActiveWindow();
 		if (!RUN_ONCE)
 		{
 			extern bool HACK_CODEC_CHOOSE(HWND hW);
-			HACK_CODEC_CHOOSE(GetMainWindow());
-			RUN_ONCE = true;
+			if(HACK_CODEC_CHOOSE(GetMainWindow()))
+				RUN_ONCE = true;
+			else proceed = false;
 		}
-		RECORD_RECORDING=TRUE;
-		RECORD_Start(filename);
+		if(proceed)
+		{
+			RECORD_RECORDING=TRUE;
+			RECORD_Start(filename);
+		}
 		BuildDispMenu(0);
 	}
 }
