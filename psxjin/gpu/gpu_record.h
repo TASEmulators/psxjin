@@ -45,8 +45,6 @@ extern unsigned long	RECORD_RECORDING_WIDTH;
 extern unsigned long	RECORD_RECORDING_HEIGHT;
 extern unsigned long	RECORD_FRAME_RATE_SCALE;
 extern unsigned long	RECORD_COMPRESSION_MODE;
-extern COMPVARS			RECORD_COMPRESSION1;
-extern unsigned char	RECORD_COMPRESSION_STATE1[4096];
 extern COMPVARS			RECORD_COMPRESSION2;
 extern unsigned char	RECORD_COMPRESSION_STATE2[4096];
 

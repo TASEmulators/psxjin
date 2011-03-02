@@ -853,6 +853,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 		}
+		break;
 
 		case WM_ENTERMENULOOP:
 			UpdateMenuHotkeys();
@@ -914,13 +915,14 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_MOVE:
 		{
 			if (!IsIconic(hWnd)) {
-			RECT wrect;
-			GetWindowRect(hWnd,&wrect);
-			MainWindow_wndx = wrect.left;
-			MainWindow_wndy = wrect.top;
-			WindowBoundsCheckNoResize(MainWindow_wndx,MainWindow_wndy,wrect.right);
+				RECT wrect;
+				GetWindowRect(hWnd,&wrect);
+				MainWindow_wndx = wrect.left;
+				MainWindow_wndy = wrect.top;
+				WindowBoundsCheckNoResize(MainWindow_wndx,MainWindow_wndy,wrect.right);
 			}
 		}
+		break;
 		case WM_COMMAND:
 			//Recent CDs
 			if(wParam >= RECENTCD_START && wParam <= RECENTCD_START + RecentCDs.MAX_RECENT_ITEMS - 1)
@@ -1226,6 +1228,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_SYSKEYDOWN:
 			if (wParam != VK_F10)
 				return DefWindowProc(hWnd, msg, wParam, lParam);
+			break;
 
 		case WM_KEYDOWN:
 			PADhandleKey(wParam);
