@@ -208,11 +208,11 @@ void OnCfgDef1(HWND hW);
 void OnCfgDef2(HWND hW);
 void OnBugFixes(HWND hW);
 
-void OnRecording(HWND hW);
+//void OnRecording(HWND hW);
 
 void SelectDev(HWND hW);
 BOOL bTestModes(void);
-void OnKeyConfig(HWND hW);
+//void OnKeyConfig(HWND hW);
 void GetSettings(HWND hW);
 void OnClipboard(HWND hW);
 void DoDevEnum(HWND hW);
@@ -250,10 +250,7 @@ BOOL CALLBACK SoftDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		case IDC_SELFIX:
 			OnBugFixes(hW);
-			return TRUE;
-		case IDC_KEYCONFIG:
-			OnKeyConfig(hW);
-			return TRUE;
+			return TRUE;	
 		case IDC_SELDEV:
 			SelectDev(hW);
 			return TRUE;
@@ -265,10 +262,6 @@ BOOL CALLBACK SoftDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		case IDC_CLIPBOARD:
 			OnClipboard(hW);
-			return TRUE;
-
-		case IDC_RECORDING:
-			OnRecording(hW);
 			return TRUE;
 		}
 	}
@@ -602,7 +595,7 @@ void OnBugFixes(HWND hW)
 ////////////////////////////////////////////////////////////////////////
 // Recording options
 ////////////////////////////////////////////////////////////////////////
-
+/*
 void RefreshCodec(HWND hW)
 {
 	char buffer[255];
@@ -638,11 +631,11 @@ void RefreshCodec(HWND hW)
 	else
 		wsprintf(buffer,"24 bit Compression: Full Frames (Uncompressed)");
 	SetDlgItemText(hW,IDC_COMPRESSION2,buffer);
-}
+}*/
 
 bool HACK_CODEC_CHOOSE(HWND hW)
 {
-	{
+	{		
 		BITMAPINFOHEADER bitmap = {40,640,480,1,24,0,640*480*3,2048,2048,0,0};
 		if (!ICCompressorChoose(hW,ICMF_CHOOSE_DATARATE|ICMF_CHOOSE_KEYFRAME,&bitmap,NULL,&RECORD_COMPRESSION2,"24 bit Compression")) return false;
 		if (RECORD_COMPRESSION2.cbState>sizeof(RECORD_COMPRESSION_STATE2))
@@ -658,11 +651,11 @@ bool HACK_CODEC_CHOOSE(HWND hW)
 		}
 		RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
 	}
-	RefreshCodec(hW);
+	//RefreshCodec(hW);
 	return true;
 }
 
-BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/*BOOL CALLBACK RecordingDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -783,7 +776,7 @@ void OnRecording(HWND hW)
 	          hW,(DLGPROC)RecordingDlgProc);
 
 }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////
 // default 1: fast
@@ -1433,7 +1426,7 @@ void SetGPUKey(HWND hWC,char szKey)
 	}
 	if (i!=iCnt) tempDest = ComboBox_SetCurSel(hWC,i);
 }
-
+/* I killed the GPU hotkeys!
 BOOL CALLBACK KeyDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -1508,7 +1501,7 @@ void OnKeyConfig(HWND hW)
 	DialogBox(hInst,MAKEINTRESOURCE(IDD_GPUKEYS),
 	          hW,(DLGPROC)KeyDlgProc);
 }
-
+*/
 #else
 
 ////////////////////////////////////////////////////////////////////////

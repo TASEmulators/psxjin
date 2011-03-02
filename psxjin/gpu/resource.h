@@ -5,7 +5,6 @@
 #define IDS_INFO0                       1
 #define IDS_INFO1                       2
 #define IDS_INFO2                       3
-#define IDC_DEFAULT                     3
 #define IDC_DEF1                        127
 #define IDC_DEF2                        128
 #define IDD_DEVICE                      133
@@ -17,16 +16,6 @@
 #define IDC_CURSOR1                     142
 #define IDD_CFGDLG                      500
 #define IDD_CFGSOFT                     501
-#define IDC_KEY1                        1030
-#define IDC_KEY2                        1031
-#define IDC_KEY3                        1032
-#define IDC_KEY4                        1033
-#define IDC_KEY5                        1034
-#define IDC_KEY6                        1035
-#define IDC_KEY7                        1036
-#define IDC_KEY8                        1037
-#define IDC_KEY9                        1038
-#define IDC_KEY10                       1039
 #define IDC_CLIPBOARD                   1040
 #define IDC_CLPEDIT                     1041
 #define IDC_TEXWINDOWS                  2001
@@ -119,24 +108,12 @@
 #define IDC_FIX31                       2068
 #define IDC_FIX32                       2069
 #define IDC_GAMMA                       2070
-#define IDC_REC_MODE1                   2071
-#define IDC_REC_MODE2                   2072
-#define IDC_VIDEO_SIZE                  2073
-#define IDC_REC_WIDTH                   2074
-#define IDC_REC_HEIGHT                  2075
-#define IDC_FRAME_RATE                  2076
-#define IDC_COMPRESSION1                2077
-#define IDC_COMPRESSION2                2078
-#define IDC_RECCFG                      2079
 #define IDC_VSYNC                       2080
-#define IDC_REC_MODE3                   2089
 #define IDC_TRANSPARENT                 2081
 #define IDC_DEBUGMODE                   2082
 #define IDC_SSSPSXLIMIT                 2083
-#define IDC_COMBO1                      2087
 #define IDC_KKAPTURE                    2084
-#define IDD_RECORDING                   2085
-#define IDD_KEYS                        2086
+#define IDC_COMBO1                      2087
 
 // Next default values for new objects
 // 
