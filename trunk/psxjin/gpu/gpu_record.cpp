@@ -73,34 +73,10 @@ unsigned long		skip;
 BOOL RECORD_Start(char filename[256])
 {
 	static FILE *data;
-	if (HIWORD(VideoForWindowsVersion())<0x010a)
-	{
-		MessageBox(NULL,"Video for Windows version is too old !\nAbording Recording.","Error", MB_OK|MB_ICONSTOP);
-		return FALSE;
-	}
-	if ((data=fopen(filename,"wb"))==NULL) goto error;
 	if (RECORD_RECORDING_MODE==0)
 	{
-		switch (RECORD_VIDEO_SIZE)
-		{
-		case 0:
-			RECORD_BI.biWidth	= iResX;
-			RECORD_BI.biHeight	= iResY;
-			break;
-		case 1:
-			RECORD_BI.biWidth	= iResX/2;
-			RECORD_BI.biHeight	= iResY/2;
-			break;
-		default:
-			RECORD_BI.biWidth	= iResX/4;
-			RECORD_BI.biHeight	= iResY/4;
-			break;
-		}
-	}
-	else if (RECORD_RECORDING_MODE==1)
-	{
-		RECORD_BI.biWidth	= RECORD_RECORDING_WIDTH;
-		RECORD_BI.biHeight	= RECORD_RECORDING_HEIGHT;
+		RECORD_BI.biWidth	= Config.CurWinX;
+		RECORD_BI.biHeight	= Config.CurWinY;	
 	}
 	else
 	{
@@ -109,18 +85,15 @@ BOOL RECORD_Start(char filename[256])
 		RECORD_BI.biWidth = Config.CurWinX;
 		RECORD_BI.biHeight = Config.CurWinY;
 	}
-	if (RECORD_COMPRESSION_MODE==0)
+	if (HIWORD(VideoForWindowsVersion())<0x010a)
 	{
-		RECORD_BI.biBitCount = 16;
-		RECORD_BI.biSizeImage = RECORD_BI.biWidth*RECORD_BI.biHeight*2;
-		pCompression = &RECORD_COMPRESSION1;
+		MessageBox(NULL,"Video for Windows version is too old !\nAbording Recording.","Error", MB_OK|MB_ICONSTOP);
+		return FALSE;
 	}
-	else
-	{
-		RECORD_BI.biBitCount = 24;
-		RECORD_BI.biSizeImage = RECORD_BI.biWidth*RECORD_BI.biHeight*3;
-		pCompression = &RECORD_COMPRESSION2;
-	}
+	if ((data=fopen(filename,"wb"))==NULL) goto error;
+	RECORD_BI.biBitCount = 24;
+	RECORD_BI.biSizeImage = RECORD_BI.biWidth*RECORD_BI.biHeight*3;
+	pCompression = &RECORD_COMPRESSION2;
 	AVIFileInit();
 	if (AVIFileOpen(&pfile,filename,OF_WRITE | OF_CREATE,NULL)!=AVIERR_OK) goto error;
 	memset(&strhdr,0,sizeof(strhdr));
@@ -152,12 +125,12 @@ BOOL RECORD_Start(char filename[256])
 
 	frame = 0;
 	skip = RECORD_FRAME_RATE_SCALE;
-	return TRUE;
+	return TRUE;	
 error:
 	RECORD_Stop();
 	RECORD_RECORDING = FALSE;
 	return FALSE;
-}
+	}
 
 //--------------------------------------------------------------------
 
