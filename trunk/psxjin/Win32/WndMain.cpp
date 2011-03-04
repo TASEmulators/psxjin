@@ -2568,12 +2568,13 @@ void WIN32_SplitAvi()
 {
 	if (Movie.capture)
 	{
-		GPUstopAvi(false);
+		
 		Movie.AviCount++;
-		sprintf(Movie.aviFilename, "%s%s%03d_%s-%dx%d.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort,MainWindow_width,MainWindow_height-MainWindow_menubar);
 		Config.CurWinX = MainWindow_width;
 		Config.CurWinY = MainWindow_height-MainWindow_menubar;
-		GPUstartAvi(Movie.aviFilename);	
+		RECORD_RECORDING_MODE = 2;
+		GPUrestartAVINewRes();
+				
 	}
 }
 
@@ -2581,7 +2582,7 @@ void WIN32_StopAviRecord()
 {
 	if (!Movie.capture)
 		return;
-	GPUstopAvi(true);
+	GPUstopAvi();
 	SPUstopWav();
 	Movie.capture = 0;
 	AVIisCapturing = false;
