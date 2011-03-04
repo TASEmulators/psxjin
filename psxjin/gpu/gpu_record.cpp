@@ -73,8 +73,8 @@ BOOL RECORD_Start(char filename[256])
 	static FILE *data;
 	if (RECORD_RECORDING_MODE==0)
 	{
-		RECORD_BI.biWidth	= Config.CurWinX;
-		RECORD_BI.biHeight	= Config.CurWinY;	
+		RECORD_BI.biWidth	= iResX;
+		RECORD_BI.biHeight	= iResY;	
 	}
 	else
 	{

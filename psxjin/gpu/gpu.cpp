@@ -3400,37 +3400,44 @@ void CALLBACK GPUsetcurrentmode(char newModeFlags)
 	BuildDispMenu(0);
 }
 void OnRecording(HWND hW);
+
+
 void CALLBACK GPUstartAvi(char* filename)
 {
 	if (!RECORD_RECORDING)
 	{
 		bool proceed = true;
 		HWND hWP=GetActiveWindow();
-		if (!RUN_ONCE)
-		{
-			extern bool HACK_CODEC_CHOOSE(HWND hW);
-			if(HACK_CODEC_CHOOSE(GetMainWindow()))
-				RUN_ONCE = true;
-			else proceed = false;
-		}
-		if(proceed)
+		extern bool HACK_CODEC_CHOOSE(HWND hW);
+		if(HACK_CODEC_CHOOSE(GetMainWindow()))
 		{
 			RECORD_RECORDING=TRUE;
 			RECORD_Start(filename);
+		}
+		else 
+		{
+			RECORD_RECORDING=FALSE;
 		}
 		BuildDispMenu(0);
 	}
 }
 
-void CALLBACK GPUstopAvi(bool off)
+void CALLBACK GPUrestartAVINewRes(void)
+{
+	RECORD_Stop();
+	char* N = new char[256];
+	RECORD_Start(N);
+	delete N;
+}
+
+
+void CALLBACK GPUstopAvi(void)
 {
 	if (RECORD_RECORDING)
 	{		
 		RECORD_RECORDING=FALSE;
 		RECORD_Stop();
-		BuildDispMenu(0);
-		if (off)
-			RUN_ONCE = 0;
+		BuildDispMenu(0);		
 	}	
 }
 

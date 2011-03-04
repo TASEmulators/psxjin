@@ -155,7 +155,7 @@ if ( (Movie.startAvi) || (Movie.startWav) ) {
 
 // stop capture?
 if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
-	GPUstopAvi(true);
+	GPUstopAvi();
 	SPUstopWav();
 	Movie.capture = 0;
 }

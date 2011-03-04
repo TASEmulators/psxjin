@@ -136,7 +136,8 @@ void CALLBACK  GPUshowInput(void);
 void CALLBACK  GPUshowAnalog(void);
 void CALLBACK  GPUshowALL(void);
 void CALLBACK  GPUstartAvi(char* filename);
-void CALLBACK  GPUstopAvi(bool);
+void CALLBACK  GPUstopAvi(void);
+void CALLBACK GPUrestartAVINewRes(void);
 void CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
 ////plugin stuff From Shadow
