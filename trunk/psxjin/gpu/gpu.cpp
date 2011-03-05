@@ -141,7 +141,6 @@
 #include "prim.h"
 #include "psemu.h"
 #include "menu.h"
-#include "key.h"
 #include "fps.h"
 
 #include "../plugins.h"
