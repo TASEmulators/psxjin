@@ -72,7 +72,6 @@ void inline execI()
 			iVSyncFlag = 0;
 			PSXjin_LuaFrameBoundary();
 			iJoysToPoll = 2;
-			GPUupdateframe();
 			SysUpdate();
 		}
 		code = PSXM(psxRegs.pc);
