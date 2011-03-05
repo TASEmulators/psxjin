@@ -16,107 +16,8 @@
 	*                                                                         *
 	***************************************************************************/
 
-//*************************************************************************//
-// History of changes:
-//
-// 2008/05/17 - Pete
-// - added GPUvisualVibration and "visual rumble" stuff
-//
-// 2008/02/03 - Pete
-// - added GPUsetframelimit and GPUsetfix ("fake gpu busy states")
-//
-// 2007/11/03 - Pete
-// - new way to create save state picture (Vista)
-//
-// 2004/01/31 - Pete
-// - added zn bits
-//
-// 2003/01/04 - Pete
-// - the odd/even bit hack (CronoCross status screen) is now a special game fix
-//
-// 2003/01/04 - Pete
-// - fixed wrapped y display position offset - Legend of Legaia
-//
-// 2002/11/24 - Pete
-// - added new frameskip func support
-//
-// 2002/11/02 - Farfetch'd & Pete
-// - changed the y display pos handling
-//
-// 2002/10/03 - Farfetch'd & Pete
-// - added all kind of tiny stuff (gpureset, gpugetinfo, dmachain align, polylines...)
-//
-// 2002/10/03 - Pete
-// - fixed gpuwritedatamem & now doing every data processing with it
-//
-// 2002/08/31 - Pete
-// - delayed odd/even toggle for FF8 intro scanlines
-//
-// 2002/08/03 - Pete
-// - "Sprite 1" command count added
-//
-// 2002/08/03 - Pete
-// - handles "screen disable" correctly
-//
-// 2002/07/28 - Pete
-// - changed dmachain handler (monkey hero)
-//
-// 2002/06/15 - Pete
-// - removed dmachain fixes, added dma endless loop detection instead
-//
-// 2002/05/31 - Lewpy
-// - Win95/NT "disable screensaver" fix
-//
-// 2002/05/30 - Pete
-// - dmawrite/read wrap around
-//
-// 2002/05/15 - Pete
-// - Added dmachain "0" check game fix
-//
-// 2002/04/20 - linuzappz
-// - added iFastFwd stuff
-//
-// 2002/02/18 - linuzappz
-// - Added DGA2 support to PIC stuff
-//
-// 2002/02/10 - Pete
-// - Added dmacheck for The Mummy and T'ai Fu
-//
-// 2002/01/13 - linuzappz
-// - Added timing in the GPUdisplayText func
-//
-// 2002/01/06 - lu
-// - Added some #ifdef for the linux configurator
-//
-// 2002/01/05 - Pete
-// - fixed unwanted screen clearing on horizontal centering (causing
-//   flickering in linux version)
-//
-// 2001/12/10 - Pete
-// - fix for Grandia in ChangeDispOffsetsX
-//
-// 2001/12/05 - syo (syo68k@geocities.co.jp)
-// - added disable screen saver for "stop screen saver" option
-//
-// 2001/11/20 - linuzappz
-// - added Soft and About DlgProc calls in GPUconfigure and
-//   GPUabout, for linux
-//
-// 2001/11/09 - Darko Matesic
-// - added recording frame in updateLace and stop recording
-//   in GPUclose (if it is still recording)
-//
-// 2001/10/28 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
-
 #include "stdafx.h"
-
 #include <algorithm>
-
-#ifdef _WINDOWS
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -126,13 +27,9 @@
 #include <png.h>
 #include "win32.h"
 
-#endif
-
 #define _IN_GPU
 
-#ifdef _WINDOWS
 #include "gpu_record.h"
-#endif
 
 #include "externals.h"
 #include "gpu.h"
@@ -144,10 +41,6 @@
 #include "fps.h"
 
 #include "../plugins.h"
-
-//#define SMALLDEBUG
-//#include <dbgout.h>
-
 
 unsigned long dwGPUVersion=0;
 int           iGPUHeight=512;
@@ -167,17 +60,7 @@ const  unsigned char version  = 1;    // do not touch - library for PSEmu 1.x
 const  unsigned char revision = 0;
 const  unsigned char build    = 2;   // increase that with each version
 
-#ifdef _WINDOWS
 static char *libraryName      = "TAS Soft Graphics Plugin";
-#else
-#ifndef _SDL
-static char *libraryName      = "P.E.Op.S. SoftX Driver";
-static char *libraryInfo      = "P.E.Op.S. SoftX Driver V1.18\nCoded by Pete Bernert and the P.E.Op.S. team\n";
-#else
-static char *libraryName      = "P.E.Op.S. SoftSDL Driver";
-static char *libraryInfo      = "P.E.Op.S. SoftSDL Driver V1.18\nCoded by Pete Bernert and the P.E.Op.S. team\n";
-#endif
-#endif
 
 static char *PluginAuthor     = "Pete Bernert and the P.E.Op.S. team";
 
@@ -240,8 +123,6 @@ int               iFakePrimBusy=0;
 int               iRumbleVal=0;
 int               iRumbleTime=0;
 
-#ifdef _WINDOWS
-
 ////////////////////////////////////////////////////////////////////////
 // screensaver stuff: dynamically load kernel32.dll to avoid export dependeny
 ////////////////////////////////////////////////////////////////////////
@@ -284,20 +165,6 @@ BOOL FreeKernel32(void)
 
 	return TRUE;
 }
-#else
-
-// Linux: Stub the functions
-BOOL LoadKernel32(void)
-{
-	return TRUE;
-}
-
-BOOL FreeKernel32(void)
-{
-	return TRUE;
-}
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 // some misc external display funcs
@@ -403,11 +270,7 @@ void DoTextSnapShot(int iNum)
 	char szTxt[256];
 	char * pB;
 
-#ifdef _WINDOWS
 	sprintf(szTxt,"SNAP\\PEOPSSOFT%03d.txt",iNum);
-#else
-	sprintf(szTxt,"%s/peopssoft%03d.txt",getenv("HOME"),iNum);
-#endif
 
 	if ((txtfile=fopen(szTxt,"wb"))==NULL)
 		return;
@@ -420,9 +283,6 @@ void DoTextSnapShot(int iNum)
 	}
 	fclose(txtfile);
 }
-
-////////////////////////////////////////////////////////////////////////
-
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -453,11 +313,8 @@ void makeNormalSnapshotPNG(void)                    // snapshot of current scree
 	do
 	{
 		snapshotnr++;
-#ifdef _WINDOWS
+
 		sprintf(filename,"SNAP\\snap_%03lu.png",snapshotnr);
-#else
-		sprintf(filename,"%s/peopssoft%03ld.png",getenv("HOME"),snapshotnr);
-#endif
 
 		bmpfile=fopen(filename,"rb");
 		if (bmpfile == NULL) break;
@@ -622,11 +479,8 @@ void makeNormalSnapshotBMP(void)                    // snapshot of current scree
 	do
 	{
 		snapshotnr++;
-#ifdef _WINDOWS
+
 		sprintf(filename,"SNAP\\snap_%03lu.bmp",snapshotnr);
-#else
-		sprintf(filename,"%s/peopssoft%03ld.bmp",getenv("HOME"),snapshotnr);
-#endif
 
 		bmpfile=fopen(filename,"rb");
 		if (bmpfile == NULL) break;
@@ -762,11 +616,8 @@ void makeVramSnapshot(void)                    // snapshot of current screen
 	do
 	{
 		snapshotnr++;
-#ifdef _WINDOWS
+
 		sprintf(filename,"SNAP\\snap_%03lu.bmp",snapshotnr);
-#else
-		sprintf(filename,"%s/peopssoft%03ld.bmp",getenv("HOME"),snapshotnr);
-#endif
 
 		bmpfile=fopen(filename,"rb");
 		if (bmpfile == NULL) break;
@@ -841,12 +692,7 @@ void makeFullVramSnapshot(void)                    // snapshot of whole vram
 	do
 	{
 		snapshotnr++;
-#ifdef _WINDOWS
 		sprintf(filename,"SNAP\\PEOPSSOFT%03lu.bmp",snapshotnr);
-#else
-		sprintf(filename,"%s/peopssoft%03ld.bmp",getenv("HOME"),snapshotnr);
-#endif
-
 		bmpfile=fopen(filename,"rb");
 		if (bmpfile == NULL) break;
 		fclose(bmpfile);
@@ -996,7 +842,6 @@ long CALLBACK GPUinit()                                // GPU INIT
 
 void gpu_ReadConfig(void);
 
-#ifdef _WINDOWS
 long CALLBACK GPUopen(HWND hwndGPU)                    // GPU OPEN
 {
 	hWGPU = hwndGPU;                                      // store hwnd
@@ -1020,56 +865,23 @@ long CALLBACK GPUopen(HWND hwndGPU)                    // GPU OPEN
 	return 0;
 }
 
-#else
-
-long GPUopen(unsigned long * disp,char * CapText,char * CfgFile)
-{
-	unsigned long d;
-
-	pCaptionText=CapText;
-
-#ifndef _FPSE
-	pConfigFile=CfgFile;
-#endif
-
-	ReadConfig();                                         // read registry
-
-	InitFPS();
-
-	bIsFirstFrame  = TRUE;                                // we have to init later
-	bDoVSyncUpdate = TRUE;
-
-	d=ulInitDisplay();                                    // setup x
-
-	if (disp) *disp=d;                                    // wanna x pointer? ok
-
-	if (d) return 0;
-	return -1;
-}
-
-#endif
-
 ////////////////////////////////////////////////////////////////////////
 // time to leave...
 ////////////////////////////////////////////////////////////////////////
 
 long CALLBACK GPUclose()                               // GPU CLOSE
 {
-#ifdef _WINDOWS
 	if (RECORD_RECORDING==TRUE)
 	{
 		RECORD_Stop();
 		RECORD_RECORDING=FALSE;
 		BuildDispMenu(0);
 	}
-#endif
 
 	CloseDisplay();                                       // shutdown direct draw
 
-#ifdef _WINDOWS
 	if (iStopSaver)
 		D_SetThreadExecutionState(ES_SYSTEM_REQUIRED|ES_DISPLAY_REQUIRED);
-#endif
 
 	return 0;
 }
@@ -1192,18 +1004,7 @@ void ChangeDispOffsetsX(void)                          // X CENTER
 			PreviousPSXDisplay.Range.x0+=2; //???
 
 			PreviousPSXDisplay.Range.x1+=(short)(lx-l);
-#ifndef _WINDOWS
-			PreviousPSXDisplay.Range.x1-=2; // makes linux stretching easier
-#endif
 		}
-
-#ifndef _WINDOWS
-		// some linux alignment security
-		PreviousPSXDisplay.Range.x0=PreviousPSXDisplay.Range.x0>>1;
-		PreviousPSXDisplay.Range.x0=PreviousPSXDisplay.Range.x0<<1;
-		PreviousPSXDisplay.Range.x1=PreviousPSXDisplay.Range.x1>>1;
-		PreviousPSXDisplay.Range.x1=PreviousPSXDisplay.Range.x1<<1;
-#endif
 
 		DoClearScreenBuffer();
 	}
@@ -1311,7 +1112,6 @@ void updateDisplayIfChanged(void)                      // UPDATE DISPLAY IF CHAN
 
 ////////////////////////////////////////////////////////////////////////
 
-#ifdef _WINDOWS
 void ChangeWindowMode(void)                            // TOGGLE FULLSCREEN - WINDOW
 {
 	GPUclose();
@@ -1320,7 +1120,6 @@ void ChangeWindowMode(void)                            // TOGGLE FULLSCREEN - WI
 	bChangeWinMode=FALSE;
 	bDoVSyncUpdate=TRUE;
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 // gun cursor func: player=0-7, x=0-511, y=0-255
@@ -1379,8 +1178,6 @@ void CALLBACK GPUupdateLace(void)                      // VSYNC
 //				}
 //		}
 
-#ifdef _WINDOWS
-
 	if (RECORD_RECORDING)
 		if (RECORD_WriteFrame()==FALSE)
 		{
@@ -1389,8 +1186,6 @@ void CALLBACK GPUupdateLace(void)                      // VSYNC
 		}
 
 	if (bChangeWinMode) ChangeWindowMode();               // toggle full - window mode
-
-#endif
 
 	bDoVSyncUpdate=FALSE;                                 // vsync done
 }
@@ -2055,15 +1850,9 @@ long CALLBACK GPUgetMode(void)
 
 long CALLBACK GPUconfigure(void)
 {
-#ifdef _WINDOWS
 	HWND hWP=GetActiveWindow();
-
 	DialogBox(hInst,MAKEINTRESOURCE(IDD_CFGSOFT),
 	          hWP,(DLGPROC)SoftDlgProc);
-#else // LINUX
-	SoftDlgProc();
-#endif
-
 	return 0;
 }
 
@@ -2073,7 +1862,6 @@ long CALLBACK GPUconfigure(void)
 
 void SetFixes(void)
 {
-#ifdef _WINDOWS
 	BOOL bOldPerformanceCounter=IsPerformanceCounter;    // store curr timer mode
 
 	if (dwActFixes&0x10)                                 // check fix 0x10
@@ -2082,7 +1870,6 @@ void SetFixes(void)
 
 	if (bOldPerformanceCounter!=IsPerformanceCounter)    // we have change it?
 		InitFPS();                                          // -> init fps again
-#endif
 
 	if (dwActFixes&0x02) sDispWidths[4]=384;
 	else                sDispWidths[4]=368;
@@ -2143,7 +1930,6 @@ long CALLBACK GPUdmaChain(u32* baseAddrL, unsigned long addr)
 // show about dlg
 ////////////////////////////////////////////////////////////////////////
 
-#ifdef _WINDOWS
 BOOL CALLBACK AboutDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -2160,19 +1946,12 @@ BOOL CALLBACK AboutDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	return FALSE;
 }
-#endif
 
 void CALLBACK GPUabout(void)                           // ABOUT
 {
-#ifdef _WINDOWS
 	HWND hWP=GetActiveWindow();                           // to be sure
 	DialogBox(hInst,MAKEINTRESOURCE(IDD_ABOUT),
 	          hWP,(DLGPROC)AboutDlgProc);
-#else // LINUX
-#ifndef _FPSE
-	AboutDlgProc();
-#endif
-#endif
 	return;
 }
 
@@ -2716,7 +2495,6 @@ void PaintPicDot(unsigned char * p,unsigned char c)
 // so you have to use the frontbuffer to get a fully
 // rendered picture
 
-#ifdef _WINDOWS
 void CALLBACK GPUgetScreenPic(unsigned char * pMem)
 {
 	HRESULT ddrval;
@@ -3004,144 +2782,6 @@ void CALLBACK GPUgetScreenPic(unsigned char * pMem)
 	}
 }
 
-#else
-// LINUX version:
-
-#ifdef USE_DGA2
-#include <X11/extensions/xf86dga.h>
-extern XDGADevice *dgaDev;
-#endif
-extern char * Xpixels;
-
-void GPUgetScreenPic(unsigned char * pMem)
-{
-	unsigned short c;
-	unsigned char * pf;
-	int x,y;
-
-	float XS=(float)iResX/128;
-	float YS=(float)iResY/96;
-
-	pf=pMem;
-
-	memset(pMem, 0, 128*96*3);
-
-	if (Xpixels)
-	{
-		unsigned char * ps=(unsigned char *)Xpixels;
-
-		if (iDesktopCol==16)
-		{
-			long lPitch=iResX<<1;
-			unsigned short sx;
-#ifdef USE_DGA2
-			if (!iWindowMode) lPitch+= (dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth) * 2;
-#endif
-			for (y=0;y<96;y++)
-			{
-				for (x=0;x<128;x++)
-				{
-					sx=*((unsigned short *)((ps)+
-					                        (((int)((float)y*YS))*lPitch)+
-					                        ((int)((float)x*XS))*2));
-					*(pf+0)=(sx&0x1f)<<3;
-					*(pf+1)=(sx&0x7e0)>>3;
-					*(pf+2)=(sx&0xf800)>>8;
-					pf+=3;
-				}
-			}
-		}
-		else
-			if (iDesktopCol==15)
-			{
-				long lPitch=iResX<<1;
-				unsigned short sx;
-#ifdef USE_DGA2
-				if (!iWindowMode) lPitch+= (dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth) * 2;
-#endif
-				for (y=0;y<96;y++)
-				{
-					for (x=0;x<128;x++)
-					{
-						sx=*((unsigned short *)((ps)+
-						                        (((int)((float)y*YS))*lPitch)+
-						                        ((int)((float)x*XS))*2));
-						*(pf+0)=(sx&0x1f)<<3;
-						*(pf+1)=(sx&0x3e0)>>2;
-						*(pf+2)=(sx&0x7c00)>>7;
-						pf+=3;
-					}
-				}
-			}
-			else
-			{
-				long lPitch=iResX<<2;
-				unsigned long sx;
-#ifdef USE_DGA2
-				if (!iWindowMode) lPitch+= (dgaDev->mode.imageWidth - dgaDev->mode.viewportWidth) * 4;
-#endif
-				for (y=0;y<96;y++)
-				{
-					for (x=0;x<128;x++)
-					{
-						sx=*((unsigned long *)((ps)+
-						                       (((int)((float)y*YS))*lPitch)+
-						                       ((int)((float)x*XS))*4));
-						*(pf+0)=(sx&0xff);
-						*(pf+1)=(sx&0xff00)>>8;
-						*(pf+2)=(sx&0xff0000)>>16;
-						pf+=3;
-					}
-				}
-			}
-	}
-
-	/////////////////////////////////////////////////////////////////////
-	// generic number/border painter
-
-	pf=pMem+(103*3);                                      // offset to number rect
-
-	for (y=0;y<20;y++)                                    // loop the number rect pixel
-	{
-		for (x=0;x<6;x++)
-		{
-			c=cFont[lSelectedSlot][x+y*6];                    // get 4 char dot infos at once (number depends on selected slot)
-			PaintPicDot(pf,(c&0xc0)>>6);
-			pf+=3;                // paint the dots into the rect
-			PaintPicDot(pf,(c&0x30)>>4);
-			pf+=3;
-			PaintPicDot(pf,(c&0x0c)>>2);
-			pf+=3;
-			PaintPicDot(pf,(c&0x03));
-			pf+=3;
-		}
-		pf+=104*3;                                          // next rect y line
-	}
-
-	pf=pMem;                                              // ptr to first pos in 128x96 pic
-	for (x=0;x<128;x++)                                   // loop top/bottom line
-	{
-		*(pf+(95*128*3))=0x00;
-		*pf++=0x00;
-		*(pf+(95*128*3))=0x00;
-		*pf++=0x00;                   // paint it red
-		*(pf+(95*128*3))=0xff;
-		*pf++=0xff;
-	}
-	pf=pMem;                                              // ptr to first pos
-	for (y=0;y<96;y++)                                    // loop left/right line
-	{
-		*(pf+(127*3))=0x00;
-		*pf++=0x00;
-		*(pf+(127*3))=0x00;
-		*pf++=0x00;                      // paint it red
-		*(pf+(127*3))=0xff;
-		*pf++=0xff;
-		pf+=127*3;                                          // offset to next line
-	}
-}
-#endif
-
 ////////////////////////////////////////////////////////////////////////
 // func will be called with 128x96x3 BGR data.
 // the plugin has to store the data and display
@@ -3328,8 +2968,6 @@ void CALLBACK GPUsetspeedmode(unsigned long newSpeedMode)
 
 ////////////////////////////////////////////////////////////////////////
 
-#ifdef _WINDOWS
-
 void CALLBACK GPUvisualVibration(unsigned long iSmall, unsigned long iBig)
 {
 	int iVibVal;
@@ -3345,10 +2983,6 @@ void CALLBACK GPUvisualVibration(unsigned long iSmall, unsigned long iBig)
 
 	iRumbleTime=15;                                       // let the rumble last 16 buffer swaps
 }
-
-#endif
-
-////////////////////////////////////////////////////////////////////////
 
 void CALLBACK GPUsetframecounter(unsigned long newCurrentFrame,unsigned long newTotalFrames)
 {
@@ -3392,7 +3026,6 @@ void CALLBACK GPUshowframecounter()
 	}
 }
 
-
 void CALLBACK GPUshowInput()
 {
 	if (ulKeybits&KEY_SHOWINPUT)
@@ -3425,8 +3058,6 @@ void CALLBACK GPUshowAnalog()
 	}
 }
 
-
-
 void CALLBACK GPUshowALL()
 {	
 	if (ulKeybits&KEY_SHOWFPS)
@@ -3442,7 +3073,6 @@ void CALLBACK GPUshowALL()
 		BuildDispMenu(0);
 	}
 }
-
 
 void CALLBACK GPUsetcurrentmode(char newModeFlags)
 {

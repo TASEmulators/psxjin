@@ -27,9 +27,9 @@
 #include "PsxCommon.h"
 #include "ix86.h"
 #include "../movie.h"
-#ifdef WIN32
+
 #include "Win32.h"
-#endif
+
 
 #
 
@@ -393,15 +393,12 @@ static int recInit() {
 		SysMessage("Error allocating memory"); return -1;
 	}
 
-	#ifdef WIN32
 	{
 		DWORD ass;
 		VirtualProtect(recMem,RECMEM_SIZE,PAGE_EXECUTE_READWRITE,&ass);
 		//VirtualProtect(recRAM,0x200000,PAGE_EXECUTE_READWRITE,&ass);
 		//VirtualProtect(recROM,0x080000,PAGE_EXECUTE_READWRITE,&ass);
 	}
-	#endif
-
 
 	for (i=0; i<0x80; i++) psxRecLUT[i + 0x0000] = (u32)&recRAM[(i & 0x1f) << 16];
 	memcpy(psxRecLUT + 0x8000, psxRecLUT, 0x80 * 4);
@@ -449,10 +446,8 @@ __inline static void execute() {
 		if (iVSyncFlag) {
 			if (iGpuHasUpdated || iFrameAdvance || iDoPauseAtVSync) {
 				if (iSaveStateTo) {
-					#ifdef WIN32
 						WIN32_SaveState(iSaveStateTo);
 						iSaveStateTo = 0;
-					#endif
 				}
 				if (iFrameAdvance || iDoPauseAtVSync) {
 					iPause = 1;					
@@ -492,14 +487,11 @@ __inline static void execute() {
 		GPUupdateframe();
 		SysUpdate();
 
-		#ifdef WIN32
 		if (iSaveStateTo) {
 			WIN32_SaveState(iSaveStateTo);
 			iSaveStateTo = 0;
 		}
-		#endif
 	}
-	#ifdef WIN32
 	if (iLoadStateFrom) {
 		WIN32_LoadState(iLoadStateFrom);
 		iLoadStateFrom = 0;
@@ -515,7 +507,6 @@ __inline static void execute() {
 		ClosePlugins();
 		SysRunGui();
 	}
-	#endif
 }
 
 static void recExecute() {

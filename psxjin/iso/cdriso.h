@@ -5,11 +5,6 @@
 
 extern std::string CDR_iso_fileToOpen;
 
-#ifdef __LINUX__
-typedef void *HWND;
-#define CALLBACK
-#endif
-
 #define VERBOSE 1
 
 extern char IsoFile[256];
