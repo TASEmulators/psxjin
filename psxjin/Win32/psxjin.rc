@@ -614,14 +614,6 @@ BEGIN
     CTEXT           "Note: The NetPlay Plugin Directory should be the same as the other Plugins.",IDC_NETPLAYNOTE,10,50,145,19
 END
 
-IDD_CONNECT DIALOG  0, 0, 112, 31
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Connecting..."
-FONT 8, "MS Sans Serif"
-BEGIN
-    LTEXT           "Please wait while connecting... /",IDC_CONNECTSTR,5,10,104,8
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -645,14 +637,6 @@ BEGIN
         RIGHTMARGIN, 158
         TOPMARGIN, 7
         BOTTOMMARGIN, 88
-    END
-
-    IDD_CONNECT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 105
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 24
     END
 END
 #endif    // APSTUDIO_INVOKED

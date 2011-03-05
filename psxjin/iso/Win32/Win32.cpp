@@ -76,12 +76,6 @@ void CfgOpenFile() {
 	}
 }
 
-void UpdZmode() {
-	if (ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_METHOD)) == 1)
-		 Zmode = 1;
-	else Zmode = 2;
-}
-
 void SysUpdate();
 
 //void SysUpdate() {
@@ -92,15 +86,3 @@ void SysUpdate();
 //		DispatchMessage(&msg);
 //	}
 //}
-
-
-
-long CDRconfigure() {
-/*
-    DialogBox(hInst,
-              MAKEINTRESOURCE(IDD_ISOCONFIG),
-              GetActiveWindow(),  
-              (DLGPROC)IsoConfigureDlgProc);
-*/
-	return 0;
-}
