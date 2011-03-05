@@ -456,6 +456,8 @@ static int StartRecord()
 	epadd.leftJoyY = 128;
 	epadd.rightJoyX = 128;
 	epadd.rightJoyY = 128;
+	epadd.moveX = 0;
+	epadd.moveY = 0;
 	for (int i = 0; i < 4; i++)
 	{
 		memcpy(&Movie.lastPads1[i], &epadd, sizeof(epadd));
@@ -580,9 +582,15 @@ inline static uint16 JoyRead16()
 
 void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 {
+	pad->moveX = 0;
+	pad->moveY = 0;
+	pad->leftJoyX = 128;
+	pad->leftJoyY = 128;
+	pad->rightJoyX = 128;
+	pad->rightJoyY = 128;
+	pad->buttonStatus = 0;	
 	if (Movie.isText)
-	{
-	pad->buttonStatus = 0;
+	{	
 	switch (type) {
 		case PSE_PAD_TYPE_MOUSE:
 			//LR 000 000|
@@ -887,7 +895,7 @@ void MOV_Convert()
 }
 
 void MOV_WriteJoy(PadDataS *pad,unsigned char type)
-{
+{	
 	if (Movie.isText)
 	{
 		char temp[1024];	

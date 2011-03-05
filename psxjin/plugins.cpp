@@ -512,8 +512,16 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 	epadd.leftJoyY = 128;
 	epadd.rightJoyX = 128;
 	epadd.rightJoyY = 128;	
-	epadd.controllerType = Movie.padType1;
+	epadd.moveX = 0;
+	epadd.moveY = 0;
+	epadd.controllerType = Movie.padType1;		
+
 	PAD1_readPort1(&padd);	
+	if (padd.controllerType != PSE_PAD_TYPE_MOUSE)
+	{
+		padd.moveX = 0;
+		padd.moveY = 0;
+	}
 	if (Movie.mode != 0)	
 		padd.controllerType = Movie.padType1;
 	memcpy(&PaddInput,&padd,sizeof(padd));
@@ -700,6 +708,8 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	epadd.leftJoyY = 128;
 	epadd.rightJoyX = 128;
 	epadd.rightJoyY = 128;
+	epadd.moveX = 0;
+	epadd.moveY = 0;
 	epadd.controllerType = Movie.padType2;
 	if (Movie.MultiTrack && ((Movie.RecordPlayer >= Movie.P2_Start) || (Movie.RecordPlayer == Movie.NumPlayers+2)))
 	{
@@ -709,6 +719,11 @@ unsigned char CALLBACK PAD2__startPoll(int pad) {
 	else
 	{
 		PAD2_readPort2(&padd);
+	}
+	if (padd.controllerType != PSE_PAD_TYPE_MOUSE)
+	{
+		padd.moveX = 0;
+		padd.moveY = 0;
 	}
 	if (Config.EnableAutoFire) 
 	{
