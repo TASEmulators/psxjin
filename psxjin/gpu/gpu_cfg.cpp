@@ -730,7 +730,6 @@ void gpu_ReadConfig(void)
 	iDebugMode = GetPrivateProfileInt("GPU", "iDebugMode", 0, Conf_File);
 	bKkaptureMode = GetPrivateProfileInt("GPU", "bKkaptureMode", 0, Conf_File);
 	
-	GetPrivateProfileString("GPU", "GPUKeys", szKeyDefaults, &szGPUKeys[0], 11, Conf_File);	
 	GetPrivateProfileString("GPU", "DeviceName", 0, &szDevName[0], 128, Conf_File);	
 
 	//Recording options
@@ -832,7 +831,6 @@ void gpu_WriteConfig(void)
 	sprintf(Str_Tmp, "%d", bKkaptureMode);
 	WritePrivateProfileString("GPU", "bKkaptureMode", Str_Tmp, Conf_File);
 	
-	WritePrivateProfileString("GPU", "GPUKeys", szGPUKeys, Conf_File);
 	WritePrivateProfileString("GPU", "DeviceName", szDevName, Conf_File);
 //*****
 //		WritePrivateProfileString("GPU", "guiDev", &guiDev, Conf_File);

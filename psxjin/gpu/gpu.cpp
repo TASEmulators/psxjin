@@ -155,6 +155,7 @@ int           iGPUHeight=512;
 int           iGPUHeightMask=511;
 int           GlobalTextIL=0;
 int           iTileCheat=0;
+unsigned long          ulKeybits=0;
 
 void (*fpPSXjin_LuaGui)(void *s, int width, int height, int bpp, int pitch);
 int iMaximumSpeed=0;
@@ -1001,8 +1002,6 @@ long CALLBACK GPUopen(HWND hwndGPU)                    // GPU OPEN
 {
 	hWGPU = hwndGPU;                                      // store hwnd
 
-	SetKeyHandler();                                      // sub-class window
-
 	if (bChangeWinMode) ReadWinSizeConfig();              // alt+enter toggle?
 	else                                                  // or first time startup?
 	{
@@ -1065,8 +1064,6 @@ long CALLBACK GPUclose()                               // GPU CLOSE
 		BuildDispMenu(0);
 	}
 #endif
-
-	ReleaseKeyHandler();                                  // de-subclass window
 
 	CloseDisplay();                                       // shutdown direct draw
 

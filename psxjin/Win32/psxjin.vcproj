@@ -1212,14 +1212,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gpu\key.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\gpu\key.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gpu\macros.inc"
 				>
 			</File>
