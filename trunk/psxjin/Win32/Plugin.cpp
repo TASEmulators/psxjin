@@ -835,9 +835,9 @@ bool OpenPlugins(HWND hWnd) {
 	ret = SPUopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
 	ret = PAD1_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); return false; }
+	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); }
 	ret = PAD2_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); return false; }
+	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); }
 
 	SetCurrentDirectory(PSXjinDir);
 	//ShowCursor(FALSE);
@@ -868,8 +868,10 @@ void ResetPlugins() {
 	CDRshutdown();
 	GPUshutdown();
 	SPUshutdown();
-	PAD1_shutdown();
-	PAD2_shutdown();
+	//PAD1_shutdown();
+	//PAD2_shutdown();
+	
+
 
 	ret = CDRinit();
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }
