@@ -168,6 +168,7 @@ extern int NetOpened;
 typedef struct
 {
 	unsigned char controllerType;                           //controler type
+	unsigned char padding;
 	unsigned short buttonStatus;                            //normal buttons, all types use it
 	// next values are in range 0-255 where 128 is center
 	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY; //for analog
