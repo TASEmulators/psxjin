@@ -561,25 +561,36 @@ int LoadState(char *file) {
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
+	pos = ftell(f);
 	gpufP->extraData = malloc(gpufP->extraDataSize);
 	gzread(f, gpufP->extraData, gpufP->extraDataSize);
+	pos = ftell(f);
 	GPUfreeze(0, gpufP);
+	pos = ftell(f);
 	free(gpufP->extraData);
 	free(gpufP);
 
 	sioFreeze(f, 0);
+	pos = ftell(f);
 	cdrFreeze(f, 0);
+	pos = ftell(f);
 	psxHwFreeze(f, 0);
+	pos = ftell(f);
 	CDRisoFreeze(f,0);
+	pos = ftell(f);
 	psxRcntFreeze(f, 0);
+	pos = ftell(f);
 	mdecFreeze(f, 0);
+	pos = ftell(f);
 	MovieFreeze(f, 0);
+	pos = ftell(f);
 
 	// spu
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
 	memfile.truncate(Size);
 	gzread(f, memfile.buf(), Size);
+	pos = ftell(f);
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
 
