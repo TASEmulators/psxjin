@@ -459,8 +459,7 @@ __inline static void execute() {
 				}
 				iDoPauseAtVSync = 0;
 				iFrameAdvance = 0;
-				iGpuHasUpdated = 0;
-				GPUupdateframe();
+				iGpuHasUpdated = 0;				
 				SysUpdate();
 			}
 			iVSyncFlag = 0;
