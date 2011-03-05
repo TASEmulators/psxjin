@@ -452,6 +452,7 @@ static int StartRecord()
 	Movie.bytesPerFrame = SetBytesPerFrame(Movie);
 	PadDataS epadd; //empty pad;
 	epadd.buttonStatus = 0xffff;
+	epadd.padding = 0;
 	epadd.leftJoyX = 128;
 	epadd.leftJoyY = 128;
 	epadd.rightJoyX = 128;
@@ -582,6 +583,7 @@ inline static uint16 JoyRead16()
 
 void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 {
+	pad->padding = 0;
 	pad->moveX = 0;
 	pad->moveY = 0;
 	pad->leftJoyX = 128;
