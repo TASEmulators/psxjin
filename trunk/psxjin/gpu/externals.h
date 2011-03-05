@@ -324,9 +324,7 @@ extern BOOL  bKkaptureMode;
 
 extern unsigned long  ulKeybits;
 
-#ifdef _WINDOWS
-extern char           szGPUKeys[];
-#endif
+
 
 #endif
 
