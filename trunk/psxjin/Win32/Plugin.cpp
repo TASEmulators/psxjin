@@ -842,6 +842,9 @@ bool OpenPlugins(HWND hWnd) {
 	SetCurrentDirectory(PSXjinDir);
 	//ShowCursor(FALSE);
 	GPUsendFpLuaGui(PSXjin_LuaGui);
+
+	//it is important to call this! plugins expect it!
+	ResetPlugins();
 	return true;
 }
 
