@@ -19,11 +19,10 @@
 #include <string.h>
 
 #include "PsxCommon.h"
-#ifdef WIN32
 #include "Win32/Win32.h"
 #include "Win32/ram_search.h"
 #include "Win32/ramwatch.h"
-#endif
+
 
 // global variables
 psxCounter psxCounters[5];
@@ -258,11 +257,9 @@ iVSyncFlag = 1;
 		modeFlags |= MODE_FLAG_REPLAY;
 	GPUsetcurrentmode(modeFlags);
 
-	// update WIN32 tools
-#ifdef WIN32
+	//Update tools
 	PSXjinApplyCheats();
 	UpdateToolWindows();
-#endif
 
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 

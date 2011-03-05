@@ -116,8 +116,6 @@ typedef struct PSXRECTTAG
 	short y1;
 } PSXRect_t;
 
-#ifdef _WINDOWS
-
 typedef struct SDXTAG
 {
 	LPDIRECTDRAW                   DD;
@@ -128,31 +126,6 @@ typedef struct SDXTAG
 	LPDIRECTDRAWSURFACE            DDSScreenPic;
 	HWND                           hWnd;
 } sDX;
-
-#else
-// linux defines for some windows stuff
-
-#define FALSE 0
-#define TRUE 1
-#define BOOL unsigned short
-#define LOWORD(l)           ((unsigned short)(l))
-#define HIWORD(l)           ((unsigned short)(((unsigned long)(l) >> 16) & 0xFFFF))
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#define DWORD unsigned long
-#define __int64 long long int
-
-typedef struct RECTTAG
-{
-	int left;
-	int top;
-	int right;
-	int bottom;
-}RECT;
-
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
 
 typedef struct TWINTAG
 {
@@ -181,11 +154,7 @@ typedef struct PSXDISPLAYTAG
 
 } PSXDisplay_t;
 
-/////////////////////////////////////////////////////////////////////////////
-
-#ifdef _WINDOWS
 extern HINSTANCE hInst;
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -193,17 +162,12 @@ extern HINSTANCE hInst;
 
 #ifndef _IN_DRAW
 
-#ifdef _WINDOWS
 extern sDX            DX;
 extern HWND           hWGPU;
 extern GUID           guiDev;
 extern int            iRefreshRate;
 extern BOOL           bVsync;
 extern BOOL           bVsync_Key;
-#else
-extern char *         pCaptionText;
-#endif
-
 extern int            iResX;
 extern int            iResY;
 extern long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP;
@@ -211,7 +175,6 @@ extern long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
 extern short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;
 extern long           lLowerpart;
 extern BOOL           bIsFirstFrame;
-//extern int            iWinSize;
 extern BOOL           bCheckMask;
 extern unsigned short sSetMask;
 extern unsigned long  lSetMask;
@@ -230,10 +193,8 @@ extern int            iFVDisplay;
 extern PSXPoint_t     ptCursorPoint[];
 extern unsigned short usCursorActive;
 
-#ifdef _WINDOWS
 extern int            iSysMemory;
 extern int            iFPSEInterface;
-#endif
 
 #endif
 
@@ -309,12 +270,10 @@ extern int            iRumbleTime;
 
 extern unsigned long dwCoreFlags;
 
-#ifdef _WINDOWS
 extern HFONT hGFont;
 extern int   iMPos;
 extern BOOL  bTransparent;
 extern BOOL  bKkaptureMode;
-#endif
 
 #endif
 
@@ -340,10 +299,8 @@ extern int            iFrameLimit;
 extern float          fFrameRateHz;
 extern float          fps_skip;
 extern float          fps_cur;
-#ifdef _WINDOWS
 extern BOOL           IsPerformanceCounter;
 extern int			  iStopSaver;
-#endif
 extern BOOL           bSSSPSXLimit;
 
 #endif
