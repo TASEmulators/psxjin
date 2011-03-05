@@ -122,10 +122,9 @@ void psxUpdateVSyncRateEnd() {
 	if (Config.VSyncWA) psxCounters[3].rate/= 2;
 }
 
+extern int iVSyncFlag;      //has a VSync already occured? (we can only save just after a VSync+iGpuHasUpdated)
 void psxRcntUpdate() {
-	PadDataS paddtemp;
-	unsigned long buttonToSend;
-	char modeFlags;
+
 
 	if ((psxRegs.cycle - psxCounters[3].sCycle) >= psxCounters[3].Cycle) {
 		if (psxCounters[3].mode & 0x10000) { // VSync End (22 hsyncs)
@@ -133,7 +132,7 @@ void psxRcntUpdate() {
 				psxUpdateVSyncRate();
 				psxRcntUpd(3);
 				GPUupdateLace(); // updateGPU
-				SysUpdate();
+				//SysUpdate();
 	#ifdef GTE_LOG
 				GTE_LOG("VSync\n");
 	#endif
@@ -142,127 +141,129 @@ void psxRcntUpdate() {
 // raise VSync flag
 iVSyncFlag = 1;
 
-// start capture?
-if ( (Movie.startAvi) || (Movie.startWav) ) {
-	if (Movie.startAvi)
-		GPUstartAvi(Movie.aviFilename);
-	if (Movie.startWav)
-		SPUstartWav(Movie.wavFilename);
-	Movie.startAvi = 0;
-	Movie.startWav = 0;
-	Movie.capture = 1;
-}
+	PadDataS paddtemp;
+	unsigned long buttonToSend;
+	char modeFlags;
 
-// stop capture?
-if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) ) {
-	GPUstopAvi();
-	SPUstopWav();
-	Movie.capture = 0;
-}
+	Movie.currentFrame++;
+	if (Movie.currentFrame > Movie.MaxRecFrames) Movie.MaxRecFrames = Movie.currentFrame;
 
-Movie.currentFrame++;
-if (Movie.currentFrame > Movie.MaxRecFrames) Movie.MaxRecFrames = Movie.currentFrame;
+	// update OSD information
+	GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
 
-// update OSD information
-GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
-
-// handle movie end while in replay mode
-if (Movie.mode == MOVIEMODE_PLAY) {
-	// pause at last movie frame
-	if (Movie.currentFrame==Movie.totalFrames && Config.PauseAfterPlayback)
-		iPause = 1;
-	// stop if we're beyond last frame
-	if (Movie.currentFrame>Movie.totalFrames) {
-		GPUdisplayText("*PSXjin*: Movie End");
-		MOV_StopMovie();
-	}
-}
-
-// write/read joypad information for this frame
-if (iJoysToPoll == 2) { //if no joypad has been poll for this frame
-	if (!Movie.Port1_Mtap)
+	// handle movie end while in replay mode
+	if (Movie.mode == MOVIEMODE_PLAY) 
 	{
-		if (Movie.mode == MOVIEMODE_RECORD) {		
-			MOV_WriteJoy(&Movie.lastPads1[0],Movie.padType1);		
+		// pause at last movie frame
+		if (Movie.currentFrame==Movie.totalFrames && Config.PauseAfterPlayback)
+			iPause = 1;
+		// stop if we're beyond last frame
+		if (Movie.currentFrame>Movie.totalFrames)
+		{
+			GPUdisplayText("*PSXjin*: Movie End");
+			MOV_StopMovie();
 		}
-			else if (Movie.mode == MOVIEMODE_PLAY) {
+	}
+
+
+	// write/read joypad information for this frame
+	if (iJoysToPoll == 2) //if no joypad has been poll for this frame
+	{
+		if (!Movie.Port1_Mtap)
+		{
+			if (Movie.mode == MOVIEMODE_RECORD)
+			{		
+				MOV_WriteJoy(&Movie.lastPads1[0],Movie.padType1);		
+			}
+			else if (Movie.mode == MOVIEMODE_PLAY)
+			{
 				MOV_ReadJoy(&paddtemp,Movie.padType1);		
-		}
-	} else {
-		for (int i = 0; i < 4; i++)
-		{
-			if (Movie.mode == MOVIEMODE_RECORD) {		
-				MOV_WriteJoy(&Movie.lastPads1[i],Movie.padType1);		
 			}
-			else if (Movie.mode == MOVIEMODE_PLAY) {
+		}
+		else
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				if (Movie.mode == MOVIEMODE_RECORD)
+				{		
+					MOV_WriteJoy(&Movie.lastPads1[i],Movie.padType1);		
+				}
+				else if (Movie.mode == MOVIEMODE_PLAY)
+				{
 					MOV_ReadJoy(&paddtemp,Movie.padType1);		
-			}	
-		}
-	}
-	if (!Movie.Port2_Mtap)
-	{
-		if (Movie.mode == MOVIEMODE_RECORD) {		
-			MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);		
-		}
-			else if (Movie.mode == MOVIEMODE_PLAY) {
-				MOV_ReadJoy(&paddtemp,Movie.padType2);		
-		}
-	} else {
-		for (int i = 0; i < 4; i++)
-		{
-			if (Movie.mode == MOVIEMODE_RECORD) {		
-				MOV_WriteJoy(&Movie.lastPads2[i],Movie.padType2);		
+				}	
 			}
-			else if (Movie.mode == MOVIEMODE_PLAY) {
-					MOV_ReadJoy(&paddtemp,Movie.padType2);		
-			}	
 		}
+		if (!Movie.Port2_Mtap)
+		{
+			if (Movie.mode == MOVIEMODE_RECORD)
+			{		
+				MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);		
+			}
+			else if (Movie.mode == MOVIEMODE_PLAY)
+			{
+				MOV_ReadJoy(&paddtemp,Movie.padType2);		
+			}
+		}
+		else
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				if (Movie.mode == MOVIEMODE_RECORD)
+				{		
+					MOV_WriteJoy(&Movie.lastPads2[i],Movie.padType2);		
+				}
+				else if (Movie.mode == MOVIEMODE_PLAY)
+				{
+					MOV_ReadJoy(&paddtemp,Movie.padType2);		
+				}	
+			}
+		}
+		Movie.lagCounter++;
+		GPUsetlagcounter(Movie.lagCounter);
 	}
-	Movie.lagCounter++;
-	GPUsetlagcounter(Movie.lagCounter);
-}
-else if (iJoysToPoll == 1) { //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
-	printf("CATASTROPHIC FAILURE: CONTACT DARKKOBOLD");
-	if (Movie.mode == MOVIEMODE_RECORD)		
-		MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);
+	else if (iJoysToPoll == 1)
+	{ //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
+		printf("CATASTROPHIC FAILURE: CONTACT DARKKOBOLD");
+		if (Movie.mode == MOVIEMODE_RECORD)		
+			MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);
+		else if (Movie.mode == MOVIEMODE_PLAY)
+			MOV_ReadJoy(&paddtemp,Movie.padType2);
+	}
+
+	// write/read control byte for this frame
+	if (Movie.mode == MOVIEMODE_RECORD)	
+		MOV_WriteControl();
 	else if (Movie.mode == MOVIEMODE_PLAY)
-		MOV_ReadJoy(&paddtemp,Movie.padType2);
-}
-	
-// write/read control byte for this frame
-if (Movie.mode == MOVIEMODE_RECORD)	
-	MOV_WriteControl();
-else if (Movie.mode == MOVIEMODE_PLAY)
+		MOV_ReadControl();
 
-	MOV_ReadControl();
+	MOV_ProcessControlFlags();
 
-MOV_ProcessControlFlags();
+	// write file once in a while to prevent data loss
+	if ((Movie.mode == MOVIEMODE_RECORD) && (Movie.currentFrame%1800 == 0))
+		MOV_WriteMovieFile();
 
-// write file once in a while to prevent data loss
-if ((Movie.mode == MOVIEMODE_RECORD) && (Movie.currentFrame%1800 == 0))
-	MOV_WriteMovieFile();
+	buttonToSend = 0;
+	buttonToSend = Movie.lastPads1[0].buttonStatus;
+	buttonToSend = (buttonToSend ^ (Movie.lastPads2[0].buttonStatus << 16));
+	GPUinputdisplay(buttonToSend);
 
-buttonToSend = 0;
-buttonToSend = Movie.lastPads1[0].buttonStatus;
-buttonToSend = (buttonToSend ^ (Movie.lastPads2[0].buttonStatus << 16));
-GPUinputdisplay(buttonToSend);
+	modeFlags = 0;
+	if (iPause)
+		modeFlags |= MODE_FLAG_PAUSED;
+	if (Movie.mode == MOVIEMODE_RECORD)
+		modeFlags |= MODE_FLAG_RECORD;
+	if (Movie.mode == MOVIEMODE_PLAY)
+		modeFlags |= MODE_FLAG_REPLAY;
+	GPUsetcurrentmode(modeFlags);
 
-modeFlags = 0;
-if (iPause)
-	modeFlags |= MODE_FLAG_PAUSED;
-if (Movie.mode == MOVIEMODE_RECORD)
-	modeFlags |= MODE_FLAG_RECORD;
-if (Movie.mode == MOVIEMODE_PLAY)
-	modeFlags |= MODE_FLAG_REPLAY;
-GPUsetcurrentmode(modeFlags);
-
-// update WIN32 tools
+	// update WIN32 tools
 #ifdef WIN32
 	PSXjinApplyCheats();
 	UpdateToolWindows();
 #endif
 
-CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
+	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 
 					/* movie stuff end */
 		} else { // VSync Start (240 hsyncs) 
