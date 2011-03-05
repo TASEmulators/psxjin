@@ -381,10 +381,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\memsearch.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\memView.cpp"
 				>
 			</File>

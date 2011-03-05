@@ -340,8 +340,6 @@ int main(int argc, char **argv) {
 
 	CreateMainWindow(SW_SHOW);
 
-	PSXjinInitCheatData();
-
 	RecentCDs.GetRecentItemsFromIni(Config.Conf_File, "General");
 	RecentMovies.GetRecentItemsFromIni(Config.Conf_File, "General");
 	RecentLua.GetRecentItemsFromIni(Config.Conf_File, "General");
