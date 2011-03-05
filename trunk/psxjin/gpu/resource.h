@@ -14,7 +14,6 @@
 #define IDD_GPUKEYS                     138
 #define IDD_GPURECORDING                139
 #define IDC_CURSOR1                     142
-#define IDD_CFGDLG                      500
 #define IDD_CFGSOFT                     501
 #define IDC_CLIPBOARD                   1040
 #define IDC_CLPEDIT                     1041
