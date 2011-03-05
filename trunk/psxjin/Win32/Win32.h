@@ -94,7 +94,6 @@ int MHkeysListMake(int bBuild);
 
 // cheats
 void CreateCheatEditor();
-void PSXjinInitCheatData();
 void MemSearchCommand(int command);
 
 void WIN32_LoadState(int newState);
