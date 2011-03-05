@@ -534,19 +534,26 @@ int LoadState(char *file) {
 	f = fopen(file, "rb");
 	if (f == NULL) return -1;
 
+	long pos;
+
 	psxCpu->Reset();
 
 	gzread(f, header, 32);
-
+	pos = ftell(f);
 	if (strncmp("STv3 PSXjin", header, 9)) { fclose(f); return -1; }
-
+	pos = ftell(f);
 	gzseek(f, 128*96*3, SEEK_CUR);
-
+	pos = ftell(f);
 	gzread(f, psxM, 0x00200000);
+	pos = ftell(f);
 	gzread(f, psxP, 0x00010000);
+	pos = ftell(f);
 	gzread(f, psxR, 0x00080000);
+	pos = ftell(f);
 	gzread(f, psxH, 0x00010000);
+	pos = ftell(f);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
+	pos = ftell(f);
 
 	if (Config.HLE)
 		psxBiosFreeze(0);
