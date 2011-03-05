@@ -325,10 +325,6 @@ void ConfigureSPU(HWND hW) {
 	SPUconfigure();
 }
 
-void ConfigureCDR(HWND hW) {
-	CDRconfigure();
-}
-
 void ConfigurePAD1(HWND hW) {
 	ConfPlugin(PADconfigure, IDC_LISTPAD1, "PADconfigure");
 }
@@ -434,9 +430,6 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 			switch(LOWORD(wParam)) {
 				case IDC_CONFIGGPU:  ConfigureGPU(hW); return TRUE;
        			case IDC_CONFIGSPU:  ConfigureSPU(hW); return TRUE;
-       			case IDC_CONFIGCDR:  
-					ConfigureCDR(hW); 
-					return TRUE;
        			case IDC_CONFIGPAD1: ConfigurePAD1(hW); return TRUE;
        			case IDC_CONFIGPAD2: ConfigurePAD2(hW); return TRUE;
 				case IDC_TESTPAD1:   TestPAD1(hW);  return TRUE;

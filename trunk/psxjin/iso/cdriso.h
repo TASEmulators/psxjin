@@ -47,7 +47,6 @@ long CDRgetTN(unsigned char *);
 long CDRgetTD(unsigned char , unsigned char *);
 long CDRreadTrack(unsigned char *);
 unsigned char * CDRgetBuffer(void);
-long CDRconfigure(void);
 long CDRtest(void);
 void CDRabout(void);
 long CDRplay(unsigned char *);

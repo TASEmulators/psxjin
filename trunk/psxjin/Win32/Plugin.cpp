@@ -783,38 +783,6 @@ void PADhandleKey(int key) {
 	}
 }
 
-char charsTable[4] = { '|', '/', '-', '\\' };
-
-BOOL CALLBACK ConnectDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	char str[256];
-	static int waitState;
-
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			SetWindowText(hW, _("Connecting..."));
-
-			sprintf(str, _("Please wait while connecting... %c\n"), charsTable[waitState]);
-			Static_SetText(GetDlgItem(hW, IDC_CONNECTSTR), str);
-			SetTimer(hW, 0, 100, NULL);
-			return TRUE;
-
-		case WM_TIMER:
-			if (++waitState == 4) waitState = 0;
-			sprintf(str, _("Please wait while connecting... %c\n"), charsTable[waitState]);
-			Static_SetText(GetDlgItem(hW, IDC_CONNECTSTR), str);
-			return TRUE;
-
-/*		case WM_COMMAND:
-			switch (LOWORD(wParam)) {
-       			case IDCANCEL:
-					WaitCancel = 1;
-					return TRUE;
-			}*/
-	}
-
-	return FALSE;
-}
-
 long CALLBACK GPUopen(HWND hwndGPU);
 bool OpenPlugins(HWND hWnd) {
 	int ret;

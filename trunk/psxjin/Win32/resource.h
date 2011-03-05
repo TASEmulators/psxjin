@@ -12,7 +12,6 @@
 #define IDD_CPUCONF                     105
 #define IDD_MEM_VIEW                    106
 #define IDD_NETPLAY                     108
-#define IDD_CONNECT                     109
 #define IDD_REPLAYINP                   110
 #define IDD_RECORDINP                   111
 #define IDD_CFGDLG                      112
@@ -104,7 +103,6 @@
 #define IDC_SYSCMCDS                    1027
 #define IDC_ASMCHECK14                  1028
 #define IDC_LIST2                       1028
-#define IDC_CONNECTSTR                  1028
 #define IDC_ASMCHECK15                  1029
 #define IDC_PSXjin_ABOUT_AUTHORS        1029
 #define IDC_ASMCHECK16                  1030
