@@ -919,8 +919,60 @@ long CALLBACK GPUinit()                                // GPU INIT
 	PreviousPSXDisplay.DisplayModeNew.y=0;
 	PSXDisplay.Double=1;
 	lGPUdataRet=0x400;
+	
+	//05-mar-2010
+	lLowerpart = 0;
+	dwLaceCnt = 0;
+	bCheckMask = 0;
+	sSetMask = 0;
+	lSetMask = 0;
+	memset(&gpuDataM[0],0,sizeof(gpuDataM));
+	gpuCommand = 0;
+	gpuDataC = 0;
+	gpuDataP = 0;
+	DataReadMode = DR_NORMAL;
+	memset(lGPUInfoVals,0x00,16*sizeof(unsigned long));
+	bUsingTWin = FALSE;
+	memset(&TWin,0,sizeof(TWin));
+	clutid = 0;
+	usMirror=0;
+	iDither = 0;
+	drawX=drawY=drawW=drawH=0;
+	g_m1=g_m2=g_m3=0;
+	DrawSemiTrans=0;
+		extern short Ymin;
+	extern short Ymax;
+	Ymin=0;
+	Ymax=0;
+	ly0=lx0=ly1=lx1=ly2=lx2=ly3=lx3=0;
+	GlobalTextAddrX=GlobalTextAddrY=GlobalTextTP=0;
+	GlobalTextREST=GlobalTextABR=GlobalTextPAGE=0;
+	InitFPS();
+	//just to be sure:  copied from gpu reset
+	memset(lGPUInfoVals,0x00,16*sizeof(unsigned long));
+	lGPUstatusRet=0x14802000;
+	PSXDisplay.Disabled=1;
+	DataWriteMode=DataReadMode=DR_NORMAL;
+	PSXDisplay.DrawOffset.x=PSXDisplay.DrawOffset.y=0;
+	drawX=drawY=0;
+	drawW=drawH=0;
+	sSetMask=0;
+	lSetMask=0;
+	bCheckMask=FALSE;
+	usMirror=0;
+	GlobalTextAddrX=0;
+	GlobalTextAddrY=0;
+	GlobalTextTP=0;
+	GlobalTextABR=0;
+	PSXDisplay.RGB24=FALSE;
+	PSXDisplay.Interlaced=FALSE;
+	bUsingTWin = FALSE;
+	
+
+
 
 	DataWriteMode = DR_NORMAL;
+
 
 	// Reset transfer values, to prevent mis-transfer of data
 	memset(&VRAMWrite,0,sizeof(VRAMLoad_t));
@@ -2220,7 +2272,9 @@ void FreezeExtra_save(struct FreezeExtra* extra)
 	extra->VRAMRead = VRAMRead;
 	extra->DataWriteMode = DataWriteMode;
 	extra->DataReadMode = DataReadMode;
-	extra->dwLaceCnt = dwLaceCnt;
+
+	//zero 05-mar-2011 - we dont need to save this, it is intimately tied to the throttle and isnt part of the game state, even though it sounds like something that may be a HW attribute...
+	//extra->dwLaceCnt = dwLaceCnt;
 
 	extra->PSXDisplay = PSXDisplay;
 	extra->PreviousPSXDisplay = PreviousPSXDisplay; 
