@@ -77,7 +77,7 @@ void SPU_chan::save(EMUFILE* fp)
 	fp->write32le(s_2);
 	fp->write8le(flags);
 
-	fp->write32le((u32)0);
+	fp->write32le(pending);
 	fp->write32le((u32)0);
 	fp->write32le((u32)0);
 }
@@ -118,7 +118,7 @@ void SPU_chan::load(EMUFILE* fp)
 	fp->read8le(&flags);
 
 	s32 temp;
-	fp->read32le(&temp);
+	fp->read32le(&pending);
 	fp->read32le(&temp);
 	fp->read32le(&temp);
 }
