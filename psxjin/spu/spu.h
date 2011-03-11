@@ -192,6 +192,10 @@ public:
 	s32 iOldNoise;
 	u8 bNoise;
 
+	u32 pending;
+
+	static const int NOISE_PENDING = 1;
+
 	//BRR decoding and state
 	//note that the block is larger than the 28 sample blocksize.
 	//this is a clever hack to help keep previous samples available for interpolation.

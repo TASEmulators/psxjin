@@ -128,8 +128,7 @@ static int iSecureStart=0; // secure start counter
 void SPU_chan::updatePitch(u16 pitch)
 {
 	smpinc = 44100.0 / 44100.0 / 4096 * pitch;
-	//smpinc = 0.078f;
-	//smpinc = 1.0f;
+	//printf("%f\n",smpinc);
 }
 
 void SPU_chan::keyon()
@@ -149,7 +148,7 @@ void SPU_chan::keyon()
 	
 	blockAddress = (rawStartAddr<<3);
 	
-	//if(spu->isCore) printf("[%02d] Keyon at %08X with smpinc %f\n",ch,blockAddress,smpinc);
+	if(spu->isCore) printf("[%02d] Keyon at %08X with smpinc %f and smpcnt %f\n",ch,blockAddress,smpinc,smpcnt);
 
 	//init interpolation state with zeros
 	block[24] = block[25] = block[26] = block[27] = 0;
@@ -159,6 +158,9 @@ void SPU_chan::keyon()
 
 	StartADSR(this);
 	StartREVERB(this);
+//#ifdef VERSION_3
+	bNoise = (pending & NOISE_PENDING)?TRUE:FALSE;
+//#endif
 };
 
 void SPU_chan::keyoff()
@@ -366,6 +368,7 @@ SPU_chan::SPU_chan()
 	, bFMod(FALSE)
 	, bReverb(FALSE)
 	, bNoise(FALSE)
+	, pending(0)
 {
 }
 
@@ -496,7 +499,7 @@ restart:
 	//it is safe to only check for overflow once since we can only play samples at +2 octaves (4x too fast)
 	if(true)
 	{
-		s16 a = block[sampnum&31];
+		s16 a = block[sampnum];
 		s16 b = block[(sampnum-1)&31];
 		s16 c = block[(sampnum-2)&31];
 		s16 d = block[(sampnum-3)&31];
@@ -534,6 +537,13 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 				samp = iGetNoiseVal(chan);
 			else
 				samp = chan->decodeBRR(spu);
+			
+			if(
+				//Movie.currentFrame >= 458384 && 
+				chan->smpcnt > 29)
+			{
+				//printf("22: %f\n",chan->smpcnt);
+			}
 
 			//channel may have ended at any time (from the BRR decode or from a previous envelope calculation
 			if (chan->status == CHANSTATUS_STOPPED) {

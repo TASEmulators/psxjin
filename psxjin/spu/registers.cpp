@@ -186,10 +186,8 @@ void NoiseOn(SPU_struct* spu, int start,int end,unsigned short val)
 	{
 		if (val&1)  {
 			printf("[%02d] NOISE on\n",ch);
-			spu->channels[ch].bNoise = TRUE;
-		} else spu->channels[ch].bNoise = FALSE;
-			//s_chan[ch].bNoise=1;
-		//else s_chan[ch].bNoise=0;
+			spu->channels[ch].pending |= SPU_chan::NOISE_PENDING;
+		} else spu->channels[ch].pending &= ~SPU_chan::NOISE_PENDING;
 	}
 }
 
