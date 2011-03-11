@@ -493,9 +493,10 @@ restart:
 
 	//perform interpolation. hardcoded for now
 	//if(GetAsyncKeyState('I'))
+	//it is safe to only check for overflow once since we can only play samples at +2 octaves (4x too fast)
 	if(true)
 	{
-		s16 a = block[sampnum];
+		s16 a = block[sampnum&31];
 		s16 b = block[(sampnum-1)&31];
 		s16 c = block[(sampnum-2)&31];
 		s16 d = block[(sampnum-3)&31];
