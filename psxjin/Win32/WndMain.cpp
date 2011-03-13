@@ -677,15 +677,16 @@ void RunCD(HWND hWnd)
 	{
 		if (BIOSExists())
 		{
-			ClosePlugins();
-			if(!OpenPlugins(hWnd)) 
-			{
-				iCallW32Gui =  1;
-				CDRclose();
-				return;
-			}
+			
 			if (!Movie.CDSwap)
 			{
+				ClosePlugins();
+				if(!OpenPlugins(hWnd)) 
+				{
+					iCallW32Gui =  1;
+					CDRclose();
+					return;
+				}
 				SysReset();
 				NeedReset = 0;
 				CheckCdrom();
