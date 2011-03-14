@@ -145,7 +145,7 @@ iVSyncFlag = 1;
 	char modeFlags;
 
 	Movie.currentFrame++;
-	printf("frame: %d\n",Movie.currentFrame);
+	//printf("frame: %d\n",Movie.currentFrame);
 	if (Movie.currentFrame > Movie.MaxRecFrames) Movie.MaxRecFrames = Movie.currentFrame;
 
 	// update OSD information
