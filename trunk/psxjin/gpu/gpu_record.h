@@ -48,7 +48,7 @@ extern unsigned long	RECORD_COMPRESSION_MODE;
 extern COMPVARS			RECORD_COMPRESSION2;
 extern unsigned char	RECORD_COMPRESSION_STATE2[4096];
 
-BOOL RECORD_Start(char filename[256]);
+BOOL RECORD_Start();
 void RECORD_Stop();
 BOOL RECORD_WriteFrame();
 BOOL RECORD_GetFrame();

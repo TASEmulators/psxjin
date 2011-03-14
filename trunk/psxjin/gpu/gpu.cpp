@@ -3092,7 +3092,7 @@ void CALLBACK GPUstartAvi(char* filename)
 		if(HACK_CODEC_CHOOSE(GetMainWindow()))
 		{
 			RECORD_RECORDING=TRUE;
-			RECORD_Start(filename);
+			RECORD_Start();
 		}
 		else 
 		{
@@ -3104,10 +3104,8 @@ void CALLBACK GPUstartAvi(char* filename)
 
 void CALLBACK GPUrestartAVINewRes(void)
 {
-	RECORD_Stop();
-	char* N = new char[256];
-	RECORD_Start(N);
-	delete N;
+	RECORD_Stop();	
+	RECORD_Start();	
 }
 
 
