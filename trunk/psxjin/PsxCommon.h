@@ -365,6 +365,8 @@ inline float u32_to_float(u32 u) {
 #define	CTASSERT(x)		typedef char __assert ## y[(x) ? 1 : -1]
 #endif
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
 template<typename T> inline void reconstruct(T* t) { 
 	t->~T();
 	new(t) T();

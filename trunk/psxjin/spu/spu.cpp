@@ -148,7 +148,7 @@ void SPU_chan::keyon()
 	
 	blockAddress = (rawStartAddr<<3);
 	
-	if(spu->isCore) printf("[%02d] Keyon at %08X with smpinc %f and smpcnt %f\n",ch,blockAddress,smpinc,smpcnt);
+	//if(spu->isCore) printf("[%02d] Keyon at %08X with smpinc %f and pending %d and bNoise %d\n",ch,blockAddress,smpinc,pending,bNoise);
 
 	//init interpolation state with zeros
 	block[24] = block[25] = block[26] = block[27] = 0;
@@ -530,20 +530,17 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 		{
 			SPU_chan *chan = &spu->channels[i];
 
-			if (chan->status == CHANSTATUS_STOPPED) continue;
+			if (chan->status == CHANSTATUS_STOPPED) {
+				fmod = 0;
+				continue;
+			}
 
 			s32 samp;
 			if(chan->bNoise)
 				samp = iGetNoiseVal(chan);
 			else
 				samp = chan->decodeBRR(spu);
-			
-			if(
-				//Movie.currentFrame >= 458384 && 
-				chan->smpcnt > 29)
-			{
-				//printf("22: %f\n",chan->smpcnt);
-			}
+
 
 			//channel may have ended at any time (from the BRR decode or from a previous envelope calculation
 			if (chan->status == CHANSTATUS_STOPPED) {
@@ -556,23 +553,22 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 
 			//and now immediately afterwards tick it again
 			MixADSR(chan);
-
-
 	
 			checklog[i] = true;
 
 			samp = samp * adsrLevel/1023;
+			//samp = ((s64)samp * adsrLevel)>>10; //maybe better?
 
 			//apply the modulation
 			if(chan->bFMod)
 			{
+				if(fmod < -32768 || fmod > 32767) printf("[%02d]: fmod value out of range! (%d) !\n",samp);
 				//this was a little hard to test. ff7 battle fx were using it, but 
 				//its hard to tell since I dont think our noise is very good. need a better test.
-				chan->smpcnt += chan->smpinc;
 				s32 pitch = chan->rawPitch;
-				pitch = ((32768L+fmod)*pitch)/32768L;
-				if (pitch>0x3fff) pitch=0x3fff;
-				if (pitch<0x1)    pitch=0x1;
+				pitch = ((32768+fmod)*pitch)>>15;
+				//if(pitch>=0x4000 || pitch<0) printf("crap! fmodulated pitch was out of range!");
+				//if(pitch>0x3FFF) pitch = 0x3FFF;
 				chan->updatePitch((u16)pitch);
 			
 				//just some diagnostics
@@ -580,16 +576,9 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 				//printf("fmod: %d\n",fmod);
 			}
 
-			//don't output this channel; it is used to modulate the next channel
-			if(i<23 && spu->channels[i+1].bFMod)
-			{
-				//should this be limited? lets check it.
-				if(samp < -32768 || samp > 32767) printf("[%02d]: limiting fmod value of %d !\n",samp);
-				fmod = limit(samp);
-				continue;
-			}
-
 			chan->smpcnt += chan->smpinc;
+
+			fmod = samp; //save fmod value to be used for next channel, if it is a modulation channel
 
 			s32 left = (samp * chan->iLeftVolume) / 0x4000;
 			s32 right = (samp * chan->iRightVolume) / 0x4000;
