@@ -51,6 +51,7 @@ unsigned long		RECORD_VIDEO_SIZE;
 unsigned long		RECORD_RECORDING_WIDTH;
 unsigned long		RECORD_RECORDING_HEIGHT;
 unsigned long		RECORD_FRAME_RATE_SCALE;
+unsigned long		RECORD_TOTAL_BYTES;
 unsigned long		RECORD_COMPRESSION_MODE;
 COMPVARS			RECORD_COMPRESSION2;
 unsigned char		RECORD_COMPRESSION_STATE2[4096];
@@ -68,13 +69,16 @@ unsigned long		skip;
 
 //--------------------------------------------------------------------
 
-BOOL RECORD_Start(char filename[256])
+BOOL RECORD_Start()
 {
+	char filename[256];
 	static FILE *data;
+	RECORD_TOTAL_BYTES = 0;
 	if (RECORD_RECORDING_MODE==0)
 	{
-		RECORD_BI.biWidth	= iResX;
-		RECORD_BI.biHeight	= iResY;	
+		sprintf(&filename[0],"%s%s%03d_%s.avi",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort);
+		RECORD_BI.biWidth = Config.CurWinX;
+		RECORD_BI.biHeight = Config.CurWinY;
 	}
 	else
 	{
@@ -136,14 +140,15 @@ void RECORD_Stop()
 {
 	if (ps) AVIStreamClose(ps);
 	if (psCompressed) AVIStreamClose(psCompressed);
-	if (pfile) AVIFileClose(pfile);
-	AVIFileExit();
+	if (pfile) AVIFileClose(pfile);	
+	AVIFileExit();	
 }
 
 //--------------------------------------------------------------------
 
 BOOL RECORD_WriteFrame()
 {
+	long ByteBuffer = 0;
 	if (skip)
 	{
 		skip--;
@@ -151,12 +156,21 @@ BOOL RECORD_WriteFrame()
 	}
 	skip=RECORD_FRAME_RATE_SCALE;
 	if (!RECORD_GetFrame()) return FALSE;
-	if (FAILED(AVIStreamWrite(psCompressed,frame,1,RECORD_BUFFER,RECORD_BI.biSizeImage,AVIIF_KEYFRAME,NULL,NULL)))
+	if (FAILED(AVIStreamWrite(psCompressed,frame,1,RECORD_BUFFER,RECORD_BI.biSizeImage,AVIIF_KEYFRAME,NULL,&ByteBuffer)))
 	{
 		RECORD_Stop();
 		return FALSE;
 	}
 	frame++;
+	RECORD_TOTAL_BYTES += ByteBuffer;
+	if (RECORD_TOTAL_BYTES > 2007152000) 
+	{
+		RECORD_Stop();
+		Movie.AviCount++;
+		RECORD_Start();
+	}
+
+
 	return TRUE;
 }
 
