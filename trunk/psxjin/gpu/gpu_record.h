@@ -46,7 +46,7 @@ extern unsigned long	RECORD_RECORDING_HEIGHT;
 extern unsigned long	RECORD_FRAME_RATE_SCALE;
 extern unsigned long	RECORD_COMPRESSION_MODE;
 extern COMPVARS			RECORD_COMPRESSION2;
-extern unsigned char	RECORD_COMPRESSION_STATE2[4096];
+extern unsigned char	RECORD_COMPRESSION_STATE2[1048576];
 
 BOOL RECORD_Start();
 void RECORD_Stop();
