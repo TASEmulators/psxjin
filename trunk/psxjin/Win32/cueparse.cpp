@@ -1,12 +1,8 @@
-// cueparse.cpp : Defines the entry point for the console application.
-//
-
 #define _CRT_SECURE_NO_WARNINGS
-//#include "stdafx.h"
+
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#include <vector>
 #include <ctype.h>
 #include <algorithm>
 #include <map>
@@ -125,10 +121,25 @@ reparse:
     switch(state)
     {
     case 0:
-      if(stringToUpper(line).substr(0,4)!="FILE") break;
-      //We actually need the file names - especially the first one, so we can load the CD from that.
-      state = 1;
-      break;
+      {
+        if(stringToUpper(line).substr(0,4)!="FILE") break;
+        line = line.substr(4);
+        std::vector<std::string> parts = tokenize_str(line," ");
+        size_t first = line.find_first_of('\"');
+        if(first == std::string::npos) 
+        {
+          currTrack.filename = parts[1];
+        }
+        else
+        {
+          size_t last = line.find_last_of('\"');
+          currTrack.filename = line.substr(first+1,last-first-1);
+        }
+        currTrack.filetype = parts[parts.size()-1];
+        //printf("%s - %s\n",currTrack.filename.c_str(),currTrack.filetype.c_str());
+        state = 1;
+        break;
+      }
     case 1:
       {
         if(stringToUpper(line).substr(0,5)!="TRACK") break;
@@ -172,15 +183,16 @@ int CueData::NumTracks()
 	return tracks.size(); 
 }
 int CueData::MinTrack()
-  {
-    struct COMPARE { bool operator()(std::pair<int,CueTrack> lhs, std::pair<int,CueTrack> rhs) { return lhs.first < rhs.first; } } compare;
-    return std::min_element(tracks.begin(),tracks.end(),compare)->first;
-  }
+{
+	struct COMPARE { bool operator()(std::pair<int,CueTrack> lhs, std::pair<int,CueTrack> rhs) { return lhs.first < rhs.first; } } compare;
+	return std::min_element(tracks.begin(),tracks.end(),compare)->first;
+}
+
 int CueData::MaxTrack()
-  {
-    struct COMPARE { bool operator()(std::pair<int,CueTrack> lhs, std::pair<int,CueTrack> rhs) { return lhs.first < rhs.first; } } compare;
-    return std::max_element(tracks.begin(),tracks.end(),compare)->first;
-  }
+{
+	struct COMPARE { bool operator()(std::pair<int,CueTrack> lhs, std::pair<int,CueTrack> rhs) { return lhs.first < rhs.first; } } compare;
+	return std::max_element(tracks.begin(),tracks.end(),compare)->first;
+}
 
 int CueData::cueparser(char* Filename)
 {  
@@ -195,6 +207,7 @@ int CueData::cueparser(char* Filename)
   parse_cue(buf);
   printf("numtracks: %d; mintrack: %d; maxtrack: %d\n",NumTracks(),MinTrack(),MaxTrack());
 
+  return 0; //????
 }
 
 void CueData::CopyToConfig()
