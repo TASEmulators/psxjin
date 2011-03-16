@@ -457,6 +457,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cueparse.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cueparse.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Decode_XA.cpp"
 				>
 			</File>
