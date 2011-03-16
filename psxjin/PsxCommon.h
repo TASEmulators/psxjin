@@ -105,6 +105,16 @@ typedef unsigned long long u64;
 extern int Log;
 void __Log(char *fmt, ...);
 
+
+typedef struct {	
+	int StartPosMM;
+	int StartPosSS;
+	int StartPosFF;
+	int EndPosMM;
+	int EndPosSS;
+	int EndPosFF;
+	char FileName[256];	
+} CueStruct;
 typedef struct {
 	char Gpu[256];
 	char Spu[256];
@@ -154,7 +164,9 @@ typedef struct {
 	unsigned short Pad1AutoHold;
 	unsigned short Pad2AutoHold;
 	unsigned short Pad1AutoFire;
-	unsigned short Pad2AutoFire;
+	unsigned short Pad2AutoFire;	
+	int CueTracks;
+	CueStruct CueList[99];
 } psxjinconfig;
 
 extern psxjinconfig Config;

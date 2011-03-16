@@ -1,3 +1,11 @@
+#include <stdio.h>
+#include <string>
+#include <string.h>
+#include <vector>
+#include <ctype.h>
+#include <algorithm>
+#include <map>
+
 class CueTimestamp
 {
 public:
@@ -26,13 +34,13 @@ public:
 class CueData
 {
 public:
-	CueData();
-	~CueData();
+	CueData();	
   std::map<int,CueTrack> tracks;
   int NumTracks();
   int MinTrack();    
-  int MaxTrack();
+  int MaxTrack();  
   bool parse_cue(const char* buf);
   int cueparser(char* Filename);
+  void CopyToConfig();
 };
 

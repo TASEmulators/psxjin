@@ -17,7 +17,7 @@
 #include <string>
 
 #include "cdriso.h"
-
+#include "cueparse.h"
 #include "PsxCommon.h"
 
 std::string CDR_iso_fileToOpen;
@@ -67,10 +67,22 @@ void UpdateZmode() {
 	Zmode = 0;
 }
 
-long CDRopen(char filename[256]) {
-	struct stat buf;
-	UpdateZmode();
+int UseCue() 
+{
+	int len = strlen(IsoFile);		
+	if (len >= 3) 
+	{
+		if (!strncmp(IsoFile+(len-3), ".cue", 3)) 
+		{
+				return 1;
+		}
+	}
+	return 0;
+}
 
+long CDRopen(char filename[256]) {
+	/*struct stat buf;	
+	UpdateZmode();    
 	if (Zmode) {
 		FILE *f;
 		char table[256];
@@ -92,16 +104,31 @@ long CDRopen(char filename[256]) {
 		}
 		fread(Ztable, 1, buf.st_size, f);
 		fclose(f);
-	} else {
-		fmode = 0;
-		pbuffer = cdbuffer;
+	} else {*/
+	fmode = 0;
+	pbuffer = cdbuffer;	
+	//}
+    if (UseCue()) 
+	{
+		CueData CueTemp;
+		CueTemp.parse_cue(filename);
+		CueTemp.CopyToConfig();
+		cdHandle = fopen(Config.CueList[0].FileName, "rb");
+		if (cdHandle == NULL) {
+			SysMessage("Error loading %s\n", filename);
+			strcpy(IsoFile,"");
+			return -1;
+		}
 	}
-
-	cdHandle = fopen(filename, "rb");
-	if (cdHandle == NULL) {
-		SysMessage("Error loading %s\n", filename);
-		strcpy(IsoFile,"");
-		return -1;
+	else
+	{			
+		Config.CueTracks = 0;
+		cdHandle = fopen(filename, "rb");
+		if (cdHandle == NULL) {
+			SysMessage("Error loading %s\n", filename);
+			strcpy(IsoFile,"");
+			return -1;
+		}
 	}
 
 	return 0;
@@ -121,23 +148,46 @@ long CDRclose(void) {
 // buffer:
 //  byte 0 - start track
 //  byte 1 - end track
-long CDRgetTN(unsigned char *buffer) {
-	buffer[0] = 1;
-	buffer[1] = 1;
 
+long CDRgetTN(unsigned char *buffer) {
+	if (Config.CueTracks == 0)
+	{
+		buffer[0] = 1;
+		buffer[1] = 1;
+	}
+	else
+	{
+		buffer[0] = 1;
+		buffer[1] = Config.CueTracks;
+	}
 	return 0;
 }
 
+
 // return Track Time
 // buffer:
-//  byte 0 - frame
-//  byte 1 - second
-//  byte 2 - minute
-long CDRgetTD(unsigned char track, unsigned char *buffer) {
-	buffer[2] = 0;
-	buffer[1] = 2;
-	buffer[0] = 0;
+/*CdlGetTD
+Obtains the TOC entries information (min, sec) corresponding to the track number specified in the
+parameters Please set the track No. in the BCD parameters.
+Table 11-11: CdlGetTD
+Result Contents
+0 Status
+1 TOC min
+2 TOC sec*/
 
+long CDRgetTD(unsigned char track, unsigned char *buffer) {
+	if (Config.CueTracks = 0)
+	{
+		buffer[2] = 0;
+		buffer[1] = 2;
+		buffer[0] = 0;
+	}
+	else
+	{
+		buffer[2] = Config.CueList[track-1].StartPosSS;
+		buffer[1] = Config.CueList[track-1].StartPosMM;
+		buffer[0] = 0;
+	}
 	return 0;
 }
 

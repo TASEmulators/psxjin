@@ -672,12 +672,11 @@ bool BIOSExists()	//Attempts to open the BIOS, if successful, it returns true
 }
 
 void RunCD(HWND hWnd)
-{
+{	
 	if (!IsoFile[0] == 0)
 	{
 		if (BIOSExists())
-		{
-			
+		{			
 			if (!Movie.CDSwap)
 			{
 				ClosePlugins();
