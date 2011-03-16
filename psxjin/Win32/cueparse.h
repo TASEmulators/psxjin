@@ -22,7 +22,7 @@ public:
   CueTrack();
   std::string filename, filetype;
   std::string tracktype;
-  std::map<int,CueTimestamp> indexes;
+  std::map<int,CueTimestamp> indexes;  
 };
 
 
@@ -37,6 +37,7 @@ public:
   int NumTracks();
   int MinTrack();    
   int MaxTrack();  
+  char Path[256];
   bool parse_cue(const char* buf);
   int cueparser(char* Filename);
   void CopyToConfig();

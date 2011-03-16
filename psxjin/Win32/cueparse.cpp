@@ -196,8 +196,28 @@ int CueData::MaxTrack()
 
 int CueData::cueparser(char* Filename)
 {  
-  //Need to pull file location off this file, so it can be added to each file in the cue.
+  int flen = strlen(Filename);
+  char X = '\\';
+  int Pos;
+  bool found = false;
+  for (int i = flen; i > 0; i--)
+  {
+	  if (!found)
+		  if (strncmp(&Filename[i-1],&X,1))
+		  {
+				found = true;
+				Pos  = i;
+		  }
+  }
+  if (found)
+  {
+	  memcpy(&Path,Filename,Pos);
+	  Path[Pos] = '\0';
+  }
+
   FILE* inf = fopen(Filename,"rb"); 
+  printf("OMG HI");
+  printf(Path);
   fseek(inf,0,SEEK_END);
   long len = ftell(inf);
   fseek(inf,0,SEEK_SET);
@@ -206,7 +226,7 @@ int CueData::cueparser(char* Filename)
   buf[len] = 0;  
   parse_cue(buf);
   printf("numtracks: %d; mintrack: %d; maxtrack: %d\n",NumTracks(),MinTrack(),MaxTrack());
-
+ return 1;
   return 0; //????
 }
 
