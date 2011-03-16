@@ -207,16 +207,24 @@ int CueData::cueparser(char* Filename)
   buf[len] = 0;  
   parse_cue(buf);
   printf("numtracks: %d; mintrack: %d; maxtrack: %d\n",NumTracks(),MinTrack(),MaxTrack());
-
+  int i = 0;
   for(TTrackMap::iterator it(tracks.begin()); it != tracks.end(); ++it)
   {
-	printf("%s -> %s\n",Filename,it->second.filename.c_str());
+	printf("%s -> %s\n",Filename,it->second.filename.c_str());	
 	char temp[MAX_PATH*2], temp2[MAX_PATH*2];
 	strcpy(temp,Filename);
 	PathRemoveFileSpecA(temp);
 	PathCombineA(temp2,temp,it->second.filename.c_str());
 	printf("%s\n",temp2);
-	it->second.filename = temp2;
+	it->second.filename = temp2;	
+	strcpy(Config.CueList[i].FileName, temp2);
+	Config.CueList[i].StartPosMM = 0;
+	Config.CueList[i].StartPosSS = 0;
+	Config.CueList[i].StartPosFF = 0;
+	Config.CueList[i].EndPosMM = 0;		
+	Config.CueList[i].EndPosSS = 0;		
+	Config.CueList[i].EndPosFF = 0;
+	i++;
   }
 		
   return 1;
@@ -227,14 +235,7 @@ void CueData::CopyToConfig()
 	Config.CueTracks = NumTracks();
 	for (int i = 0; i < Config.CueTracks; i++)
 	{
-		//Add file extension here.
-		strcpy(Config.CueList[i].FileName, "\0");
-		Config.CueList[i].StartPosMM = 0;
-		Config.CueList[i].StartPosSS = 0;
-		Config.CueList[i].StartPosFF = 0;
-		Config.CueList[i].EndPosMM = 0;		
-		Config.CueList[i].EndPosSS = 0;		
-		Config.CueList[i].EndPosFF = 0;
+		
 	}
 }
  CueData::CueData()
