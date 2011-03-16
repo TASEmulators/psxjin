@@ -128,7 +128,7 @@ reparse:
         size_t first = line.find_first_of('\"');
         if(first == std::string::npos) 
         {
-          currTrack.filename = parts[1];
+          currTrack.filename = parts[0];
         }
         else
         {
