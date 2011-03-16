@@ -1,9 +1,7 @@
-#include <stdio.h>
+#ifndef _CUEPARSE_H_
+#define _CUEPARSE_H_
+
 #include <string>
-#include <string.h>
-#include <vector>
-#include <ctype.h>
-#include <algorithm>
 #include <map>
 
 class CueTimestamp
@@ -44,3 +42,6 @@ public:
   void CopyToConfig();
 };
 
+
+
+#endif //_CUEPARSE_H_
