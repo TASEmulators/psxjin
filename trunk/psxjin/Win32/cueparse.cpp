@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <map>
 #include "cueparse.h"
+#include "PsxCommon.h"
 
 /// \brief convert input string into vector of string tokens
 ///
@@ -125,7 +126,7 @@ reparse:
     {
     case 0:
       if(stringToUpper(line).substr(0,4)!="FILE") break;
-      //dont bother with the filename or filetype.. bleh
+      //We actually need the file names - especially the first one, so we can load the CD from that.
       state = 1;
       break;
     case 1:
@@ -183,7 +184,8 @@ int CueData::MaxTrack()
 
 int CueData::cueparser(char* Filename)
 {  
-  FILE* inf = fopen(Filename,"rb");
+  //Need to pull file location off this file, so it can be added to each file in the cue.
+  FILE* inf = fopen(Filename,"rb"); 
   fseek(inf,0,SEEK_END);
   long len = ftell(inf);
   fseek(inf,0,SEEK_SET);
@@ -195,6 +197,21 @@ int CueData::cueparser(char* Filename)
 
 }
 
+void CueData::CopyToConfig()
+{
+	Config.CueTracks = NumTracks();
+	for (int i = 0; i < Config.CueTracks; i++)
+	{
+		//Add file extension here.
+		strcpy(Config.CueList[i].FileName, "\0");
+		Config.CueList[i].StartPosMM = 0;
+		Config.CueList[i].StartPosSS = 0;
+		Config.CueList[i].StartPosFF = 0;
+		Config.CueList[i].EndPosMM = 0;		
+		Config.CueList[i].EndPosSS = 0;		
+		Config.CueList[i].EndPosFF = 0;
+	}
+}
  CueData::CueData()
 {
 
