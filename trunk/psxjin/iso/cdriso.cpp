@@ -70,9 +70,9 @@ void UpdateZmode() {
 int UseCue() 
 {
 	int len = strlen(IsoFile);		
-	if (len >= 3) 
+	if (len >= 4) 
 	{
-		if (!strncmp(IsoFile+(len-3), ".cue", 3)) 
+		if (strncmp(IsoFile+(len-3), ".cue", 4)) 
 		{
 				return 1;
 		}
@@ -107,11 +107,11 @@ long CDRopen(char filename[256]) {
 	} else {*/
 	fmode = 0;
 	pbuffer = cdbuffer;	
-	//}
+	//}	
     if (UseCue()) 
-	{
+	{			
 		CueData CueTemp;
-		CueTemp.parse_cue(filename);
+		CueTemp.cueparser(filename);
 		CueTemp.CopyToConfig();
 		cdHandle = fopen(Config.CueList[0].FileName, "rb");
 		if (cdHandle == NULL) {
@@ -121,7 +121,7 @@ long CDRopen(char filename[256]) {
 		}
 	}
 	else
-	{			
+	{		
 		Config.CueTracks = 0;
 		cdHandle = fopen(filename, "rb");
 		if (cdHandle == NULL) {
