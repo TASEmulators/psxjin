@@ -22,22 +22,22 @@ public:
   CueTrack();
   std::string filename, filetype;
   std::string tracktype;
-  std::map<int,CueTimestamp> indexes;  
+  std::map<int,CueTimestamp> indexes;
 };
 
 
 
+  typedef std::map<int,CueTrack> TTrackMap;
 
 
 class CueData
 {
 public:
 	CueData();	
-  std::map<int,CueTrack> tracks;
+  TTrackMap tracks;
   int NumTracks();
   int MinTrack();    
   int MaxTrack();  
-  char Path[256];
   bool parse_cue(const char* buf);
   int cueparser(char* Filename);
   void CopyToConfig();

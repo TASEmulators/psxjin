@@ -9,6 +9,8 @@
 #include "cueparse.h"
 #include "PsxCommon.h"
 
+#include <Shlwapi.h>
+
 /// \brief convert input string into vector of string tokens
 ///
 /// \note consecutive delimiters will be treated as single delimiter
@@ -196,28 +198,7 @@ int CueData::MaxTrack()
 
 int CueData::cueparser(char* Filename)
 {  
-  int flen = strlen(Filename);
-  char X = '\\';
-  int Pos;
-  bool found = false;
-  for (int i = flen; i > 0; i--)
-  {
-	  if (!found)
-		  if (strncmp(&Filename[i-1],&X,1))
-		  {
-				found = true;
-				Pos  = i;
-		  }
-  }
-  if (found)
-  {
-	  memcpy(&Path,Filename,Pos);
-	  Path[Pos] = '\0';
-  }
-
   FILE* inf = fopen(Filename,"rb"); 
-  printf("OMG HI");
-  printf(Path);
   fseek(inf,0,SEEK_END);
   long len = ftell(inf);
   fseek(inf,0,SEEK_SET);
@@ -226,8 +207,19 @@ int CueData::cueparser(char* Filename)
   buf[len] = 0;  
   parse_cue(buf);
   printf("numtracks: %d; mintrack: %d; maxtrack: %d\n",NumTracks(),MinTrack(),MaxTrack());
- return 1;
-  return 0; //????
+
+  for(TTrackMap::iterator it(tracks.begin()); it != tracks.end(); ++it)
+  {
+	printf("%s -> %s\n",Filename,it->second.filename.c_str());
+	char temp[MAX_PATH*2], temp2[MAX_PATH*2];
+	strcpy(temp,Filename);
+	PathRemoveFileSpecA(temp);
+	PathCombineA(temp2,temp,it->second.filename.c_str());
+	printf("%s\n",temp2);
+	it->second.filename = temp2;
+  }
+		
+  return 1;
 }
 
 void CueData::CopyToConfig()
