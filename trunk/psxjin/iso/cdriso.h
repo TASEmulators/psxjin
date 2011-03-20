@@ -37,6 +37,7 @@ void SysMessage(char *fmt, ...);
 long CDRinit(void);
 long CDRshutdown(void);
 long CDRopen(char* filename);
+long SwapCD(char* out, char *in);
 long CDRclose(void);
 long CDRgetTN(unsigned char *);
 long CDRgetTD(unsigned char , unsigned char *);

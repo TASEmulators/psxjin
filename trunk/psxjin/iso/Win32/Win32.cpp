@@ -69,6 +69,48 @@ int _GetFile(char *out) {
 	return 0;
 }
 
+long SwapCD(char *out, char *in) {
+	OPENFILENAME ofn;
+	char szFileName[MAXFILENAME];
+	char szFileTitle[MAXFILENAME];	
+	char szTemp[256];
+	memset(&szFileName,  0, sizeof(szFileName));
+	memset(&szFileTitle, 0, sizeof(szFileTitle));
+
+    ofn.lStructSize			= sizeof(OPENFILENAME);
+    ofn.hwndOwner			= GetActiveWindow();
+    ofn.lpstrFilter			= "Cd Iso Format (*.iso, *.bin, *.img, *.cue)\0*.iso;*.bin;*.img;*.cue;\0All Files (*.*)\0*.*\0\0";
+	ofn.lpstrCustomFilter	= NULL;
+    ofn.nMaxCustFilter		= 0;
+    ofn.nFilterIndex		= 1;
+    ofn.lpstrFile			= szFileName;
+    ofn.nMaxFile			= MAXFILENAME;
+    ofn.lpstrInitialDir		= NULL;
+    ofn.lpstrFileTitle		= szFileTitle;
+    ofn.nMaxFileTitle		= MAXFILENAME;
+    if (in) 
+	{			
+		sprintf(&szTemp[0], "PSXjin Insert CD %s", in);
+		ofn.lpstrTitle = &szTemp[0];
+	}
+	else
+	{
+		ofn.lpstrTitle			= "PSXjin Change CD...";
+	}
+    ofn.lpstrDefExt			= "ISO";
+	char temp[2048];
+	GetModuleFileName(0, temp, 2048);
+	ofn.lpstrInitialDir = temp;
+    ofn.Flags				= OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
+
+	if (GetOpenFileName ((LPOPENFILENAME)&ofn)) {
+		strcpy(out, szFileName);
+		return 1;
+	}
+
+	return 0;
+}
+
 void CfgOpenFile() {
 	if (_GetFile(IsoFile) == 1)
 	{

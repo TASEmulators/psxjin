@@ -140,43 +140,7 @@ void CALLBACK  GPUstopAvi(void);
 void CALLBACK GPUrestartAVINewRes(void);
 void CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
-////plugin stuff From Shadow
-//// *** walking in the valley of your darking soul i realize that i was alone
-////Gpu function pointers
-//extern GPUupdateLace       GPU_updateLace;
-//extern GPUinit             GPU_init;
-//extern GPUshutdown         GPU_shutdown; 
-//extern GPUconfigure        GPU_configure;
-//extern GPUtest             GPU_test;
-//extern GPUabout            GPU_about;
-//extern GPUopen             GPU_open;
-//extern GPUclose            GPU_close;
-//extern GPUreadStatus       GPU_readStatus;
-//extern GPUreadData         GPU_readData;
-//extern GPUreadDataMem      GPU_readDataMem;
-//extern GPUwriteStatus      GPU_writeStatus; 
-//extern GPUwriteData        GPU_writeData;
-//extern GPUwriteDataMem     GPU_writeDataMem;
-//extern GPUdmaChain         GPU_dmaChain;
-//extern GPUkeypressed       GPU_keypressed;
-//extern GPUdisplayText      GPUdisplayText;
-//extern GPUmakeSnapshot     GPU_makeSnapshot;
-//extern GPUfreeze           GPU_freeze;
-//extern GPUgetScreenPic     GPU_getScreenPic;
-//extern GPUshowScreenPic    GPU_showScreenPic;
-//extern GPUclearDynarec     GPU_clearDynarec;
-//extern GPUsetframelimit    GPU_setframelimit;
-//extern GPUsetframecounter  GPU_setframecounter;
-//extern GPUsetlagcounter    GPU_setlagcounter;
-//extern GPUinputdisplay     GPU_inputdisplay;
-//extern GPUupdateframe      GPU_updateframe;
-//extern GPUsetcurrentmode   GPUsetcurrentmode;
-//extern GPUsetspeedmode     GPU_setspeedmode;
-//extern GPUshowframecounter GPU_showframecounter;
-//extern GPUshowInput		   GPU_showInput;
-//extern GPUstartAvi         GPU_startAvi;
-//extern GPUstopAvi          GPU_stopAvi;
-//extern GPUsendFpLuaGui     GPU_sendFpLuaGui;
+
 
 //cd rom plugin ;)
 //typedef long (CALLBACK* CDRinit)(void);

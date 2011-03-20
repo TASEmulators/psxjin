@@ -72,7 +72,7 @@ int UseCue()
 	int len = strlen(IsoFile);		
 	if (len >= 4) 
 	{
-		if (strncmp(IsoFile+(len-3), ".cue", 4)) 
+		if (!strncmp(IsoFile+(len-4), ".cue", 4)) 
 		{
 				return 1;
 		}
@@ -109,7 +109,7 @@ long CDRopen(char filename[256]) {
 	pbuffer = cdbuffer;	
 	//}	
     if (UseCue()) 
-	{			
+	{				
 		CueData CueTemp;
 		CueTemp.cueparser(filename);
 		CueTemp.CopyToConfig();

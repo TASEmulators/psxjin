@@ -676,34 +676,27 @@ void RunCD(HWND hWnd)
 	if (!IsoFile[0] == 0)
 	{
 		if (BIOSExists())
-		{			
-			if (!Movie.CDSwap)
+		{						
+			ClosePlugins();
+			if(!OpenPlugins(hWnd)) 
 			{
-				ClosePlugins();
-				if(!OpenPlugins(hWnd)) 
-				{
-					iCallW32Gui =  1;
-					CDRclose();
-					return;
-				}
-				SysReset();
-				NeedReset = 0;
-				CheckCdrom();
-				if (LoadCdrom() == -1) {
-					ClosePlugins();
-					RestoreWindow();
-					SysMessage(_("Could not load Cdrom"));
-					IsoFile[0] = 0;
-					return;
-				}			
-				Movie.currentFrame = 0;
-				WIN32_StopAviRecord();
-				MOV_StopMovie();
-			}	
-			else
-			{
-				Movie.CDSwap = false;
+				iCallW32Gui =  1;
+				CDRclose();
+				return;
 			}
+			SysReset();
+			NeedReset = 0;
+			CheckCdrom();
+			if (LoadCdrom() == -1) {
+				ClosePlugins();
+				RestoreWindow();
+				SysMessage(_("Could not load Cdrom"));
+				IsoFile[0] = 0;
+				return;
+			}			
+			Movie.currentFrame = 0;
+			WIN32_StopAviRecord();
+			MOV_StopMovie();			
 			RecentCDs.UpdateRecentItems(IsoFile);
 			Running = 1;
 			if (AutoRWLoad)
