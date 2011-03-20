@@ -1001,8 +1001,7 @@ void MOV_ReadControl() {
 	{
 		int contFlg = atoi((char*)Movie.inputBufferPtr);
 		Movie.inputBufferPtr += 4;
-		char controlFlags = (1 << contFlg);
-		controlFlags >>= 1;
+		char controlFlags = (1 << contFlg);				
 		MovieControl.reset = controlFlags&MOVIE_CONTROL_RESET;
 		MovieControl.cdCase = controlFlags&MOVIE_CONTROL_CDCASE;
 		MovieControl.sioIrq = controlFlags&MOVIE_CONTROL_SIOIRQ;
@@ -1067,27 +1066,25 @@ void MOV_WriteControl() {
 }
 
 void MOV_ProcessControlFlags() {
-	if (MovieControl.cdCase) {
-		Movie.CDSwap = true;
-		cdOpenCase ^= -1;
-		if (cdOpenCase < 0) {
+	if (MovieControl.cdCase) //This should only get excuted on playback.
+	{		
+		cdOpenCase ^= -1; //Flip CDopen Status
+		if (cdOpenCase < 0) 
+		{			
 			Movie.currentCdrom++;
 			Movie.CdromCount++;
-			#ifdef WIN32
-				MOV_W32_CdChangeDialog();
-			#else
-				//TODO: pause and ask for a new CD?
-			#endif
+			iPause = 1;			
+			SwapCD(IsoFile, NULL);			
 		}
-		else {
-			CDRclose();
+		else 
+		{
+			CDRclose();			
 			CDRopen(IsoFile);
 			CheckCdrom();
-			if (LoadCdrom() == -1)
-				SysMessage(_("Could not load Cdrom"));
-			sprintf(Movie.CdromIds, "%s%9.9s", Movie.CdromIds,CdromId);
+			if (LoadCdrom() == -1) SysMessage(_("Could not load Cdrom"));				
+			sprintf(Movie.CdromIds, "%s%9.9s", Movie.CdromIds,CdromId);		
 		}
-	} //End of Flags
+	}
 	if (MovieControl.cheats)
 		cheatsEnabled ^= 1;
 	if (MovieControl.reset) {
@@ -1138,10 +1135,11 @@ int MovieFreeze(gzFile f, int Mode) {
 	gzfreezel(&Config.RCntFix);
 	gzfreezel(&Config.VSyncWA);
 	gzfreezel(&Movie.lastPads1);
-	gzfreezel(&Movie.lastPads2);
+	gzfreezel(&Movie.lastPads2);	
 	gzfreezel(&Movie.currentCdrom);
 	gzfreezel(&Movie.CdromCount);
 	gzfreeze(Movie.CdromIds,Movie.CdromCount*9);
+	gzfreezel(&cdOpenCase);
 	gzfreezel(&bufSize);
 
 	uint8* tempBuffer, *deleteTempBuffer = NULL;

@@ -69,13 +69,14 @@ void ReadonlyToggle()
 	return;
 }
 
+
 void CDOpenClose()
 {
 	if (Movie.mode == MOVIEMODE_RECORD)
 	{
-		MovieControl.cdCase ^= 1;
-		if (cdOpenCase < 0) {
-			if (MovieControl.cdCase)
+		MovieControl.cdCase ^= 1; //Flip Flag - Not actual status
+		if (cdOpenCase < 0) { //Check if open/closed
+			if (MovieControl.cdCase) //Notifiers of whether or not we are reversing the process. 
 				GPUdisplayText("*PSXjin*: CD Case Will Close On Next Frame");
 			else
 				GPUdisplayText("*PSXjin*: CD Case Won't Close On Next Frame");
@@ -92,9 +93,13 @@ void CDOpenClose()
 		cdOpenCase ^= -1;
 		if (cdOpenCase < 0) {
 			GPUdisplayText(_("*PSXjin*: CD Case Opened"));
+			iPause = 1;					
+			SwapCD(IsoFile, &Movie.CdromIds[0]);	
+			Movie.CDSwap = true;
 		}
 		else {
 			GPUdisplayText(_("*PSXjin*: CD Case Closed"));
+			Movie.CDSwap = false;
 			CDRclose();
 			CDRopen(IsoFile);
 			CheckCdrom();
