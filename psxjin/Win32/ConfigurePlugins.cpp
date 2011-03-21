@@ -175,20 +175,7 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 				if (type & PSE_LT_GPU) {
 					ComboAddPlugin(hWC_GPU, Config.Gpu);
 				}
-
-				if (type & PSE_LT_PAD) {
-					PADquery query;
-
-					query = (PADquery)GetProcAddress((HMODULE)Lib, "PADquery");
-					if (query != NULL) {
-						if (query() & 0x1)
-							ComboAddPlugin(hWC_PAD1, Config.Pad1);
-						if (query() & 0x2)
-							ComboAddPlugin(hWC_PAD2, Config.Pad2);
-					} else { // just a guess
-						ComboAddPlugin(hWC_PAD1, Config.Pad1);
-					}
-				}
+			
 			}
 		}
 	} while (FindNextFile(Find,&FindData));
@@ -325,75 +312,7 @@ void ConfigureSPU(HWND hW) {
 	SPUconfigure();
 }
 
-void ConfigurePAD1(HWND hW) {
-	ConfPlugin(PADconfigure, IDC_LISTPAD1, "PADconfigure");
-}
 
-void ConfigurePAD2(HWND hW) {
-	ConfPlugin(PADconfigure, IDC_LISTPAD2, "PADconfigure");
-}
-
-void AboutPAD1(HWND hW) {
-	ConfPlugin(PADabout, IDC_LISTPAD1, "PADabout");
-}
-
-void AboutPAD2(HWND hW) {
-	ConfPlugin(PADabout, IDC_LISTPAD2, "PADabout");
-}
-
-
-#define TestPlugin(src, confs, name) \
-	void *drv; \
-	src conf; \
-	int ret = 0; \
-	char * pDLL = GetSelDLL(hW, confs); \
-	char file[256]; \
-	if (pDLL== NULL) return; \
-	strcpy(file, Config.PluginsDir); \
-	strcat(file, pDLL); \
-	drv = SysLoadLibrary(file); \
-	if (drv == NULL) return; \
-	conf = (src) SysLoadSym(drv, name); \
-	if (SysLibError() == NULL) { \
-		ret = conf(); \
-		if (ret == 0) \
-			 SysMessage(_("This plugin reports that should work correctly")); \
-		else SysMessage(_("This plugin reports that should not work correctly")); \
-	} \
-	SysCloseLibrary(drv);
-
-void TestPAD1(HWND hW) {
-	TestPlugin(PADtest, IDC_LISTPAD1, "PADtest");
-}
-
-void TestPAD2(HWND hW) {
-	TestPlugin(PADtest, IDC_LISTPAD2, "PADtest");
-}
-
-#include <shlobj.h>
-
-int SelectPath(HWND hW, char *Title, char *Path) {
-	LPITEMIDLIST pidl;
-	BROWSEINFO bi;
-	char Buffer[256];
-
-	bi.hwndOwner = hW;
-	bi.pidlRoot = NULL;
-	bi.pszDisplayName = Buffer;
-	bi.lpszTitle = Title;
-	bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
-	bi.lpfn = NULL;
-	bi.lParam = 0;
-	if ((pidl = SHBrowseForFolder(&bi)) != NULL) {
-		if (SHGetPathFromIDList(pidl, Path)) {
-			int len = strlen(Path);
-
-			if (Path[len - 1] != '\\') { strcat(Path,"\\"); }
-			return 0;
-		}
-	}
-	return -1;
-}
 
 BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
@@ -429,13 +348,7 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 		case WM_COMMAND:
 			switch(LOWORD(wParam)) {
 				case IDC_CONFIGGPU:  ConfigureGPU(hW); return TRUE;
-       			case IDC_CONFIGSPU:  ConfigureSPU(hW); return TRUE;
-       			case IDC_CONFIGPAD1: ConfigurePAD1(hW); return TRUE;
-       			case IDC_CONFIGPAD2: ConfigurePAD2(hW); return TRUE;
-				case IDC_TESTPAD1:   TestPAD1(hW);  return TRUE;
-				case IDC_TESTPAD2:   TestPAD2(hW);  return TRUE;
-    	        case IDC_ABOUTPAD1:  AboutPAD1(hW); return TRUE;
-    		    case IDC_ABOUTPAD2:  AboutPAD2(hW); return TRUE;
+       			case IDC_CONFIGSPU:  ConfigureSPU(hW); return TRUE;				
 
 				case IDCANCEL: 
 					OnCancel(hW); 

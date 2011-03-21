@@ -365,6 +365,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\directx\dinput.h"
+				>
+			</File>
+			<File
+				RelativePath="..\directx\dinput.lib"
+				>
+			</File>
+			<File
 				RelativePath=".\luaconsole.cpp"
 				>
 			</File>
@@ -434,14 +442,6 @@
 			</File>
 			<File
 				RelativePath="WndMain.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\zeropad.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\zeropad.h"
 				>
 			</File>
 		</Filter>
@@ -1286,6 +1286,10 @@
 		</File>
 		<File
 			RelativePath="..\gpu\res\gpu.bmp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\SSXPad\PadSSSPSXres.h"
 			>
 		</File>
 		<File

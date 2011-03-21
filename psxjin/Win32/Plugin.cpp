@@ -463,11 +463,8 @@ void PADhandleKey(int key) {
 	if(key == EmuCommandTable[EMUCMD_CONFPAD].key
 	&& modifiers == EmuCommandTable[EMUCMD_CONFPAD].keymod)
 	{
-		if (!IsoFile[0])
-		{
-			if (PAD1_configure) PAD1_configure();
-			if (strcmp(Config.Pad1, Config.Pad2)) if (PAD2_configure) PAD2_configure();
-		}
+		
+		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CONTROLCONFIG), gApp.hWnd, (DLGPROC)PADwndProc);
 		return;
 	}
 

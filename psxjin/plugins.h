@@ -140,111 +140,11 @@ void CALLBACK  GPUstopAvi(void);
 void CALLBACK GPUrestartAVINewRes(void);
 void CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
-
-
-//cd rom plugin ;)
-//typedef long (CALLBACK* CDRinit)(void);
-//typedef long (CALLBACK* CDRshutdown)(void);
-//typedef long (CALLBACK* CDRopen)(void);
-//typedef long (CALLBACK* CDRclose)(void);
-//typedef long (CALLBACK* CDRgetTN)(unsigned char *);
-//typedef long (CALLBACK* CDRgetTD)(unsigned char , unsigned char *);
-//typedef long (CALLBACK* CDRreadTrack)(unsigned char *);
-//typedef unsigned char * (CALLBACK* CDRgetBuffer)(void);
-//typedef long (CALLBACK* CDRconfigure)(void);
-//typedef long (CALLBACK* CDRtest)(void);
-//typedef void (CALLBACK* CDRabout)(void);
-//typedef long (CALLBACK* CDRplay)(unsigned char *);
-//typedef long (CALLBACK* CDRstop)(void);
-//struct CdrStat {
-//	unsigned long Type;
-//	unsigned long Status;
-//	unsigned char Time[3];
-//};
-//typedef long (CALLBACK* CDRgetStatus)(struct CdrStat *);
-//typedef char* (CALLBACK* CDRgetDriveLetter)(void);
-//struct SubQ {
-//	char res0[11];
-//	unsigned char ControlAndADR;
-//	unsigned char TrackNumber;
-//	unsigned char IndexNumber;
-//	unsigned char TrackRelativeAddress[3];
-//	unsigned char Filler;
-//	unsigned char AbsoluteAddress[3];
-//	char res1[72];
-//};
-//typedef unsigned char* (CALLBACK* CDRgetBufferSub)(void);
-
-//cd rom function pointers 
-//extern CDRinit               CDR_init;
-//extern CDRshutdown           CDR_shutdown;
-//extern CDRopen               CDR_open;
-//extern CDRclose              CDR_close; 
-//extern CDRtest               CDR_test;
-//extern CDRgetTN              CDR_getTN;
-//extern CDRgetTD              CDR_getTD;
-//extern CDRreadTrack          CDR_readTrack;
-//extern CDRgetBuffer          CDR_getBuffer;
-//extern CDRplay               CDR_play;
-//extern CDRstop               CDR_stop;
-//extern CDRgetStatus          CDR_getStatus;
-//extern CDRgetDriveLetter     CDR_getDriveLetter;
-//extern CDRgetBufferSub       CDR_getBufferSub;
-//extern CDRconfigure          CDR_configure;
-//extern CDRabout              CDR_about;
-
-START_EXTERN_C
-
-
-typedef long (CALLBACK* PADconfigure)(void);
-typedef void (CALLBACK* PADabout)(void);
-typedef long (CALLBACK* PADinit)(long);
-typedef long (CALLBACK* PADshutdown)(void);	
-typedef long (CALLBACK* PADtest)(void);		
-typedef long (CALLBACK* PADclose)(void);
-typedef long (CALLBACK* PADquery)(void);
-typedef long (CALLBACK*	PADreadPort1)(PadDataS*);
-typedef long (CALLBACK* PADreadPort2)(PadDataS*);
-typedef long (CALLBACK* PADkeypressed)(void);
-typedef unsigned char (CALLBACK* PADstartPoll)(int);
-typedef unsigned char (CALLBACK* PADpoll)(unsigned char);
-typedef void (CALLBACK* PADsetSensitive)(int);
-
-//PAD POINTERS
-extern PADconfigure        PAD1_configure;
-extern PADabout            PAD1_about;
-extern PADinit             PAD1_init;
-extern PADshutdown         PAD1_shutdown;
-extern PADtest             PAD1_test;
-extern PADopen             PAD1_open;
-extern PADclose            PAD1_close;
-extern PADquery            PAD1_query;
-extern PADreadPort1        PAD1_readPort1;
-extern PADkeypressed       PAD1_keypressed;
-extern PADstartPoll        PAD1_startPoll;
-extern PADpoll             PAD1_poll;
-extern PADsetSensitive     PAD1_setSensitive;
-
-extern PADconfigure        PAD2_configure;
-extern PADabout            PAD2_about;
-extern PADinit             PAD2_init;
-extern PADshutdown         PAD2_shutdown;
-extern PADtest             PAD2_test;
-extern PADopen             PAD2_open;
-extern PADclose            PAD2_close;
-extern PADquery            PAD2_query;
-extern PADreadPort2        PAD2_readPort2;
-extern PADkeypressed       PAD2_keypressed;
-extern PADstartPoll        PAD2_startPoll;
-extern PADpoll             PAD2_poll;
-extern PADsetSensitive     PAD2_setSensitive;
-
-END_EXTERN_C
+long PAD1_readPort1(PadDataS* pads);
+long PAD2_readPort2(PadDataS* pads);
 
 //int LoadCDRplugin(char *CDRdll);
 //int LoadSPUplugin(char *SPUdll);
-int LoadPAD1plugin(char *PAD1dll);
-int LoadPAD2plugin(char *PAD2dll);
 
 void CALLBACK clearDynarec(void);
 
