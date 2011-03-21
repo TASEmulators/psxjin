@@ -15,8 +15,8 @@
 #define IDD_GPURECORDING                139
 #define IDC_CURSOR1                     142
 #define IDD_CFGSOFT                     501
-#define IDC_CLIPBOARD                   1040
-#define IDC_CLPEDIT                     1041
+#define IDC_CLIPBOARD                   8040
+#define IDC_CLPEDIT                     8041
 #define IDC_TEXWINDOWS                  2001
 #define IDC_TEXFIX                      2002
 #define IDC_TEXLINEAR                   2003
@@ -121,6 +121,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         2084
-#define _APS_NEXT_SYMED_VALUE           101
+#define _APS_NEXT_SYMED_VALUE           801
 #endif
 #endif

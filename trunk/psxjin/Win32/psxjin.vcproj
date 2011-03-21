@@ -397,6 +397,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\padwin.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ram_search.cpp"
 				>
 			</File>
@@ -430,6 +434,14 @@
 			</File>
 			<File
 				RelativePath="WndMain.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\zeropad.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\zeropad.h"
 				>
 			</File>
 		</Filter>
@@ -1290,6 +1302,10 @@
 		</File>
 		<File
 			RelativePath=".\psxjin.rc"
+			>
+		</File>
+		<File
+			RelativePath="E:\zeropad\Windows\resource.h"
 			>
 		</File>
 	</Files>
