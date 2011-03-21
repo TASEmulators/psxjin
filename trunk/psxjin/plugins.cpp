@@ -41,7 +41,7 @@
     dest = (src) SysLoadSym(drv, name); if (checkerr == 1) CheckErr(name); \
     if (checkerr == 2) { err = SysLibError(); if (err != NULL) errval = 1; }
 #endif
-
+/*
 START_EXTERN_C
 //
 ////Gpu function pointers
@@ -127,7 +127,7 @@ PADpoll             PAD2_poll;
 PADsetSensitive     PAD2_setSensitive;
 
 
-END_EXTERN_C
+END_EXTERN_C*/
 
 static const char *err;
 static int errval;
@@ -661,40 +661,12 @@ long CALLBACK PAD1__test(void) { return 0; }
 long CALLBACK PAD1__query(void) { return 3; }
 long CALLBACK PAD1__keypressed() { return 0; }
 
-#define LoadPad1Sym1(dest, name) \
-	LoadSym(PAD1_##dest, PAD##dest, name, 1);
-
-#define LoadPad1SymN(dest, name) \
-	LoadSym(PAD1_##dest, PAD##dest, name, 0);
-
-#define LoadPad1Sym0(dest, name) \
-	LoadSym(PAD1_##dest, PAD##dest, name, 0); \
-	if (PAD1_##dest == NULL) PAD1_##dest = (PAD##dest) PAD1__##dest;
-
 int LoadPAD1plugin(char *PAD1dll) {
-	void *drv;
-
-	hPAD1Driver = SysLoadLibrary(PAD1dll);
-	if (hPAD1Driver == NULL) {
-		PAD1_configure = NULL;
-		SysMessage (_("Could Not load PAD1 plugin %s"), PAD1dll); return -1;
-	}
-	drv = hPAD1Driver;
-	LoadPad1Sym1(init, "PADinit");
-	LoadPad1Sym1(shutdown, "PADshutdown");
-	LoadPad1Sym1(open, "PADopen");
-	LoadPad1Sym1(close, "PADclose");
-	LoadPad1Sym0(query, "PADquery");
-	LoadPad1Sym1(readPort1, "PADreadPort1");
-	LoadPad1Sym0(configure, "PADconfigure");
-	LoadPad1Sym0(test, "PADtest");
-	LoadPad1Sym0(about, "PADabout");
-	LoadPad1Sym0(keypressed, "PADkeypressed");
-	//LoadPad1Sym0(startPoll, "PADstartPoll");
-	//LoadPad1Sym0(poll, "PADpoll");
+	
+	
 	PAD1_startPoll = PAD1__startPoll;
 	PAD1_poll = PAD1__poll;
-	LoadPad1SymN(setSensitive, "PADsetSensitive");
+	
 
 	return 0;
 }
@@ -839,43 +811,6 @@ long CALLBACK PAD2__test(void) { return 0; }
 long CALLBACK PAD2__query(void) { return 3; }
 long CALLBACK PAD2__keypressed() { return 0; }
 
-#define LoadPad2Sym1(dest, name) \
-	LoadSym(PAD2_##dest, PAD##dest, name, 1);
-
-#define LoadPad2Sym0(dest, name) \
-	LoadSym(PAD2_##dest, PAD##dest, name, 0); \
-	if (PAD2_##dest == NULL) PAD2_##dest = (PAD##dest) PAD2__##dest;
-
-#define LoadPad2SymN(dest, name) \
-	LoadSym(PAD2_##dest, PAD##dest, name, 0);
-
-int LoadPAD2plugin(char *PAD2dll) {
-	void *drv;
-
-	hPAD2Driver = SysLoadLibrary(PAD2dll);
-	if (hPAD2Driver == NULL) {
-		PAD2_configure = NULL;
-		SysMessage (_("Could Not load PAD plugin %s"), PAD2dll); return -1;
-	}
-	drv = hPAD2Driver;
-	LoadPad2Sym1(init, "PADinit");
-	LoadPad2Sym1(shutdown, "PADshutdown");
-	LoadPad2Sym1(open, "PADopen");
-	LoadPad2Sym1(close, "PADclose");
-	LoadPad2Sym0(query, "PADquery");
-	LoadPad2Sym1(readPort2, "PADreadPort2");
-	LoadPad2Sym0(configure, "PADconfigure");
-	LoadPad2Sym0(test, "PADtest");
-	LoadPad2Sym0(about, "PADabout");
-	LoadPad2Sym0(keypressed, "PADkeypressed");
-	//LoadPad2Sym0(startPoll, "PADstartPoll");
-	//LoadPad2Sym0(poll, "PADpoll");
-	PAD2_startPoll = PAD2__startPoll;
-	PAD2_poll = PAD2__poll;
-	LoadPad2SymN(setSensitive, "PADsetSensitive");
-
-	return 0;
-}
 
 
 void CALLBACK clearDynarec(void) {
@@ -886,11 +821,7 @@ int LoadPlugins() {
 	int ret;
 	char Plugin[256];
 
-	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad1);
-	if (LoadPAD1plugin(Plugin) == -1) return -1;
-	sprintf(Plugin, "%s%s", Config.PluginsDir, Config.Pad2);
-	if (LoadPAD2plugin(Plugin) == -1) return -1;
-
+	PADinit();
 	ret = CDRinit();
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
 	ret = GPUinit();

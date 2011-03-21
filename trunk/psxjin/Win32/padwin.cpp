@@ -1,294 +1,477 @@
-/*  ZeroPAD - author: zerofrog(@gmail.com)
- *  Copyright (C) 2006-2007 
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+#define WINVER 0x0500
+#define _WIN32_WINNT WINVER
+#define DIRECTINPUT_VERSION 0x0800
 
-#include <string.h>
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+#include "..\\directx\\dinput.h"
 
-#include "resource.h"
-#include "zeropad.h"
+#include "PSXCommon.h"
 
-//#include <pthread>
-#include <string>
 
-using namespace std;
+HWND hTargetWnd;
 
-HINSTANCE hInst=NULL;
-static u32 s_keyPress[2], s_keyRelease[2];
-extern u16 status[2];
-
-extern string s_strIniPath;
-LRESULT WINAPI PADwndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-WNDPROC GSwndProc=NULL;
-HWND GShwnd=NULL;
-
-void SaveConfig()
+static struct
 {
-    char *szTemp;
-	char szIniFile[256], szValue[256], szProf[256];
-    int i, j;
+	ConfigKey configkey;
+	int devcnt;
+	LPDIRECTINPUT8 pDInput;
+	LPDIRECTINPUTDEVICE8 pDKeyboard;
+	LPDIRECTINPUTDEVICE8 pDDevice[4];
+	LPDIRECTINPUTEFFECT pDEffect[4][2]; /* for Small & Big Motor */
+	DIJOYSTATE JoyState[4];
+	u16 padStat[2];
+	int padID[2];
+	int padMode1[2];
+	int padMode2[2];
+	int padModeE[2];
+	int padModeC[2];
+	int padModeF[2];
+	int padVib0[2];
+	int padVib1[2];
+	int padVibF[2][4];
+	int padVibC[2];
+	DWORD padPress[2][16];
+	int curPad;
+	int curByte;
+	int curCmd;
+	int cmdLen;
+} global;
 
-	GetModuleFileName(GetModuleHandle((LPCSTR)hInst), szIniFile, 256);
-	szTemp = strrchr(szIniFile, '\\');
 
-	if(!szTemp) return;
-	strcpy(szTemp, "\\inis\\zeropad.ini");
+void PADconfigure (void)
+{
+	if (n_open == 0)
+	{
+		memset (&global, 0, sizeof (global));
+		if (DialogBox (gApp.hInstance, MAKEINTRESOURCE (IDD_DIALOG1), GetActiveWindow(), (DLGPROC)ConfigureDlgProc) == IDOK)
+			SaveConfig();
+		ReleaseDirectInput();
+	}
+}
 
-	for (j=0; j<2; j++) {
-		for (i=0; i<PADKEYS; i++) {
-            sprintf(szProf, "%d_%d", j, i);
-			sprintf(szValue, "%d", conf.keys[j][i]);
-            WritePrivateProfileString("Interface", szProf,szValue,szIniFile);
+static BOOL CALLBACK EnumAxesCallback (LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
+{
+	LPDIRECTINPUTDEVICE8 pDDevice = (LPDIRECTINPUTDEVICE8)pvRef;
+	DIPROPRANGE diprg;
+	diprg.diph.dwSize = sizeof (diprg);
+	diprg.diph.dwHeaderSize	= sizeof (diprg.diph);
+	diprg.diph.dwObj = lpddoi->dwType;
+	diprg.diph.dwHow = DIPH_BYID;
+	diprg.lMin = -128;
+	diprg.lMax = 127;
+	pDDevice->SetProperty (DIPROP_RANGE, &diprg.diph);
+	return DIENUM_CONTINUE;
+}
+
+static BOOL CALLBACK EnumJoysticksCallback (const DIDEVICEINSTANCE* instance, VOID* pContext)
+{
+	const int devno = global.devcnt;
+	if (devno >= 4)
+		return DIENUM_STOP;
+	HRESULT result = global.pDInput->CreateDevice (instance->guidInstance, &global.pDDevice[devno], NULL);
+	if (FAILED (result))
+		return DIENUM_CONTINUE;
+	global.devcnt++;
+	return DIENUM_CONTINUE;
+}
+
+static bool ReleaseDirectInput (void)
+{
+	int index = 4;
+	while (index--)
+	{
+		if (global.pDEffect[index][0])
+		{
+			global.pDEffect[index][0]->Unload();
+			global.pDEffect[index][0]->Release();
+			global.pDEffect[index][0] = NULL;
+		}
+		if (global.pDEffect[index][1])
+		{
+			global.pDEffect[index][1]->Unload();
+			global.pDEffect[index][1]->Release();
+			global.pDEffect[index][1] = NULL;
+		}
+		if (global.pDDevice[index])
+		{
+			global.pDDevice[index]->Unacquire();
+			global.pDDevice[index]->Release();
+			global.pDDevice[index] = NULL;
 		}
 	}
-
-    sprintf(szValue,"%u",conf.log);
-	WritePrivateProfileString("Interface", "Logging",szValue,szIniFile);
+	if (global.pDKeyboard)
+	{
+		global.pDKeyboard->Unacquire();
+		global.pDKeyboard->Release();
+		global.pDKeyboard = NULL;
+	}
+	if (global.pDInput)
+	{
+		global.pDInput->Release();
+		global.pDInput = NULL;
+	}
+	global.devcnt = 0;
+	return FALSE;
 }
 
-void LoadConfig()
+static bool InitDirectInput (void)
 {
-    FILE *fp;
-	char *szTemp;
-	char szIniFile[256], szValue[256], szProf[256];
-	int i, j;
-
-    memset(&conf, 0, sizeof(conf));
-#ifdef _WIN32
-    conf.keys[0][0] = 'W';			// L2
-    conf.keys[0][1] = 'O';			// R2
-    conf.keys[0][2] = 'A';			// L1
-    conf.keys[0][3] = ';';			// R1
-    conf.keys[0][4] = 'I';			// TRIANGLE
-    conf.keys[0][5] = 'L';			// CIRCLE
-    conf.keys[0][6] = 'K';			// CROSS
-    conf.keys[0][7] = 'J';			// SQUARE
-    conf.keys[0][8] = 'V';	// SELECT
-    conf.keys[0][11] = 'N';	// START
-    conf.keys[0][12] = 'E';	// UP
-    conf.keys[0][13] = 'F';	// RIGHT
-    conf.keys[0][14] = 'D';	// DOWN
-    conf.keys[0][15] = 'S';	// LEFT
-#endif
-	conf.log = 0;
-
-    GetModuleFileName(GetModuleHandle((LPCSTR)hInst), szIniFile, 256);
-	szTemp = strrchr(szIniFile, '\\');
-
-	if(!szTemp) return ;
-	strcpy(szTemp, "\\inis\\zeropad.ini");
-    fp=fopen("inis\\zeropad.ini","rt");//check if usbnull.ini really exists
-	if (!fp) {
-		CreateDirectory("inis",NULL); 
-        SaveConfig();//save and return
-		return ;
+	if (global.pDInput)
+		return TRUE;
+	HRESULT result = DirectInput8Create (hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&global.pDInput, NULL);
+	if (FAILED (result))
+		return ReleaseDirectInput();
+	result = global.pDInput->CreateDevice (GUID_SysKeyboard, &global.pDKeyboard, NULL);
+	if (FAILED (result))
+		return ReleaseDirectInput();
+	result = global.pDInput->EnumDevices (DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
+	if (FAILED (result))
+		return ReleaseDirectInput();
+	result = global.pDKeyboard->SetDataFormat (&c_dfDIKeyboard);
+	if (FAILED (result))
+		return ReleaseDirectInput();
+	if (hTargetWnd)
+	{
+		global.pDKeyboard->Unacquire();
+		result = global.pDKeyboard->SetCooperativeLevel (hTargetWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+		if (FAILED (result))
+			return ReleaseDirectInput();
 	}
-	fclose(fp);
-
-    for (j=0; j<2; j++) {
-		for (i=0; i<PADKEYS; i++) {
-            sprintf(szProf, "%d_%d", j, i);
-            GetPrivateProfileString("Interface", szProf, NULL, szValue, 20, szIniFile);
-            conf.keys[j][i] = strtoul(szValue, NULL, 10);
+	int index = global.devcnt;
+	while (index--)
+	{
+		const LPDIRECTINPUTDEVICE8 pDDevice = global.pDDevice[index];
+		result = pDDevice->SetDataFormat (&c_dfDIJoystick);
+		if (FAILED (result))
+			return ReleaseDirectInput();
+		if (hTargetWnd)
+		{
+			pDDevice->Unacquire();
+			result = pDDevice->SetCooperativeLevel (hTargetWnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
+			if (FAILED (result))
+				return ReleaseDirectInput();
 		}
-	}
+		struct
+		{
+			DIPROPDWORD dipdw;
+			DWORD rgdwAxes[2];
+			LONG rglDirection[2];
+			DIPERIODIC per;
+			DICONSTANTFORCE cf;
+			DIEFFECT eff;
+		} local;
+		memset (&local, 0, sizeof (local));
+		local.dipdw.diph.dwSize = sizeof (DIPROPDWORD);
+		local.dipdw.diph.dwHeaderSize = sizeof (DIPROPHEADER);
+		local.dipdw.diph.dwHow = DIPH_DEVICE;
+		local.dipdw.dwData = DIPROPAUTOCENTER_OFF;
+		pDDevice->SetProperty (DIPROP_AUTOCENTER, &local.dipdw.diph);
+		result = pDDevice->EnumObjects (EnumAxesCallback, pDDevice, DIDFT_AXIS);
+		if (FAILED (result))
+			return ReleaseDirectInput();
 
-    GetPrivateProfileString("Interface", "Logging", NULL, szValue, 20, szIniFile);
-    conf.log = strtoul(szValue, NULL, 10);
-}
+		local.rgdwAxes[0] = DIJOFS_X;
+		local.rgdwAxes[1] = DIJOFS_Y;
+		local.eff.dwSize = sizeof (DIEFFECT);
+		local.eff.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
+		local.eff.dwDuration = INFINITE;
+		local.eff.dwGain = DI_FFNOMINALMAX;
+		local.eff.dwTriggerButton = DIEB_NOTRIGGER;
+		local.eff.cAxes = 2;
+		local.eff.rgdwAxes = local.rgdwAxes;
+		local.eff.rglDirection = local.rglDirection;
 
-void SysMessage(char *fmt, ...) {
-	va_list list;
-	char tmp[512];
+		/* Small Motor */
+		local.eff.cbTypeSpecificParams = sizeof (DIPERIODIC);
+		local.eff.lpvTypeSpecificParams = &local.per;
+		result = pDDevice->CreateEffect (GUID_Square , &local.eff, &global.pDEffect[index][0], NULL);
+		if (FAILED (result))
+			global.pDEffect[index][0] = NULL;
 
-	va_start(list,fmt);
-	vsprintf(tmp,fmt,list);
-	va_end(list);
-	MessageBox(0, tmp, "PADwinKeyb Msg", 0);
-}
-
-s32  _PADopen(void *pDsp)
-{
-	memset(&event, 0, sizeof(event));
-	LoadConfig();  
-    s_keyPress[0] = s_keyPress[1] = 0;
-    s_keyRelease[0] = s_keyRelease[1] = 0;
-	
-    if( GShwnd != NULL && GSwndProc != NULL ) {
-        // revert
-        SetWindowLongPtr(GShwnd, GWLP_WNDPROC, (LPARAM)(WNDPROC)(GSwndProc));
-    }
-
-    GShwnd = (HWND)*(long*)pDsp;
-    GSwndProc = (WNDPROC)GetWindowLongPtr(GShwnd, GWLP_WNDPROC);
-    GSwndProc = ((WNDPROC)SetWindowLongPtr(GShwnd, GWLP_WNDPROC, (LPARAM)(WNDPROC)(PADwndProc)));
-
-    return 0;
-}
-
-void _PADclose()
-{
-    if( GShwnd != NULL && GSwndProc != NULL ) {
-        SetWindowLongPtr(GShwnd, GWLP_WNDPROC, (LPARAM)(WNDPROC)(GSwndProc));
-        GSwndProc = NULL;
-        GShwnd = NULL;
-    }
-}
-
-void _PADupdate(int pad)
-{ 
-    status[pad] |= s_keyRelease[pad];
-    status[pad] &= ~s_keyPress[pad];
-    s_keyRelease[pad] = 0;
-    s_keyPress[pad] = 0;    
-}
-
-void CALLBACK PADupdate(int pad)
-{
-}
-
-LRESULT WINAPI PADwndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    int i,pad,keyPress[2]={0},keyRelease[2]={0};
-    static bool lbutton=false,rbutton=false;
-
-	switch (msg) {
-		case WM_KEYDOWN:
-			if (lParam & 0x40000000)
-				return TRUE;
-
-            for(pad = 0; pad < 2; ++pad ) {
-                for (i=0; i<PADKEYS; i++) {
-                    if (wParam == conf.keys[pad][i]) {
-                        keyPress[pad] |=(1<<i);
-                        keyRelease[pad] &=~(1<<i);
-                        break;
-                    }
-                }
-            }
-
-            event.event = KEYPRESS;
-            event.key = wParam;
-			break;
-
-		case WM_KEYUP:
-            for(pad = 0; pad < 2; ++pad ) {
-			    for (i=0; i<PADKEYS; i++) {
-                    if (wParam == conf.keys[pad][i]) {
-                        keyPress[pad] &=~(1<<i);
-                        keyRelease[pad] |= (1<<i);
-                        break;
-                    }
-                }
-            }
-
-            event.event = KEYRELEASE;
-            event.key = wParam;
-			break;
-
-		case WM_LBUTTONDOWN:
-			lbutton = true;
-			break;
-
-		case WM_LBUTTONUP:
-			g_lanalog[0].x = 0x80;
-			g_lanalog[0].y = 0x80;
-            g_lanalog[1].x = 0x80;
-			g_lanalog[1].y = 0x80;
-			lbutton = false;
-			break;
-
-		case WM_RBUTTONDOWN:
-			rbutton = true;
-			break;
-
-		case WM_RBUTTONUP:
-			g_ranalog[0].x = 0x80;
-			g_ranalog[0].y = 0x80;
-            g_ranalog[1].x = 0x80;
-			g_ranalog[1].y = 0x80;
-			rbutton = false;
-			break;
-
-		case WM_MOUSEMOVE:
-			if(lbutton)
-			{
-				g_lanalog[0].x = LOWORD(lParam) & 254;
-				g_lanalog[0].y = HIWORD(lParam) & 254;
-                g_lanalog[1].x = LOWORD(lParam) & 254;
-				g_lanalog[1].y = HIWORD(lParam) & 254;
-			}
-			if(rbutton)
-			{
-				g_ranalog[0].x = LOWORD(lParam) & 254;
-				g_ranalog[0].y = HIWORD(lParam) & 254;
-                g_ranalog[1].x = LOWORD(lParam) & 254;
-				g_ranalog[1].y = HIWORD(lParam) & 254;
-			}
-			break;
-
-		case WM_DESTROY:
-		case WM_QUIT:
-			event.event = KEYPRESS;
-			event.key = VK_ESCAPE;
-		    return GSwndProc(hWnd, msg, wParam, lParam);
-
-	    default:
-			return GSwndProc(hWnd, msg, wParam, lParam);
-	}
-
-    for(pad = 0; pad < 2; ++pad ) {
-        s_keyPress[pad] |= keyPress[pad];
-        s_keyPress[pad] &= ~keyRelease[pad];
-        s_keyRelease[pad] |= keyRelease[pad];
-        s_keyRelease[pad] &= ~keyPress[pad];
-    }
-
-
-
+		/* Big Motor */
+		local.eff.cbTypeSpecificParams = sizeof (DICONSTANTFORCE);
+		local.eff.lpvTypeSpecificParams = &local.cf;
+		result = pDDevice->CreateEffect (GUID_ConstantForce , &local.eff, &global.pDEffect[index][1], NULL);
+		if (FAILED (result))
+			global.pDEffect[index][1] = NULL;
+ 	}
 	return TRUE;
 }
 
-string GetKeyLabel(const int pad, const int index)
+static bool AcquireDevice (LPDIRECTINPUTDEVICE8 lpDirectInputDevice)
 {
-	const int key = conf.keys[pad][index];
-	char buff[16]="NONE)";
+	if (FAILED (lpDirectInputDevice->Acquire()))
+	{
+		HRESULT result = lpDirectInputDevice->Acquire();
+		if (result == DIERR_OTHERAPPHASPRIO)
+			return FALSE;
+		if (FAILED (result))
+			return ReleaseDirectInput();
+	}
+	return TRUE;
+}
+
+/* Small Motor */
+static bool SetDeviceForceS (int pad, DWORD force)
+{
+	InitDirectInput();
+	if (global.pDEffect[pad][0])
+	{
+		if ( force == 0) {
+			if (FAILED (global.pDEffect[pad][0]->Stop())) {
+				AcquireDevice (global.pDDevice[pad]);
+				if (FAILED (global.pDEffect[pad][0]->Stop()))
+					return ReleaseDirectInput();
+			}
+			return TRUE;
+		}
+		LONG rglDirection[2] = { 0, 0 };
+		DIPERIODIC per;
+		rglDirection[0] = force;
+		rglDirection[1] = force;
+		per.dwMagnitude = force;
+		per.dwPeriod = (DWORD) (0.01 * DI_SECONDS);
+		per.lOffset = 0;
+		per.dwPhase = 0;
+		DIEFFECT eff;
+		eff.dwSize = sizeof (DIEFFECT);
+		eff.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
+		eff.cAxes = 2;
+		eff.rglDirection = rglDirection;
+		eff.lpEnvelope = 0;
+		eff.cbTypeSpecificParams = sizeof (DIPERIODIC);
+		eff.lpvTypeSpecificParams = &per;
+		if (FAILED (global.pDEffect[pad][0]->SetParameters (&eff, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START)))
+			return ReleaseDirectInput();
+		if (FAILED (global.pDEffect[pad][0]->Start (1, 0)))
+		{
+			AcquireDevice (global.pDDevice[pad]);
+			if (FAILED (global.pDEffect[pad][0]->Start (1, 0)))
+				return ReleaseDirectInput();
+		}
+	}
+	return TRUE;
+}
+
+/* Big Motor */
+static bool SetDeviceForceB (int pad, DWORD force)
+{
+	InitDirectInput();
+	if (global.pDEffect[pad][1])
+	{
+		if ( force == 0) {
+			if (FAILED (global.pDEffect[pad][1]->Stop())) {
+				AcquireDevice (global.pDDevice[pad]);
+				if (FAILED (global.pDEffect[pad][1]->Stop()))
+					return ReleaseDirectInput();
+			}
+			return TRUE;
+		}
+		LONG rglDirection[2] = { 0, 0 };
+		DICONSTANTFORCE cf;
+		rglDirection[0] = force;
+		rglDirection[1] = force;
+		cf.lMagnitude = force;
+		DIEFFECT eff;
+		eff.dwSize = sizeof (DIEFFECT);
+		eff.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
+		eff.cAxes = 2;
+		eff.rglDirection = rglDirection;
+		eff.lpEnvelope = 0;
+		eff.cbTypeSpecificParams = sizeof (DICONSTANTFORCE);
+		eff.lpvTypeSpecificParams = &cf;
+		if (FAILED (global.pDEffect[pad][1]->SetParameters (&eff, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START)))
+			return ReleaseDirectInput();
+		if (FAILED (global.pDEffect[pad][1]->Start (1, 0)))
+		{
+			AcquireDevice (global.pDDevice[pad]);
+			if (FAILED (global.pDEffect[pad][1]->Start (1, 0)))
+				return ReleaseDirectInput();
+		}
+	}
+	return TRUE;
+}
+
+static bool GetJoyState (const int devno)
+{
+	InitDirectInput();
+	if (global.pDDevice[devno] == NULL)
+		return FALSE;
+	global.pDDevice[devno]->Poll();
+	if (FAILED (global.pDDevice[devno]->GetDeviceState (sizeof (DIJOYSTATE), &global.JoyState[devno])))
+	{
+		AcquireDevice (global.pDDevice[devno]);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+static bool GetKeyState (u8* keyboard)
+{
+	InitDirectInput();
+	if (global.pDKeyboard == NULL)
+		return FALSE;
+	global.pDKeyboard->Poll();
+	if (FAILED (global.pDKeyboard->GetDeviceState (256, keyboard)))
+	{
+		AcquireDevice (global.pDKeyboard);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+static void MakeConfigFileName (char* fname)
+{
+	GetModuleFileName (hInstance, fname, 256);
+	strcpy (fname + strlen (fname) - 3, "cfg");
+}
+
+static void SaveConfig (void)
+{
+	
+}
+
+static void LoadConfig (void)
+{
+	global.padVibC[0] = global.padVibC[1] = -1;
+	for (int cnt = 21; cnt--; )
+	{
+		const int key0 = global.config.keys[0][cnt];
+		if (key0 >= 0x1000)
+			global.padVibC[0] = (key0 & 0xfff) / 0x100;
+		const int key1 = global.config.keys[1][cnt];
+		if (key1 >= 0x1000)
+			global.padVibC[1] = (key1 & 0xfff) / 0x100;
+	}
+}
+
+static void PADsetMode (const int pad, const int mode)
+{
+	static const u8 padID[] = { 0x41, 0x73, 0x41, 0x79 };
+	global.padMode1[pad] = mode;
+	global.padVib0[pad] = 0;
+	global.padVib1[pad] = 0;
+	global.padVibF[pad][0] = 0;
+	global.padVibF[pad][1] = 0;
+	global.padID[pad] = padID[global.padMode2[pad] * 2 + mode];
+}
+
+static void KeyPress (const int pad, const int index, const bool press)
+{
+	if (index < 16)
+	{
+		if (press)
+		{
+			global.padStat[pad] &= ~(1 << index);
+			if (global.padPress[pad][index] == 0)
+				global.padPress[pad][index] = GetTickCount();
+		}
+		else
+		{
+			global.padStat[pad] |= 1 << index;
+			global.padPress[pad][index] = 0;
+		}
+	}
+	else
+	{
+		static bool prev[2] = { FALSE, FALSE };
+		if ((prev[pad] != press) && (global.padModeF[pad] == 0))
+		{
+			prev[pad] = press;
+			if (press) PADsetMode (pad, !global.padMode1[pad]);
+		}
+	}
+}
+
+static void UpdateState (const int pad)
+{
+	static int flag_keyboard;
+	static int flag_joypad[4];
+	if (pad == 0)
+	{
+		flag_keyboard = 0;
+		flag_joypad[0] = 0;
+		flag_joypad[1] = 0;
+		flag_joypad[2] = 0;
+		flag_joypad[3] = 0;
+	}
+	static u8 keystate[256];
+	for (int index = 17; index--; )
+	{
+		const int key = global.config.keys[pad][index];
+		if (key == 0)
+			continue;
+		else if (key < 0x100)
+		{
+			if (flag_keyboard == FALSE)
+			{
+				flag_keyboard = TRUE;
+				if (GetKeyState (keystate) == FALSE)
+					return;
+			}
+			KeyPress (pad, index, keystate[key] & 0x80);
+		}
+		else
+		{
+			const int joypad = ((key & 0xfff) / 100);
+			if (flag_joypad[joypad] == FALSE)
+			{
+				flag_joypad[joypad] = TRUE;
+				if (GetJoyState (joypad) == FALSE)
+					return;
+			}
+			if (key < 0x2000)
+			{
+				KeyPress (pad, index, global.JoyState[joypad].rgbButtons[key & 0xff]);
+			}
+			else if (key < 0x3000)
+			{
+				const int state = ((int*)&global.JoyState[joypad].lX)[(key & 0xff) /2];
+				switch (key & 1)
+				{
+				case 0: KeyPress (pad, index, state < -64); break;
+				case 1: KeyPress (pad, index, state >= 64); break;
+				}
+			}
+			else
+			{
+				const u32 state = global.JoyState[joypad].rgdwPOV[(key & 0xff) /4];
+				switch (key & 3)
+				{
+				case 0: KeyPress (pad, index, (state >= 0 && state <= 4500) || (state >= 31500 && state <= 36000)); break;
+				case 1: KeyPress (pad, index, state >= 4500  && state <= 13500); break;
+				case 2: KeyPress (pad, index, state >= 13500 && state <= 22500); break;
+				case 3: KeyPress (pad, index, state >= 22500 && state <= 31500); break;
+				}
+			}
+		}
+	}
+
+	
+}
+
+static void set_label (const HWND hWnd, const int pad, const int index)
+{
+	const int key = global.config.keys[pad][index];
+	char buff[64];
 	if (key < 0x100)
 	{
 		if (key == 0)
 			strcpy (buff, "NONE");
-        else {
-            if(key>=0x60 && key<=0x69) {
-				sprintf(buff, "NumPad %c", '0' + key - 0x60);
-			}
-            else sprintf(buff, "%c", key);
-        }
-    }
+		else if (GetKeyNameText (key << 16, buff, sizeof (buff)) == 0)
+			wsprintf (buff, "Keyboard 0x%02X", key);
+	}
 	else if (key >= 0x1000 && key < 0x2000)
 	{
-		sprintf (buff, "J%d_%d", (key & 0xfff) / 0x100, (key & 0xff) + 1);
+		wsprintf (buff, "J%d_%d", (key & 0xfff) / 0x100, (key & 0xff) + 1);
 	}
 	else if (key >= 0x2000 && key < 0x3000)
 	{
 		static const char name[][4] = { "MIN", "MAX" };
 		const int axis = (key & 0xff);
-		sprintf (buff, "J%d_AXIS%d_%s", (key & 0xfff) / 0x100, axis / 2, name[axis % 2]);
+		wsprintf (buff, "J%d_AXIS%d_%s", (key & 0xfff) / 0x100, axis / 2, name[axis % 2]);
 		if (index >= 17 && index <= 20)
 			buff[strlen (buff) -4] = '\0';
 	}
@@ -296,154 +479,467 @@ string GetKeyLabel(const int pad, const int index)
 	{
 		static const char name[][7] = { "FOWARD", "RIGHT", "BACK", "LEFT" };
 		const int pov = (key & 0xff);
-		sprintf (buff, "J%d_POV%d_%s", (key & 0xfff) / 0x100, pov /4, name[pov % 4]);
+		wsprintf (buff, "J%d_POV%d_%s", (key & 0xfff) / 0x100, pov /4, name[pov % 4]);
 	}
-
-    return buff;
+	Button_SetText (GetDlgItem (hWnd, IDC_ESELECT + index), buff);
 }
 
-BOOL CALLBACK ConfigureDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	HWND hWC;
-	TCITEM tcI; 
-	int i,key, numkeys;
-    u8* pkeyboard;
-	static int disabled=0;
-    static int padn=0;
 
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			LoadConfig();
-            padn = 0;
-            if (conf.log)        CheckDlgButton(hW, IDC_LOG, TRUE);
+void CALLBACK PADshutdown (void)
+{
+}
 
-			for (i=0; i<PADKEYS; i++) {
-				hWC = GetDlgItem(hW, IDC_L2 + i*2);
-				Button_SetText(hWC, GetKeyLabel(padn, i).c_str());
-			}
-
-			hWC = GetDlgItem(hW, IDC_TABC);
-
-			tcI.mask = TCIF_TEXT;
-			tcI.pszText = "PAD 1";
-
-			TabCtrl_InsertItem(hWC, 0, &tcI);
-
-			tcI.mask = TCIF_TEXT;
-			tcI.pszText = "PAD 2";
-
-			TabCtrl_InsertItem(hWC, 1, &tcI);
-			return TRUE;
-
-		case WM_TIMER:
-			if (disabled){
-                key = 0;
-                //pkeyboard = SDL_GetKeyState(&numkeys);
-                for (int i = 0; i < numkeys; ++i) {
-				    if( pkeyboard[i] ) {
-                        key = i;
-                        break;
-                    }
-				}
-    
-                if( key == 0 ) {
-                    // check joystick
-                }
-                
-				if (key != 0){
-					KillTimer(hW, 0x80);
-					hWC = GetDlgItem(hW, disabled);
-                    conf.keys[padn][disabled-IDC_L2] = key;
-                    Button_SetText(hWC, GetKeyLabel(padn, disabled-IDC_L2).c_str());
-					EnableWindow(hWC, TRUE);
-					disabled=0;
-					return TRUE;
-				}
-            }
-			return TRUE;
-
-		case WM_COMMAND:
-			for(i = IDC_L2; i <= IDC_LEFT; i+=2)
-			{
-				if(LOWORD(wParam) == i)
-				{
-				  if (disabled)//change selection
-					EnableWindow(GetDlgItem(hW, disabled), TRUE);
-
-				  EnableWindow(GetDlgItem(hW, disabled=wParam), FALSE);
-				
-				  SetTimer(hW, 0x80, 250, NULL);
-				
-				  return TRUE;
-				}
-			}
-
-			switch(LOWORD(wParam)) {
-				case IDCANCEL:
-					KillTimer(hW, 0x80);
-					EndDialog(hW, TRUE);
-					return TRUE;
-				case IDOK:
-					KillTimer(hW, 0x80);
-					if (IsDlgButtonChecked(hW, IDC_LOG))
-						 conf.log = 1;
-					else conf.log = 0;
-					SaveConfig();
-					EndDialog(hW, FALSE);
-					return TRUE;
-			}
-            break;
-
-		case WM_NOTIFY:
-			switch (wParam) {
-				case IDC_TABC:
-					hWC = GetDlgItem(hW, IDC_TABC);
-					padn = TabCtrl_GetCurSel(hWC);
-					
-					for (i=0; i<PADKEYS; i++) {
-						hWC = GetDlgItem(hW, IDC_EL3 + i);
-                        Button_SetText(hWC, GetKeyLabel(padn, i).c_str());
-					}
-
-					return TRUE;
-			}
-			return FALSE;
+static int n_open = 0;
+s32 PADopen (HWND hWnd)
+{
+	if (!IsWindow (hWnd) && !IsBadReadPtr ((u32*)hWnd, 4))
+		hWnd = *(HWND*)hWnd;
+	if (!IsWindow (hWnd))
+		hWnd = NULL;
+	else
+	{
+		while (GetWindowLong (hWnd, GWL_STYLE) & WS_CHILD)
+			hWnd = GetParent (hWnd);
 	}
-	return FALSE;
-}
-
-BOOL CALLBACK AboutDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			return TRUE;
-
-		case WM_COMMAND:
-			switch(LOWORD(wParam)) {
-				case IDOK:
-					EndDialog(hW, FALSE);
-					return TRUE;
-			}
+	hTargetWnd = hWnd;
+	if (n_open++ == FALSE)
+	{
+		memset (&global, 0, sizeof (global));
+		global.padStat[0] = 0xffff;
+		global.padStat[1] = 0xffff;
+		LoadConfig();
+		PADsetMode (0, 0);
+		PADsetMode (1, 0);
 	}
-	return FALSE;
-}
-
-void CALLBACK PADconfigure() {
-    DialogBox(hInst,
-              MAKEINTRESOURCE(IDD_DIALOG1),
-              GetActiveWindow(),  
-              (DLGPROC)ConfigureDlgProc);
-}
-
-void CALLBACK PADabout() {
-	SysMessage("Author: zerofrog\nThanks to SSSPSXPad, TwinPAD, and PADwin plugins");
-}
-
-s32 CALLBACK PADtest() {
 	return 0;
 }
 
-BOOL APIENTRY DllMain(HANDLE hModule,                  // DLL INIT
-                      DWORD  dwReason, 
-                      LPVOID lpReserved) {
-	hInst = (HINSTANCE)hModule;
-	return TRUE;                                          // very quick :)
+void PADclose (void)
+{
+	if (--n_open == 0)
+		ReleaseDirectInput();
 }
+
+u32 CALLBACK PADquery (void)
+{
+	return 3;
+}
+
+u8 PADstartPoll (int pad)
+{
+	global.curPad = pad -1;
+	global.curByte = 0;
+	return 0xff;
+}
+
+static const u8 cmd40[8] =
+{
+	0xff, 0x5a, 0x00, 0x00, 0x02, 0x00, 0x00, 0x5a
+};
+static const u8 cmd41[8] =
+{
+	0xff, 0x5a, 0xff, 0xff, 0x03, 0x00, 0x00, 0x5a,
+};
+static const u8 cmd44[8] =
+{
+	0xff, 0x5a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+static const u8 cmd45[8] =
+{
+	0xff, 0x5a, 0x03, 0x02, 0x01, 0x02, 0x01, 0x00,
+};
+static const u8 cmd46[8] =
+{
+	0xff, 0x5a, 0x00, 0x00, 0x01, 0x02, 0x00, 0x0a,
+};
+static const u8 cmd47[8] =
+{
+	0xff, 0x5a, 0x00, 0x00, 0x02, 0x00, 0x01, 0x00,
+};
+static const u8 cmd4c[8] =
+{
+	0xff, 0x5a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+static const u8 cmd4d[8] =
+{
+	0xff, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+};
+static const u8 cmd4f[8] =
+{
+	0xff, 0x5a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5a,
+};
+
+static u8 get_analog (const int key)
+{
+	const int pad = ((key & 0xf00) / 0x100);
+	const int pos = ((key & 0x0ff) /2);
+	return (u8)(((int*)&global.JoyState[pad].lX)[pos] + 128);
+}
+
+static u8 get_pressure (const DWORD now, const DWORD press)
+{
+	return 255;
+}
+
+u8 CALLBACK PADpoll (const u8 value)
+{
+	const int pad = global.curPad;
+	const int cur = global.curByte;
+	static u8 buf[20];
+	if (cur == 0)
+	{
+		global.curByte++;
+		global.curCmd = value;
+		switch (value)
+		{
+		case 0x40:
+			global.cmdLen = sizeof (cmd40);
+			memcpy (buf, cmd40, sizeof (cmd40));
+			return 0xf3;
+		case 0x41:
+			global.cmdLen = sizeof (cmd41);
+			memcpy (buf, cmd41, sizeof (cmd41));
+			return 0xf3;
+		case 0x42:
+		case 0x43:
+			if (value == 0x42) UpdateState (pad);
+			global.cmdLen = 2 + 2 * (global.padID[pad] & 0x0f);
+			buf[1] = global.padModeC[pad] ? 0x00 : 0x5a;
+			*(u16*)&buf[2] = global.padStat[pad];
+			if (value == 0x43 && global.padModeE[pad])
+			{
+				buf[4] = 0;
+				buf[5] = 0;
+				buf[6] = 0;
+				buf[7] = 0;
+				return 0xf3;
+			}
+			else
+			{
+				buf[ 4] = get_analog (global.config.keys[pad][19]);
+				buf[ 5] = get_analog (global.config.keys[pad][20]);
+				buf[ 6] = get_analog (global.config.keys[pad][17]);
+				buf[ 7] = get_analog (global.config.keys[pad][18]);
+				if (global.padID[pad] == 0x79)
+				{
+					const DWORD now = GetTickCount();
+					buf[ 8] = get_pressure (now, global.padPress[pad][2]);
+					buf[ 9] = get_pressure (now, global.padPress[pad][0]);
+					buf[10] = get_pressure (now, global.padPress[pad][3]);
+					buf[11] = get_pressure (now, global.padPress[pad][1]);
+					buf[12] = get_pressure (now, global.padPress[pad][11]);
+					buf[13] = get_pressure (now, global.padPress[pad][10]);
+					buf[14] = get_pressure (now, global.padPress[pad][9]);
+					buf[15] = get_pressure (now, global.padPress[pad][8]);
+					buf[16] = get_pressure (now, global.padPress[pad][13]);
+					buf[17] = get_pressure (now, global.padPress[pad][12]);
+					buf[18] = get_pressure (now, global.padPress[pad][15]);
+					buf[19] = get_pressure (now, global.padPress[pad][14]);
+				}
+				return (u8)global.padID[pad];
+			}
+			break;
+		case 0x44:
+			global.cmdLen = sizeof (cmd44);
+			memcpy (buf, cmd44, sizeof (cmd44));
+			return 0xf3;
+		case 0x45:
+			global.cmdLen = sizeof (cmd45);
+			memcpy (buf, cmd45, sizeof (cmd45));
+			buf[4] = (u8)global.padMode1[pad];
+			return 0xf3;
+		case 0x46:
+			global.cmdLen = sizeof (cmd46);
+			memcpy (buf, cmd46, sizeof (cmd46));
+			return 0xf3;
+		case 0x47:
+			global.cmdLen = sizeof (cmd47);
+			memcpy (buf, cmd47, sizeof (cmd47));
+			return 0xf3;
+		case 0x4c:
+			global.cmdLen = sizeof (cmd4c);
+			memcpy (buf, cmd4c, sizeof (cmd4c));
+			return 0xf3;
+		case 0x4d:
+			global.cmdLen = sizeof (cmd4d);
+			memcpy (buf, cmd4d, sizeof (cmd4d));
+			return 0xf3;
+		case 0x4f:
+			global.padID[pad] = 0x79;
+			global.padMode2[pad] = 1;
+			global.cmdLen = sizeof (cmd4f);
+			memcpy (buf, cmd4f, sizeof (cmd4f));
+			return 0xf3;
+		}
+	}
+	switch (global.curCmd)
+	{
+	case 0x42:
+		if (cur == global.padVib0[pad])
+			global.padVibF[pad][0] = value;
+		if (cur == global.padVib1[pad])
+			global.padVibF[pad][1] = value;
+		break;
+	case 0x43:
+		if (cur == 2)
+		{
+			global.padModeE[pad] = value;
+			global.padModeC[pad] = 0;
+		}
+		break;
+	case 0x44:
+		if (cur == 2)
+			PADsetMode (pad, value);
+		if (cur == 3)
+			global.padModeF[pad] = (value == 3);
+		break;
+	case 0x46:
+		if (cur == 2)
+		{
+			switch(value)
+			{
+			case 0:
+				buf[5] = 0x02;
+				buf[6] = 0x00;
+				buf[7] = 0x0A;
+				break;
+			case 1:
+				buf[5] = 0x01;
+				buf[6] = 0x01;
+				buf[7] = 0x14;
+				break;
+			}
+		}
+		break;
+	case 0x4c:
+		if (cur == 2)
+		{
+			static const u8 buf5[] = { 0x04, 0x07, 0x02, 0x05 };
+			buf[5] = buf5[value & 3];
+		}
+		break;
+	case 0x4d:
+		if (cur >= 2)
+		{
+			if (cur == global.padVib0[pad])
+				buf[cur] = 0x00;
+			if (cur == global.padVib1[pad])
+				buf[cur] = 0x01;
+			if (value == 0x00)
+			{
+				global.padVib0[pad] = cur;
+				if ((global.padID[pad] & 0x0f) < (cur - 1) / 2)
+					 global.padID[pad] = (global.padID[pad] & 0xf0) + (cur - 1) / 2;
+			}
+			else if (value == 0x01)
+			{
+				global.padVib1[pad] = cur;
+				if ((global.padID[pad] & 0x0f) < (cur - 1) / 2)
+					 global.padID[pad] = (global.padID[pad] & 0xf0) + (cur - 1) / 2;
+			}
+		}
+		break;
+	}
+	if (cur >= global.cmdLen)
+		return 0;
+	return buf[global.curByte++];
+}
+
+
+
+long PAD_readPort1 (PadDataS* pads)
+{
+	memset (pads, 0, sizeof (PadDataS));
+	if ((global.padID[0] & 0xf0) == 0x40)
+		pads->controllerType = 4;
+	else
+		pads->controllerType = 7;
+	pads->buttonStatus = global.padStat[0];
+	pads->leftJoyX = get_analog (global.config.keys[0][17]);
+	pads->leftJoyY = get_analog (global.config.keys[0][18]);
+	pads->rightJoyX = get_analog (global.config.keys[0][19]);
+	pads->rightJoyY = get_analog (global.config.keys[0][20]);
+	pads->moveX = 0;
+	pads->moveY = 0;
+	return 0;
+}
+
+long PAD2_readPort2 (PadDataS* pads)
+{
+	memset (pads, 0, sizeof (PadDataS));
+	if ((global.padID[1] & 0xf0) == 0x40)
+		pads->controllerType = 4;
+	else
+		pads->controllerType = 7;
+	pads->buttonStatus = global.padStat[1];
+	pads->leftJoyX = get_analog (global.config.keys[1][17]);
+	pads->leftJoyY = get_analog (global.config.keys[1][18]);
+	pads->rightJoyX = get_analog (global.config.keys[1][19]);
+	pads->rightJoyY = get_analog (global.config.keys[1][20]);
+	pads->moveX = 0;
+	pads->moveY = 0;
+	return 0;
+}
+
+keyEvent* CALLBACK PADkeyEvent (void)
+{
+	static keyEvent ev;
+	static u8 state[2][256];
+	if (n_open)
+	{
+		memcpy (state[0], state[1], sizeof (state[0]));
+		GetKeyState (state[1]);
+		for (int cnt = 0; cnt < 256; cnt++)
+		{
+			if (~state[0][cnt] & state[1][cnt] & 0x80)
+			{
+				ev.event = (state[1][cnt] & 0x80) ? 1 : 2;
+				ev.key = MapVirtualKey (cnt, 1);
+				return &ev;
+			}
+		}
+	}
+	return NULL;
+}
+
+
+
+
+LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
+{
+	static BYTE keymaps[2][256];
+	static DWORD countdown;
+	static int disabled;
+	static HWND hTabWnd;
+	static int pad;
+	int cnt1;
+	int cnt2;
+	int key;
+	switch (msg)
+	{
+	case WM_INITDIALOG:
+		hTargetWnd = hWnd;
+		pad = disabled = 0;
+		LoadConfig();
+		for (cnt1 = 21; cnt1--; )
+			set_label (hWnd, pad, cnt1);
+		hTabWnd = GetDlgItem (hWnd, IDC_TABC);
+		TCITEM tcI;
+		tcI.mask = TCIF_TEXT;
+		tcI.pszText = "PAD1";
+		TabCtrl_InsertItem (hTabWnd, 0, &tcI);
+		tcI.mask = TCIF_TEXT;
+		tcI.pszText = "PAD2";
+		TabCtrl_InsertItem (hTabWnd, 1, &tcI);
+		SetTimer (hWnd, 0x80, 50, NULL);
+		return TRUE;
+	case WM_DESTROY:
+		break;
+	case WM_NOTIFY:
+		if (wParam == IDC_TABC)
+		{
+			if (disabled)
+				EnableWindow (GetDlgItem (hWnd, disabled), TRUE);
+			disabled = 0;
+			pad = TabCtrl_GetCurSel (hTabWnd);
+			for (cnt1 = 21; cnt1--; )
+				set_label (hWnd, pad, cnt1);
+		}
+		break;
+	case WM_COMMAND:
+		for (cnt1 = 21; cnt1--; )
+		{
+			if (LOWORD (wParam) == IDC_BSELECT + cnt1)
+			{
+				if (disabled)
+					EnableWindow (GetDlgItem (hWnd, disabled), TRUE);
+				EnableWindow (GetDlgItem (hWnd, disabled = wParam), FALSE);
+				countdown = GetTickCount();
+				GetKeyState (keymaps[0]);
+				return TRUE;
+			}
+		}
+		if (LOWORD (wParam) == IDOK)
+			EndDialog (hWnd, IDOK);
+		else if (LOWORD (wParam) == IDCANCEL)
+			EndDialog (hWnd, IDCANCEL);
+		break;
+	case WM_TIMER:
+		if (disabled)
+		{
+			const int index = disabled - IDC_BSELECT;
+			int analog = FALSE;
+			if ((GetTickCount() - countdown) / 1000 != 10)
+			{
+				char buff[64];
+				wsprintf (buff, "Timeout: %d", 10 - (GetTickCount() - countdown) / 1000);
+				SetWindowText (GetDlgItem (hWnd, IDC_ESELECT + index), buff);
+			}
+			else
+			{
+				global.config.keys[pad][index] = 0;
+				set_label (hWnd, pad, index);
+				EnableWindow (GetDlgItem (hWnd, disabled), TRUE);
+				disabled = 0;
+				break;
+			}
+			if (GetKeyState (keymaps[1]) == FALSE)
+				break;
+			for (key = 0x100; key--; )
+			{
+				if (~keymaps[0][key] & keymaps[1][key] & 0x80)
+					break;
+			}
+			for (cnt1 = global.devcnt; cnt1--;)
+			{
+				if (GetJoyState (cnt1) == FALSE)
+					break;
+
+				for (cnt2 = 32; cnt2--; )
+				{
+					if (global.JoyState[cnt1].rgbButtons[cnt2])
+						key = 0x1000 + 0x100 * cnt1 + cnt2;
+				}
+				for (cnt2 = 8; cnt2--; )
+				{
+					const int now = ((u32*)&global.JoyState[cnt1].lX)[cnt2];
+					if (now < -64)
+					{
+						key = 0x2000 + 0x100 * cnt1 + cnt2 * 2 +0;
+						analog = TRUE;
+					}
+					else if (now >= 64)
+					{
+						key = 0x2000 + 0x100 * cnt1 + cnt2 * 2 +1;
+						analog = TRUE;
+					}
+				}
+				for (cnt2 = 4; cnt2--; )
+				{
+					const u32 now = global.JoyState[cnt1].rgdwPOV[cnt2];
+					if ((now >= 0 && now < 4500) || (now >= 31500 && now < 36000))
+						key = 0x3000 + 0x100 * cnt1 + cnt2 * 4 +0;
+					if (now >= 4500 && now < 13500)
+						key = 0x3000 + 0x100 * cnt1 + cnt2 * 4 +1;
+					if (now >= 13500 && now < 22500)
+						key = 0x3000 + 0x100 * cnt1 + cnt2 * 4 +2;
+					if (now >= 22500 && now < 31500)
+						key = 0x3000 + 0x100 * cnt1 + cnt2 * 4 +3;
+				}
+			}
+			if (index >= 17 && index <= 20 && analog == 0)
+				key = 0;
+			else if (key > 0)
+			{
+				if (key != 1)
+					global.config.keys[pad][index] = key;
+				set_label (hWnd, pad, index);
+				EnableWindow (GetDlgItem (hWnd, disabled), TRUE);
+				disabled = 0;
+			}
+		}
+	}
+	return 0;
+}
+
+

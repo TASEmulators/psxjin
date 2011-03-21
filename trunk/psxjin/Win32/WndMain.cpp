@@ -1147,8 +1147,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_CONFIGURATION_CONTROLLERS:
-					if (PAD1_configure) PAD1_configure();
-					if (strcmp(Config.Pad1, Config.Pad2)) if (PAD2_configure) PAD2_configure();
+					PADConfigure();
 					return TRUE;
 
 				case ID_CONFIGURATION_MAPHOTKEYS:
@@ -2134,7 +2133,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Sound"), ID_CONFIGURATION_SOUND);
 	ADDMENUITEM(0, _("&Graphics"), ID_CONFIGURATION_GRAPHICS);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&Plugins && Bios"), ID_CONFIGURATION);
+	ADDMENUITEM(0, _("&Bios"), ID_CONFIGURATION);
 
 
 	ADDSUBMENU(0, _("&Tools"));

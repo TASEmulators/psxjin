@@ -82,6 +82,19 @@ typedef unsigned __int16 u16;
 typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
 
+
+typedef struct
+{
+	u32 key;
+	u32 event;
+} keyEvent;
+
+typedef struct
+{
+	u32 keys[2][21];
+} ConfigKey;
+
+
 #define INLINE __inline
 
 #elif defined(__LINUX__) || defined(__DREAMCAST__) || \
