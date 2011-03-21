@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 
+#include "padwin.h"
 #include "PsxCommon.h"
 //We try to emulate bios :) HELP US :P
 

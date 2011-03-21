@@ -29,6 +29,7 @@
 #endif
 
 #include "PsxCommon.h"
+#include "padwin.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)

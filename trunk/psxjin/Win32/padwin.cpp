@@ -8,13 +8,15 @@
 #include "..\\directx\\dinput.h"
 
 #include "PSXCommon.h"
+#include "plugins.h"
+#include "resource.h"
 
 
 HWND hTargetWnd;
 
-static struct
+struct
 {
-	ConfigKey configkey;
+	ConfigKey config;
 	int devcnt;
 	LPDIRECTINPUT8 pDInput;
 	LPDIRECTINPUTDEVICE8 pDKeyboard;
@@ -39,17 +41,6 @@ static struct
 	int cmdLen;
 } global;
 
-
-void PADconfigure (void)
-{
-	if (n_open == 0)
-	{
-		memset (&global, 0, sizeof (global));
-		if (DialogBox (gApp.hInstance, MAKEINTRESOURCE (IDD_DIALOG1), GetActiveWindow(), (DLGPROC)ConfigureDlgProc) == IDOK)
-			SaveConfig();
-		ReleaseDirectInput();
-	}
-}
 
 static BOOL CALLBACK EnumAxesCallback (LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
 {
@@ -77,7 +68,7 @@ static BOOL CALLBACK EnumJoysticksCallback (const DIDEVICEINSTANCE* instance, VO
 	return DIENUM_CONTINUE;
 }
 
-static bool ReleaseDirectInput (void)
+bool ReleaseDirectInput (void)
 {
 	int index = 4;
 	while (index--)
@@ -120,7 +111,7 @@ static bool InitDirectInput (void)
 {
 	if (global.pDInput)
 		return TRUE;
-	HRESULT result = DirectInput8Create (hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&global.pDInput, NULL);
+	HRESULT result = DirectInput8Create (gApp.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&global.pDInput, NULL);
 	if (FAILED (result))
 		return ReleaseDirectInput();
 	result = global.pDInput->CreateDevice (GUID_SysKeyboard, &global.pDKeyboard, NULL);
@@ -322,11 +313,7 @@ static bool GetKeyState (u8* keyboard)
 	return TRUE;
 }
 
-static void MakeConfigFileName (char* fname)
-{
-	GetModuleFileName (hInstance, fname, 256);
-	strcpy (fname + strlen (fname) - 3, "cfg");
-}
+
 
 static void SaveConfig (void)
 {
@@ -485,9 +472,7 @@ static void set_label (const HWND hWnd, const int pad, const int index)
 }
 
 
-void CALLBACK PADshutdown (void)
-{
-}
+
 
 static int n_open = 0;
 s32 PADopen (HWND hWnd)
@@ -514,23 +499,12 @@ s32 PADopen (HWND hWnd)
 	return 0;
 }
 
-void PADclose (void)
-{
-	if (--n_open == 0)
-		ReleaseDirectInput();
-}
 
 u32 CALLBACK PADquery (void)
 {
 	return 3;
 }
 
-u8 PADstartPoll (int pad)
-{
-	global.curPad = pad -1;
-	global.curByte = 0;
-	return 0xff;
-}
 
 static const u8 cmd40[8] =
 {
@@ -576,178 +550,10 @@ static u8 get_analog (const int key)
 	return (u8)(((int*)&global.JoyState[pad].lX)[pos] + 128);
 }
 
-static u8 get_pressure (const DWORD now, const DWORD press)
-{
-	return 255;
-}
-
-u8 CALLBACK PADpoll (const u8 value)
-{
-	const int pad = global.curPad;
-	const int cur = global.curByte;
-	static u8 buf[20];
-	if (cur == 0)
-	{
-		global.curByte++;
-		global.curCmd = value;
-		switch (value)
-		{
-		case 0x40:
-			global.cmdLen = sizeof (cmd40);
-			memcpy (buf, cmd40, sizeof (cmd40));
-			return 0xf3;
-		case 0x41:
-			global.cmdLen = sizeof (cmd41);
-			memcpy (buf, cmd41, sizeof (cmd41));
-			return 0xf3;
-		case 0x42:
-		case 0x43:
-			if (value == 0x42) UpdateState (pad);
-			global.cmdLen = 2 + 2 * (global.padID[pad] & 0x0f);
-			buf[1] = global.padModeC[pad] ? 0x00 : 0x5a;
-			*(u16*)&buf[2] = global.padStat[pad];
-			if (value == 0x43 && global.padModeE[pad])
-			{
-				buf[4] = 0;
-				buf[5] = 0;
-				buf[6] = 0;
-				buf[7] = 0;
-				return 0xf3;
-			}
-			else
-			{
-				buf[ 4] = get_analog (global.config.keys[pad][19]);
-				buf[ 5] = get_analog (global.config.keys[pad][20]);
-				buf[ 6] = get_analog (global.config.keys[pad][17]);
-				buf[ 7] = get_analog (global.config.keys[pad][18]);
-				if (global.padID[pad] == 0x79)
-				{
-					const DWORD now = GetTickCount();
-					buf[ 8] = get_pressure (now, global.padPress[pad][2]);
-					buf[ 9] = get_pressure (now, global.padPress[pad][0]);
-					buf[10] = get_pressure (now, global.padPress[pad][3]);
-					buf[11] = get_pressure (now, global.padPress[pad][1]);
-					buf[12] = get_pressure (now, global.padPress[pad][11]);
-					buf[13] = get_pressure (now, global.padPress[pad][10]);
-					buf[14] = get_pressure (now, global.padPress[pad][9]);
-					buf[15] = get_pressure (now, global.padPress[pad][8]);
-					buf[16] = get_pressure (now, global.padPress[pad][13]);
-					buf[17] = get_pressure (now, global.padPress[pad][12]);
-					buf[18] = get_pressure (now, global.padPress[pad][15]);
-					buf[19] = get_pressure (now, global.padPress[pad][14]);
-				}
-				return (u8)global.padID[pad];
-			}
-			break;
-		case 0x44:
-			global.cmdLen = sizeof (cmd44);
-			memcpy (buf, cmd44, sizeof (cmd44));
-			return 0xf3;
-		case 0x45:
-			global.cmdLen = sizeof (cmd45);
-			memcpy (buf, cmd45, sizeof (cmd45));
-			buf[4] = (u8)global.padMode1[pad];
-			return 0xf3;
-		case 0x46:
-			global.cmdLen = sizeof (cmd46);
-			memcpy (buf, cmd46, sizeof (cmd46));
-			return 0xf3;
-		case 0x47:
-			global.cmdLen = sizeof (cmd47);
-			memcpy (buf, cmd47, sizeof (cmd47));
-			return 0xf3;
-		case 0x4c:
-			global.cmdLen = sizeof (cmd4c);
-			memcpy (buf, cmd4c, sizeof (cmd4c));
-			return 0xf3;
-		case 0x4d:
-			global.cmdLen = sizeof (cmd4d);
-			memcpy (buf, cmd4d, sizeof (cmd4d));
-			return 0xf3;
-		case 0x4f:
-			global.padID[pad] = 0x79;
-			global.padMode2[pad] = 1;
-			global.cmdLen = sizeof (cmd4f);
-			memcpy (buf, cmd4f, sizeof (cmd4f));
-			return 0xf3;
-		}
-	}
-	switch (global.curCmd)
-	{
-	case 0x42:
-		if (cur == global.padVib0[pad])
-			global.padVibF[pad][0] = value;
-		if (cur == global.padVib1[pad])
-			global.padVibF[pad][1] = value;
-		break;
-	case 0x43:
-		if (cur == 2)
-		{
-			global.padModeE[pad] = value;
-			global.padModeC[pad] = 0;
-		}
-		break;
-	case 0x44:
-		if (cur == 2)
-			PADsetMode (pad, value);
-		if (cur == 3)
-			global.padModeF[pad] = (value == 3);
-		break;
-	case 0x46:
-		if (cur == 2)
-		{
-			switch(value)
-			{
-			case 0:
-				buf[5] = 0x02;
-				buf[6] = 0x00;
-				buf[7] = 0x0A;
-				break;
-			case 1:
-				buf[5] = 0x01;
-				buf[6] = 0x01;
-				buf[7] = 0x14;
-				break;
-			}
-		}
-		break;
-	case 0x4c:
-		if (cur == 2)
-		{
-			static const u8 buf5[] = { 0x04, 0x07, 0x02, 0x05 };
-			buf[5] = buf5[value & 3];
-		}
-		break;
-	case 0x4d:
-		if (cur >= 2)
-		{
-			if (cur == global.padVib0[pad])
-				buf[cur] = 0x00;
-			if (cur == global.padVib1[pad])
-				buf[cur] = 0x01;
-			if (value == 0x00)
-			{
-				global.padVib0[pad] = cur;
-				if ((global.padID[pad] & 0x0f) < (cur - 1) / 2)
-					 global.padID[pad] = (global.padID[pad] & 0xf0) + (cur - 1) / 2;
-			}
-			else if (value == 0x01)
-			{
-				global.padVib1[pad] = cur;
-				if ((global.padID[pad] & 0x0f) < (cur - 1) / 2)
-					 global.padID[pad] = (global.padID[pad] & 0xf0) + (cur - 1) / 2;
-			}
-		}
-		break;
-	}
-	if (cur >= global.cmdLen)
-		return 0;
-	return buf[global.curByte++];
-}
 
 
 
-long PAD_readPort1 (PadDataS* pads)
+long PAD_readPort1(PadDataS* pads)
 {
 	memset (pads, 0, sizeof (PadDataS));
 	if ((global.padID[0] & 0xf0) == 0x40)
@@ -764,7 +570,7 @@ long PAD_readPort1 (PadDataS* pads)
 	return 0;
 }
 
-long PAD2_readPort2 (PadDataS* pads)
+long PAD2_readPort2(PadDataS* pads)
 {
 	memset (pads, 0, sizeof (PadDataS));
 	if ((global.padID[1] & 0xf0) == 0x40)
@@ -943,3 +749,10 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 }
 
 
+void PADconfigure (void)
+{	
+		memset (&global, 0, sizeof (global));
+		if (DialogBox (gApp.hInstance, MAKEINTRESOURCE (IDD_CONFIGCONTROL), GetActiveWindow(), (DLGPROC)ConfigurePADDlgProc) == IDOK)
+			SaveConfig();
+		ReleaseDirectInput();	
+}

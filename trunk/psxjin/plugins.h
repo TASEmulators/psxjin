@@ -19,18 +19,7 @@
 #ifndef __PLUGINS_H__
 #define __PLUGINS_H__
 
-#if defined (__WIN32__)
 #include "Win32\plugin.h"
-#elif defined(__LINUX__) || defined(__MACOSX__)
-typedef void* HWND;
-#define CALLBACK
-#include "Linux/Plugin.h"
-#elif defined(__DREAMCAST__)
-typedef void* HWND;
-#define CALLBACK
-#include "Dreamcast/Plugin.h"
-#endif
-
 #include "PSEmu_Plugin_Defs.h"
 #include "PsxCommon.h"
 #include "Decode_XA.h"
@@ -140,8 +129,9 @@ void CALLBACK  GPUstopAvi(void);
 void CALLBACK GPUrestartAVINewRes(void);
 void CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
-long PAD1_readPort1(PadDataS* pads);
-long PAD2_readPort2(PadDataS* pads);
+
+//Padwin Exports
+//Should probably put these in a separate .h file, but whatever.
 
 //int LoadCDRplugin(char *CDRdll);
 //int LoadSPUplugin(char *SPUdll);

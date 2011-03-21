@@ -28,6 +28,7 @@
 #include "../cheat.h"
 #include "../R3000A.h"
 #include "movie.h"
+#include "padwin.h"
 
 #include "Win32.h"
 #include "resource.h"
@@ -464,7 +465,7 @@ void PADhandleKey(int key) {
 	&& modifiers == EmuCommandTable[EMUCMD_CONFPAD].keymod)
 	{
 		
-		DialogBox(gApp.hInstance, MAKEINTRESOURCE(IDD_CONTROLCONFIG), gApp.hWnd, (DLGPROC)PADwndProc);
+		PADconfigure();
 		return;
 	}
 
@@ -804,10 +805,9 @@ bool OpenPlugins(HWND hWnd) {
 	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
 	ret = SPUopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
-	ret = PAD1_open(hWnd);
+	ret = PADopen(hWnd);
 	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); }
-	ret = PAD2_open(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening PAD2 Plugin (%d)"), ret); }
+	
 
 	SetCurrentDirectory(PSXjinDir);
 	//ShowCursor(FALSE);
@@ -826,10 +826,6 @@ void ClosePlugins() {
 	if (ret < 0) { SysMessage (_("Error Closing CDR Plugin")); return; }
 	ret = GPUclose();
 	if (ret < 0) { SysMessage (_("Error Closing GPU Plugin")); return; }
-	ret = PAD1_close();
-	if (ret < 0) { SysMessage (_("Error Closing PAD1 Plugin")); return; }
-	ret = PAD2_close();
-	if (ret < 0) { SysMessage (_("Error Closing PAD2 Plugin")); return; }
 }
 
 void ResetPlugins() {
@@ -838,21 +834,14 @@ void ResetPlugins() {
 	CDRshutdown();
 	GPUshutdown();
 	SPUshutdown();
-	//PAD1_shutdown();
-	//PAD2_shutdown();
 	
-
 
 	ret = CDRinit();
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }
 	ret = GPUinit();
 	if (ret != 0) { SysMessage (_("GPUinit error: %d"), ret); return; }
 	ret = SPUinit();
-	if (ret != 0) { SysMessage (_("SPUinit error: %d"), ret); return; }
-	ret = PAD1_init(1);
-	if (ret != 0) { SysMessage (_("PAD1init error: %d"), ret); return; }
-	ret = PAD2_init(2);
-	if (ret != 0) { SysMessage (_("PAD2init error: %d"), ret); return; }
+	if (ret != 0) { SysMessage (_("SPUinit error: %d"), ret); return; }	
 }
 
 void SetEmulationSpeed(int cmd) {
