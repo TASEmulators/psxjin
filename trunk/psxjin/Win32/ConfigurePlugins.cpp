@@ -34,11 +34,6 @@ void SaveConfig()
 	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 	
 	WritePrivateProfileString("Plugins", "Bios", Config.Bios, Conf_File);
-	WritePrivateProfileString("Plugins", "GPU", Config.Gpu , Conf_File);
-	WritePrivateProfileString("Plugins", "SPU", Config.Spu , Conf_File);
-	WritePrivateProfileString("Plugins", "CDR", Config.Cdr , Conf_File);
-	WritePrivateProfileString("Plugins", "Pad1", Config.Pad1 , Conf_File);
-	WritePrivateProfileString("Plugins", "Pad2", Config.Pad2 , Conf_File);
 	WritePrivateProfileString("Plugins", "MCD1", Config.Mcd1 , Conf_File);
 	WritePrivateProfileString("Plugins", "MCD2", Config.Mcd2 , Conf_File);
 	wsprintf(Str_Tmp, "%d", Config.Xa);
@@ -267,15 +262,13 @@ void OnOK(HWND hW) {
 	char * pad2DLL=GetSelDLL(hW,IDC_LISTPAD2);
 	char * biosFILE=GetSelDLL(hW,IDC_LISTBIOS);
 
-    if ((pad1DLL==NULL) ||
-	   (pad2DLL==NULL) ||(biosFILE==NULL)) {
+    if  (biosFILE==NULL) {
 		MessageBox(hW,"Configuration not OK!","Error",MB_OK|MB_ICONERROR);
 		return;
 	}
 
 	strcpy(Config.Bios, biosFILE);
-	strcpy(Config.Pad1, pad1DLL);
-	strcpy(Config.Pad2, pad2DLL);
+
 
 	SaveConfig();
 

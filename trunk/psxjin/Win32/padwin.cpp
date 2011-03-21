@@ -204,86 +204,7 @@ static bool AcquireDevice (LPDIRECTINPUTDEVICE8 lpDirectInputDevice)
 	return TRUE;
 }
 
-/* Small Motor */
-static bool SetDeviceForceS (int pad, DWORD force)
-{
-	InitDirectInput();
-	if (global.pDEffect[pad][0])
-	{
-		if ( force == 0) {
-			if (FAILED (global.pDEffect[pad][0]->Stop())) {
-				AcquireDevice (global.pDDevice[pad]);
-				if (FAILED (global.pDEffect[pad][0]->Stop()))
-					return ReleaseDirectInput();
-			}
-			return TRUE;
-		}
-		LONG rglDirection[2] = { 0, 0 };
-		DIPERIODIC per;
-		rglDirection[0] = force;
-		rglDirection[1] = force;
-		per.dwMagnitude = force;
-		per.dwPeriod = (DWORD) (0.01 * DI_SECONDS);
-		per.lOffset = 0;
-		per.dwPhase = 0;
-		DIEFFECT eff;
-		eff.dwSize = sizeof (DIEFFECT);
-		eff.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
-		eff.cAxes = 2;
-		eff.rglDirection = rglDirection;
-		eff.lpEnvelope = 0;
-		eff.cbTypeSpecificParams = sizeof (DIPERIODIC);
-		eff.lpvTypeSpecificParams = &per;
-		if (FAILED (global.pDEffect[pad][0]->SetParameters (&eff, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START)))
-			return ReleaseDirectInput();
-		if (FAILED (global.pDEffect[pad][0]->Start (1, 0)))
-		{
-			AcquireDevice (global.pDDevice[pad]);
-			if (FAILED (global.pDEffect[pad][0]->Start (1, 0)))
-				return ReleaseDirectInput();
-		}
-	}
-	return TRUE;
-}
 
-/* Big Motor */
-static bool SetDeviceForceB (int pad, DWORD force)
-{
-	InitDirectInput();
-	if (global.pDEffect[pad][1])
-	{
-		if ( force == 0) {
-			if (FAILED (global.pDEffect[pad][1]->Stop())) {
-				AcquireDevice (global.pDDevice[pad]);
-				if (FAILED (global.pDEffect[pad][1]->Stop()))
-					return ReleaseDirectInput();
-			}
-			return TRUE;
-		}
-		LONG rglDirection[2] = { 0, 0 };
-		DICONSTANTFORCE cf;
-		rglDirection[0] = force;
-		rglDirection[1] = force;
-		cf.lMagnitude = force;
-		DIEFFECT eff;
-		eff.dwSize = sizeof (DIEFFECT);
-		eff.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
-		eff.cAxes = 2;
-		eff.rglDirection = rglDirection;
-		eff.lpEnvelope = 0;
-		eff.cbTypeSpecificParams = sizeof (DICONSTANTFORCE);
-		eff.lpvTypeSpecificParams = &cf;
-		if (FAILED (global.pDEffect[pad][1]->SetParameters (&eff, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START)))
-			return ReleaseDirectInput();
-		if (FAILED (global.pDEffect[pad][1]->Start (1, 0)))
-		{
-			AcquireDevice (global.pDDevice[pad]);
-			if (FAILED (global.pDEffect[pad][1]->Start (1, 0)))
-				return ReleaseDirectInput();
-		}
-	}
-	return TRUE;
-}
 
 static bool GetJoyState (const int devno)
 {
@@ -317,11 +238,31 @@ static bool GetKeyState (u8* keyboard)
 
 static void SaveConfig (void)
 {
+	char Str_Tmp[1024];
+	char Pad_Tmp[1024];
+	for (int j = 0; j < 2; j++)
+	{
+		for(int i = 0; i < 21; i++)
+		{
+			sprintf(Str_Tmp, "%d",global.config.keys[j][i]);
+			sprintf(Pad_Tmp, "PAD%d_%d",j, i);
+			WritePrivateProfileString("Controllers", Pad_Tmp, Str_Tmp, Config.Conf_File);
+		}
+	}
 	
 }
 
 static void LoadConfig (void)
-{
+{	
+	char Pad_Tmp[1024];
+	for (int j = 0; j < 2; j++)
+	{
+		for(int i = 0; i < 21; i++)
+		{			
+			sprintf(Pad_Tmp, "PAD%d_%d",j, i);
+			global.config.keys[j][i] = (u32)GetPrivateProfileInt("Controllers", Pad_Tmp, 0, Config.Conf_File);
+		}
+	}	
 	global.padVibC[0] = global.padVibC[1] = -1;
 	for (int cnt = 21; cnt--; )
 	{
@@ -473,8 +414,6 @@ static void set_label (const HWND hWnd, const int pad, const int index)
 
 
 
-
-static int n_open = 0;
 s32 PADopen (HWND hWnd)
 {
 	if (!IsWindow (hWnd) && !IsBadReadPtr ((u32*)hWnd, 4))
@@ -487,15 +426,12 @@ s32 PADopen (HWND hWnd)
 			hWnd = GetParent (hWnd);
 	}
 	hTargetWnd = hWnd;
-	if (n_open++ == FALSE)
-	{
-		memset (&global, 0, sizeof (global));
-		global.padStat[0] = 0xffff;
-		global.padStat[1] = 0xffff;
-		LoadConfig();
-		PADsetMode (0, 0);
-		PADsetMode (1, 0);
-	}
+	memset (&global, 0, sizeof (global));
+	global.padStat[0] = 0xffff;
+	global.padStat[1] = 0xffff;
+	LoadConfig();
+	PADsetMode (0, 0);
+	PADsetMode (1, 0);	
 	return 0;
 }
 
@@ -554,7 +490,8 @@ static u8 get_analog (const int key)
 
 
 long PAD1_readPort1(PadDataS* pads)
-{
+{	
+	UpdateState(0);
 	memset (pads, 0, sizeof (PadDataS));
 	if ((global.padID[0] & 0xf0) == 0x40)
 		pads->controllerType = 4;
@@ -571,7 +508,8 @@ long PAD1_readPort1(PadDataS* pads)
 }
 
 long PAD2_readPort2(PadDataS* pads)
-{
+{	
+	UpdateState(1);
 	memset (pads, 0, sizeof (PadDataS));
 	if ((global.padID[1] & 0xf0) == 0x40)
 		pads->controllerType = 4;
@@ -591,18 +529,15 @@ keyEvent* CALLBACK PADkeyEvent (void)
 {
 	static keyEvent ev;
 	static u8 state[2][256];
-	if (n_open)
+	memcpy (state[0], state[1], sizeof (state[0]));
+	GetKeyState (state[1]);
+	for (int cnt = 0; cnt < 256; cnt++)
 	{
-		memcpy (state[0], state[1], sizeof (state[0]));
-		GetKeyState (state[1]);
-		for (int cnt = 0; cnt < 256; cnt++)
+		if (~state[0][cnt] & state[1][cnt] & 0x80)
 		{
-			if (~state[0][cnt] & state[1][cnt] & 0x80)
-			{
-				ev.event = (state[1][cnt] & 0x80) ? 1 : 2;
-				ev.key = MapVirtualKey (cnt, 1);
-				return &ev;
-			}
+			ev.event = (state[1][cnt] & 0x80) ? 1 : 2;
+			ev.key = MapVirtualKey (cnt, 1);
+			return &ev;
 		}
 	}
 	return NULL;
