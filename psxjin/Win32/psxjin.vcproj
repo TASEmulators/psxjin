@@ -409,6 +409,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\padwin.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ram_search.cpp"
 				>
 			</File>
@@ -1289,10 +1293,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\SSXPad\PadSSSPSXres.h"
-			>
-		</File>
-		<File
 			RelativePath="..\PSEmu_Plugin_Defs.h"
 			>
 		</File>
@@ -1306,10 +1306,6 @@
 		</File>
 		<File
 			RelativePath=".\psxjin.rc"
-			>
-		</File>
-		<File
-			RelativePath="E:\zeropad\Windows\resource.h"
 			>
 		</File>
 	</Files>

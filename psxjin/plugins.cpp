@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "padwin.h"
 #include "PsxCommon.h"
 
 #ifdef _MSC_VER_
@@ -41,93 +41,6 @@
     dest = (src) SysLoadSym(drv, name); if (checkerr == 1) CheckErr(name); \
     if (checkerr == 2) { err = SysLibError(); if (err != NULL) errval = 1; }
 #endif
-/*
-START_EXTERN_C
-//
-////Gpu function pointers
-//GPUupdateLace       GPU_updateLace;
-//GPUinit             GPU_init;
-//GPUshutdown         GPU_shutdown; 
-//GPUconfigure        GPU_configure;
-//GPUtest             GPU_test;
-//GPUabout            GPU_about;
-//GPUopen             GPU_open;
-//GPUclose            GPU_close;
-//GPUreadStatus       GPU_readStatus;
-//GPUreadData         GPU_readData;
-//GPUreadDataMem      GPU_readDataMem;
-//GPUwriteStatus      GPU_writeStatus; 
-//GPUwriteData        GPU_writeData;
-//GPUwriteDataMem     GPU_writeDataMem;
-//GPUdmaChain         GPU_dmaChain;
-//GPUkeypressed       GPU_keypressed;
-//GPUdisplayText      GPUdisplayText;
-//GPUmakeSnapshot     GPU_makeSnapshot;
-//GPUfreeze           GPU_freeze;
-//GPUgetScreenPic     GPU_getScreenPic;
-//GPUshowScreenPic    GPU_showScreenPic;
-//GPUclearDynarec     GPU_clearDynarec;
-//GPUsetframelimit    GPU_setframelimit;
-//GPUsetframecounter  GPU_setframecounter;
-//GPUsetlagcounter    GPU_setlagcounter;
-//GPUinputdisplay     GPU_inputdisplay;
-//GPUupdateframe      GPU_updateframe;
-//GPUsetcurrentmode   GPUsetcurrentmode;
-//GPUsetspeedmode     GPU_setspeedmode;
-//GPUshowframecounter GPU_showframecounter;
-//GPUshowInput		GPU_showInput;
-//GPUstartAvi         GPU_startAvi;
-//GPUstopAvi          GPU_stopAvi;
-//GPUsendFpLuaGui     GPU_sendFpLuaGui;
-
-//cd rom function pointers 
-//CDRinit               CDR_init;
-//CDRshutdown           CDR_shutdown;
-//CDRopen               CDR_open;
-//CDRclose              CDR_close; 
-//CDRtest               CDR_test;
-//CDRgetTN              CDR_getTN;
-//CDRgetTD              CDR_getTD;
-//CDRreadTrack          CDR_readTrack;
-//CDRgetBuffer          CDR_getBuffer;
-//CDRplay               CDR_play;
-//CDRstop               CDR_stop;
-//CDRgetStatus          CDR_getStatus;
-//CDRgetDriveLetter     CDR_getDriveLetter;
-//CDRgetBufferSub       CDR_getBufferSub;
-//CDRconfigure          CDR_configure;
-//CDRabout              CDR_about;
-
-//PAD POINTERS
-PADconfigure        PAD1_configure;
-PADabout            PAD1_about;
-PADinit             PAD1_init;
-PADshutdown         PAD1_shutdown;
-PADtest             PAD1_test;
-PADopen             PAD1_open;
-PADclose            PAD1_close;
-PADquery            PAD1_query;
-PADreadPort1        PAD1_readPort1;
-PADkeypressed       PAD1_keypressed;
-PADstartPoll        PAD1_startPoll;
-PADpoll             PAD1_poll;
-PADsetSensitive     PAD1_setSensitive;
-PADconfigure        PAD2_configure;
-PADabout            PAD2_about;
-PADinit             PAD2_init;
-PADshutdown         PAD2_shutdown;
-PADtest             PAD2_test;
-PADopen             PAD2_open;
-PADclose            PAD2_close;
-PADquery            PAD2_query;
-PADreadPort2        PAD2_readPort2;
-PADkeypressed       PAD2_keypressed;
-PADstartPoll        PAD2_startPoll;
-PADpoll             PAD2_poll;
-PADsetSensitive     PAD2_setSensitive;
-
-
-END_EXTERN_C*/
 
 static const char *err;
 static int errval;
@@ -501,7 +414,9 @@ unsigned char _PADpoll(unsigned char value) {
 	return buf[bufc++];
 }
 
-unsigned char CALLBACK PAD1__startPoll(int pad) {
+
+
+unsigned char PAD1_startPoll(int pad) {
 	PadDataS padd; //Pad that is read in
 	PadDataS Mpadds[4]; //Place to store all 4 pads data
 	
@@ -651,7 +566,7 @@ unsigned char CALLBACK PAD1__startPoll(int pad) {
 }
 
 
-unsigned char CALLBACK PAD1__poll(unsigned char value) {
+unsigned char PAD1_poll(unsigned char value) {
 	return _PADpoll(value);
 }
 
@@ -661,17 +576,8 @@ long CALLBACK PAD1__test(void) { return 0; }
 long CALLBACK PAD1__query(void) { return 3; }
 long CALLBACK PAD1__keypressed() { return 0; }
 
-int LoadPAD1plugin(char *PAD1dll) {
-	
-	
-	PAD1_startPoll = PAD1__startPoll;
-	PAD1_poll = PAD1__poll;
-	
 
-	return 0;
-}
-
-unsigned char CALLBACK PAD2__startPoll(int pad) {
+unsigned char PAD2_startPoll(int pad) {
 	PadDataS padd;
 	PadDataS Mpadds[4];
 	PadDataS epadd; //empty pad;
@@ -801,7 +707,7 @@ if (!Movie.Port2_Mtap) {
 	}
 }
 
-unsigned char CALLBACK PAD2__poll(unsigned char value) {
+unsigned char PAD2_poll(unsigned char value) {
 	return _PADpoll(value);
 }
 
@@ -819,20 +725,14 @@ void CALLBACK clearDynarec(void) {
 
 int LoadPlugins() {
 	int ret;
-	char Plugin[256];
 
-	PADinit();
+
 	ret = CDRinit();
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
 	ret = GPUinit();
 	if (ret < 0) { SysMessage (_("GPUinit error: %d"), ret); return -1; }
 	ret = SPUinit();
 	if (ret < 0) { SysMessage (_("SPUinit error: %d"), ret); return -1; }
-	ret = PAD1_init(1);
-	if (ret < 0) { SysMessage (_("PAD1init error: %d"), ret); return -1; }
-	ret = PAD2_init(2);
-	if (ret < 0) { SysMessage (_("PAD2init error: %d"), ret); return -1; }
-
 	return 0;
 }
 
@@ -843,8 +743,6 @@ void ReleasePlugins() {
 	CDRshutdown();
 	GPUshutdown();
 	SPUshutdown();
-	PAD1_shutdown();
-	PAD2_shutdown();
 
 	SysCloseLibrary(hPAD1Driver); hPAD1Driver = NULL;
 	SysCloseLibrary(hPAD2Driver); hPAD2Driver = NULL;

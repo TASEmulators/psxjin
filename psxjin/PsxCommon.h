@@ -39,13 +39,8 @@ typedef uint32_t uint32;
 #endif
 
 #include "System.h"
-#if defined(__DREAMCAST__)
-#include <zlib/zlib.h>
-#else
 #include <zlib.h>
-#endif
 
-#if defined(__WIN32__)
 
 #include <windows.h>
 
@@ -57,17 +52,7 @@ typedef struct {
 
 extern AppData gApp;
 
-#elif defined (__LINUX__) || defined (__MACOSX__)
 
-#include <sys/types.h>
-
-#define __inline inline
-
-#endif
-
-#if defined (__LINUX__) || defined (__MACOSX__)
-#define strnicmp strncasecmp
-#endif
 
 // Basic types
 #if defined(_MSC_VER_)

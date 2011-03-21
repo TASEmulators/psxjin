@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <algorithm>
+#include "padwin.h"
 
 using std::min;
 using std::max;
