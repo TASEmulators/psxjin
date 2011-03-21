@@ -553,7 +553,7 @@ static u8 get_analog (const int key)
 
 
 
-long PAD_readPort1(PadDataS* pads)
+long PAD1_readPort1(PadDataS* pads)
 {
 	memset (pads, 0, sizeof (PadDataS));
 	if ((global.padID[0] & 0xf0) == 0x40)
