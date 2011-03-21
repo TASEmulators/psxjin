@@ -5,7 +5,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
-#include "..\\directx\\dinput.h"
+#include "dinput.h"
 
 #include "PSXCommon.h"
 #include "plugins.h"
