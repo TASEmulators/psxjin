@@ -83,7 +83,7 @@
 				OutputFile="$(OutDir)\psxjin-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng,../directx"
+				AdditionalLibraryDirectories="./includes;./lua/lib;zlib;libpng,directx"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -365,11 +365,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\directx\dinput.h"
-				>
-			</File>
-			<File
-				RelativePath="..\directx\dinput.lib"
+				RelativePath=".\directx\dinput.h"
 				>
 			</File>
 			<File
