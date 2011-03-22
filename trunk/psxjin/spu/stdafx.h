@@ -28,10 +28,9 @@
 // WINDOWS
 //////////////////////////////////////////////////////////
 
-#ifdef _WINDOWS
 
 #define WIN32_LEAN_AND_MEAN
-#define STRICT
+//#define STRICT
 #include <windows.h>
 #include <windowsx.h>
 #include "mmsystem.h"
@@ -45,33 +44,4 @@
 
 #define INLINE __inline
 
-//////////////////////////////////////////////////////////
-// LINUX
-//////////////////////////////////////////////////////////
-#else
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/soundcard.h>
-#include <unistd.h>
-#ifndef NOTHREADLIB
-#include <pthread.h>
-#endif
-#define RRand(range) (random()%range)
-#include <string.h>
-#include <sys/time.h>
-#include <math.h>
-
-#undef CALLBACK
-#define CALLBACK
-#define DWORD unsigned long
-#define LOWORD(l)           ((unsigned short)(l))
-#define HIWORD(l)           ((unsigned short)(((unsigned long)(l) >> 16) & 0xFFFF))
-
-#define INLINE inline
-
-#endif
 

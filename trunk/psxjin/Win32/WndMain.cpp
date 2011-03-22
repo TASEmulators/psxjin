@@ -107,14 +107,6 @@ HWND memPokeHWND = NULL;
 char bufPokeAddress[7];
 char bufPokeNewval[7];
 
-#ifdef __MINGW32__
-#ifndef LVM_GETSELECTIONMARK
-#define LVM_GETSELECTIONMARK (LVM_FIRST+66)
-#endif
-#ifndef ListView_GetSelectionMark
-#define ListView_GetSelectionMark(w) (INT)SNDMSG((w),LVM_GETSELECTIONMARK,0,0)
-#endif
-#endif
 
 #include "maphkeys.h"
 int iTurboMode;
