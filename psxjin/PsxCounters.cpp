@@ -143,7 +143,7 @@ iVSyncFlag = 1;
 	PadDataS paddtemp;
 	unsigned long buttonToSend;
 	char modeFlags;
-
+	Config.AutoFireFrame = !Config.AutoFireFrame;
 	Movie.currentFrame++;
 	//printf("frame: %d\n",Movie.currentFrame);
 	if (Movie.currentFrame > Movie.MaxRecFrames) Movie.MaxRecFrames = Movie.currentFrame;

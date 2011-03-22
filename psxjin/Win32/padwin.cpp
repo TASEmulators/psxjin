@@ -722,6 +722,5 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 void PADconfigure (void)
 {			
 		if (DialogBox (gApp.hInstance, MAKEINTRESOURCE (IDD_CONFIGCONTROL), GetActiveWindow(), (DLGPROC)ConfigurePADDlgProc) == IDOK)
-			SaveConfig();
-		ReleaseDirectInput();	
+			SaveConfig();		
 }

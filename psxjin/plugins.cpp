@@ -193,91 +193,8 @@ long CDR__configure(void) { return 0; }
 long CDR__test(void) { return 0; }
 void CDR__about(void) {}
 
-#define LoadCdrSym1(dest, name) \
-	LoadSym(CDR_##dest, CDR##dest, name, 1);
-
-#define LoadCdrSym0(dest, name) \
-	LoadSym(CDR_##dest, CDR##dest, name, 0); \
-	if (CDR_##dest == NULL) CDR_##dest = (CDR##dest) CDR__##dest;
-
-#define LoadCdrSymN(dest, name) \
-	LoadSym(CDR_##dest, CDR##dest, name, 0);
-
-//int LoadCDRplugin(char *CDRdll) {
-//	void *drv;
-//
-//	hCDRDriver = SysLoadLibrary(CDRdll);
-//	if (hCDRDriver == NULL) {
-//		CDR_configure = NULL;
-//		SysMessage (_("Could Not load CDR plugin %s"), CDRdll);  return -1;
-//	}
-//	drv = hCDRDriver;
-//	LoadCdrSym1(init, "CDRinit");
-//	LoadCdrSym1(shutdown, "CDRshutdown");
-//	LoadCdrSym1(open, "CDRopen");
-//	LoadCdrSym1(close, "CDRclose");
-//	LoadCdrSym1(getTN, "CDRgetTN");
-//	LoadCdrSym1(getTD, "CDRgetTD");
-//	LoadCdrSym1(readTrack, "CDRreadTrack");
-//	LoadCdrSym1(getBuffer, "CDRgetBuffer");
-//	LoadCdrSym0(play, "CDRplay");
-//	LoadCdrSym0(stop, "CDRstop");
-//	LoadCdrSym0(getStatus, "CDRgetStatus");
-//	LoadCdrSym0(getDriveLetter, "CDRgetDriveLetter");
-//	LoadCdrSym0(getBufferSub, "CDRgetBufferSub");
-//	LoadCdrSym0(configure, "CDRconfigure");
-//	LoadCdrSym0(test, "CDRtest");
-//	LoadCdrSym0(about, "CDRabout");
-//
-//	return 0;
-//}
-
-//int LoadSPUplugin(char *SPUdll) {
-//	void *drv;
-//
-//	hSPUDriver = SysLoadLibrary(SPUdll);
-//	if (hSPUDriver == NULL) {
-//		SPU_configure = NULL;
-//		SysMessage (_("Could not open SPU plugin %s"), SPUdll); return -1;
-//	}
-//	drv = hSPUDriver;
-//	LoadSpuSym1(init, "SPUinit");
-//	LoadSpuSym1(shutdown, "SPUshutdown");
-//	LoadSpuSym1(open, "SPUopen");
-//	LoadSpuSym1(close, "SPUclose");
-//	LoadSpuSym0(configure, "SPUconfigure");
-//	LoadSpuSym0(about, "SPUabout");
-//	LoadSpuSym0(test, "SPUtest");
-//	errval = 0;
-//	LoadSpuSym2(startChannels1, "SPUstartChannels1");
-//	LoadSpuSym2(startChannels2, "SPUstartChannels2");
-//	LoadSpuSym2(stopChannels1, "SPUstopChannels1");
-//	LoadSpuSym2(stopChannels2, "SPUstopChannels2");
-//	LoadSpuSym2(putOne, "SPUputOne");
-//	LoadSpuSym2(getOne, "SPUgetOne");
-//	LoadSpuSym2(setAddr, "SPUsetAddr");
-//	LoadSpuSym2(setPitch, "SPUsetPitch");
-//	LoadSpuSym2(setVolumeL, "SPUsetVolumeL");
-//	LoadSpuSym2(setVolumeR, "SPUsetVolumeR");
-//	LoadSpuSymE(writeRegister, "SPUwriteRegister");
-//	LoadSpuSymE(readRegister, "SPUreadRegister");		
-//	LoadSpuSymE(writeDMA, "SPUwriteDMA");
-//	LoadSpuSymE(readDMA, "SPUreadDMA");
-//	LoadSpuSym0(writeDMAMem, "SPUwriteDMAMem");
-//	LoadSpuSym0(readDMAMem, "SPUreadDMAMem");
-//	LoadSpuSym0(playADPCMchannel, "SPUplayADPCMchannel");
-//	LoadSpuSym0(freeze, "SPUfreeze");
-//	LoadSpuSym0(registerCallback, "SPUregisterCallback");
-//	LoadSpuSymN(async, "SPUasync");
-//	LoadSpuSymN(startWav, "SPUstartWav");
-//	LoadSpuSymN(stopWav, "SPUstopWav");
-//
-//	return 0;
-//}
 
 
-void *hPAD1Driver;
-void *hPAD2Driver;
 
 static unsigned char buf[256];
 unsigned char nonepar[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -293,7 +210,6 @@ PadDataS padd1, padd2;
 
 unsigned char _PADstartPoll(PadDataS *pad) {
 	bufc = 0;		
-	//printf("Analog Values  %03d %03d %03d %03d\n", pad->rightJoyX, pad->rightJoyY, pad->leftJoyX, pad->leftJoyY);
 	switch (pad->controllerType) {
 		case PSE_PAD_TYPE_MOUSE:
 			mousepar[3] = pad->buttonStatus & 0xff;
@@ -419,7 +335,7 @@ unsigned char _PADpoll(unsigned char value) {
 unsigned char PAD1_startPoll(int pad) {
 	PadDataS padd; //Pad that is read in
 	PadDataS Mpadds[4]; //Place to store all 4 pads data
-	
+
 
 	PadDataS epadd; //Set up an empty pad to fill the buffer
 	epadd.buttonStatus = 0xffff;
@@ -432,7 +348,6 @@ unsigned char PAD1_startPoll(int pad) {
 	epadd.controllerType = Movie.padType1;		
 
 	PAD1_readPort1(&padd);	
-	printf("%d, %d\n", padd.leftJoyX, padd.leftJoyY);
 	if (padd.controllerType != PSE_PAD_TYPE_MOUSE)
 	{
 		padd.moveX = 0;
@@ -459,7 +374,7 @@ unsigned char PAD1_startPoll(int pad) {
 	}
 	if (Config.EnableAutoFire) 
 	{
-		Config.AutoFireFrame = !Config.AutoFireFrame; //Flip framef
+		
 		if (Config.AutoFireFrame) 
 		{			
 			padd.buttonStatus &= (Config.Pad1AutoFire ^ 0xffff); //Force pad on  and value with zero, force to zero. 
@@ -607,7 +522,6 @@ unsigned char PAD2_startPoll(int pad) {
 	}
 	if (Config.EnableAutoFire) 
 	{
-		Config.AutoFireFrame = !Config.AutoFireFrame; //Flip framef
 		if (Config.AutoFireFrame) 
 		{			
 			padd.buttonStatus &= (Config.Pad2AutoFire ^ 0xffff); //Force pad on  and value with zero, force to zero. 
@@ -739,13 +653,6 @@ int LoadPlugins() {
 }
 
 void ReleasePlugins() {
-	if (hCDRDriver  == NULL ||
-		hPAD1Driver == NULL || hPAD2Driver == NULL) return;
+	GPUshutdown(); //This is the only one that actually does anything. 
 
-	CDRshutdown();
-	GPUshutdown();
-	SPUshutdown();
-
-	SysCloseLibrary(hPAD1Driver); hPAD1Driver = NULL;
-	SysCloseLibrary(hPAD2Driver); hPAD2Driver = NULL;
 }
