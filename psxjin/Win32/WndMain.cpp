@@ -50,6 +50,7 @@
 #include "plugins.h"
 #include "analog.h"
 #include "padwin.h"
+#include "../gpu/draw.h"
 
 const int RECENTCD_START = 65000;
 const int RECENTMOVIE_START = 65020;
@@ -860,7 +861,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_EDITRERECORD,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_MOVIE_CONVERT,MF_BYCOMMAND   | ((!IsMovieLoaded() && !Movie.readOnly) ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_PLAYBEGINNING,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
-			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CONTROLLERS,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			//EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CONTROLLERS,MF_BYCOMMAND | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_START_CAPTURE,  MF_BYCOMMAND   | (!AVIisCapturing && IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_END_CAPTURE,    MF_BYCOMMAND   | (AVIisCapturing   ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_SCREENSHOT,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));  
@@ -892,10 +893,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_CDCLOSE,		MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
 			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
-			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!IsoFile[0] ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
+			EnableMenuItem(gApp.hMenu,ID_EMULATOR_4X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_CONFIGURATION_CHEATS,MF_BYCOMMAND | MF_GRAYED);
 			CheckMenuItem(gApp.hMenu, ID_FILE_READONLY, MF_BYCOMMAND | (Movie.readOnly ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_MUTE, MF_BYCOMMAND | ((iVolume == 5) ? MF_CHECKED:MF_UNCHECKED));
@@ -1103,26 +1104,38 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 				case ID_EMULATOR_1X:
 					MainWindow_width = 320;
+					Config.CurWinX = 320;
 					MainWindow_height = 240+GetMenuSize();
+					Config.CurWinY = 240;
+					SetRes(320,240);
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 
 				case ID_EMULATOR_2X:
 					MainWindow_width = 640;
+					Config.CurWinX = 640;
 					MainWindow_height = 480+GetMenuSize();
+					Config.CurWinY = 480;
+					SetRes(640,480);
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 				case ID_EMULATOR_3X:
 					MainWindow_width = 960;
+					Config.CurWinX = 960;
 					MainWindow_height = 720+GetMenuSize();
+					Config.CurWinY = 720;
+					SetRes(960,720);
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;
 				case ID_EMULATOR_4X:
 					MainWindow_width = 1280;
+					Config.CurWinX = 1280;
 					MainWindow_height = 960+GetMenuSize();
+					Config.CurWinY = 960;
+					SetRes(1280,960);
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					WriteWindowSizeToConfig();
 					return TRUE;

@@ -54,8 +54,6 @@ extern AppData gApp;
 
 
 
-// Basic types
-#if defined(_MSC_VER_)
 
 typedef __int8  s8;
 typedef __int16 s16;
@@ -82,20 +80,6 @@ typedef struct
 
 #define INLINE __inline
 
-#elif defined(__LINUX__) || defined(__DREAMCAST__) || \
-	  defined(__MINGW32__) || defined(__MACOSX__)
-
-typedef char s8;
-typedef short s16;
-typedef long s32;
-typedef long long s64;
-
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned long u32;
-typedef unsigned long long u64;
-
-#endif
 
 #define _(msgid) msgid
 #define N_(msgid) msgid

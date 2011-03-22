@@ -149,6 +149,12 @@ void StretchedBlit3x(void);
 // HQ Initialize Lookup Table
 ////////////////////////////////////////////////////////////////////////
 
+void SetRes(int X, int Y)
+{
+	iResX = X;
+	iResY = Y;
+}
+
 int InitLUTs(void)
 {
 	int i, j, k, r, g, b, Y, u, v;

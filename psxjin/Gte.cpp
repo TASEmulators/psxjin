@@ -212,7 +212,6 @@ __inline void MTC2(unsigned long value, int reg) {
 			psxRegs.CP2D.r[30] = value;
 
 			a = psxRegs.CP2D.r[30];
-#if defined(_MSC_VER_)
 			if (a > 0) {
 				__asm {
 					mov eax, a;
@@ -231,31 +230,7 @@ __inline void MTC2(unsigned long value, int reg) {
 			} else {
 				psxRegs.CP2D.r[31] = 32;
 			}
-#elif defined(__LINUX__) || defined(__MINGW32__)
-			if (a > 0) {
-				__asm__ ("bsrl %1, %0\n" : "=r"(a) : "r"(a) );
-				psxRegs.CP2D.r[31] = 31 - a;
-			} else if (a < 0) {
-				a^= 0xffffffff;
-				__asm__ ("bsrl %1, %0\n" : "=r"(a) : "r"(a) );
-				psxRegs.CP2D.r[31] = 31 - a;
-			} else {
-				psxRegs.CP2D.r[31] = 32;
-			}
-#else
-			if (a > 0) {
-				int i;
-				for (i=31; (a & (1 << i)) == 0 && i >= 0; i--);
-				psxRegs.CP2D.r[31] = 31 - i;
-			} else if (a < 0) {
-				int i;
-				a^= 0xffffffff;
-				for (i=31; (a & (1 << i)) == 0 && i >= 0; i--);
-				psxRegs.CP2D.r[31] = 31 - i;
-			} else {
-				psxRegs.CP2D.r[31] = 32;
-			}
-#endif
+
 			break;
 		
 		default:
