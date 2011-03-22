@@ -175,18 +175,14 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 
 // BIOS
 
-	lp=(char *)malloc(strlen("HLE") + 1);
-	sprintf(lp, "HLE");
-	i=ComboBox_AddString(hWC_BIOS, "Internal HLE Bios");
-	tempDest = ComboBox_SetItemData(hWC_BIOS, i, lp);
+
 	if (_stricmp(Config.Bios, lp)==0)
 		tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
 
 	strcpy(tmpStr, Config.BiosDir);
 	strcat(tmpStr, "*");
 	Find=FindFirstFile(tmpStr, &FindData);
-
-	do {
+ 	do {
 		if (Find==INVALID_HANDLE_VALUE) break;
 		if (!strcmp(FindData.cFileName, ".")) continue;
 		if (!strcmp(FindData.cFileName, "..")) continue;
@@ -198,19 +194,8 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 		if (_stricmp(Config.Bios, FindData.cFileName)==0)
 			tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
 	} while (FindNextFile(Find,&FindData));
-
+    
 	if (Find!=INVALID_HANDLE_VALUE) FindClose(Find);
-
-	if (ComboBox_GetCurSel(hWC_CDR ) == -1)
-		tempDest = ComboBox_SetCurSel(hWC_CDR,  0);
-	if (ComboBox_GetCurSel(hWC_GPU ) == -1)
-		tempDest = ComboBox_SetCurSel(hWC_GPU,  0);
-	if (ComboBox_GetCurSel(hWC_SPU ) == -1)
-		tempDest = ComboBox_SetCurSel(hWC_SPU,  0);
-	if (ComboBox_GetCurSel(hWC_PAD1) == -1)
-		tempDest = ComboBox_SetCurSel(hWC_PAD1, 0);
-	if (ComboBox_GetCurSel(hWC_PAD2) == -1)
-		tempDest = ComboBox_SetCurSel(hWC_PAD2, 0);
 	if (ComboBox_GetCurSel(hWC_BIOS) == -1)
 		tempDest = ComboBox_SetCurSel(hWC_BIOS, 0);
 
@@ -254,17 +239,15 @@ char *GetSelDLL(HWND hW,int id) {
 
 
 void OnOK(HWND hW) {
-	char * pad1DLL=GetSelDLL(hW,IDC_LISTPAD1);
-	char * pad2DLL=GetSelDLL(hW,IDC_LISTPAD2);
 	char * biosFILE=GetSelDLL(hW,IDC_LISTBIOS);
 
     if  (biosFILE==NULL) {
-		MessageBox(hW,"Configuration not OK!","Error",MB_OK|MB_ICONERROR);
-		return;
+		MessageBox(hW,"BIOS not selected!","Error",MB_OK|MB_ICONERROR);
 	}
-
-	strcpy(Config.Bios, biosFILE);
-
+	else
+	{
+		strcpy(Config.Bios, biosFILE);
+	}
 
 	SaveConfig();
 
