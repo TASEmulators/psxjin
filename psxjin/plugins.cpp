@@ -432,6 +432,7 @@ unsigned char PAD1_startPoll(int pad) {
 	epadd.controllerType = Movie.padType1;		
 
 	PAD1_readPort1(&padd);	
+	printf("%d, %d\n", padd.leftJoyX, padd.leftJoyY);
 	if (padd.controllerType != PSE_PAD_TYPE_MOUSE)
 	{
 		padd.moveX = 0;
@@ -440,6 +441,7 @@ unsigned char PAD1_startPoll(int pad) {
 	if (Movie.mode != 0)	
 		padd.controllerType = Movie.padType1;
 	memcpy(&PaddInput,&padd,sizeof(padd));
+	
 	if (Config.enable_extern_analog)
 	{
 		padd.leftJoyX = Config.PadLeftX;
