@@ -9,11 +9,7 @@
 using std::min;
 using std::max;
 
-#ifdef __linux
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#endif
+
 
 extern "C" {
 	#include <lua.h>
@@ -2407,7 +2403,7 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	assert(iicon >= 0 && iicon <= 3);
 	if(!(iicon >= 0 && iicon <= 3)) iicon = 0;
 
-#ifdef WIN32
+
 	{
 		static const int etypes [] = {MB_OK, MB_YESNO, MB_YESNOCANCEL, MB_OKCANCEL, MB_ABORTRETRYIGNORE};
 		static const int eicons [] = {MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONWARNING, MB_ICONERROR};
@@ -2426,164 +2422,8 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 		lua_pushstring(L, answer);
 		return 1;
 	}
-#else
 
-	char *t;
-#ifdef __linux
-	int pid; // appease compiler
 
-	// Before doing any work, verify the correctness of the parameters.
-	if (strcmp(type, "ok") == 0)
-		t = "OK:100";
-	else if (strcmp(type, "yesno") == 0)
-		t = "Yes:100,No:101";
-	else if (strcmp(type, "yesnocancel") == 0)
-		t = "Yes:100,No:101,Cancel:102";
-	else
-		return luaL_error(L, "invalid popup type \"%s\"", type);
-
-	// Can we find a copy of xmessage? Search the path.
-	
-	char *path = strdup(getenv("PATH"));
-
-	char *current = path;
-	
-	char *colon;
-
-	int found = 0;
-
-	while (current) {
-		colon = strchr(current, ':');
-		
-		// Clip off the colon.
-		*colon++ = 0;
-		
-		int len = strlen(current);
-		char *filename = (char*)malloc(len + 12); // always give excess
-		snprintf(filename, len+12, "%s/xmessage", current);
-		
-		if (access(filename, X_OK) == 0) {
-			free(filename);
-			found = 1;
-			break;
-		}
-		
-		// Failed, move on.
-		current = colon;
-		free(filename);
-		
-	}
-
-	free(path);
-
-	// We've found it?
-	if (!found)
-		goto use_console;
-
-	pid = fork();
-	if (pid == 0) {// I'm the virgin sacrifice
-	
-		// I'm gonna be dead in a matter of microseconds anyways, so wasted memory doesn't matter to me.
-		// Go ahead and abuse strdup.
-		char * parameters[] = {"xmessage", "-buttons", t, strdup(str), NULL};
-
-		execvp("xmessage", parameters);
-		
-		// Aw shitty
-		perror("exec xmessage");
-		exit(1);
-	}
-	else if (pid < 0) // something went wrong!!! Oh hell... use the console
-		goto use_console;
-	else {
-		// We're the parent. Watch for the child.
-		int r;
-		int res = waitpid(pid, &r, 0);
-		if (res < 0) // wtf?
-			goto use_console;
-		
-		// The return value gets copmlicated...
-		if (!WIFEXITED(r)) {
-			luaL_error(L, "don't screw with my xmessage process!");
-		}
-		r = WEXITSTATUS(r);
-		
-		// We assume it's worked.
-		if (r == 0)
-		{
-			return 0; // no parameters for an OK
-		}
-		if (r == 100) {
-			lua_pushstring(L, "yes");
-			return 1;
-		}
-		if (r == 101) {
-			lua_pushstring(L, "no");
-			return 1;
-		}
-		if (r == 102) {
-			lua_pushstring(L, "cancel");
-			return 1;
-		}
-		
-		// Wtf?
-		return luaL_error(L, "popup failed due to unknown results involving xmessage (%d)", r);
-	}
-
-use_console:
-#endif
-
-	// All else has failed
-
-	if (strcmp(type, "ok") == 0)
-		t = "";
-	else if (strcmp(type, "yesno") == 0)
-		t = "yn";
-	else if (strcmp(type, "yesnocancel") == 0)
-		t = "ync";
-	else
-		return luaL_error(L, "invalid popup type \"%s\"", type);
-
-	fprintf(stderr, "Lua Message: %s\n", str);
-
-	while (true) {
-		char buffer[64];
-
-		// We don't want parameters
-		if (!t[0]) {
-			fprintf(stderr, "[Press Enter]");
-			fgets(buffer, sizeof(buffer), stdin);
-			// We're done
-			return 0;
-
-		}
-		fprintf(stderr, "(%s): ", t);
-		fgets(buffer, sizeof(buffer), stdin);
-		
-		// Check if the option is in the list
-		if (strchr(t, tolower(buffer[0]))) {
-			switch (tolower(buffer[0])) {
-			case 'y':
-				lua_pushstring(L, "yes");
-				return 1;
-			case 'n':
-				lua_pushstring(L, "no");
-				return 1;
-			case 'c':
-				lua_pushstring(L, "cancel");
-				return 1;
-			default:
-				luaL_error(L, "internal logic error in console based prompts for gui.popup");
-			
-			}
-		}
-		
-		// We fell through, so we assume the user answered wrong and prompt again.
-	
-	}
-
-	// Nothing here, since the only way out is in the loop.
-#endif
 
 }
 

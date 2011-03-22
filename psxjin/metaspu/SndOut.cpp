@@ -339,37 +339,7 @@ void SndBuffer::Write( const StereoOut32& Sample )
 //		ssFreeze--;
 //		return;
 //	}
-//#ifndef __LINUX__
-//	else if( dspPluginEnabled )
-//	{
-//		// Convert in, send to winamp DSP, and convert out.
-//
-//		for( int i=0; i<SndOutPacketSize; ++i ) { sndTempBuffer16[i] = sndTempBuffer[i].DownSample(); }
-//		m_dsp_progress += DspProcess( (s16*)sndTempBuffer16, SndOutPacketSize );
-//
-//		// Some ugly code to ensure full packet handling:
-//		int ei = 0;
-//		while( m_dsp_progress >= SndOutPacketSize )
-//		{
-//			for( int i=0; i<SndOutPacketSize; ++i, ++ei ) { sndTempBuffer[i] = sndTempBuffer16[ei].UpSample(); }
-//
-//			if( !timeStretchDisabled )
-//				timeStretchWrite();
-//			else
-//				_WriteSamples(sndTempBuffer, sndTempProgress);
-//
-//			m_dsp_progress -= SndOutPacketSize;
-//		}
-//		
-//		// copy any leftovers to the front of the dsp buffer.
-//		if( m_dsp_progress > 0 )
-//		{
-//			memcpy( &sndTempBuffer16[ei], sndTempBuffer16,
-//				sizeof(sndTempBuffer16[0]) * m_dsp_progress
-//			);
-//		}
-//	}
-//#endif
+
 //	else
 	{
 		if( !timeStretchDisabled )

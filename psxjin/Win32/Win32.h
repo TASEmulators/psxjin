@@ -19,10 +19,7 @@
 #ifndef __WIN32_H__
 #define __WIN32_H__
 
-#ifdef __MINGW32__
-#define _WIN32_WINDOWS 0x410
-#define _WIN32_IE 0x0500
-#endif
+
 
 #define VK_OEM_PLUS 0xBB
 #define VK_OEM_COMMA 0xBC

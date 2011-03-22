@@ -24,7 +24,6 @@ u32 *j32Ptr[32];
 static s32 iCpuId(s32 cmd, u32 *regs) {
 	int flag;
 
-#if defined (_MSC_VER_)
 	__asm {
 		push ebx
 		push edi
@@ -57,37 +56,7 @@ static s32 iCpuId(s32 cmd, u32 *regs) {
 	}
 
 	return 0;
-#elif defined(__LINUX__) || (__MINGW32__)
-	__asm__(
-		"pushf\n" \
-		"pop %%eax\n" \
-		"mov %%eax, %%edx\n" \
-		"xor $0x200000, %%eax\n" \
-		"push %%eax\n" \
-		"popf\n" \
-		"pushf\n" \
-		"pop %%eax\n" \
-		"xor %%edx, %%eax\n" \
-		"mov %%eax, %0" \
-		: "=r"(flag) :
-	);
-	if (!flag) return -1;
 
-	__asm__(
-		"mov %4, %%eax\n"
-		"cpuid\n"
-		"mov %%eax, %0\n"
-		"mov %%ebx, %1\n"
-		"mov %%ecx, %2\n"
-		"mov %%edx, %3"
-		: "=m" (regs[0]), "=m" (regs[1]),
-		  "=m" (regs[2]), "=m" (regs[3])
-		: "m"(cmd)
-		: "eax", "ebx", "ecx", "edx"
-	);
-
-	return 0;
-#endif
 }
 
 void x86Init() {

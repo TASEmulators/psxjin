@@ -156,30 +156,7 @@ typedef struct
 
 
 
-/*         PAD PlugIn          */
 
-/*
-
-  functions that must be exported from PAD Plugin
-  
-  long	PADinit(long flags);	// called only once when PSEmu Starts
-  void	PADshutdown(void);		// called when PSEmu exits
-  long	PADopen(PadInitS *);	// called when PSEmu is running program
-  long	PADclose(void);
-  long	PADconfigure(void);
-  void  PADabout(void);
-  long  PADtest(void);			// called from Configure Dialog and after PADopen();
-  long	PADquery(void);
-
-  long	PADreadPort1(PadDataS *);
-  long	PADreadPort2(PadDataS *);
-
-*/
-
-// PADquery responses (notice - values ORed)
-// PSEmu will use them also in PADinit to tell Plugin which Ports will use
-// notice that PSEmu will call PADinit and PADopen only once when they are from
-// same plugin
 
 // might be used in port 1 (must support PADreadPort1() function)
 #define PSE_PAD_USE_PORT1			1
@@ -232,68 +209,7 @@ typedef struct
 #define PSE_NET_BLOCKING	0x00000000
 #define PSE_NET_NONBLOCKING	0x00000001
 
-/* note: unsupported fields should be zeroed.
- 
-typedef struct {
-	char EmuName[32];
-	char CdromID[9];	// ie. 'SCPH12345', no \0 trailing character
-	char CdromLabel[11];
-	void *psxMem;
-	GPUshowScreenPic GPU_showScreenPic;
-	GPUdisplayText GPUdisplayText;
-	PADsetSensitive PAD_setSensitive;
-	char GPUpath[256];
-	char SPUpath[256];
-	char CDRpath[256];
-	char MCD1path[256];
-	char MCD2path[256];
-	char BIOSpath[256];	// 'HLE' for internal bios
-	char Unused[1024];
-} netInfo;
 
-*/
-
-/*
-  basic funcs:
-
-   long NETopen(HWND hWnd)
-    opens the connection.
-    shall return 0 on success, else -1.
-    -1 is also returned if the user selects offline mode.
-
-   long NETclose()
-    closes the connection.
-    shall return 0 on success, else -1.
-
-   void NETpause()
-    this is called when the user paused the emulator.
-
-   void NETresume()
-    this is called when the user resumed the emulator.
-
-   long NETqueryPlayer()
-    returns player number
-
-   long NETsendPadData(void *pData, int Size)
-    this should be called for the first pad only on each side.
-
-   long NETrecvPadData(void *pData, int Pad)
-    call this for Pad 1/2 to get the data sent by the above func.
-
-  extended funcs:
-
-   long NETsendData(void *pData, int Size, int Mode)
-    sends Size bytes from pData to the other side.
-
-   long NETrecvData(void *pData, int Size, int Mode)
-    receives Size bytes from pData to the other side.
-
-   void NETsetInfo(netInfo *info);
-    sets the netInfo struct.
-
-   void NETkeypressed(int key) (linux only)
-    key is a XK_?? (X11) keycode.
-*/
 
 
 #endif // _PSEMU_PLUGIN_DEFS_H
