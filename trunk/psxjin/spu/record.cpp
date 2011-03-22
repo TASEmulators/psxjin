@@ -38,6 +38,7 @@
 #define _IN_RECORD
 
 #include "record.h"
+#include "PSXCommon.h"
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -46,13 +47,16 @@ HMMIO    hWaveFile=NULL;
 MMCKINFO mmckMain;
 MMCKINFO mmckData;
 char     szRecFileName[MAX_PATH];
+unsigned long TotBytes;
+int FileCount;
+unsigned long MBYTES = 1024*1024;
 
 ////////////////////////////////////////////////////////////////////////
 
 void RecordStart()
 {
 	WAVEFORMATEX pcmwf;
-
+	TotBytes = 0;
 	// setup header in the same format as our directsound stream
 	memset(&pcmwf,0,sizeof(WAVEFORMATEX));
 	pcmwf.wFormatTag      = WAVE_FORMAT_PCM;
@@ -64,6 +68,7 @@ void RecordStart()
 	pcmwf.wBitsPerSample  = 16;
 
 	// create file
+    sprintf(&szRecFileName[0],"%s%s%03d_%s.wav",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort);
 	hWaveFile=mmioOpen(szRecFileName,NULL,MMIO_CREATE|MMIO_WRITE|MMIO_EXCLUSIVE | MMIO_ALLOCBUF);
 	if (!hWaveFile) return;
 
@@ -108,6 +113,15 @@ void RecordBuffer(s16* pSound,long lBytes)
 {
 	// write the samples
 	if (hWaveFile) mmioWrite(hWaveFile,(char*)pSound,lBytes);
+	TotBytes += lBytes;
+	if (TotBytes > 2000*MBYTES)
+	{
+		RecordStop();
+		FileCount++;
+		RecordStart();
+	}
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////

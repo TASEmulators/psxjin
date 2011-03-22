@@ -1137,6 +1137,7 @@ void SPUstartWav(char* filename)
 {
 	strncpy(szRecFileName,filename,260);
 	iDoRecord=1;
+	FileCount=0;
 	RecordStart();
 }
 void SPUstopWav()

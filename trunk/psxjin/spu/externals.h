@@ -193,6 +193,7 @@ extern unsigned long LastPlay;
 
 #ifdef _WINDOWS
 extern int iDoRecord;
+extern int FileCount;
 #endif
 
 #endif
