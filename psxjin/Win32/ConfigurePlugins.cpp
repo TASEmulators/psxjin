@@ -76,8 +76,7 @@ void LoadConfig()
 {
 	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 
-	GetPrivateProfileString("Plugins", "Bios", "scph1001.bin", &Config.Bios[0], 256, Conf_File);
-	GetPrivateProfileString("Plugins", "Pad2", "padSeguDPP.dll", &Config.Pad2[0], 256, Conf_File);
+	GetPrivateProfileString("Plugins", "Bios", "scph1001.bin", &Config.Bios[0], 256, Conf_File);	
 	GetPrivateProfileString("Plugins", "MCD1", "", &Config.Mcd1[0], 256, Conf_File);
 	GetPrivateProfileString("Plugins", "MCD2", "", &Config.Mcd2[0], 256, Conf_File);
 	Config.Xa = GetPrivateProfileInt("Plugins", "Xa", 0, Conf_File);
@@ -122,63 +121,18 @@ void LoadConfig()
 BOOL OnConfigurePluginsDialog(HWND hW) {
 	WIN32_FIND_DATA FindData;
 	HANDLE Find;
-	HANDLE Lib;
-	PSEgetLibType    PSE_GetLibType;
-	PSEgetLibName    PSE_GetLibName;
-	PSEgetLibVersion PSE_GetLibVersion;
-	HWND hWC_GPU=GetDlgItem(hW,IDC_LISTGPU);
-	HWND hWC_SPU=GetDlgItem(hW,IDC_LISTSPU);
-	HWND hWC_CDR=GetDlgItem(hW,IDC_LISTCDR);
-	HWND hWC_PAD1=GetDlgItem(hW,IDC_LISTPAD1);
-	HWND hWC_PAD2=GetDlgItem(hW,IDC_LISTPAD2);
 	HWND hWC_BIOS=GetDlgItem(hW,IDC_LISTBIOS);
 	char tmpStr[256];
 	char *lp;
 	int i;
 
-	strcpy(tmpStr, Config.PluginsDir);
-	strcat(tmpStr, "*.dll");
-	Find = FindFirstFile(tmpStr, &FindData);
-
-	do {
-		if (Find==INVALID_HANDLE_VALUE) break;
-		sprintf(tmpStr,"%s%s", Config.PluginsDir, FindData.cFileName);
-		Lib = LoadLibrary(tmpStr);
-		if (Lib!=NULL) {
-			PSE_GetLibType = (PSEgetLibType) GetProcAddress((HMODULE)Lib,"PSEgetLibType");
-			PSE_GetLibName = (PSEgetLibName) GetProcAddress((HMODULE)Lib,"PSEgetLibName");
-			PSE_GetLibVersion = (PSEgetLibVersion) GetProcAddress((HMODULE)Lib,"PSEgetLibVersion");
-
-			if (PSE_GetLibType != NULL && PSE_GetLibName != NULL && PSE_GetLibVersion != NULL) {
-				unsigned long version = PSE_GetLibVersion();
-				long type;
-
-				sprintf(tmpStr, "%s %d.%d", PSE_GetLibName(), (int)(version>>8)&0xff, (int)version&0xff);
-				type = PSE_GetLibType();
-				if (type & PSE_LT_CDR) {
-					ComboAddPlugin(hWC_CDR, Config.Cdr);
-				}
-
-				if (type & PSE_LT_SPU) {
-					ComboAddPlugin(hWC_SPU, Config.Spu);
-				}
-
-				if (type & PSE_LT_GPU) {
-					ComboAddPlugin(hWC_GPU, Config.Gpu);
-				}
-			
-			}
-		}
-	} while (FindNextFile(Find,&FindData));
-
-	if (Find!=INVALID_HANDLE_VALUE) FindClose(Find);
+	
 
 // BIOS
 
 
-	if (_stricmp(Config.Bios, lp)==0)
-		tempDest = ComboBox_SetCurSel(hWC_BIOS, i);
-
+	
+	
 	strcpy(tmpStr, Config.BiosDir);
 	strcat(tmpStr, "*");
 	Find=FindFirstFile(tmpStr, &FindData);
@@ -213,12 +167,6 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 
 void CleanUpCombos(HWND hW) {
 	int i,iCnt;HWND hWC;char * lp;
-
-	CleanCombo(IDC_LISTGPU);
-	CleanCombo(IDC_LISTSPU);
-	CleanCombo(IDC_LISTCDR);
-	CleanCombo(IDC_LISTPAD1);
-	CleanCombo(IDC_LISTPAD2);
 	CleanCombo(IDC_LISTBIOS);
 }
 
@@ -229,7 +177,7 @@ void OnCancel(HWND hW) {
 }
 
 
-char *GetSelDLL(HWND hW,int id) {
+char *GetSelBIOS(HWND hW,int id) {
 	HWND hWC = GetDlgItem(hW,id);
 	int iSel;
 	iSel = ComboBox_GetCurSel(hWC);
@@ -239,7 +187,7 @@ char *GetSelDLL(HWND hW,int id) {
 
 
 void OnOK(HWND hW) {
-	char * biosFILE=GetSelDLL(hW,IDC_LISTBIOS);
+	char * biosFILE=GetSelBIOS(hW,IDC_LISTBIOS);
 
     if  (biosFILE==NULL) {
 		MessageBox(hW,"BIOS not selected!","Error",MB_OK|MB_ICONERROR);
@@ -262,19 +210,7 @@ void OnOK(HWND hW) {
 }
 
 
-#define ConfPlugin(src, confs, name) \
-	void *drv; \
-	src conf; \
-	char * pDLL = GetSelDLL(hW, confs); \
-	char file[256]; \
-	if(pDLL==NULL) return; \
-	strcpy(file, Config.PluginsDir); \
-	strcat(file, pDLL); \
-	drv = SysLoadLibrary(file); \
-	if (drv == NULL) return; \
-	conf = (src) SysLoadSym(drv, name); \
-	if (SysLibError() == NULL) conf(); \
-	SysCloseLibrary(drv);
+
 
 void ConfigureGPU(HWND hW) {
 	GPUconfigure();
@@ -293,35 +229,11 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 
 			Button_SetText(GetDlgItem(hW, IDOK), _("OK"));
 			Button_SetText(GetDlgItem(hW, IDCANCEL), _("Cancel"));
-			Static_SetText(GetDlgItem(hW, IDC_GRAPHICS), _("Graphics"));
-			Static_SetText(GetDlgItem(hW, IDC_FIRSTCONTROLLER), _("First Controller"));
-			Static_SetText(GetDlgItem(hW, IDC_SECONDCONTROLLER), _("Second Controller"));
-			Static_SetText(GetDlgItem(hW, IDC_SOUND), _("Sound"));
-			Static_SetText(GetDlgItem(hW, IDC_CDROM), _("CD-ROM"));
-			Static_SetText(GetDlgItem(hW, IDC_BIOS), _("Bios"));
-			Button_SetText(GetDlgItem(hW, IDC_CONFIGGPU), _("Configure..."));
-			Button_SetText(GetDlgItem(hW, IDC_TESTGPU), _("Test..."));
-			Button_SetText(GetDlgItem(hW, IDC_ABOUTGPU), _("About..."));
-			Button_SetText(GetDlgItem(hW, IDC_CONFIGSPU), _("Configure..."));
-			Button_SetText(GetDlgItem(hW, IDC_TESTSPU), _("Test..."));
-			Button_SetText(GetDlgItem(hW, IDC_ABOUTSPU), _("About..."));
-			Button_SetText(GetDlgItem(hW, IDC_CONFIGCDR), _("Configure..."));
-			Button_SetText(GetDlgItem(hW, IDC_TESTCDR), _("Test..."));
-			Button_SetText(GetDlgItem(hW, IDC_ABOUTCDR), _("About..."));
-			Button_SetText(GetDlgItem(hW, IDC_CONFIGPAD1), _("Configure..."));
-			Button_SetText(GetDlgItem(hW, IDC_TESTPAD1), _("Test..."));
-			Button_SetText(GetDlgItem(hW, IDC_ABOUTPAD1), _("About..."));
-			Button_SetText(GetDlgItem(hW, IDC_CONFIGPAD2), _("Configure..."));
-			Button_SetText(GetDlgItem(hW, IDC_TESTPAD2), _("Test..."));
-			Button_SetText(GetDlgItem(hW, IDC_ABOUTPAD2), _("About..."));
-
+			Static_SetText(GetDlgItem(hW, IDC_BIOS), _("Bios"));			
 			return OnConfigurePluginsDialog(hW);
 
 		case WM_COMMAND:
-			switch(LOWORD(wParam)) {
-				case IDC_CONFIGGPU:  ConfigureGPU(hW); return TRUE;
-       			case IDC_CONFIGSPU:  ConfigureSPU(hW); return TRUE;				
-
+			switch(LOWORD(wParam)) {				
 				case IDCANCEL: 
 					OnCancel(hW); 
 					if (CancelQuit) {
