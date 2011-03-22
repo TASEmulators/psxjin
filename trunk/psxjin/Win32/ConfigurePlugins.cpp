@@ -77,10 +77,6 @@ void LoadConfig()
 	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
 
 	GetPrivateProfileString("Plugins", "Bios", "scph1001.bin", &Config.Bios[0], 256, Conf_File);
-	GetPrivateProfileString("Plugins", "GPU", "gpuTASsoft.dll", &Config.Gpu[0], 256, Conf_File);
-	GetPrivateProfileString("Plugins", "SPU", "", &Config.Spu[0], 256, Conf_File);
-	GetPrivateProfileString("Plugins", "CDR", "cdrTASiso.dll", &Config.Cdr[0], 256, Conf_File);
-	GetPrivateProfileString("Plugins", "Pad1", "padSeguDPP.dll", &Config.Pad1[0], 256, Conf_File);
 	GetPrivateProfileString("Plugins", "Pad2", "padSeguDPP.dll", &Config.Pad2[0], 256, Conf_File);
 	GetPrivateProfileString("Plugins", "MCD1", "", &Config.Mcd1[0], 256, Conf_File);
 	GetPrivateProfileString("Plugins", "MCD2", "", &Config.Mcd2[0], 256, Conf_File);

@@ -38,5 +38,6 @@ void          DisplayPic(void);
 void          ShowGpuPic(void);
 void          ShowTextGpuPic(void);
 void          MoveScanLineArea(HWND hwnd);
+void		  SetRes(int X, int Y);
 
 #endif // _GPU_DRAW_H_
