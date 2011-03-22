@@ -26,7 +26,6 @@ struct
 	u16 padStat[2];
 	int padID[2];
 	int padMode1[2];
-	int padMode2[2];
 	int padModeE[2];
 	int padModeC[2];
 	int padModeF[2];
@@ -242,6 +241,9 @@ static void SaveConfig (void)
 	char Pad_Tmp[1024];
 	for (int j = 0; j < 2; j++)
 	{
+		sprintf(Pad_Tmp, "PAD%d Type",j);
+		sprintf(Str_Tmp, "%d",global.padID[j]);
+		WritePrivateProfileString("Controllers", Pad_Tmp, Str_Tmp, Config.Conf_File);
 		for(int i = 0; i < 21; i++)
 		{
 			sprintf(Str_Tmp, "%d",global.config.keys[j][i]);
@@ -257,6 +259,8 @@ static void LoadConfig (void)
 	char Pad_Tmp[1024];
 	for (int j = 0; j < 2; j++)
 	{
+		sprintf(Pad_Tmp, "PAD%d Type",j);
+		global.padID[j] = (u32)GetPrivateProfileInt("Controllers", Pad_Tmp, 0, Config.Conf_File);
 		for(int i = 0; i < 21; i++)
 		{			
 			sprintf(Pad_Tmp, "PAD%d_%d",j, i);
@@ -283,7 +287,6 @@ static void PADsetMode (const int pad, const int mode)
 	global.padVib1[pad] = 0;
 	global.padVibF[pad][0] = 0;
 	global.padVibF[pad][1] = 0;
-	global.padID[pad] = padID[global.padMode2[pad] * 2 + mode];
 }
 
 static void KeyPress (const int pad, const int index, const bool press)
@@ -430,8 +433,8 @@ s32 PADopen (HWND hWnd)
 	global.padStat[0] = 0xffff;
 	global.padStat[1] = 0xffff;
 	LoadConfig();
-	PADsetMode (0, 0);
-	PADsetMode (1, 0);	
+	PADsetMode (0, global.padID[0]);
+	PADsetMode (1, global.padID[1]);	
 	return 0;
 }
 
@@ -493,7 +496,7 @@ long PAD1_readPort1(PadDataS* pads)
 {	
 	UpdateState(0);
 	memset (pads, 0, sizeof (PadDataS));
-	if ((global.padID[0] & 0xf0) == 0x40)
+	if (global.padID[0] == 0)
 		pads->controllerType = 4;
 	else
 		pads->controllerType = 7;
@@ -511,7 +514,7 @@ long PAD2_readPort2(PadDataS* pads)
 {	
 	UpdateState(1);
 	memset (pads, 0, sizeof (PadDataS));
-	if ((global.padID[1] & 0xf0) == 0x40)
+	if (global.padID[1] == 0)
 		pads->controllerType = 4;
 	else
 		pads->controllerType = 7;
@@ -564,6 +567,16 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 		LoadConfig();
 		for (cnt1 = 21; cnt1--; )
 			set_label (hWnd, pad, cnt1);
+		if (global.padID[pad])
+		{
+			 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_CHECKED);
+			 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_UNCHECKED);
+		}
+		else
+		{
+			 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_UNCHECKED);
+			 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_CHECKED);
+		}
 		hTabWnd = GetDlgItem (hWnd, IDC_TABC);
 		TCITEM tcI;
 		tcI.mask = TCIF_TEXT;
@@ -585,9 +598,31 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 			pad = TabCtrl_GetCurSel (hTabWnd);
 			for (cnt1 = 21; cnt1--; )
 				set_label (hWnd, pad, cnt1);
+			if (global.padID[pad])
+			{
+				 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_CHECKED);
+				 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_UNCHECKED);
+			}
+			else
+			{
+				 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_UNCHECKED);
+				 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_CHECKED);
+			}
+		}
+			if (wParam == IDC_DIGITALSELECT || wParam == IDC_ANALOGSELECT)
+			{
+				if (IsDlgButtonChecked(hWnd,IDC_DIGITALSELECT) == BST_CHECKED) 
+			{
+				global.padID[pad] = 1;
+			}
+			else
+			{
+				global.padID[pad] = 0;
+			}
 		}
 		break;
 	case WM_COMMAND:
+		
 		for (cnt1 = 21; cnt1--; )
 		{
 			if (LOWORD (wParam) == IDC_BSELECT + cnt1)
@@ -685,8 +720,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 
 
 void PADconfigure (void)
-{	
-		memset (&global, 0, sizeof (global));
+{			
 		if (DialogBox (gApp.hInstance, MAKEINTRESOURCE (IDD_CONFIGCONTROL), GetActiveWindow(), (DLGPROC)ConfigurePADDlgProc) == IDOK)
 			SaveConfig();
 		ReleaseDirectInput();	

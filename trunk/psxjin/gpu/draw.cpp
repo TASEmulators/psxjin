@@ -99,12 +99,7 @@ int InitLUTs(void)
 // Could just snip this and make it return void
 // and make MMX detection it's own function
 
-#ifdef __GNUC__
-__asm__ __volatile__ ("movl $1, %%eax":::"eax");
-	__asm__ __volatile__ ("cpuid");
-__asm__ __volatile__ ( "and $0x00800000, %%edx":::"edx");
-__asm__ __volatile__ ( "movl %%edx, %0": "=g" (nMMXsupport));
-#else
+
 	__asm
 	{
 		mov  eax, 1
@@ -112,7 +107,6 @@ __asm__ __volatile__ ( "movl %%edx, %0": "=g" (nMMXsupport));
 		and  edx, 0x00800000
 		mov  nMMXsupport, edx
 	}
-#endif
 	return nMMXsupport;
 }
 
