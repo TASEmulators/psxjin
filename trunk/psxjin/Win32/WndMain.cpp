@@ -2317,6 +2317,8 @@ int SysInit() {
 		GPUshowframecounter();
 	if (dispInput)
 		GPUshowInput();
+	if (dispAnalog)
+		GPUshowAnalog();
 	return 0;
 }
 

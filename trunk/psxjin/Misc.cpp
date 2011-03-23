@@ -27,6 +27,7 @@
 #include "plugins.h"
 #include "EmuFile.h"
 #include "CdRom.h"
+#include "padwin.h"
 #include "spu/spu.h"
 
 int CDRisoFreeze(gzFile f, int Mode);
@@ -502,6 +503,8 @@ int SaveState(char *file) {
 	psxRcntFreeze(f, 1);
 	pos = ftell(f);
 	mdecFreeze(f, 1);
+	pos = ftell(f);	
+	PadFreeze(f, 1);
 	pos = ftell(f);
 	MovieFreeze(f, 1);
 	pos = ftell(f);
@@ -581,6 +584,8 @@ int LoadState(char *file) {
 	psxRcntFreeze(f, 0);
 	pos = ftell(f);
 	mdecFreeze(f, 0);
+	pos = ftell(f);
+	PadFreeze(f, 0);
 	pos = ftell(f);
 	MovieFreeze(f, 0);
 	pos = ftell(f);

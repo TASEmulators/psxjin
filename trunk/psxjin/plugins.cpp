@@ -208,7 +208,9 @@ static int bufcount, bufc;
 
 PadDataS padd1, padd2;
 
-unsigned char _PADstartPoll(PadDataS *pad) {
+
+//Older, simpler version of pad polling - for Standard Pads or MultiTAP
+unsigned char _PADstartPoll_old(PadDataS *pad) {
 	bufc = 0;		
 	switch (pad->controllerType) {
 		case PSE_PAD_TYPE_MOUSE:
@@ -227,7 +229,6 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 			analogpar[6] = pad->rightJoyY;
 			analogpar[7] = pad->leftJoyX;
 			analogpar[8] = pad->leftJoyY;
-
 			memcpy(buf, analogpar, 9);
 			bufcount = 8;
 			break;
@@ -239,7 +240,6 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 			analogpar[6] = pad->rightJoyY;
 			analogpar[7] = pad->leftJoyX;
 			analogpar[8] = pad->leftJoyY;
-
 			memcpy(buf, analogpar, 9);
 			bufcount = 8;
 			break;
@@ -260,7 +260,7 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 			bufcount = 1;			
 			break;
 		case PSE_PAD_TYPE_STANDARD:
-		default:
+		default:			
 			stdpar[3] = pad->buttonStatus & 0xff;
 			stdpar[4] = pad->buttonStatus >> 8;
 			memcpy(buf, stdpar, 5);
@@ -269,6 +269,7 @@ unsigned char _PADstartPoll(PadDataS *pad) {
 	}
 	return buf[bufc++];
 }
+
 
 unsigned char _xPADstartPoll(PadDataS *padd) {
 	bufc = 0;
@@ -325,18 +326,40 @@ unsigned char _xPADstartPoll(PadDataS *padd) {
 	return buf[bufc++];
 }
 
-unsigned char _PADpoll(unsigned char value) {
+unsigned char _PADpoll_old(unsigned char value) {
 	if (bufc > bufcount) return 0;
-	return buf[bufc++];
+	return buf[bufc++];		
 }
 
+unsigned char _PADpoll(unsigned char value) {
+	if (Config.UsingMultiTap || ((Config.PadState.padID[Config.PadState.curPad] & 0xf0) == 0x40))
+	{
+		return _PADpoll_old(value);
+	}
+	else 
+	{		
+		return PADpoll_SSS(value);
+	}
+}
 
+unsigned char _PADstartPoll(PadDataS *pad)
+{
+	if (Config.UsingMultiTap || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
+	{
+		
+		return _PADstartPoll_old(pad);
+	}
+	else 
+	{		
+		Config.PadState.curByte = 0;
+		return 0xff;
+	}
+}
 
 unsigned char PAD1_startPoll(int pad) {
 	PadDataS padd; //Pad that is read in
 	PadDataS Mpadds[4]; //Place to store all 4 pads data
-
-
+	Config.PadState.curPad = 0;
 	PadDataS epadd; //Set up an empty pad to fill the buffer
 	epadd.buttonStatus = 0xffff;
 	epadd.leftJoyX = 128;
@@ -346,7 +369,7 @@ unsigned char PAD1_startPoll(int pad) {
 	epadd.moveX = 0;
 	epadd.moveY = 0;
 	epadd.controllerType = Movie.padType1;		
-
+	UpdateState(Config.PadState.curPad);
 	PAD1_readPort1(&padd);	
 	if (padd.controllerType != PSE_PAD_TYPE_MOUSE)
 	{
@@ -497,6 +520,7 @@ long CALLBACK PAD1__keypressed() { return 0; }
 unsigned char PAD2_startPoll(int pad) {
 	PadDataS padd;
 	PadDataS Mpadds[4];
+	Config.PadState.curPad = 0;
 	PadDataS epadd; //empty pad;
 	epadd.buttonStatus = 0xffff;
 	epadd.leftJoyX = 128;

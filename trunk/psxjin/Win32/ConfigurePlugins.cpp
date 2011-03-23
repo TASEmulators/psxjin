@@ -1,5 +1,5 @@
 /*  PSXjin - Pc Psx Emulator
- *  Copyright (C) 1999-2003  PSXjin Team
+ *    PSXjin Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -211,14 +211,6 @@ void OnOK(HWND hW) {
 
 
 
-
-void ConfigureGPU(HWND hW) {
-	GPUconfigure();
-}
-
-void ConfigureSPU(HWND hW) {
-	SPUconfigure();
-}
 
 
 

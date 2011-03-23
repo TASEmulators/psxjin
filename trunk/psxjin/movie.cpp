@@ -194,7 +194,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->Port2_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P2_MTAP;
 	}
 	tempMovie->NumPlayers= 2;
-	tempMovie->P2_Start = 2;
+	tempMovie->P2_Start = 2;	
 	if (tempMovie->Port1_Mtap)
 	{
 		tempMovie->MultiTrack = 1;
@@ -504,6 +504,14 @@ static int StartReplay()
 		fread(Movie.inputBufferPtr, 1, toRead, fpMovie);
 		if (Movie.inputBufferPtr == 0)
 			return 0;
+	}
+	if (Movie.Port1_Mtap || Movie.Port2_Mtap) 
+	{
+		Config.UsingMultiTap = true;
+	}
+	else
+	{
+		Config.UsingMultiTap = false;
 	}
 
 	return 1;
