@@ -40,6 +40,10 @@ typedef uint32_t uint32;
 
 #include "System.h"
 #include <zlib.h>
+#ifndef DIRECTINPUT_VERSION
+#define DIRECTINPUT_VERSION 0x0800
+#endif
+#include "dinput.h"
 
 
 #include <windows.h>
@@ -87,6 +91,26 @@ typedef struct
 extern int Log;
 void __Log(char *fmt, ...);
 
+typedef struct
+{	
+	int devcnt;	
+	u16 padStat[2];
+	int padID[2];
+	int padMode1[2];
+	int padMode2[2];
+	int padModeE[2];
+	int padModeC[2];
+	int padModeF[2];
+	int padVib0[2];
+	int padVib1[2];
+	int padVibF[2][4];
+	int padVibC[2];
+	DWORD padPress[2][16];
+	int curPad;
+	int curByte;
+	int curCmd;
+	int cmdLen;
+} PadDef;
 
 typedef struct {	
 	int StartPosMM;
@@ -146,9 +170,12 @@ typedef struct {
 	unsigned short Pad1AutoHold;
 	unsigned short Pad2AutoHold;
 	unsigned short Pad1AutoFire;
-	unsigned short Pad2AutoFire;	
+	unsigned short Pad2AutoFire;
+	bool UsingMultiTap;
 	int CueTracks;
 	CueStruct CueList[99];
+	ConfigKey KeyConfig;
+	PadDef PadState;
 } psxjinconfig;
 
 extern psxjinconfig Config;

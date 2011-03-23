@@ -9,3 +9,6 @@ unsigned char PAD1_poll(unsigned char value);
 unsigned char PAD2_poll(unsigned char value);
 unsigned char PAD1_startPoll(int pad);
 unsigned char PAD2_startPoll(int pad);
+u8 PADpoll_SSS (u8 value);
+void UpdateState (const int pad);
+int PadFreeze(gzFile f, int Mode);

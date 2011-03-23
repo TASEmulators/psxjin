@@ -1,10 +1,13 @@
 #define WINVER 0x0500
 #define _WIN32_WINNT WINVER
+#ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800
+#endif
 
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+
 #include "dinput.h"
 
 #include "PSXCommon.h"
@@ -14,31 +17,14 @@
 
 HWND hTargetWnd;
 
-struct
+struct 
 {
-	ConfigKey config;
-	int devcnt;
 	LPDIRECTINPUT8 pDInput;
 	LPDIRECTINPUTDEVICE8 pDKeyboard;
 	LPDIRECTINPUTDEVICE8 pDDevice[4];
 	LPDIRECTINPUTEFFECT pDEffect[4][2]; /* for Small & Big Motor */
 	DIJOYSTATE JoyState[4];
-	u16 padStat[2];
-	int padID[2];
-	int padMode1[2];
-	int padModeE[2];
-	int padModeC[2];
-	int padModeF[2];
-	int padVib0[2];
-	int padVib1[2];
-	int padVibF[2][4];
-	int padVibC[2];
-	DWORD padPress[2][16];
-	int curPad;
-	int curByte;
-	int curCmd;
-	int cmdLen;
-} global;
+} dx8;
 
 
 static BOOL CALLBACK EnumAxesCallback (LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
@@ -57,13 +43,13 @@ static BOOL CALLBACK EnumAxesCallback (LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID 
 
 static BOOL CALLBACK EnumJoysticksCallback (const DIDEVICEINSTANCE* instance, VOID* pContext)
 {
-	const int devno = global.devcnt;
+	const int devno = Config.PadState.devcnt;
 	if (devno >= 4)
 		return DIENUM_STOP;
-	HRESULT result = global.pDInput->CreateDevice (instance->guidInstance, &global.pDDevice[devno], NULL);
+	HRESULT result = dx8.pDInput->CreateDevice (instance->guidInstance, &dx8.pDDevice[devno], NULL);
 	if (FAILED (result))
 		return DIENUM_CONTINUE;
-	global.devcnt++;
+	Config.PadState.devcnt++;
 	return DIENUM_CONTINUE;
 }
 
@@ -72,67 +58,67 @@ bool ReleaseDirectInput (void)
 	int index = 4;
 	while (index--)
 	{
-		if (global.pDEffect[index][0])
+		if (dx8.pDEffect[index][0])
 		{
-			global.pDEffect[index][0]->Unload();
-			global.pDEffect[index][0]->Release();
-			global.pDEffect[index][0] = NULL;
+			dx8.pDEffect[index][0]->Unload();
+			dx8.pDEffect[index][0]->Release();
+			dx8.pDEffect[index][0] = NULL;
 		}
-		if (global.pDEffect[index][1])
+		if (dx8.pDEffect[index][1])
 		{
-			global.pDEffect[index][1]->Unload();
-			global.pDEffect[index][1]->Release();
-			global.pDEffect[index][1] = NULL;
+			dx8.pDEffect[index][1]->Unload();
+			dx8.pDEffect[index][1]->Release();
+			dx8.pDEffect[index][1] = NULL;
 		}
-		if (global.pDDevice[index])
+		if (dx8.pDDevice[index])
 		{
-			global.pDDevice[index]->Unacquire();
-			global.pDDevice[index]->Release();
-			global.pDDevice[index] = NULL;
+			dx8.pDDevice[index]->Unacquire();
+			dx8.pDDevice[index]->Release();
+			dx8.pDDevice[index] = NULL;
 		}
 	}
-	if (global.pDKeyboard)
+	if (dx8.pDKeyboard)
 	{
-		global.pDKeyboard->Unacquire();
-		global.pDKeyboard->Release();
-		global.pDKeyboard = NULL;
+		dx8.pDKeyboard->Unacquire();
+		dx8.pDKeyboard->Release();
+		dx8.pDKeyboard = NULL;
 	}
-	if (global.pDInput)
+	if (dx8.pDInput)
 	{
-		global.pDInput->Release();
-		global.pDInput = NULL;
+		dx8.pDInput->Release();
+		dx8.pDInput = NULL;
 	}
-	global.devcnt = 0;
+	Config.PadState.devcnt = 0;
 	return FALSE;
 }
 
 static bool InitDirectInput (void)
 {
-	if (global.pDInput)
+	if (dx8.pDInput)
 		return TRUE;
-	HRESULT result = DirectInput8Create (gApp.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&global.pDInput, NULL);
+	HRESULT result = DirectInput8Create (gApp.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dx8.pDInput, NULL);
 	if (FAILED (result))
 		return ReleaseDirectInput();
-	result = global.pDInput->CreateDevice (GUID_SysKeyboard, &global.pDKeyboard, NULL);
+	result = dx8.pDInput->CreateDevice (GUID_SysKeyboard, &dx8.pDKeyboard, NULL);
 	if (FAILED (result))
 		return ReleaseDirectInput();
-	result = global.pDInput->EnumDevices (DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
+	result = dx8.pDInput->EnumDevices (DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
 	if (FAILED (result))
 		return ReleaseDirectInput();
-	result = global.pDKeyboard->SetDataFormat (&c_dfDIKeyboard);
+	result = dx8.pDKeyboard->SetDataFormat (&c_dfDIKeyboard);
 	if (FAILED (result))
 		return ReleaseDirectInput();
 	if (hTargetWnd)
 	{
-		global.pDKeyboard->Unacquire();
-		result = global.pDKeyboard->SetCooperativeLevel (hTargetWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+		dx8.pDKeyboard->Unacquire();
+		result = dx8.pDKeyboard->SetCooperativeLevel (hTargetWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 		if (FAILED (result))
 			return ReleaseDirectInput();
 	}
-	int index = global.devcnt;
+	int index = Config.PadState.devcnt;
 	while (index--)
 	{
-		const LPDIRECTINPUTDEVICE8 pDDevice = global.pDDevice[index];
+		const LPDIRECTINPUTDEVICE8 pDDevice = dx8.pDDevice[index];
 		result = pDDevice->SetDataFormat (&c_dfDIJoystick);
 		if (FAILED (result))
 			return ReleaseDirectInput();
@@ -176,16 +162,16 @@ static bool InitDirectInput (void)
 		/* Small Motor */
 		local.eff.cbTypeSpecificParams = sizeof (DIPERIODIC);
 		local.eff.lpvTypeSpecificParams = &local.per;
-		result = pDDevice->CreateEffect (GUID_Square , &local.eff, &global.pDEffect[index][0], NULL);
+		result = pDDevice->CreateEffect (GUID_Square , &local.eff, &dx8.pDEffect[index][0], NULL);
 		if (FAILED (result))
-			global.pDEffect[index][0] = NULL;
+			dx8.pDEffect[index][0] = NULL;
 
 		/* Big Motor */
 		local.eff.cbTypeSpecificParams = sizeof (DICONSTANTFORCE);
 		local.eff.lpvTypeSpecificParams = &local.cf;
-		result = pDDevice->CreateEffect (GUID_ConstantForce , &local.eff, &global.pDEffect[index][1], NULL);
+		result = pDDevice->CreateEffect (GUID_ConstantForce , &local.eff, &dx8.pDEffect[index][1], NULL);
 		if (FAILED (result))
-			global.pDEffect[index][1] = NULL;
+			dx8.pDEffect[index][1] = NULL;
  	}
 	return TRUE;
 }
@@ -208,12 +194,12 @@ static bool AcquireDevice (LPDIRECTINPUTDEVICE8 lpDirectInputDevice)
 static bool GetJoyState (const int devno)
 {
 	InitDirectInput();
-	if (global.pDDevice[devno] == NULL)
+	if (dx8.pDDevice[devno] == NULL)
 		return FALSE;
-	global.pDDevice[devno]->Poll();
-	if (FAILED (global.pDDevice[devno]->GetDeviceState (sizeof (DIJOYSTATE), &global.JoyState[devno])))
+	dx8.pDDevice[devno]->Poll();
+	if (FAILED (dx8.pDDevice[devno]->GetDeviceState (sizeof (DIJOYSTATE), &dx8.JoyState[devno])))
 	{
-		AcquireDevice (global.pDDevice[devno]);
+		AcquireDevice (dx8.pDDevice[devno]);
 		return FALSE;
 	}
 	return TRUE;
@@ -222,17 +208,21 @@ static bool GetJoyState (const int devno)
 static bool GetKeyState (u8* keyboard)
 {
 	InitDirectInput();
-	if (global.pDKeyboard == NULL)
+	if (dx8.pDKeyboard == NULL)
 		return FALSE;
-	global.pDKeyboard->Poll();
-	if (FAILED (global.pDKeyboard->GetDeviceState (256, keyboard)))
+	dx8.pDKeyboard->Poll();
+	if (FAILED (dx8.pDKeyboard->GetDeviceState (256, keyboard)))
 	{
-		AcquireDevice (global.pDKeyboard);
+		AcquireDevice (dx8.pDKeyboard);
 		return FALSE;
 	}
 	return TRUE;
 }
 
+int PadFreeze(gzFile f, int Mode) {
+	gzfreezel(&Config.PadState);
+	return 0;
+}
 
 
 static void SaveConfig (void)
@@ -242,11 +232,11 @@ static void SaveConfig (void)
 	for (int j = 0; j < 2; j++)
 	{
 		sprintf(Pad_Tmp, "PAD%d Type",j);
-		sprintf(Str_Tmp, "%d",global.padID[j]);
+		sprintf(Str_Tmp, "%d",Config.PadState.padID[j]);
 		WritePrivateProfileString("Controllers", Pad_Tmp, Str_Tmp, Config.Conf_File);
 		for(int i = 0; i < 21; i++)
 		{
-			sprintf(Str_Tmp, "%d",global.config.keys[j][i]);
+			sprintf(Str_Tmp, "%d",Config.KeyConfig.keys[j][i]);
 			sprintf(Pad_Tmp, "PAD%d_%d",j, i);
 			WritePrivateProfileString("Controllers", Pad_Tmp, Str_Tmp, Config.Conf_File);
 		}
@@ -260,33 +250,34 @@ static void LoadConfig (void)
 	for (int j = 0; j < 2; j++)
 	{
 		sprintf(Pad_Tmp, "PAD%d Type",j);
-		global.padID[j] = (u32)GetPrivateProfileInt("Controllers", Pad_Tmp, 0, Config.Conf_File);
+		Config.PadState.padID[j] = (u32)GetPrivateProfileInt("Controllers", Pad_Tmp, 0, Config.Conf_File);
 		for(int i = 0; i < 21; i++)
 		{			
 			sprintf(Pad_Tmp, "PAD%d_%d",j, i);
-			global.config.keys[j][i] = (u32)GetPrivateProfileInt("Controllers", Pad_Tmp, 0, Config.Conf_File);
+			Config.KeyConfig.keys[j][i] = (u32)GetPrivateProfileInt("Controllers", Pad_Tmp, 0, Config.Conf_File);
 		}
 	}	
-	global.padVibC[0] = global.padVibC[1] = -1;
+	Config.PadState.padVibC[0] = Config.PadState.padVibC[1] = -1;
 	for (int cnt = 21; cnt--; )
 	{
-		const int key0 = global.config.keys[0][cnt];
+		const int key0 = Config.KeyConfig.keys[0][cnt];
 		if (key0 >= 0x1000)
-			global.padVibC[0] = (key0 & 0xfff) / 0x100;
-		const int key1 = global.config.keys[1][cnt];
+			Config.PadState.padVibC[0] = (key0 & 0xfff) / 0x100;
+		const int key1 = Config.KeyConfig.keys[1][cnt];
 		if (key1 >= 0x1000)
-			global.padVibC[1] = (key1 & 0xfff) / 0x100;
+			Config.PadState.padVibC[1] = (key1 & 0xfff) / 0x100;
 	}
 }
 
 static void PADsetMode (const int pad, const int mode)
 {
 	static const u8 padID[] = { 0x41, 0x73, 0x41, 0x79 };
-	global.padMode1[pad] = mode;
-	global.padVib0[pad] = 0;
-	global.padVib1[pad] = 0;
-	global.padVibF[pad][0] = 0;
-	global.padVibF[pad][1] = 0;
+	Config.PadState.padMode1[pad] = mode;
+	Config.PadState.padVib0[pad] = 0;
+	Config.PadState.padVib1[pad] = 0;
+	Config.PadState.padVibF[pad][0] = 0;
+	Config.PadState.padVibF[pad][1] = 0;
+	Config.PadState.padID[pad] = padID[Config.PadState.padMode2[pad] * 2 + mode];
 }
 
 static void KeyPress (const int pad, const int index, const bool press)
@@ -295,28 +286,28 @@ static void KeyPress (const int pad, const int index, const bool press)
 	{
 		if (press)
 		{
-			global.padStat[pad] &= ~(1 << index);
-			if (global.padPress[pad][index] == 0)
-				global.padPress[pad][index] = GetTickCount();
+			Config.PadState.padStat[pad] &= ~(1 << index);
+			if (Config.PadState.padPress[pad][index] == 0)
+				Config.PadState.padPress[pad][index] = GetTickCount();
 		}
 		else
 		{
-			global.padStat[pad] |= 1 << index;
-			global.padPress[pad][index] = 0;
+			Config.PadState.padStat[pad] |= 1 << index;
+			Config.PadState.padPress[pad][index] = 0;
 		}
 	}
 	else
 	{
 		static bool prev[2] = { FALSE, FALSE };
-		if ((prev[pad] != press) && (global.padModeF[pad] == 0))
+		if ((prev[pad] != press) && (Config.PadState.padModeF[pad] == 0))
 		{
 			prev[pad] = press;
-			if (press) PADsetMode (pad, !global.padMode1[pad]);
+			if (press) PADsetMode (pad, !Config.PadState.padMode1[pad]);
 		}
 	}
 }
 
-static void UpdateState (const int pad)
+void UpdateState (const int pad)
 {
 	static int flag_keyboard;
 	static int flag_joypad[4];
@@ -331,7 +322,7 @@ static void UpdateState (const int pad)
 	static u8 keystate[256];
 	for (int index = 17; index--; )
 	{
-		const int key = global.config.keys[pad][index];
+		const int key = Config.KeyConfig.keys[pad][index];
 		if (key == 0)
 			continue;
 		else if (key < 0x100)
@@ -355,11 +346,11 @@ static void UpdateState (const int pad)
 			}
 			if (key < 0x2000)
 			{
-				KeyPress (pad, index, global.JoyState[joypad].rgbButtons[key & 0xff]);
+				KeyPress (pad, index, dx8.JoyState[joypad].rgbButtons[key & 0xff]);
 			}
 			else if (key < 0x3000)
 			{
-				const int state = ((int*)&global.JoyState[joypad].lX)[(key & 0xff) /2];
+				const int state = ((int*)&dx8.JoyState[joypad].lX)[(key & 0xff) /2];
 				switch (key & 1)
 				{
 				case 0: KeyPress (pad, index, state < -64); break;
@@ -368,7 +359,7 @@ static void UpdateState (const int pad)
 			}
 			else
 			{
-				const u32 state = global.JoyState[joypad].rgdwPOV[(key & 0xff) /4];
+				const u32 state = dx8.JoyState[joypad].rgdwPOV[(key & 0xff) /4];
 				switch (key & 3)
 				{
 				case 0: KeyPress (pad, index, (state >= 0 && state <= 4500) || (state >= 31500 && state <= 36000)); break;
@@ -382,10 +373,12 @@ static void UpdateState (const int pad)
 
 	
 }
+	
+
 
 static void set_label (const HWND hWnd, const int pad, const int index)
 {
-	const int key = global.config.keys[pad][index];
+	const int key = Config.KeyConfig.keys[pad][index];
 	char buff[64];
 	if (key < 0x100)
 	{
@@ -429,12 +422,12 @@ s32 PADopen (HWND hWnd)
 			hWnd = GetParent (hWnd);
 	}
 	hTargetWnd = hWnd;
-	memset (&global, 0, sizeof (global));
-	global.padStat[0] = 0xffff;
-	global.padStat[1] = 0xffff;
+	memset (&Config.PadState, 0, sizeof (PadDef));
+	Config.PadState.padStat[0] = 0xffff;
+	Config.PadState.padStat[1] = 0xffff;
 	LoadConfig();
-	PADsetMode (0, global.padID[0]);
-	PADsetMode (1, global.padID[1]);	
+	PADsetMode (0, (int)((Config.PadState.padID[0] & 0xf0) == 0x40));
+	PADsetMode (1, (int)((Config.PadState.padID[1] & 0xf0) == 0x40));	
 	return 0;
 }
 
@@ -486,43 +479,203 @@ static u8 get_analog (const int key)
 {
 	const int pad = ((key & 0xf00) / 0x100);
 	const int pos = ((key & 0x0ff) /2);
-	return (u8)(((int*)&global.JoyState[pad].lX)[pos] + 128);
+	return (u8)(((int*)&dx8.JoyState[pad].lX)[pos] + 128);
+}
+
+u8 PADpoll_SSS (u8 value)
+{
+	const int pad = Config.PadState.curPad;
+	const int cur = Config.PadState.curByte;
+	static u8 buf[20];
+
+
+	if (cur == 0)
+	{
+		Config.PadState.curByte++;
+		Config.PadState.curCmd = value;
+		switch (value)
+		{
+		case 0x40:
+			Config.PadState.cmdLen = sizeof (cmd40);
+			memcpy (buf, cmd40, sizeof (cmd40));
+			return 0xf3;
+		case 0x41:
+			Config.PadState.cmdLen = sizeof (cmd41);
+			memcpy (buf, cmd41, sizeof (cmd41));
+			return 0xf3;
+		case 0x42:
+		case 0x43:
+			if (value == 0x42) UpdateState (pad);
+			Config.PadState.cmdLen = 2 + 2 * (Config.PadState.padID[pad] & 0x0f);
+			buf[1] = Config.PadState.padModeC[pad] ? 0x00 : 0x5a;
+			*(u16*)&buf[2] = Config.PadState.padStat[pad];
+			if (value == 0x43 && Config.PadState.padModeE[pad])
+			{
+				buf[4] = 0;
+				buf[5] = 0;
+				buf[6] = 0;
+				buf[7] = 0;
+				return 0xf3;
+			}
+			else
+			{
+				buf[ 4] = get_analog (Config.KeyConfig.keys[pad][19]);
+				buf[ 5] = get_analog (Config.KeyConfig.keys[pad][20]);
+				buf[ 6] = get_analog (Config.KeyConfig.keys[pad][17]);
+				buf[ 7] = get_analog (Config.KeyConfig.keys[pad][18]);
+
+				if (Config.PadState.padID[pad] == 0x79)
+				{
+					const DWORD now = GetTickCount();
+					buf[ 8] = 255;
+					buf[ 9] = 255;
+					buf[10] = 255;
+					buf[11] = 255;
+					buf[12] = 255;
+					buf[13] = 255;
+					buf[14] = 255;
+					buf[15] = 255;
+					buf[16] = 255;
+					buf[17] = 255;
+					buf[18] = 255;
+					buf[19] = 255;
+				}
+				return (u8)Config.PadState.padID[pad];
+			}
+			break;
+		case 0x44:
+			Config.PadState.cmdLen = sizeof (cmd44);
+			memcpy (buf, cmd44, sizeof (cmd44));
+			return 0xf3;
+		case 0x45:
+			Config.PadState.cmdLen = sizeof (cmd45);
+			memcpy (buf, cmd45, sizeof (cmd45));
+			buf[4] = (u8)Config.PadState.padMode1[pad];
+			return 0xf3;
+		case 0x46:
+			Config.PadState.cmdLen = sizeof (cmd46);
+			memcpy (buf, cmd46, sizeof (cmd46));
+			return 0xf3;
+		case 0x47:
+			Config.PadState.cmdLen = sizeof (cmd47);
+			memcpy (buf, cmd47, sizeof (cmd47));
+			return 0xf3;
+		case 0x4c:
+			Config.PadState.cmdLen = sizeof (cmd4c);
+			memcpy (buf, cmd4c, sizeof (cmd4c));
+			return 0xf3;
+		case 0x4d:
+			Config.PadState.cmdLen = sizeof (cmd4d);
+			memcpy (buf, cmd4d, sizeof (cmd4d));
+			return 0xf3;
+		case 0x4f:
+			Config.PadState.padID[pad] = 0x79;
+			Config.PadState.padMode2[pad] = 1;
+			Config.PadState.cmdLen = sizeof (cmd4f);
+			memcpy (buf, cmd4f, sizeof (cmd4f));
+			return 0xf3;
+		}
+	}
+	switch (Config.PadState.curCmd)
+	{
+	case 0x42:
+		break;
+	case 0x43:
+		if (cur == 2)
+		{
+			Config.PadState.padModeE[pad] = value;
+			Config.PadState.padModeC[pad] = 0;
+		}
+		break;
+	case 0x44:
+		if (cur == 2)
+			PADsetMode (pad, value);
+		if (cur == 3)
+			Config.PadState.padModeF[pad] = (value == 3);
+		break;
+	case 0x46:
+		if (cur == 2)
+		{
+			switch(value)
+			{
+			case 0:
+				buf[5] = 0x02;
+				buf[6] = 0x00;
+				buf[7] = 0x0A;
+				break;
+			case 1:
+				buf[5] = 0x01;
+				buf[6] = 0x01;
+				buf[7] = 0x14;
+				break;
+			}
+		}
+		break;
+	case 0x4c:
+		if (cur == 2)
+		{
+			static const u8 buf5[] = { 0x04, 0x07, 0x02, 0x05 };
+			buf[5] = buf5[value & 3];
+		}
+		break;
+	case 0x4d:
+		if (cur >= 2)
+		{
+			if (cur == Config.PadState.padVib0[pad])
+				buf[cur] = 0x00;
+			if (cur == Config.PadState.padVib1[pad])
+				buf[cur] = 0x01;
+			if (value == 0x00)
+			{
+				Config.PadState.padVib0[pad] = cur;
+				if ((Config.PadState.padID[pad] & 0x0f) < (cur - 1) / 2)
+					 Config.PadState.padID[pad] = (Config.PadState.padID[pad] & 0xf0) + (cur - 1) / 2;
+			}
+			else if (value == 0x01)
+			{
+				Config.PadState.padVib1[pad] = cur;
+				if ((Config.PadState.padID[pad] & 0x0f) < (cur - 1) / 2)
+					 Config.PadState.padID[pad] = (Config.PadState.padID[pad] & 0xf0) + (cur - 1) / 2;
+			}
+		}
+		break;
+	}
+	if (cur >= Config.PadState.cmdLen)
+		return 0;
+	return buf[Config.PadState.curByte++];
 }
 
 
 
-
 long PAD1_readPort1(PadDataS* pads)
-{	
-	UpdateState(0);
+{		
 	memset (pads, 0, sizeof (PadDataS));
-	if (global.padID[0] == 0)
+	if ((Config.PadState.padID[0] & 0xf0) == 0x40)
 		pads->controllerType = 4;
 	else
 		pads->controllerType = 7;
-	pads->buttonStatus = global.padStat[0];
-	pads->leftJoyX = get_analog (global.config.keys[0][17]);
-	pads->leftJoyY = get_analog (global.config.keys[0][18]);
-	pads->rightJoyX = get_analog (global.config.keys[0][19]);
-	pads->rightJoyY = get_analog (global.config.keys[0][20]);
+	pads->buttonStatus = Config.PadState.padStat[0];
+	pads->leftJoyX = get_analog (Config.KeyConfig.keys[0][17]);
+	pads->leftJoyY = get_analog (Config.KeyConfig.keys[0][18]);
+	pads->rightJoyX = get_analog (Config.KeyConfig.keys[0][19]);
+	pads->rightJoyY = get_analog (Config.KeyConfig.keys[0][20]);
 	pads->moveX = 0;
 	pads->moveY = 0;
 	return 0;
 }
 
 long PAD2_readPort2(PadDataS* pads)
-{	
-	UpdateState(1);
+{		
 	memset (pads, 0, sizeof (PadDataS));
-	if (global.padID[1] == 0)
+	if ((Config.PadState.padID[1] & 0xf0) == 0x40)
 		pads->controllerType = 4;
 	else
 		pads->controllerType = 7;
-	pads->buttonStatus = global.padStat[1];
-	pads->leftJoyX = get_analog (global.config.keys[1][17]);
-	pads->leftJoyY = get_analog (global.config.keys[1][18]);
-	pads->rightJoyX = get_analog (global.config.keys[1][19]);
-	pads->rightJoyY = get_analog (global.config.keys[1][20]);
+	pads->buttonStatus = Config.PadState.padStat[1];
+	pads->leftJoyX = get_analog (Config.KeyConfig.keys[1][17]);
+	pads->leftJoyY = get_analog (Config.KeyConfig.keys[1][18]);
+	pads->rightJoyX = get_analog (Config.KeyConfig.keys[1][19]);
+	pads->rightJoyY = get_analog (Config.KeyConfig.keys[1][20]);
 	pads->moveX = 0;
 	pads->moveY = 0;
 	return 0;
@@ -567,7 +720,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 		LoadConfig();
 		for (cnt1 = 21; cnt1--; )
 			set_label (hWnd, pad, cnt1);
-		if (global.padID[pad])
+		if ((Config.PadState.padID[pad] & 0xf0) == 0x40)
 		{
 			 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_CHECKED);
 			 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_UNCHECKED);
@@ -598,7 +751,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 			pad = TabCtrl_GetCurSel (hTabWnd);
 			for (cnt1 = 21; cnt1--; )
 				set_label (hWnd, pad, cnt1);
-			if (global.padID[pad])
+			if((Config.PadState.padID[pad] & 0xf0) == 0x40)
 			{
 				 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_CHECKED);
 				 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_UNCHECKED);
@@ -613,11 +766,11 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 			{
 				if (IsDlgButtonChecked(hWnd,IDC_DIGITALSELECT) == BST_CHECKED) 
 			{
-				global.padID[pad] = 1;
+				Config.PadState.padID[pad] = 0x41;
 			}
 			else
 			{
-				global.padID[pad] = 0;
+				Config.PadState.padID[pad] = 0x73;
 			}
 		}
 		break;
@@ -653,7 +806,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 			}
 			else
 			{
-				global.config.keys[pad][index] = 0;
+				Config.KeyConfig.keys[pad][index] = 0;
 				set_label (hWnd, pad, index);
 				EnableWindow (GetDlgItem (hWnd, disabled), TRUE);
 				disabled = 0;
@@ -666,19 +819,19 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 				if (~keymaps[0][key] & keymaps[1][key] & 0x80)
 					break;
 			}
-			for (cnt1 = global.devcnt; cnt1--;)
+			for (cnt1 = Config.PadState.devcnt; cnt1--;)
 			{
 				if (GetJoyState (cnt1) == FALSE)
 					break;
 
 				for (cnt2 = 32; cnt2--; )
 				{
-					if (global.JoyState[cnt1].rgbButtons[cnt2])
+					if (dx8.JoyState[cnt1].rgbButtons[cnt2])
 						key = 0x1000 + 0x100 * cnt1 + cnt2;
 				}
 				for (cnt2 = 8; cnt2--; )
 				{
-					const int now = ((u32*)&global.JoyState[cnt1].lX)[cnt2];
+					const int now = ((u32*)&dx8.JoyState[cnt1].lX)[cnt2];
 					if (now < -64)
 					{
 						key = 0x2000 + 0x100 * cnt1 + cnt2 * 2 +0;
@@ -692,7 +845,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 				}
 				for (cnt2 = 4; cnt2--; )
 				{
-					const u32 now = global.JoyState[cnt1].rgdwPOV[cnt2];
+					const u32 now = dx8.JoyState[cnt1].rgdwPOV[cnt2];
 					if ((now >= 0 && now < 4500) || (now >= 31500 && now < 36000))
 						key = 0x3000 + 0x100 * cnt1 + cnt2 * 4 +0;
 					if (now >= 4500 && now < 13500)
@@ -708,7 +861,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 			else if (key > 0)
 			{
 				if (key != 1)
-					global.config.keys[pad][index] = key;
+					Config.KeyConfig.keys[pad][index] = key;
 				set_label (hWnd, pad, index);
 				EnableWindow (GetDlgItem (hWnd, disabled), TRUE);
 				disabled = 0;
