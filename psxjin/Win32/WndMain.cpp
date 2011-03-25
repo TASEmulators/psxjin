@@ -896,6 +896,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPFRAMECOUNTER, MF_BYCOMMAND | (dispFrameCounter ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPINPUT, MF_BYCOMMAND | (dispInput ? MF_CHECKED:MF_UNCHECKED));
 			CheckMenuItem(gApp.hMenu, ID_EMULATOR_DISPANALOG, MF_BYCOMMAND | (dispAnalog ? MF_CHECKED:MF_UNCHECKED));
+			CheckMenuItem(gApp.hMenu, ID_ANALOG_HACK, MF_BYCOMMAND | (Config.UsingAnalogHack ? MF_CHECKED:MF_UNCHECKED));
 			return TRUE;
 		case WM_MOVE:
 		{
@@ -1155,8 +1156,10 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_CONFIGURATION_CONTROLLERS:
 					PADconfigure();
 					return TRUE;
-
-				case ID_CONFIGURATION_MAPHOTKEYS:
+				case ID_ANALOG_HACK:
+					Config.UsingAnalogHack = !Config.UsingAnalogHack;
+					return true;
+				case ID_CONFIGURATION_MAPHOTKEYS:	
 						MHkeysCreate();
 					return TRUE;
 
@@ -2131,6 +2134,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);
 
 	ADDSUBMENU(0, _("&Configuration"));
+	ADDMENUITEM(0, _("&Analog Hack"), ID_ANALOG_HACK);
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
@@ -2253,6 +2257,10 @@ void SaveIni()
 	WritePrivateProfileString("General", "InputDisplay", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", dispAnalog );
 	WritePrivateProfileString("General", "AnalogDisplay", Str_Tmp, Config.Conf_File);
+	sprintf(Str_Tmp, "%d", dispAnalog );
+	WritePrivateProfileString("General", "AnalogDisplay", Str_Tmp, Config.Conf_File);
+	sprintf(Str_Tmp, "%d", (int)Config.UsingAnalogHack);
+	WritePrivateProfileString("General", "AnalogHack", Str_Tmp, Config.Conf_File);
 
 
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
@@ -2281,7 +2289,7 @@ void LoadIni()
 	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Config.Conf_File);
 	dispInput = GetPrivateProfileInt("General", "InputDisplay", 0, Config.Conf_File);
 	dispAnalog = GetPrivateProfileInt("General", "AnalogDisplay", 0, Config.Conf_File);
-	
+	Config.UsingAnalogHack = (bool)GetPrivateProfileInt("General", "AnalogHack", 0, Config.Conf_File);
 
 	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things
 	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things

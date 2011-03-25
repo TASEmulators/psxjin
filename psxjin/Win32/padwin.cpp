@@ -92,7 +92,7 @@ bool ReleaseDirectInput (void)
 	return FALSE;
 }
 
-static bool InitDirectInput (void)
+bool InitDirectInput (void)
 {
 	if (dx8.pDInput)
 		return TRUE;
@@ -798,6 +798,8 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 		{
 			const int index = disabled - IDC_BSELECT;
 			int analog = FALSE;
+			UpdateState(0);
+			UpdateState(1);
 			if ((GetTickCount() - countdown) / 1000 != 10)
 			{
 				char buff[64];

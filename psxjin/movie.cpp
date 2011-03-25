@@ -192,6 +192,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->isText = tempMovie->movieFlags&MOVIE_FLAG_IS_TEXT;
 		tempMovie->Port1_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P1_MTAP;
 		tempMovie->Port2_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P2_MTAP;
+		tempMovie->UsingAnalogHack = (bool)(tempMovie->movieFlags&MOVIE_FLAG_ANALOG_HACK);
 	}
 	tempMovie->NumPlayers= 2;
 	tempMovie->P2_Start = 2;	
@@ -332,6 +333,8 @@ static void WriteMovieHeader()
 		Movie.movieFlags |= MOVIE_FLAG_P1_MTAP;
 	if (Movie.Port2_Mtap)
 		Movie.movieFlags |= MOVIE_FLAG_P2_MTAP;
+	if (Config.UsingAnalogHack) 
+		Movie.movieFlags |= MOVIE_FLAG_ANALOG_HACK;
 
 	
 	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
@@ -505,13 +508,13 @@ static int StartReplay()
 		if (Movie.inputBufferPtr == 0)
 			return 0;
 	}
-	if (Movie.Port1_Mtap || Movie.Port2_Mtap) 
+	if (Movie.UsingAnalogHack)
 	{
-		Config.UsingMultiTap = true;
+		Config.UsingAnalogHack = true;
 	}
 	else
 	{
-		Config.UsingMultiTap = false;
+		Config.UsingAnalogHack = false;
 	}
 
 	return 1;

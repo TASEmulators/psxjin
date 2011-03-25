@@ -171,7 +171,7 @@ typedef struct {
 	unsigned short Pad2AutoHold;
 	unsigned short Pad1AutoFire;
 	unsigned short Pad2AutoFire;
-	bool UsingMultiTap;
+	bool UsingAnalogHack;
 	int CueTracks;
 	CueStruct CueList[99];
 	ConfigKey KeyConfig;
@@ -257,6 +257,7 @@ struct MovieType {
 	int Port2_Mtap;						//Is player 2 a Multitap?
 	int NumPlayers;						//Number of players in the movie
 	int P2_Start;						//Where does pad2 start? 
+	bool UsingAnalogHack;				//Stupid Analog Hack for Final Fantasy 8. Yes, I added a hack just for me.
 
 };
 
@@ -279,6 +280,7 @@ struct MovieControlType {
 #define MOVIE_FLAG_IS_TEXT		  (1<<6)
 #define MOVIE_FLAG_P1_MTAP		  (1<<7)
 #define MOVIE_FLAG_P2_MTAP		  (1<<8)
+#define MOVIE_FLAG_ANALOG_HACK	  (1<<9)
 
 #define MOVIE_CONTROL_RESET       (1<<1)
 #define MOVIE_CONTROL_CDCASE      (1<<2)

@@ -12,3 +12,4 @@ unsigned char PAD2_startPoll(int pad);
 u8 PADpoll_SSS (u8 value);
 void UpdateState (const int pad);
 int PadFreeze(gzFile f, int Mode);
+bool InitDirectInput (void);
