@@ -271,7 +271,7 @@ static void LoadConfig (void)
 
 static void PADsetMode (const int pad, const int mode)
 {
-	static const u8 padID[] = { 0x41, 0x73, 0x41, 0x79 };
+	static const u8 padID[] = { 0x41, 0x73, 0x41, 0x73 };
 	Config.PadState.padMode1[pad] = mode;
 	Config.PadState.padVib0[pad] = 0;
 	Config.PadState.padVib1[pad] = 0;
@@ -484,11 +484,14 @@ static u8 get_analog (const int key)
 
 u8 PADpoll_SSS (u8 value)
 {
-	const int pad = Config.PadState.curPad;
-	const int cur = Config.PadState.curByte;
+	const int pad = Config.PadState.curPad;	
 	static u8 buf[20];
-
-
+	if ((value&0xf0) == 0x40)
+	{		
+		Config.PadState.curByte = 0;
+	}
+	const int cur = Config.PadState.curByte;
+	//printf("(%d)", Config.PadState.curByte);
 	if (cur == 0)
 	{
 		Config.PadState.curByte++;
@@ -522,26 +525,9 @@ u8 PADpoll_SSS (u8 value)
 				buf[ 4] = get_analog (Config.KeyConfig.keys[pad][19]);
 				buf[ 5] = get_analog (Config.KeyConfig.keys[pad][20]);
 				buf[ 6] = get_analog (Config.KeyConfig.keys[pad][17]);
-				buf[ 7] = get_analog (Config.KeyConfig.keys[pad][18]);
-
-				if (Config.PadState.padID[pad] == 0x79)
-				{
-					const DWORD now = GetTickCount();
-					buf[ 8] = 255;
-					buf[ 9] = 255;
-					buf[10] = 255;
-					buf[11] = 255;
-					buf[12] = 255;
-					buf[13] = 255;
-					buf[14] = 255;
-					buf[15] = 255;
-					buf[16] = 255;
-					buf[17] = 255;
-					buf[18] = 255;
-					buf[19] = 255;
-				}
-				return (u8)Config.PadState.padID[pad];
+				buf[ 7] = get_analog (Config.KeyConfig.keys[pad][18]);								
 			}
+			return (u8)Config.PadState.padID[pad];
 			break;
 		case 0x44:
 			Config.PadState.cmdLen = sizeof (cmd44);
