@@ -457,8 +457,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 
 					//save author info
 					GetDlgItemText(hDlg, IDC_METADATA, Movie.authorInfo, MOVIE_MAX_METADATA);
-					Movie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';
-					Config.UsingMultiTap = false;
+					Movie.authorInfo[MOVIE_MAX_METADATA-1] = '\0';					
 					Movie.NumPlayers = 2;
 					Movie.P2_Start = 2;
 					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_USE_BINARY, BM_GETCHECK, 0, 0))
@@ -466,8 +465,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 					else
 						Movie.isText = 1;
 					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_PORT1_MTAP, BM_GETCHECK, 0, 0))
-					{
-						Config.UsingMultiTap = true;
+					{					
 						Movie.Port1_Mtap = 1;
 						Movie.NumPlayers +=3;
 						Movie.P2_Start += 3;
@@ -476,8 +474,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM
 					else
 						Movie.Port1_Mtap = 0;
 					if (BST_CHECKED == SendDlgItemMessage(hDlg, IDC_PORT2_MTAP, BM_GETCHECK, 0, 0))
-					{
-						Config.UsingMultiTap = true;
+					{						
 						Movie.Port2_Mtap = 1;
 						Movie.NumPlayers +=3;
 						Movie.MultiTrack =1;

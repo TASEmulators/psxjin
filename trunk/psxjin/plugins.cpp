@@ -332,19 +332,19 @@ unsigned char _PADpoll_old(unsigned char value) {
 }
 
 unsigned char _PADpoll(unsigned char value) {
-	if (Config.UsingMultiTap || ((Config.PadState.padID[Config.PadState.curPad] & 0xf0) == 0x40))
+	if (!Config.UsingAnalogHack || ((Config.PadState.padID[Config.PadState.curPad] & 0xf0) == 0x40))
 	{
 		return _PADpoll_old(value);
 	}
 	else 
-	{		
-		return PADpoll_SSS(value);
+	{			
+		return PADpoll_SSS(value);				
 	}
 }
 
 unsigned char _PADstartPoll(PadDataS *pad)
-{
-	if (Config.UsingMultiTap || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
+{	
+	if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
 	{
 		
 		return _PADstartPoll_old(pad);
@@ -673,6 +673,7 @@ int LoadPlugins() {
 	if (ret < 0) { SysMessage (_("GPUinit error: %d"), ret); return -1; }
 	ret = SPUinit();
 	if (ret < 0) { SysMessage (_("SPUinit error: %d"), ret); return -1; }
+	InitDirectInput();
 	return 0;
 }
 

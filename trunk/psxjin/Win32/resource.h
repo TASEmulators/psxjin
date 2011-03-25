@@ -505,6 +505,7 @@
 #define ID_DEBUG_MESSAGES               40015
 #define ID_CONFIGURATION_CONTROLLERS    40017
 #define ID_CONFIGURATION                40018
+#define ID_ANALOG_HACK					40019
 #define ID_FILE_RUNCDBIOS               40026
 #define ID_FILE_RECENT_CD               40027
 #define ID_FILE_CLOSE_CD                40028
