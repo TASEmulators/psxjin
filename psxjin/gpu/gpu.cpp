@@ -906,11 +906,12 @@ long CALLBACK GPUshutdown()                            // GPU SHUTDOWN
 
 void updateDisplay(void)                               // UPDATE DISPLAY
 {
-	if (PSXDisplay.Disabled)                              // disable?
+	 //We never want a clear front buffer. 
+	/*if (PSXDisplay.Disabled)                              // disable?
 	{
 		DoClearFrontBuffer();                               // -> clear frontbuffer
 		return;                                             // -> and bye
-	}
+	}*/
 
 	if (dwActFixes&32)                                    // pc fps calculation fix
 	{

@@ -192,7 +192,8 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		tempMovie->isText = tempMovie->movieFlags&MOVIE_FLAG_IS_TEXT;
 		tempMovie->Port1_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P1_MTAP;
 		tempMovie->Port2_Mtap = tempMovie->movieFlags&MOVIE_FLAG_P2_MTAP;
-		tempMovie->UsingAnalogHack = (bool)(tempMovie->movieFlags&MOVIE_FLAG_ANALOG_HACK);
+		tempMovie->UsingAnalogHack = tempMovie->movieFlags&MOVIE_FLAG_ANALOG_HACK;
+		tempMovie->UsingRCntFix = tempMovie->movieFlags&MOVIE_FLAG_RCNTFIX;
 	}
 	tempMovie->NumPlayers= 2;
 	tempMovie->P2_Start = 2;	
@@ -335,6 +336,8 @@ static void WriteMovieHeader()
 		Movie.movieFlags |= MOVIE_FLAG_P2_MTAP;
 	if (Config.UsingAnalogHack) 
 		Movie.movieFlags |= MOVIE_FLAG_ANALOG_HACK;
+	if (Config.RCntFix)
+		Movie.movieFlags |= MOVIE_FLAG_RCNTFIX;
 
 	
 	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
@@ -516,7 +519,14 @@ static int StartReplay()
 	{
 		Config.UsingAnalogHack = false;
 	}
-
+	if (Movie.UsingRCntFix)
+	{
+		Config.RCntFix = 1;
+	}
+	else
+	{
+		Config.RCntFix = 0;
+	}
 	return 1;
 }
 
@@ -537,8 +547,7 @@ void MOV_StartMovie(int mode)
 	Movie.currentCdrom = 1;
 	cdOpenCase = 0;
 	cheatsEnabled = 0;
-	Config.Sio = 0;
-	Config.RCntFix = 0;
+	Config.Sio = 0;	
 	Config.VSyncWA = 0;
 	memset(&MovieControl, 0, sizeof(MovieControl));
 	if (Movie.mode == MOVIEMODE_RECORD)

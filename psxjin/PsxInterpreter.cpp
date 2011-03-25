@@ -104,9 +104,9 @@ inline void execI()
 					iSaveStateTo = 0;
 				}		
 				if (iFrameAdvance || iDoPauseAtVSync)
-				{
+				{			
 					iPause = 1;
-				}
+				}				
 				iDoPauseAtVSync = 0;
 				iFrameAdvance = 0;				
 				iGpuHasUpdated = 0;
