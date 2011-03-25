@@ -346,8 +346,7 @@ unsigned char _PADpoll(unsigned char value) {
 }
 
 unsigned char _PADstartPoll(PadDataS *pad)
-{	
-	printf("\n");
+{		
 	if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
 	{
 		
@@ -511,7 +510,16 @@ unsigned char PAD1_startPoll(int pad) {
 
 
 unsigned char PAD1_poll(unsigned char value) {
-	return _PADpoll(value);
+	if (!Config.UsingAnalogHack || (Movie.padType1 == 4))
+	{
+		return _PADpoll_old(value);
+	}
+	else 
+	{			
+		unsigned char retval;
+		retval = PADpoll_SSS(value);						
+		return retval;
+	}
 }
 
 long CALLBACK PAD1__configure(void) { return 0; }
@@ -652,7 +660,16 @@ if (!Movie.Port2_Mtap) {
 }
 
 unsigned char PAD2_poll(unsigned char value) {
-	return _PADpoll(value);
+	if (!Config.UsingAnalogHack || (Movie.padType2 == 4))
+	{
+		return _PADpoll_old(value);
+	}
+	else 
+	{			
+		unsigned char retval;
+		retval = PADpoll_SSS(value);						
+		return retval;
+	}
 }
 
 long CALLBACK PAD2__configure(void) { return 0; }

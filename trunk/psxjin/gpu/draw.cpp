@@ -3735,7 +3735,7 @@ void NoStretchedBlit(void)
 ////////////////////////////////////////////////////////////////////////
 
 void NoStretchedBlitEx(void)
-{
+{	
 	static int iOldDX=0;
 	static int iOldDY=0;
 
@@ -3819,6 +3819,7 @@ void NoStretchedBlitEx(void)
 
 void StretchedBlit2x(void)
 {
+	printf("hi\n");
 	if (iWindowMode)
 	{
 		RECT ScreenRect,ViewportRect;

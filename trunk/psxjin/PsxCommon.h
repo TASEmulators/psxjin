@@ -258,6 +258,7 @@ struct MovieType {
 	int NumPlayers;						//Number of players in the movie
 	int P2_Start;						//Where does pad2 start? 
 	bool UsingAnalogHack;				//Stupid Analog Hack for Final Fantasy 8. Yes, I added a hack just for me.
+	int UsingRCntFix;					//Parasite Eve Fix
 
 };
 
@@ -281,6 +282,7 @@ struct MovieControlType {
 #define MOVIE_FLAG_P1_MTAP		  (1<<7)
 #define MOVIE_FLAG_P2_MTAP		  (1<<8)
 #define MOVIE_FLAG_ANALOG_HACK	  (1<<9)
+#define MOVIE_FLAG_RCNTFIX		  (1<<10)
 
 #define MOVIE_CONTROL_RESET       (1<<1)
 #define MOVIE_CONTROL_CDCASE      (1<<2)
