@@ -338,12 +338,16 @@ unsigned char _PADpoll(unsigned char value) {
 	}
 	else 
 	{			
-		return PADpoll_SSS(value);				
+		unsigned char retval;
+		retval = PADpoll_SSS(value);				
+		//printf("%X-%X, ",value,retval);
+		return retval;
 	}
 }
 
 unsigned char _PADstartPoll(PadDataS *pad)
 {	
+	printf("\n");
 	if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
 	{
 		
