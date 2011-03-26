@@ -29,6 +29,11 @@
           Multitap toggle, player 1
     bit 8:
           Multitap toggle, player 2
+    bit 9: 
+          Analog Hack
+    bit 10: 
+          Parasite Eve/Vandal Hearts fix
+
 
 00E 1-byte unsigned char: controller port 1 type
 00F 1-byte unsigned char: controller port 2 type
