@@ -2259,7 +2259,7 @@ void SaveIni()
 	WritePrivateProfileString("General", "AnalogDisplay", Str_Tmp, Config.Conf_File);
 	sprintf(Str_Tmp, "%d", dispAnalog );
 	WritePrivateProfileString("General", "AnalogDisplay", Str_Tmp, Config.Conf_File);
-	sprintf(Str_Tmp, "%d", (int)Config.UsingAnalogHack);
+	sprintf(Str_Tmp, "%d", Config.UsingAnalogHack);
 	WritePrivateProfileString("General", "AnalogHack", Str_Tmp, Config.Conf_File);
 
 
@@ -2289,7 +2289,7 @@ void LoadIni()
 	dispFrameCounter = GetPrivateProfileInt("General", "FrameCounter", 0, Config.Conf_File);
 	dispInput = GetPrivateProfileInt("General", "InputDisplay", 0, Config.Conf_File);
 	dispAnalog = GetPrivateProfileInt("General", "AnalogDisplay", 0, Config.Conf_File);
-	Config.UsingAnalogHack = (bool)GetPrivateProfileInt("General", "AnalogHack", 0, Config.Conf_File);
+	Config.UsingAnalogHack = GetPrivateProfileInt("General", "AnalogHack", 0, Config.Conf_File);
 
 	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things
 	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things

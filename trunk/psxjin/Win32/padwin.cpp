@@ -452,7 +452,7 @@ static const u8 cmd44[8] =
 };
 static const u8 cmd45[8] =
 {
-	0xff, 0x5a, 0x03, 0x02, 0x01, 0x02, 0x01, 0x00,
+	0xff, 0x5a, 0x00, 0x02, 0x01, 0x02, 0x01, 0x00,
 };
 static const u8 cmd46[8] =
 {
@@ -481,15 +481,23 @@ static u8 get_analog (const int key)
 	const int pos = ((key & 0x0ff) /2);
 	return (u8)(((int*)&dx8.JoyState[pad].lX)[pos] + 128);
 }
+static u8 buf[20];
 
+void PADstartPoll_SSS(PadDataS *pad)
+{
+	*(u16*)&buf[2] = pad->buttonStatus;
+	buf[4] = pad->rightJoyX;
+	buf[5] = pad->rightJoyY;
+	buf[6] = pad->leftJoyX;
+	buf[7] = pad->leftJoyY;	
+}
 u8 PADpoll_SSS (u8 value)
 {
-	const int pad = Config.PadState.curPad;	
-	static u8 buf[20];
-	if ((value&0xf0) == 0x40)
+	const int pad = Config.PadState.curPad;		
+	/*if ((value&0xf0) == 0x40)
 	{		
 		Config.PadState.curByte = 0;
-	}
+	}*/
 	const int cur = Config.PadState.curByte;
 	//printf("(%d)", Config.PadState.curByte);
 	if (cur == 0)
@@ -507,11 +515,9 @@ u8 PADpoll_SSS (u8 value)
 			memcpy (buf, cmd41, sizeof (cmd41));
 			return 0xf3;
 		case 0x42:
-		case 0x43:
-			if (value == 0x42) UpdateState (pad);
+		case 0x43:			
 			Config.PadState.cmdLen = 2 + 2 * (Config.PadState.padID[pad] & 0x0f);
-			buf[1] = Config.PadState.padModeC[pad] ? 0x00 : 0x5a;
-			*(u16*)&buf[2] = Config.PadState.padStat[pad];
+			buf[1] = Config.PadState.padModeC[pad] ? 0x00 : 0x5a;			
 			if (value == 0x43 && Config.PadState.padModeE[pad])
 			{
 				buf[4] = 0;
@@ -519,14 +525,7 @@ u8 PADpoll_SSS (u8 value)
 				buf[6] = 0;
 				buf[7] = 0;
 				return 0xf3;
-			}
-			else
-			{
-				buf[ 4] = get_analog (Config.KeyConfig.keys[pad][19]);
-				buf[ 5] = get_analog (Config.KeyConfig.keys[pad][20]);
-				buf[ 6] = get_analog (Config.KeyConfig.keys[pad][17]);
-				buf[ 7] = get_analog (Config.KeyConfig.keys[pad][18]);								
-			}
+			}			
 			return (u8)Config.PadState.padID[pad];
 			break;
 		case 0x44:
@@ -627,7 +626,7 @@ u8 PADpoll_SSS (u8 value)
 		break;
 	}
 	if (cur >= Config.PadState.cmdLen)
-		return 0;
+		return 0xff;
 	return buf[Config.PadState.curByte++];
 }
 
