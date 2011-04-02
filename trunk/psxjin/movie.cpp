@@ -24,7 +24,7 @@ int iVSyncFlag = 0;      //has a VSync already occured? (we can only save just a
 int iJoysToPoll = 0;     //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
 static const char szFileHeader[] = "PJM "; //movie file identifier
 
-int SetBytesPerFrame( MovieType Movie)
+int SetBytesPerFrame( MovieType Movie)	
 {
 	int loopcount;
 	if (Movie.isText) {
@@ -477,7 +477,7 @@ static int StartRecord()
 	sprintf(Movie.CdromIds, "%9.9s", CdromId);
 	WriteMovieHeader();
 	Movie.inputBufferPtr = Movie.inputBuffer;
-	memset(&Config.PadState.padModeC,0,6*sizeof(int));
+	ResetPads();
 	PADsetMode (0, (Movie.padType1 == 7) ? 1:0);
 	PADsetMode (1, (Movie.padType2 == 7) ? 1:0);
 	return 1;
@@ -530,7 +530,7 @@ static int StartReplay()
 	{
 		Config.RCntFix = 0;
 	}
-	memset(&Config.PadState.padModeC,0,6*sizeof(int));
+	ResetPads();
 	PADsetMode (0, (Movie.padType1 == 7)? 1:0);
 	PADsetMode (1, (Movie.padType2 == 7)? 1:0);
 	return 1;

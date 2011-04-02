@@ -225,7 +225,7 @@ int PadFreeze(gzFile f, int Mode) {
 }
 
 
-static void SaveConfig (void)
+void SavePADConfig (void)
 {
 	char Str_Tmp[1024];
 	char Pad_Tmp[1024];
@@ -244,7 +244,7 @@ static void SaveConfig (void)
 	
 }
 
-static void LoadConfig (void)
+void LoadPADConfig (void)
 {	
 	char Pad_Tmp[1024];
 	for (int j = 0; j < 2; j++)
@@ -277,7 +277,22 @@ void PADsetMode (const int pad, const int mode)
 	Config.PadState.padVib1[pad] = 0;
 	Config.PadState.padVibF[pad][0] = 0;
 	Config.PadState.padVibF[pad][1] = 0;
+	Config.PadState.padVibF[pad][2] = 0;
+	Config.PadState.padVibF[pad][3] = 0;
 	Config.PadState.padID[pad] = padID[Config.PadState.padMode2[pad] * 2 + mode];
+}
+
+void ResetPads(void)
+{
+  for (int i = 0; i < 2; i++)
+  {
+	  Config.PadState.padMode1[i]	= 0;
+	  Config.PadState.padMode2[i]	= 0;
+	  Config.PadState.padModeE[i]   = 0;
+	  Config.PadState.padModeC[i]   = 0;
+	  Config.PadState.padModeF[i]   = 0;
+	  Config.PadState.padVibC[i]    = 0;		
+  }		
 }
 
 static void KeyPress (const int pad, const int index, const bool press)
@@ -425,7 +440,7 @@ s32 PADopen (HWND hWnd)
 	memset (&Config.PadState, 0, sizeof (PadDef));
 	Config.PadState.padStat[0] = 0xffff;
 	Config.PadState.padStat[1] = 0xffff;
-	LoadConfig();
+	LoadPADConfig();
 	PADsetMode (0, (int)((Config.PadState.padID[0] & 0xf0) == 0x70));
 	PADsetMode (1, (int)((Config.PadState.padID[1] & 0xf0) == 0x70));	
 	return 0;
@@ -688,7 +703,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 	static BYTE keymaps[2][256];
 	static DWORD countdown;
 	static int disabled;
-	static HWND hTabWnd;
+	static HWND hTabWnd;	
 	static int pad;
 	int cnt1;
 	int cnt2;
@@ -697,8 +712,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 	{
 	case WM_INITDIALOG:
 		hTargetWnd = hWnd;
-		pad = disabled = 0;
-		LoadConfig();
+		pad = disabled = 0;		
 		for (cnt1 = 21; cnt1--; )
 			set_label (hWnd, pad, cnt1);
 		if ((Config.PadState.padID[pad] & 0xf0) == 0x40)
@@ -711,6 +725,9 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 			 CheckDlgButton(hWnd, IDC_DIGITALSELECT, BST_UNCHECKED);
 			 CheckDlgButton(hWnd, IDC_ANALOGSELECT, BST_CHECKED);
 		}
+		EnableWindow(GetDlgItem(hWnd,IDC_DIGITALSELECT),(Movie.mode==0));			
+		EnableWindow(GetDlgItem(hWnd,IDC_ANALOGSELECT),(Movie.mode==0));
+		EnableWindow(GetDlgItem(hWnd,IDC_BSELECT + 20),FALSE);
 		hTabWnd = GetDlgItem (hWnd, IDC_TABC);
 		TCITEM tcI;
 		tcI.mask = TCIF_TEXT;
@@ -750,10 +767,10 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 				Config.PadState.padID[pad] = 0x41;
 			}
 			else
-			{
+			{				
 				Config.PadState.padID[pad] = 0x73;
-			}
-		}
+			}									
+		}		
 		break;
 	case WM_COMMAND:
 		
@@ -858,5 +875,5 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 void PADconfigure (void)
 {			
 		if (DialogBox (gApp.hInstance, MAKEINTRESOURCE (IDD_CONFIGCONTROL), GetActiveWindow(), (DLGPROC)ConfigurePADDlgProc) == IDOK)
-			SaveConfig();		
+			SavePADConfig();		
 }

@@ -24,6 +24,7 @@
 #include "resource.h"
 #include "Win32.h"
 #include "maphkeys.h"
+#include "padwin.h"
 
 int tempDest; //this is for the compiler to not throw in a million of warnings
 
@@ -58,7 +59,7 @@ void SaveConfig()
 	WritePrivateProfileString("Plugins", "RCntFix", Str_Tmp, Conf_File);
 	wsprintf(Str_Tmp, "%d", Config.VSyncWA);
 	WritePrivateProfileString("Plugins", "VSyncWA", Str_Tmp, Conf_File);
-
+	SavePADConfig();	
 	for (int i = 0; i <= EMUCMDMAX; i++) 
 	{
 		wsprintf(Str_Tmp, "%d", EmuCommandTable[i].key);
@@ -89,7 +90,7 @@ void LoadConfig()
 	Config.PsxOut = GetPrivateProfileInt("Plugins", "PsxOut", 0, Conf_File);
 	Config.RCntFix = GetPrivateProfileInt("Plugins", "RCntFix", 0, Conf_File);
 	Config.VSyncWA = GetPrivateProfileInt("Plugins", "VSyncWA", 0, Conf_File);
-
+	LoadPADConfig();
 	int temp;
 	for (int i = 0; i <= EMUCMDMAX-1; i++)
 	{
