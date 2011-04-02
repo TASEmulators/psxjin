@@ -269,7 +269,7 @@ static void LoadConfig (void)
 	}
 }
 
-static void PADsetMode (const int pad, const int mode)
+void PADsetMode (const int pad, const int mode)
 {
 	static const u8 padID[] = { 0x41, 0x73, 0x41, 0x73 };
 	Config.PadState.padMode1[pad] = mode;
@@ -426,8 +426,8 @@ s32 PADopen (HWND hWnd)
 	Config.PadState.padStat[0] = 0xffff;
 	Config.PadState.padStat[1] = 0xffff;
 	LoadConfig();
-	PADsetMode (0, (int)((Config.PadState.padID[0] & 0xf0) == 0x40));
-	PADsetMode (1, (int)((Config.PadState.padID[1] & 0xf0) == 0x40));	
+	PADsetMode (0, (int)((Config.PadState.padID[0] & 0xf0) == 0x70));
+	PADsetMode (1, (int)((Config.PadState.padID[1] & 0xf0) == 0x70));	
 	return 0;
 }
 
@@ -452,7 +452,7 @@ static const u8 cmd44[8] =
 };
 static const u8 cmd45[8] =
 {
-	0xff, 0x5a, 0x00, 0x02, 0x01, 0x02, 0x01, 0x00,
+	0xff, 0x5a, 0x03, 0x02, 0x01, 0x02, 0x01, 0x00,
 };
 static const u8 cmd46[8] =
 {
@@ -493,11 +493,7 @@ void PADstartPoll_SSS(PadDataS *pad)
 }
 u8 PADpoll_SSS (u8 value)
 {
-	const int pad = Config.PadState.curPad;		
-	/*if ((value&0xf0) == 0x40)
-	{		
-		Config.PadState.curByte = 0;
-	}*/
+	const int pad = Config.PadState.curPad;			
 	const int cur = Config.PadState.curByte;
 	//printf("(%d)", Config.PadState.curByte);
 	if (cur == 0)

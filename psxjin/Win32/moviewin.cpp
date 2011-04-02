@@ -198,6 +198,9 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 	SetDlgItemTextA(hDlg, IDC_USECHEATS, szExtras);
 
 	switch (dataMovie.padType1) {
+		case PSE_PAD_TYPE_NONE:
+			SetDlgItemTextA(hDlg, IDC_PADTYPE1, "None");
+			break;
 		case PSE_PAD_TYPE_MOUSE:
 			SetDlgItemTextA(hDlg, IDC_PADTYPE1, "Mouse");
 			break;
@@ -212,6 +215,9 @@ static void DisplayReplayProperties(HWND hDlg, int bClear)
 			SetDlgItemTextA(hDlg, IDC_PADTYPE1, "Standard");
 	}
 	switch (dataMovie.padType2) {
+		case PSE_PAD_TYPE_NONE:
+			SetDlgItemTextA(hDlg, IDC_PADTYPE2, "None");
+			break;
 		case PSE_PAD_TYPE_MOUSE:
 			SetDlgItemTextA(hDlg, IDC_PADTYPE2, "Mouse");
 			break;

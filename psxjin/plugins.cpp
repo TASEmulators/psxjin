@@ -30,17 +30,9 @@
     err = SysLibError(); \
     if (err != NULL) { SysMessage(_("Error loading %s: %s"), func, err); return -1; }
 
-#if defined (__MACOSX__)
-#define LoadSym(dest, src, name, checkerr) \
-    dest = (src) SysLoadSym(drv, "_" name); \
-    if(!checkerr) { SysLibError(); /*clean error*/ } \
-    if (checkerr == 1) CheckErr(name); \
-    if (checkerr == 2) { err = SysLibError(); if (err != NULL) errval = 1; }
-#else
 #define LoadSym(dest, src, name, checkerr) \
     dest = (src) SysLoadSym(drv, name); if (checkerr == 1) CheckErr(name); \
     if (checkerr == 2) { err = SysLibError(); if (err != NULL) errval = 1; }
-#endif
 
 static const char *err;
 static int errval;
@@ -316,7 +308,7 @@ unsigned char _xPADstartPoll(PadDataS *padd) {
 				break;
 			case PSE_PAD_TYPE_STANDARD:
 			default:
-				mtappar[3+psize*i] = 0x41;
+				mtappar[3+psize*i] = 0x42;
 				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
 				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;				
 		}
@@ -331,31 +323,53 @@ unsigned char _PADpoll_old(unsigned char value) {
 	return buf[bufc++];		
 }
 
-unsigned char _PADpoll(unsigned char value) {
-	if (!Config.UsingAnalogHack || ((Config.PadState.padID[Config.PadState.curPad] & 0xf0) == 0x40))
+unsigned char PAD1_poll(unsigned char value) {
+	unsigned char retval;
+	if (!Config.UsingAnalogHack || (Movie.padType1 == 4))
+	{
+		retval = _PADpoll_old(value);
+	}
+	else 
+	{			
+		
+		retval = PADpoll_SSS(value);			
+	}
+	//printf("%X-%X, ",value, retval);
+	return retval;
+}
+
+unsigned char PAD2_poll(unsigned char value) {
+	if (!Config.UsingAnalogHack || (Movie.padType2 == 4))
 	{
 		return _PADpoll_old(value);
 	}
 	else 
 	{			
 		unsigned char retval;
-		retval = PADpoll_SSS(value);				
-		//printf("%X-%X, ",value,retval);
+		retval = PADpoll_SSS(value);						
 		return retval;
 	}
 }
 
+
 unsigned char _PADstartPoll(PadDataS *pad)
 {		
-	if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
-	{
-		
+	/*if (pad->controllerType == PSE_PAD_TYPE_NONE)
+	{		
+		printf("NoPad %d\n",Config.PadState.curPad);
+		return 0xff;
+	}
+	else*/ if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
+	{		
+		printf("Here %d\n", Config.PadState.curPad);
 		return _PADstartPoll_old(pad);
 	}
 	else 
-	{		
+	{			
+		printf("Hack %d\n",Config.PadState.curPad);
+		PADstartPoll_SSS(pad);
 		Config.PadState.curByte = 0;
-		return 0xff;
+		return 0;
 	}
 }
 
@@ -381,6 +395,8 @@ unsigned char PAD1_startPoll(int pad) {
 	}
 	if (Movie.mode != 0)	
 		padd.controllerType = Movie.padType1;
+	else
+		Movie.padType1 = padd.controllerType;
 	memcpy(&PaddInput,&padd,sizeof(padd));
 	
 	if (Config.enable_extern_analog)
@@ -509,18 +525,7 @@ unsigned char PAD1_startPoll(int pad) {
 }
 
 
-unsigned char PAD1_poll(unsigned char value) {
-	if (!Config.UsingAnalogHack || (Movie.padType1 == 4))
-	{
-		return _PADpoll_old(value);
-	}
-	else 
-	{			
-		unsigned char retval;
-		retval = PADpoll_SSS(value);						
-		return retval;
-	}
-}
+
 
 long CALLBACK PAD1__configure(void) { return 0; }
 void CALLBACK PAD1__about(void) {}
@@ -532,7 +537,7 @@ long CALLBACK PAD1__keypressed() { return 0; }
 unsigned char PAD2_startPoll(int pad) {
 	PadDataS padd;
 	PadDataS Mpadds[4];
-	Config.PadState.curPad = 0;
+	Config.PadState.curPad = 1;
 	PadDataS epadd; //empty pad;
 	epadd.buttonStatus = 0xffff;
 	epadd.leftJoyX = 128;
@@ -541,6 +546,7 @@ unsigned char PAD2_startPoll(int pad) {
 	epadd.rightJoyY = 128;
 	epadd.moveX = 0;
 	epadd.moveY = 0;
+	UpdateState(Config.PadState.curPad);
 	epadd.controllerType = Movie.padType2;
 	if (Movie.MultiTrack && ((Movie.RecordPlayer >= Movie.P2_Start) || (Movie.RecordPlayer == Movie.NumPlayers+2)))
 	{
@@ -573,6 +579,8 @@ unsigned char PAD2_startPoll(int pad) {
 	}
 	if (Movie.mode != 0)	
 		padd.controllerType = Movie.padType2; //Force Controller to match movie file. 
+	else
+		Movie.padType2 = padd.controllerType;
 	if(PSXjin_LuaUsingJoypad(1)) padd.buttonStatus = PSXjin_LuaReadJoypad(1)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(1);
 	if (luaAnalogJoy != NULL) {
@@ -659,18 +667,6 @@ if (!Movie.Port2_Mtap) {
 	}
 }
 
-unsigned char PAD2_poll(unsigned char value) {
-	if (!Config.UsingAnalogHack || (Movie.padType2 == 4))
-	{
-		return _PADpoll_old(value);
-	}
-	else 
-	{			
-		unsigned char retval;
-		retval = PADpoll_SSS(value);						
-		return retval;
-	}
-}
 
 long CALLBACK PAD2__configure(void) { return 0; }
 void CALLBACK PAD2__about(void) {}
