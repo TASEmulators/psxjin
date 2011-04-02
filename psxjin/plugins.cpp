@@ -354,12 +354,12 @@ unsigned char PAD2_poll(unsigned char value) {
 
 unsigned char _PADstartPoll(PadDataS *pad)
 {		
-	/*if (pad->controllerType == PSE_PAD_TYPE_NONE)
+	if (pad->controllerType == PSE_PAD_TYPE_NONE)
 	{		
 		printf("NoPad %d\n",Config.PadState.curPad);
 		return 0xff;
 	}
-	else*/ if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
+	else if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
 	{		
 		printf("Here %d\n", Config.PadState.curPad);
 		return _PADstartPoll_old(pad);
