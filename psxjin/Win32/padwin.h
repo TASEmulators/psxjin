@@ -15,3 +15,6 @@ void UpdateState (const int pad);
 int PadFreeze(gzFile f, int Mode);
 bool InitDirectInput (void);
 void PADsetMode (const int pad, const int mode);
+void LoadPADConfig (void);
+void ResetPads(void);
+void SavePADConfig (void);
