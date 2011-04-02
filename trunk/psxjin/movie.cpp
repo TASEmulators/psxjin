@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "PsxCommon.h"
 #include "version.h"
+#include "padwin.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -476,7 +477,9 @@ static int StartRecord()
 	sprintf(Movie.CdromIds, "%9.9s", CdromId);
 	WriteMovieHeader();
 	Movie.inputBufferPtr = Movie.inputBuffer;
-
+	memset(&Config.PadState.padModeC,0,6*sizeof(int));
+	PADsetMode (0, (Movie.padType1 == 7) ? 1:0);
+	PADsetMode (1, (Movie.padType2 == 7) ? 1:0);
 	return 1;
 }
 
@@ -527,6 +530,9 @@ static int StartReplay()
 	{
 		Config.RCntFix = 0;
 	}
+	memset(&Config.PadState.padModeC,0,6*sizeof(int));
+	PADsetMode (0, (Movie.padType1 == 7)? 1:0);
+	PADsetMode (1, (Movie.padType2 == 7)? 1:0);
 	return 1;
 }
 

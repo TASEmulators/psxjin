@@ -171,7 +171,7 @@ typedef struct {
 	unsigned short Pad2AutoHold;
 	unsigned short Pad1AutoFire;
 	unsigned short Pad2AutoFire;
-	bool UsingAnalogHack;
+	int UsingAnalogHack;
 	int CueTracks;
 	CueStruct CueList[99];
 	ConfigKey KeyConfig;
