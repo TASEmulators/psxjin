@@ -4,7 +4,7 @@ exp_filename = arg[1]
 expected = io.open(exp_filename, "r")
 
 out_filename = arg[2]
-out = io.open(out_filename, "w+")
+out = io.open(out_filename, "a+")
 
 start = os.time()
 
