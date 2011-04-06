@@ -42,4 +42,8 @@ void PSXjin_LuaEnableGui(uint8 enabled);
 
 char* PSXjin_GetLuaScriptName();
 
+// Record a command-line argument in lua's global "arg" variable for
+// eventual use by the lua script
+void PSXjin_LuaAddArgument(char *arg);
+
 #endif

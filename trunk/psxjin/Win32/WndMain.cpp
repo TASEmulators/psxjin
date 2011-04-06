@@ -285,7 +285,13 @@ int main(int argc, char **argv) {
 		else if (!strcmp(argv[i], "-lua")) {
 			luaLoaded = true;
 			RecentLua.UpdateRecentItems(argv[++i]);
-			PSXjin_LoadLuaCode(argv[++i]);
+			PSXjin_LoadLuaCode(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-luaargs")) {
+			// swallows all remaining arguments!
+			++i;
+			while (i < argc)
+				PSXjin_LuaAddArgument(argv[i++]);
 		}
 		else if (!strcmp(argv[i], "-stopcapture"))
 			sscanf (argv[++i],"%lu",&Movie.stopCapture);
