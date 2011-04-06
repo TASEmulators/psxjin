@@ -48,6 +48,8 @@ extern void WinLuaOnStop(int hDlgAsInt);
 
 static lua_State *LUA;
 
+void CallExitFunction();
+
 // Screen
 static uint8 *XBuf;
 static int iScreenWidth,iScreenHeight;
@@ -567,6 +569,13 @@ static int psxjin_message(lua_State *L) {
 	const char *msg = luaL_checkstring(L,1);
 	sprintf(psxjin_message_buffer, "%s", msg);
 	GPUdisplayText(psxjin_message_buffer);
+
+	return 0;
+}
+
+static int psxjin_exitemulator(lua_State *L) {
+	CallExitFunction();
+	exit(0);
 
 	return 0;
 }
@@ -2600,6 +2609,44 @@ static int input_getcurrentinputstatus(lua_State *L) {
 	return 1;
 }
 
+// test.checksum(string component)
+// Return a crc32 checksum over the given component.
+// Component can be "mainmem", "videomem", "cpu", or "savestate".
+static int test_checksum(lua_State *L)
+{
+	const char *cname = luaL_checkstring(L, 1);
+	u32 result = 0;
+	if (!strcmp(cname, "mainmem")) {
+		result = crc32(0, (u8*)psxM, 0x00200000);
+	} else if (!strcmp(cname, "videomem")) {
+		extern unsigned char *psxVub;
+		extern int iGPUHeight;
+		result = crc32(0, psxVub, iGPUHeight*(1024*2));
+	} else if (!strcmp(cname, "cpu")) {
+		result = crc32(0, (u8*)&psxRegs, sizeof(psxRegs));
+	} else if (!strcmp(cname, "savestate")) {
+		char *filename = tempnam(NULL, "snlua");
+		SaveState(filename);
+		FILE *f = fopen(filename, "rb");
+		if (!f) {
+			remove(filename);
+			return luaL_error(L, "I/O error");
+		}
+		u8 buf[32768];
+		result = 0;
+		while (!feof(f)) {
+			size_t size = fread(buf, 32768, 1, f);
+			result = crc32(result, buf, size);
+		}
+		fclose(f);
+		remove(filename);
+	} else {
+		return luaL_argerror(L, 1, "must be 'mainmem', 'videomem', 'cpu', or 'savestate'");
+	}
+
+	lua_pushnumber(L, result);
+	return 1;
+}
 
 // the following bit operations are ported from LuaBitOp 1.0.1,
 // because it can handle the sign bit (bit 31) correctly.
@@ -2927,6 +2974,7 @@ static const struct luaL_reg psxjinlib [] = {
 	{"registerexit", psxjin_registerexit},
 	{"message", psxjin_message},
 	{"print", print}, // sure, why not
+	{"exitemulator", psxjin_exitemulator},
 	{NULL,NULL}
 };
 
@@ -3044,6 +3092,10 @@ static const struct luaL_reg inputlib[] = {
 	{NULL, NULL}
 };
 
+static const struct luaL_reg testlib[] = {
+	{"checksum", test_checksum},
+	{NULL, NULL}
+};
 
 void PSXjin_LuaFrameBoundary() {
 	lua_State *thread;
@@ -3148,6 +3200,7 @@ int PSXjin_LoadLuaCode(const char *filename) {
 		luaL_register(LUA, "gui", guilib);
 		luaL_register(LUA, "input", inputlib);
 		luaL_register(LUA, "bit", bit_funcs); // LuaBitOp library
+		luaL_register(LUA, "test", testlib);
 		lua_settop(LUA, 0); // clean the stack, because each call to luaL_register leaves a table on top
 
 		// register a few utility functions outside of libraries (in the global namespace)
@@ -3437,4 +3490,26 @@ lua_State* PSXjin_GetLuaState() {
 }
 char* PSXjin_GetLuaScriptName() {
 	return luaScriptName;
+}
+
+void PSXjin_LuaAddArgument(char *arg) {
+	static int arg_count = 0;
+
+	if (!LUA) {
+		MessageBox( gApp.hWnd, "Ignoring -luaargs -- must follow -lua", "Lua arg error", MB_OK | MB_ICONSTOP);
+		return;
+	}			    
+
+	if (arg_count == 0) {
+		lua_newtable(LUA);
+		lua_setglobal(LUA, "arg");
+	}
+
+	arg_count++;
+
+	lua_getglobal(LUA, "arg");
+	lua_pushinteger(LUA, arg_count);
+	lua_pushstring(LUA, arg);
+	lua_settable(LUA, -3);
+	lua_pop(LUA, 1);
 }
