@@ -334,7 +334,7 @@ unsigned char PAD1_poll(unsigned char value) {
 		
 		retval = PADpoll_SSS(value);			
 	}
-	//printf("%X-%X, ",value, retval);
+	printf("%X-%X, ",value, retval);
 	return retval;
 }
 
@@ -354,19 +354,20 @@ unsigned char PAD2_poll(unsigned char value) {
 
 unsigned char _PADstartPoll(PadDataS *pad)
 {		
+	printf("Polling Pad %d\n", Config.PadState.curPad);
 	if (pad->controllerType == PSE_PAD_TYPE_NONE)
 	{		
-		printf("NoPad %d\n",Config.PadState.curPad);
+//		printf("NoPad %d\n",Config.PadState.curPad);
 		return 0xff;
 	}
 	else if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
 	{		
-		printf("Here %d\n", Config.PadState.curPad);
+//		printf("Here %d\n", Config.PadState.curPad);
 		return _PADstartPoll_old(pad);
 	}
 	else 
 	{			
-		printf("Hack %d\n",Config.PadState.curPad);
+	//	printf("Hack %d\n",Config.PadState.curPad);
 		PADstartPoll_SSS(pad);
 		Config.PadState.curByte = 0;
 		return 0;
