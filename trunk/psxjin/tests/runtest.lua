@@ -21,7 +21,7 @@ function check(results, key)
    end
 
    if result ~= actual then
-      return string.format("ERROR!  On frame %d, expected %d but got %d for '%s'\n",
+      return string.format("ERROR!  On frame %d, expected %s but got %s for '%s'\n",
 			   movie.framecount(), result, actual, key)
    end
 end

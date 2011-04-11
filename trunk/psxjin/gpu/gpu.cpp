@@ -2021,6 +2021,27 @@ struct FreezeExtra
 	long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
 };
 
+// VRAMWrite.ImagePtr and VRAMRead.ImagePtr point near to psxVuw.
+// We don't want to store pointers into the savestate, so the savestate
+// stores (ImagePtr - psxVuw) instead of ImagePtr.
+// (The pointers start out NULL, so we treat that as a special case.)
+#define NULL_IMAGEPTR 0x80000000U
+void vuw_to_int(unsigned short **ptr) {
+	if (*ptr == NULL) {
+		*ptr = (unsigned short *)NULL_IMAGEPTR;
+	} else {
+		*ptr = (unsigned short *)(*ptr - psxVuw);
+	}
+}
+
+void int_to_vuw(unsigned short **ptr) {
+	if (u32(*ptr) == NULL_IMAGEPTR) {
+		*ptr = NULL;
+	} else {
+		*ptr = psxVuw + s32(*ptr);
+	}
+}
+
 void FreezeExtra_save(struct FreezeExtra* extra)
 {
 	extern short g_m1,g_m2,g_m3;
@@ -2046,11 +2067,14 @@ void FreezeExtra_save(struct FreezeExtra* extra)
 	extra->gpuDataP = gpuDataP;
 	extra->VRAMWrite = VRAMWrite;
 	extra->VRAMRead = VRAMRead;
+	vuw_to_int(&extra->VRAMWrite.ImagePtr);
+	vuw_to_int(&extra->VRAMRead.ImagePtr);
 	extra->DataWriteMode = DataWriteMode;
 	extra->DataReadMode = DataReadMode;
 
 	//zero 05-mar-2011 - we dont need to save this, it is intimately tied to the throttle and isnt part of the game state, even though it sounds like something that may be a HW attribute...
 	//extra->dwLaceCnt = dwLaceCnt;
+	extra->dwLaceCnt = 0;
 
 	extra->PSXDisplay = PSXDisplay;
 	extra->PreviousPSXDisplay = PreviousPSXDisplay; 
@@ -2116,9 +2140,12 @@ void FreezeExtra_load(struct FreezeExtra* extra)
 	gpuDataP = extra->gpuDataP;
 	VRAMWrite = extra->VRAMWrite;
 	VRAMRead = extra->VRAMRead;
+	int_to_vuw(&VRAMWrite.ImagePtr);
+	int_to_vuw(&VRAMRead.ImagePtr);
 	DataWriteMode = extra->DataWriteMode;
 	DataReadMode = extra->DataReadMode;
-	dwLaceCnt = extra->dwLaceCnt;
+	// Don't save/restore dwLaceCnt
+	// dwLaceCnt = extra->dwLaceCnt;
 
 	PSXDisplay = extra->PSXDisplay;
 	PreviousPSXDisplay = extra->PreviousPSXDisplay; 
@@ -2187,6 +2214,7 @@ long CALLBACK GPUfreeze(unsigned long ulGetFreezeData,GPUFreeze_t * pF)
 		memcpy(pF->psxVRam,  psxVub,         1024*iGPUHeight*2);
 		pF->extraDataSize = sizeof(struct FreezeExtra);
 		pF->extraData = malloc(pF->extraDataSize);
+		memset(pF->extraData, 0, pF->extraDataSize);
 		FreezeExtra_save((struct FreezeExtra*)pF->extraData);
 
 		return 1;
