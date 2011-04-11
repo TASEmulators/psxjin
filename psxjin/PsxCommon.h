@@ -70,6 +70,8 @@ typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
 
 
+#include "emufile.h"
+
 typedef struct
 {
 	u32 key;
@@ -314,11 +316,11 @@ enum EMUSPEED_SET
 void SetEmulationSpeed(int cmd);
 
 #define gzfreeze(ptr, size) \
-	if (Mode == 1) fwrite(ptr, 1, size, (FILE*)f); \
-	if (Mode == 0) fread(ptr, 1, size, (FILE*)f);
+	if (Mode == 1) f->fwrite(ptr, size); \
+	if (Mode == 0) f->fread(ptr, size);
 
-template<typename T> void _gzfreezel(int Mode, FILE* f, T* ptr) { gzfreeze(ptr, sizeof(T)); }
-#define gzfreezel(ptr) _gzfreezel(Mode, ((FILE*)f), ptr)
+template<typename T> void _gzfreezel(int Mode, EMUFILE* f, T* ptr) { gzfreeze(ptr, sizeof(T)); }
+#define gzfreezel(ptr) _gzfreezel(Mode, f, ptr)
 #define gzfreezelarr(arr) gzfreeze(&arr[0],sizeof(arr))
 
 char *GetSavestateFilename(int newState);

@@ -592,7 +592,7 @@ void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
 	strncpy(Info->Name, ptr, 16);
 }
 
-int sioFreeze(gzFile f, int Mode) {
+int sioFreeze(EMUFILE *f, int Mode) {
 
 	gzfreezelarr(buf);
 	gzfreezel(&StatReg);

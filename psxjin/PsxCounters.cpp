@@ -371,7 +371,7 @@ unsigned long psxRcntRcount(unsigned long index) {
 	return ret;
 }
 
-int psxRcntFreeze(gzFile f, int Mode) {
+int psxRcntFreeze(EMUFILE *f, int Mode) {
 
 	gzfreezelarr(psxCounters);
 	gzfreezel(&psxNextCounter);

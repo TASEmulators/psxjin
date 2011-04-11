@@ -20,6 +20,8 @@
 #ifndef _SIO_H_
 #define _SIO_H_
 
+#include "emufile.h"
+
 #define MCD_SIZE	(1024 * 8 * 16)
 
 // Status Flags
@@ -54,7 +56,7 @@ unsigned char sioRead8();
 void sioWrite8(unsigned char value);
 void sioWriteCtrl16(unsigned short value);
 void sioInterrupt();
-int sioFreeze(gzFile f, int Mode);
+int sioFreeze(EMUFILE *f, int Mode);
 
 void LoadMcd(int mcd, char *str);
 void LoadMcds(char *mcd1, char *mcd2);

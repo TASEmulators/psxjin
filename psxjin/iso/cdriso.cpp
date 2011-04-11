@@ -284,7 +284,7 @@ long CDRtest(void) {
 	return 0;
 }
 
-int CDRisoFreeze(gzFile f, int Mode) {
+int CDRisoFreeze(EMUFILE *f, int Mode) {
 	gzfreezelarr(cdbuffer);
 	pbuffer = (unsigned char*)((intptr_t)pbuffer-(intptr_t)cdbuffer);
 	gzfreezel(&pbuffer);

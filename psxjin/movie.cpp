@@ -1138,7 +1138,7 @@ void MOV_ProcessControlFlags() {
 	memset(&MovieControl, 0, sizeof(MovieControl));
 }
 
-int MovieFreeze(gzFile f, int Mode) {
+int MovieFreeze(EMUFILE *f, int Mode) {
 	unsigned long bufSize = 0;
 	unsigned long buttonToSend = 0;
 

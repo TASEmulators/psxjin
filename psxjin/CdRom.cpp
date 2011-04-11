@@ -1074,7 +1074,7 @@ void cdrReset() {
 	cdr.File=1; cdr.Channel=1;
 }
 
-int cdrFreeze(gzFile f, int Mode) {
+int cdrFreeze(EMUFILE *f, int Mode) {
 	cdr.pTransfer = (unsigned char *)( (intptr_t)cdr.pTransfer - (intptr_t)cdr.Transfer);
 	gzfreeze(&cdr, sizeof(cdr));
 	gzfreeze(&stat, sizeof(stat));

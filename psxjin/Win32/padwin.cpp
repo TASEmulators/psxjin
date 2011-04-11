@@ -219,7 +219,7 @@ static bool GetKeyState (u8* keyboard)
 	return TRUE;
 }
 
-int PadFreeze(gzFile f, int Mode) {
+int PadFreeze(EMUFILE *f, int Mode) {
 	gzfreezel(&Config.PadState);
 	return 0;
 }

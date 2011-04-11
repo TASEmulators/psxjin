@@ -525,7 +525,7 @@ void yuv2rgb24(int *blk,unsigned char *image) {
 	}
 }
 
-int mdecFreeze(gzFile f, int Mode) {
+int mdecFreeze(EMUFILE *f, int Mode) {
 	mdec.unfix();
 	gzfreeze(&mdec, sizeof(mdec));
 	mdec.fix();
