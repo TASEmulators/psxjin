@@ -2635,7 +2635,7 @@ static int test_checksum(lua_State *L)
 		u8 buf[32768];
 		result = 0;
 		while (!feof(f)) {
-			size_t size = fread(buf, 32768, 1, f);
+			size_t size = fread(buf, 1, 32768, f);
 			result = crc32(result, buf, size);
 		}
 		fclose(f);
