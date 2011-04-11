@@ -34,7 +34,7 @@ void psxRcntWcount(unsigned long index, unsigned long value);
 void psxRcntWmode(unsigned long index, unsigned long value);
 void psxRcntWtarget(unsigned long index, unsigned long value);
 unsigned long psxRcntRcount(unsigned long index);
-int psxRcntFreeze(gzFile f, int Mode);
+int psxRcntFreeze(EMUFILE *f, int Mode);
 
 void psxUpdateVSyncRate();
 

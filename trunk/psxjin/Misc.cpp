@@ -30,7 +30,7 @@
 #include "padwin.h"
 #include "spu/spu.h"
 
-int CDRisoFreeze(gzFile f, int Mode);
+int CDRisoFreeze(EMUFILE *f, int Mode);
 
 // global variables
 char CdromId[10];
@@ -439,20 +439,16 @@ int Load(char *ExePath) {
 
 // STATES
 
-#define gzwrite(x,y,z) fwrite(y,1,z,x)
-#define gzread(x,y,z) fread(y,1,z,x)
-#define gzseek(x,y,z) fseek(x,y,z);
+#define gzwrite(x,y,z) (x)->fwrite(y,z)
+#define gzread(x,y,z) (x)->fread(y,z)
+#define gzseek(x,y,z) (x)->fseek(y,z);
 
 const char PSXjinHeader[32] = "STv3 PSXjin v" PCSX_VERSION;
 
-int SaveState(char *file) {
-	FILE* f;
+int SaveStateEmufile(EMUFILE *f) {
 	GPUFreeze_t *gpufP;
 	int Size;
 	unsigned char *pMem;
-
-	f = fopen(file, "wb");
-	if (f == NULL) return -1;
 
 	gzwrite(f, (void*)PSXjinHeader, 32);
 
@@ -463,22 +459,14 @@ int SaveState(char *file) {
 	gzwrite(f, pMem, 128*96*3);
 	free(pMem);
 
-	long pos = ftell(f);
-
 	gzwrite(f, psxM, 0x00200000);
-	pos = ftell(f);
 	gzwrite(f, psxP, 0x00010000);
-	pos = ftell(f);
 	gzwrite(f, psxR, 0x00080000);
-	pos = ftell(f);
 	gzwrite(f, psxH, 0x00010000);
-	pos = ftell(f);
 	gzwrite(f, (void*)&psxRegs, sizeof(psxRegs));
-	pos = ftell(f);
 
 	if (Config.HLE)
 		psxBiosFreeze(1);
-	pos = ftell(f);
 
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
@@ -491,72 +479,48 @@ int SaveState(char *file) {
 	GPUfreeze(3, gpufP);
 	free(gpufP);
 
-	pos = ftell(f);
 	sioFreeze(f, 1);
-	pos = ftell(f);
 	cdrFreeze(f, 1);
-	pos = ftell(f);
 	psxHwFreeze(f, 1);
-	pos = ftell(f);
 	CDRisoFreeze(f,1);
-	pos = ftell(f);
 	psxRcntFreeze(f, 1);
-	pos = ftell(f);
 	mdecFreeze(f, 1);
-	pos = ftell(f);	
 	PadFreeze(f, 1);
-	pos = ftell(f);
 	MovieFreeze(f, 1);
-	pos = ftell(f);
 
 	EMUFILE_MEMORY memfile;
 	SPUfreeze_new(&memfile);
 	Size = memfile.size();
 	gzwrite(f, &Size, 4);
-	pos = ftell(f);
 	gzwrite(f, memfile.buf(),Size);
-	pos = ftell(f);
-
-	fclose(f);
 
 	return 0;
 }
 
-int LoadState(char *file) {
-	FILE* f;
+int SaveState(char *file) {
+	EMUFILE_FILE f(file, "wb");
+
+	if (f.fail()) return -1;
+	return SaveStateEmufile(&f);
+}
+
+int LoadStateEmufile(EMUFILE *f) {
 	GPUFreeze_t *gpufP;
 	int Size;
 	char header[32];
 
 	printf("loadstate---\n");
 
-	//Get the directory out of filename
-	//CreateDirectory(path, 0)
-	//If error code 0 return -1
-
-	f = fopen(file, "rb");
-	if (f == NULL) return -1;
-
-	long pos;
-
 	psxCpu->Reset();
 
 	gzread(f, header, 32);
-	pos = ftell(f);
-	if (strncmp("STv3 PSXjin", header, 9)) { fclose(f); return -1; }
-	pos = ftell(f);
+	if (strncmp("STv3 PSXjin", header, 9)) { return -1; }
 	gzseek(f, 128*96*3, SEEK_CUR);
-	pos = ftell(f);
 	gzread(f, psxM, 0x00200000);
-	pos = ftell(f);
 	gzread(f, psxP, 0x00010000);
-	pos = ftell(f);
 	gzread(f, psxR, 0x00080000);
-	pos = ftell(f);
 	gzread(f, psxH, 0x00010000);
-	pos = ftell(f);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
-	pos = ftell(f);
 
 	if (Config.HLE)
 		psxBiosFreeze(0);
@@ -564,58 +528,52 @@ int LoadState(char *file) {
 	// gpu
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
-	pos = ftell(f);
 	gpufP->extraData = malloc(gpufP->extraDataSize);
 	gzread(f, gpufP->extraData, gpufP->extraDataSize);
-	pos = ftell(f);
 	GPUfreeze(0, gpufP);
-	pos = ftell(f);
 	free(gpufP->extraData);
 	free(gpufP);
 
 	sioFreeze(f, 0);
-	pos = ftell(f);
 	cdrFreeze(f, 0);
-	pos = ftell(f);
 	psxHwFreeze(f, 0);
-	pos = ftell(f);
 	CDRisoFreeze(f,0);
-	pos = ftell(f);
 	psxRcntFreeze(f, 0);
-	pos = ftell(f);
 	mdecFreeze(f, 0);
-	pos = ftell(f);
 	PadFreeze(f, 0);
-	pos = ftell(f);
 	MovieFreeze(f, 0);
-	pos = ftell(f);
 
 	// spu
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
 	memfile.truncate(Size);
 	gzread(f, memfile.buf(), Size);
-	pos = ftell(f);
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
-
-	fclose(f);
 
 	return 0;
 }
 
+int LoadState(char *file) {
+	//Get the directory out of filename
+	//CreateDirectory(path, 0)
+	//If error code 0 return -1
+
+	EMUFILE_FILE f(file, "rb");
+
+	if (f.fail()) return -1;
+	return LoadStateEmufile(&f);
+}
+
 int CheckState(char *file) {
-	FILE* f;
 	char header[32];
 
-	f = fopen(file, "rb");
-	if (f == NULL) return -1;
+	EMUFILE_FILE f(file, "rb");
+	if (f.fail()) return -1;
 
 	psxCpu->Reset();
 
-	gzread(f, header, 32);
-
-	fclose(f);
+	gzread(&f, header, 32);
 
 	if (strncmp("STv3 PSXjin", header, 9)) return -1;
 
@@ -623,13 +581,13 @@ int CheckState(char *file) {
 }
 
 int SaveStateEmbed(char *file) {
-	FILE* f;
 	GPUFreeze_t *gpufP;
 	int Size;
 	unsigned char *pMem;
 
-	f = fopen(file, "ab");
-	if (f == NULL) return -1;
+	EMUFILE_FILE ef(file, "ab");
+	if (ef.fail()) return -1;
+	EMUFILE *f = &ef;
 
 	gzwrite(f, (void*)PSXjinHeader, 32);
 
@@ -675,13 +633,10 @@ int SaveStateEmbed(char *file) {
 	gzwrite(f, &Size, 4);
 	gzwrite(f, memfile.buf(),Size);
 
-	fclose(f);
-
 	return 0;
 }
 
 int LoadStateEmbed(char *file) {
-	FILE* f;
 	GPUFreeze_t *gpufP;
 	int Size;
 	char header[32];
@@ -699,14 +654,15 @@ int LoadStateEmbed(char *file) {
 	fclose(fp);
 	fclose(fp2);
 
-	f = fopen("embsave.tmp", "rb");
-	if (f == NULL) return -1;
+	EMUFILE_FILE ef("embsave.tmp", "rb");
+	if (ef.fail()) return -1;
+	EMUFILE *f = &ef;
 
 	psxCpu->Reset();
 
 	gzread(f, header, 32);
 
-	if (strncmp("STv3 PSXjin", header, 9)) { fclose(f); return -1; }
+	if (strncmp("STv3 PSXjin", header, 9)) { return -1; }
 
 	gzseek(f, 128*96*3, SEEK_CUR);
 
@@ -744,7 +700,6 @@ int LoadStateEmbed(char *file) {
 	bool ok = SPUunfreeze_new(&memfile);
 	if(!ok) return 1;
 
-	fclose(f);
 	remove("embsave.tmp");
 
 	return 0;

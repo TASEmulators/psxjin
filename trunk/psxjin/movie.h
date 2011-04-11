@@ -25,7 +25,7 @@ void MOV_ProcessControlFlags();
 void MOV_WriteMovieFile();
 int MOV_ReadMovieFile(char* filename, struct MovieType *tempMovie);
 bool IsMovieLoaded();
-int MovieFreeze(gzFile f, int Mode);
+int MovieFreeze(EMUFILE *f, int Mode);
 void ChangeAuthor(const char* author);
 void ChangeRerecordCount(int rerecords);
 #endif /* __MOVIE_H__ */
