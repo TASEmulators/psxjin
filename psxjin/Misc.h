@@ -52,6 +52,9 @@ int Load(char *ExePath);
 
 int SaveState(char *file);
 int LoadState(char *file);
+int SaveStateEmufile(EMUFILE *f);
+int LoadStateEmufile(EMUFILE *f);
+
 int CheckState(char *file);
 
 int SaveStateEmbed(char *file);

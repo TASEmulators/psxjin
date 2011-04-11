@@ -2625,21 +2625,9 @@ static int test_checksum(lua_State *L)
 	} else if (!strcmp(cname, "cpu")) {
 		result = crc32(0, (u8*)&psxRegs, sizeof(psxRegs));
 	} else if (!strcmp(cname, "savestate")) {
-		char *filename = tempnam(NULL, "snlua");
-		SaveState(filename);
-		FILE *f = fopen(filename, "rb");
-		if (!f) {
-			remove(filename);
-			return luaL_error(L, "I/O error");
-		}
-		u8 buf[32768];
-		result = 0;
-		while (!feof(f)) {
-			size_t size = fread(buf, 1, 32768, f);
-			result = crc32(result, buf, size);
-		}
-		fclose(f);
-		remove(filename);
+		EMUFILE_MEMORY f;
+		SaveStateEmufile(&f);
+		result = crc32(0, f.buf(), f.size());
 	} else {
 		return luaL_argerror(L, 1, "must be 'mainmem', 'videomem', 'cpu', or 'savestate'");
 	}
