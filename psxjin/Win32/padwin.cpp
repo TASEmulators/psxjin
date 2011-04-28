@@ -24,6 +24,7 @@ struct
 	LPDIRECTINPUTDEVICE8 pDDevice[4];
 	LPDIRECTINPUTEFFECT pDEffect[4][2]; /* for Small & Big Motor */
 	DIJOYSTATE JoyState[4];
+	int devcnt;	
 } dx8;
 
 
@@ -43,13 +44,13 @@ static BOOL CALLBACK EnumAxesCallback (LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID 
 
 static BOOL CALLBACK EnumJoysticksCallback (const DIDEVICEINSTANCE* instance, VOID* pContext)
 {
-	const int devno = Config.PadState.devcnt;
+	const int devno = dx8.devcnt;
 	if (devno >= 4)
 		return DIENUM_STOP;
 	HRESULT result = dx8.pDInput->CreateDevice (instance->guidInstance, &dx8.pDDevice[devno], NULL);
 	if (FAILED (result))
 		return DIENUM_CONTINUE;
-	Config.PadState.devcnt++;
+	dx8.devcnt++;
 	return DIENUM_CONTINUE;
 }
 
@@ -88,7 +89,7 @@ bool ReleaseDirectInput (void)
 		dx8.pDInput->Release();
 		dx8.pDInput = NULL;
 	}
-	Config.PadState.devcnt = 0;
+	dx8.devcnt = 0;
 	return FALSE;
 }
 
@@ -115,7 +116,7 @@ bool InitDirectInput (void)
 		if (FAILED (result))
 			return ReleaseDirectInput();
 	}
-	int index = Config.PadState.devcnt;
+	int index = dx8.devcnt;
 	while (index--)
 	{
 		const LPDIRECTINPUTDEVICE8 pDDevice = dx8.pDDevice[index];
@@ -727,7 +728,6 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 		}
 		EnableWindow(GetDlgItem(hWnd,IDC_DIGITALSELECT),(Movie.mode==0));			
 		EnableWindow(GetDlgItem(hWnd,IDC_ANALOGSELECT),(Movie.mode==0));
-		EnableWindow(GetDlgItem(hWnd,IDC_BSELECT + 20),FALSE);
 		hTabWnd = GetDlgItem (hWnd, IDC_TABC);
 		TCITEM tcI;
 		tcI.mask = TCIF_TEXT;
@@ -819,7 +819,7 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 				if (~keymaps[0][key] & keymaps[1][key] & 0x80)
 					break;
 			}
-			for (cnt1 = Config.PadState.devcnt; cnt1--;)
+			for (cnt1 = dx8.devcnt; cnt1--;)
 			{
 				if (GetJoyState (cnt1) == FALSE)
 					break;
