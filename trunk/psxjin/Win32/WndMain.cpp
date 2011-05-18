@@ -2140,7 +2140,7 @@ void CreateMainMenu() {
 	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);
 
 	ADDSUBMENU(0, _("&Configuration"));
-	ADDMENUITEM(0, _("&Analog Hack"), ID_ANALOG_HACK);
+	ADDMENUITEM(0, _("&Dual Shock Emulation"), ID_ANALOG_HACK);
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);

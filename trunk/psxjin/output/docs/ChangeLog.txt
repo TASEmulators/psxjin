@@ -1,4 +1,4 @@
-Changes since v2.0.1
+Changes in v2.0.2
 --------------------
 Integrated Pad Plugin! (from SSSPSXPad)
 Cue support
@@ -6,15 +6,16 @@ SPU sound fixes (Such as Seifer's Sword)
 AVI and WAV now split at 2GB 
 Codecs greater than 4K properly load
 Display no longer dark during load screen
+Controls can be configured during gameplay
 Emulator window can be resized during play
 CD Swapping fixed for text based movies
-Analog Hack for FF8*
+*Accurate Dual Shock Emulation
 
-*Only use this hack if digital input stutters during gameplay when using analog controllers.
+*Only use this if digital input stutters during gameplay when using analog controllers.
 
 
 
-Changes since v2.0.0
+Changes in v2.0.1
 -------------------
 Fast-forward is robust and fast now. 
 Initialize GPU and SPU better when restarting/loading a game. (Less desyncs)
@@ -23,7 +24,7 @@ AVI functionality now works. No more configuration through GPU.
 Various bug fixes.
 
 
-Changes from PCSX-rr v0.1.3
+Changes from PCSX-rr v0.1.3 (v2.0.0)
 ----------------------------
 -New SPU core integrated, designed by zeromus
 -Overhaul of GUI design including the fact the menu is no longer separate from the game window
