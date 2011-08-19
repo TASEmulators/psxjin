@@ -1133,8 +1133,13 @@ void MOV_ProcessControlFlags() {
 	if (MovieControl.RCntFix && Movie.irqHacksIncluded)
 		Config.RCntFix ^= 1;
 	if (MovieControl.VSyncWA && Movie.irqHacksIncluded)
+	{
 		Config.VSyncWA ^= 1;
-
+		if (Config.VSyncWA)
+				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 Fix Enabled"));
+			else
+				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 Fix Disabled"));
+	}
 	memset(&MovieControl, 0, sizeof(MovieControl));
 }
 
