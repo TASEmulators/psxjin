@@ -61,9 +61,9 @@ Reads value from memory address. Word=2 bytes, Dword=4 bytes.
 
 Returns a chunk of memory from the given address with the given length as a string. To access, use _string.byte(str,offset)_.
 
-===memory.writebyte(int addr)===
-===memory.writeword(int addr)===
-===memory.writedword(int addr)===
+===memory.writebyte(int addr, int value)===
+===memory.writeword(int addr, int value)===
+===memory.writedword(int addr, int vlaue)===
 
 Writes value to memory address.
 
