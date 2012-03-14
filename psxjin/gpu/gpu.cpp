@@ -324,8 +324,8 @@ void makeNormalSnapshotPNG(void)                    // snapshot of current scree
 
 	srcs = (unsigned short*)&psxVuw[PSXDisplay.DisplayPosition.x+(PSXDisplay.DisplayPosition.y<<10)];
 	destc = (unsigned char*)BMP_BUFFER;
-	ax = (BMP_INFO.biWidth*65535L)/BMP_INFO.biWidth;
-	ay = (BMP_INFO.biHeight*65535L)/BMP_INFO.biHeight;
+	ax = (BMP_INFO.biWidth*(s64)65536)/BMP_INFO.biWidth;
+	ay = (BMP_INFO.biHeight*(s64)65536)/BMP_INFO.biHeight;
 	cy = (BMP_INFO.biHeight-1)<<16;
 
 	if (PSXDisplay.RGB24)
