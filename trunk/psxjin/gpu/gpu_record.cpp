@@ -192,8 +192,8 @@ BOOL RECORD_GetFrame()
 	srcs = (unsigned short*)&psxVuw[PSXDisplay.DisplayPosition.x+(PSXDisplay.DisplayPosition.y<<10)];
 	dests = (unsigned short*)RECORD_BUFFER;
 	destc = (unsigned char*)RECORD_BUFFER;
-	ax = (PSXDisplay.DisplayMode.x*65535L)/RECORD_BI.biWidth;
-	ay = (PSXDisplay.DisplayMode.y*65535L)/RECORD_BI.biHeight;
+	ax = (PSXDisplay.DisplayMode.x*(s64)65536)/RECORD_BI.biWidth;
+	ay = (PSXDisplay.DisplayMode.y*(s64)65536)/RECORD_BI.biHeight;
 	cy = (PSXDisplay.DisplayMode.y-1)<<16;
 	if (RECORD_BI.biBitCount==16)
 	{

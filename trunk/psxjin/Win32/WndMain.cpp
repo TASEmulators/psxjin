@@ -129,8 +129,8 @@ int GetMenuSize()
 	RECT Rect = {0,0};
 	ClientToScreen(gApp.hWnd,&Point);
 	GetWindowRect(gApp.hWnd,&Rect);
-	MainWindow_menubar = Point.y-Rect.top+1;
-	return MainWindow_menubar;
+	MainWindow_menubar = Point.y-Rect.top;
+	return MainWindow_menubar +  GetSystemMetrics(SM_CXDLGFRAME);
 }
 
 
@@ -1102,41 +1102,60 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 					return TRUE;
 				case ID_EMULATOR_1X:
-					MainWindow_width = 320;
-					Config.CurWinX = 320;
-					MainWindow_height = 240+GetMenuSize();
-					Config.CurWinY = 240;
-					SetRes(320,240);
-					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
-					WriteWindowSizeToConfig();
+					for(int i=0;i<2;i++)
+					{
+						MainWindow_width = 320;
+						Config.CurWinX = 320;
+						MainWindow_height = 240+GetMenuSize();
+						Config.CurWinY = 240;
+						SetRes(320,240);
+						RECT wndrect = {0,0,MainWindow_width,MainWindow_height};
+						AdjustWindowRect(&wndrect,GetWindowLong(hWnd,GWL_STYLE),false);
+						MoveWindow(hWnd, MainWindow_wndx,MainWindow_wndy,wndrect.right-wndrect.left,MainWindow_height, true);
+						WriteWindowSizeToConfig();
+					}
 					return TRUE;
-
 				case ID_EMULATOR_2X:
-					MainWindow_width = 640;
-					Config.CurWinX = 640;
-					MainWindow_height = 480+GetMenuSize();
-					Config.CurWinY = 480;
-					SetRes(640,480);
-					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
-					WriteWindowSizeToConfig();
+					for(int i=0;i<2;i++)
+					{
+						MainWindow_width = 640;
+						Config.CurWinX = 640;
+						MainWindow_height = 480+GetMenuSize();
+						Config.CurWinY = 480;
+						SetRes(640,480);
+						RECT wndrect = {0,0,MainWindow_width,MainWindow_height};
+						AdjustWindowRect(&wndrect,GetWindowLong(hWnd,GWL_STYLE),false);
+						MoveWindow(hWnd, MainWindow_wndx,MainWindow_wndy,wndrect.right-wndrect.left,MainWindow_height, true);
+						WriteWindowSizeToConfig();
+					}
 					return TRUE;
 				case ID_EMULATOR_3X:
-					MainWindow_width = 960;
-					Config.CurWinX = 960;
-					MainWindow_height = 720+GetMenuSize();
-					Config.CurWinY = 720;
-					SetRes(960,720);
-					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
-					WriteWindowSizeToConfig();
+					for(int i=0;i<2;i++)
+					{
+						MainWindow_width = 960;
+						Config.CurWinX = 960;
+						MainWindow_height = 720+GetMenuSize();
+						Config.CurWinY = 720;
+						SetRes(960,720);
+						RECT wndrect = {0,0,MainWindow_width,MainWindow_height};
+						AdjustWindowRect(&wndrect,GetWindowLong(hWnd,GWL_STYLE),false);
+						MoveWindow(hWnd, MainWindow_wndx,MainWindow_wndy,wndrect.right-wndrect.left,MainWindow_height, true);
+						WriteWindowSizeToConfig();
+					}
 					return TRUE;
 				case ID_EMULATOR_4X:
-					MainWindow_width = 1280;
-					Config.CurWinX = 1280;
-					MainWindow_height = 960+GetMenuSize();
-					Config.CurWinY = 960;
-					SetRes(1280,960);
-					MoveWindow(hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
-					WriteWindowSizeToConfig();
+					for(int i=0;i<2;i++)
+					{
+						MainWindow_width = 1280;
+						Config.CurWinX = 1280;
+						MainWindow_height = 960+GetMenuSize();
+						Config.CurWinY = 960;
+						SetRes(1280,960);
+						RECT wndrect = {0,0,MainWindow_width,MainWindow_height};
+						AdjustWindowRect(&wndrect,GetWindowLong(hWnd,GWL_STYLE),false);
+						MoveWindow(hWnd, MainWindow_wndx,MainWindow_wndy,wndrect.right-wndrect.left,MainWindow_height, true);
+						WriteWindowSizeToConfig();
+					}
 					return TRUE;
 				case ID_EMULATOR_DISPALL:
 					dispAllText ^= 1;
