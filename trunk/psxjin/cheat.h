@@ -1,6 +1,6 @@
 #ifndef __CHEAT_H__
 #define __CHEAT_H__
-
+ 
 struct SCheat
 {
 	uint32  address;
