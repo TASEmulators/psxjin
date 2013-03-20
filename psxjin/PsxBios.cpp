@@ -296,7 +296,7 @@ static __inline void DeliverEvent(u32 ev, u32 spec) {
 
 
 void psxBios_abs() { // 0x0e
-	v0 = abs(a0);
+	v0 = abs((long)a0); //zero 20-mar-2013 - cast from unsigned long to long to satisfy vs2010. i think this is ok.. the cast coerces a sign back on and then abs can run normally
 	pc0 = ra;
 }
 
