@@ -369,7 +369,7 @@ void cdrInterrupt() {
     	case CdlGetTD:
 			cdr.CmdProcess = 0;
         	cdr.Track = btoi(cdr.Param[0]);
-			SetResultSize(4);
+			SetResultSize(3);
 			cdr.StatP|= 0x2;
         	if (CDRgetTD(cdr.Track, cdr.ResultTD) == -1) {
 				cdr.Stat = DiskError;
@@ -377,9 +377,8 @@ void cdrInterrupt() {
         	} else {
         		cdr.Stat = Acknowledge;
 				cdr.Result[0] = cdr.StatP;
-	    		cdr.Result[1] = itob(cdr.ResultTD[2]);
-        	    cdr.Result[2] = itob(cdr.ResultTD[1]);
-				cdr.Result[3] = itob(cdr.ResultTD[0]);
+	    		cdr.Result[1] = itob(cdr.ResultTD[1]);
+        	    cdr.Result[2] = itob(cdr.ResultTD[2]);
 	    	}
 			break;
 
