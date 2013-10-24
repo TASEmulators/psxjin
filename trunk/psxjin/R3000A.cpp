@@ -26,6 +26,7 @@
 // global variables
 R3000Acpu *psxCpu;
 psxRegisters psxRegs;
+ExceptionPatches exceptionPatches;
 
 int psxInit() {
 
@@ -44,6 +45,7 @@ void psxReset() {
 	psxCpu->Reset();
 
 	psxMemReset();
+	exceptionPatches.clear();
 
 	memset(&psxRegs, 0, sizeof(psxRegs));
 
@@ -94,9 +96,23 @@ void psxException(u32 code, u32 bd) {
 	psxRegs.CP0.n.Status = (psxRegs.CP0.n.Status &~0x3f) |
 						  ((psxRegs.CP0.n.Status & 0xf) << 2);
 
+	// Ugly hack to prevent the BIOS from (correctly) skipping over GTE ops when an exception is
+	// raised while one is due to be executed. On real hardware, the GTE op is executed in parallel
+	// with the exception being raised, not after its return. See: "GTE opcodes are not unpatched on
+	// exception return" in the bugtracker.
 	if (!Config.HLE && (((PSXMu32(psxRegs.CP0.n.EPC) >> 24) & 0xfe) == 0x4a)) {
-		// "hokuto no ken" / "Crash Bandicot 2" ... fix
-		PSXMu32ref(psxRegs.CP0.n.EPC)&= SWAPu32(~0x02000000);
+		if (exceptionPatches.size() >= 8) {
+			// This should never happen; the official PSX kernel (BIOS) does not handle nested exceptions,
+			// but just to be sure...
+			GPUdisplayText("*PSXjin*: Too many exception op patches, forgetting earliest");
+			exceptionPatches.erase(exceptionPatches.begin(), exceptionPatches.end() - 7);
+		}
+
+		// Store the patch information so it can be undone on exception return
+		exceptionPatches.push_back(std::make_pair(psxRegs.CP0.n.EPC, PSXMu32ref(psxRegs.CP0.n.EPC)));
+
+		// Mangle the GTE op so that it is not recognized by the BIOS for not-skipping
+		PSXMu32ref(psxRegs.CP0.n.EPC) &= SWAPu32(~0x02000000);
 	}
 
 	if (Config.HLE) psxBiosException();

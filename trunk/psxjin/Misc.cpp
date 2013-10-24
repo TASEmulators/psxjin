@@ -454,9 +454,21 @@ int SaveStateEmufile(EMUFILE *f) {
 
 	pMem = (unsigned char *) malloc(128*96*3);
 	if (pMem == NULL) return -1;
-	//zero 08-nov-2010: this annoys me. it contains HUD data and isnt deterministic. make it always blank.
 	memset(pMem,0,128*96*3);
-	gzwrite(f, pMem, 128*96*3);
+
+	// Ugh. We need to store this information, but in a backwards-compatible fashion. Do this
+	// by (ab)using the gap previously occupied by GPU_getScreenPic. The data is tagged so it
+	// can be detected on savestate load
+	int tag = 'ExPs';
+	gzwrite(f, &tag, 4);
+	Size = exceptionPatches.size();
+	gzwrite(f, &Size, 4);
+	for (int i = 0; i < Size; i++) {
+		gzwrite(f, &exceptionPatches[i].first, 4);
+		gzwrite(f, &exceptionPatches[i].second, 4);
+	}
+
+	gzwrite(f, pMem, 128*96*3-4-4-Size*4*2);
 	free(pMem);
 
 	gzwrite(f, psxM, 0x00200000);
@@ -515,7 +527,23 @@ int LoadStateEmufile(EMUFILE *f) {
 
 	gzread(f, header, 32);
 	if (strncmp("STv3 PSXjin", header, 9)) { return -1; }
-	gzseek(f, 128*96*3, SEEK_CUR);
+
+	exceptionPatches.clear();
+	int tag;
+	gzread(f, &tag, 4);
+	if (tag == 'ExPs') {
+		gzread(f, &Size, 4);
+		while (Size--) {
+			u32 addr, val;
+			gzread(f, &addr, 4);
+			gzread(f, &val, 4);
+			exceptionPatches.push_back(std::make_pair(addr, val));
+		}
+		gzseek(f, 128*96*3-4-4-exceptionPatches.size()*4*2, SEEK_CUR);
+	}
+	else
+		gzseek(f, 128*96*3-4, SEEK_CUR);
+
 	gzread(f, psxM, 0x00200000);
 	gzread(f, psxP, 0x00010000);
 	gzread(f, psxR, 0x00080000);
@@ -595,7 +623,17 @@ int SaveStateEmbed(char *file) {
 	if (pMem == NULL) return -1;
 	//GPU_getScreenPic(pMem);
 	memset(pMem,0,128*96*3);
-	gzwrite(f, pMem, 128*96*3);
+
+	int tag = 'ExPs';
+	gzwrite(f, &tag, 4);
+	Size = exceptionPatches.size();
+	gzwrite(f, &Size, 4);
+	for (int i = 0; i < Size; i++) {
+		gzwrite(f, &exceptionPatches[i].first, 4);
+		gzwrite(f, &exceptionPatches[i].second, 4);
+	}
+
+	gzwrite(f, pMem, 128*96*3-4-4-Size*4*2);
 	free(pMem);
 
 	gzwrite(f, psxM, 0x00200000);
@@ -664,7 +702,21 @@ int LoadStateEmbed(char *file) {
 
 	if (strncmp("STv3 PSXjin", header, 9)) { return -1; }
 
-	gzseek(f, 128*96*3, SEEK_CUR);
+	exceptionPatches.clear();
+	int tag;
+	gzread(f, &tag, 4);
+	if (tag == 'ExPs') {
+		gzread(f, &Size, 4);
+		while (Size--) {
+			u32 addr, val;
+			gzread(f, &addr, 4);
+			gzread(f, &val, 4);
+			exceptionPatches.push_back(std::make_pair(addr, val));
+		}
+		gzseek(f, 128*96*3-4-4-exceptionPatches.size()*4*2, SEEK_CUR);
+	}
+	else
+		gzseek(f, 128*96*3-4, SEEK_CUR);
 
 	gzread(f, psxM, 0x00200000);
 	gzread(f, psxP, 0x00010000);
