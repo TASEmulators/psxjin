@@ -39,6 +39,9 @@ extern R3000Acpu psxRec;
 #define PSXREC
 #endif
 
+typedef std::vector<std::pair<u32, u32> > ExceptionPatches;
+extern ExceptionPatches exceptionPatches;
+
 typedef union {
 	struct {
 		unsigned long   r0, at, v0, v1, a0, a1, a2, a3,

@@ -589,6 +589,12 @@ void psxRFE() {
 //	SysPrintf("psxRFE\n");
 	psxRegs.CP0.n.Status = (psxRegs.CP0.n.Status & 0xfffffff0) |
 						  ((psxRegs.CP0.n.Status & 0x3c) >> 2);
+
+	if (!exceptionPatches.empty()) {
+		// Unpatch a patch made at the exception raising
+		PSXMu32ref(exceptionPatches.back().first) = exceptionPatches.back().second;
+		exceptionPatches.pop_back();
+	}
 }
 
 /*********************************************************
