@@ -176,18 +176,47 @@ Result Contents
 2 TOC sec*/
 
 long CDRgetTD(unsigned char track, unsigned char *buffer) {
-	if (Config.CueTracks = 0)
+	if (Config.CueTracks == 0)
 	{
-		buffer[2] = 0;
-		buffer[1] = 2;
-		buffer[0] = 0;
+		if (track == 1)
+		{
+			// Hardcoded single-track start
+			buffer[1] = 0;
+			buffer[2] = 2;
+		}
+		else if (!track)
+		{
+			// Calculated last (only) track end, ugh
+			int pos = fseek(cdHandle, 0, SEEK_CUR);
+			fseek(cdHandle, 0, SEEK_END);
+			int numSecs = ftell(cdHandle) / CD_FRAMESIZE_RAW / 75;
+			fseek(cdHandle, pos, SEEK_SET);
+
+			buffer[1] = (numSecs / 60) % 60;
+			buffer[2] = numSecs % 60;
+		}
+		else
+			// We only have (information) on one track...
+			return -1;
 	}
 	else
 	{
-		buffer[2] = Config.CueList[track-1].StartPosSS;
-		buffer[1] = Config.CueList[track-1].StartPosMM;
-		buffer[0] = 0;
+		if (track)
+		{
+			// Start of specified track
+			buffer[1] = Config.CueList[track-1].StartPosMM;
+			buffer[2] = Config.CueList[track-1].StartPosSS;
+		}
+		else
+		{
+			// End of last track
+			buffer[1] = Config.CueList[Config.CueTracks-1].EndPosMM;
+			buffer[2] = Config.CueList[Config.CueTracks-1].EndPosSS;
+		}
 	}
+
+	buffer[0] = 0;
+
 	return 0;
 }
 
