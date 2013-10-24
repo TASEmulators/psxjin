@@ -1051,8 +1051,18 @@ void psxDma3(u32 madr, u32 bcr, u32 chcr) {
 #endif
 				break;
 			}
-			memcpy(ptr, cdr.pTransfer, cdsize);
-			psxCpu->Clear(madr, cdsize/4);
+
+			if (cdsize) {
+				memcpy(ptr, cdr.pTransfer, cdsize);
+				psxCpu->Clear(madr, cdsize/4);
+			} else {
+				// Unusual behaviour on 0-sized DMAs. See https://code.google.com/p/psxjin/issues/detail?id=38
+				cdsize = (cdr.Mode & 0x20) ? 0x924 : 0x800;
+				memcpy(ptr, cdr.pTransfer, cdsize);
+				memset(ptr + cdsize, cdr.pTransfer[(cdr.Mode & 0x20) ? 0x920 : 0x7f8], 0x40000 - cdsize);
+				psxCpu->Clear(madr, 0x10000);
+			}
+
 			cdr.pTransfer+= cdsize;
 
 			break;
