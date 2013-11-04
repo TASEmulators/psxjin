@@ -2503,7 +2503,7 @@ void WIN32_StartMovieRecord()
 		{
 			if (Movie.saveStateIncluded)
 			{
-				OpenPlugins(gApp.hWnd);
+//				OpenPlugins(gApp.hWnd); //This shouldnt be call here, its not call when loading a state, r726 fix for broken movies with states.
 				Running = 1;
 				MOV_StartMovie(MOVIEMODE_RECORD);
 				psxCpu->Execute();
